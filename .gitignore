@@ -15,8 +15,8 @@ out/
 .env.*.local
 !.env.example
 
-# Prisma
-database/prisma/generated/
+# Prisma (client is generated to database/generated per schema.prisma output path)
+database/generated/
 
 # Logs
 *.log
