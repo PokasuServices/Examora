@@ -1,0 +1,34 @@
+{
+  "name": "@examora/database",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Prisma schema, migrations and seed data for the Examora platform",
+  "main": "./generated/client/index.js",
+  "types": "./generated/client/index.d.ts",
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate:dev": "dotenv -e ../.env -- prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:reset": "dotenv -e ../.env -- prisma migrate reset",
+    "seed": "dotenv -e ../.env -- tsx prisma/seed.ts",
+    "studio": "dotenv -e ../.env -- prisma studio",
+    "build": "prisma generate",
+    "lint": "eslint --config ../eslint.config.mjs .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf generated"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@examora/types": "workspace:*",
+    "@prisma/client": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "dotenv-cli": "^8.0.0",
+    "prisma": "^6.2.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
