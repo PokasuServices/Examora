@@ -1,0 +1,33 @@
+"use client";
+
+import Link from "next/link";
+import { useAuth } from "@examora/auth-client";
+import { Button } from "@examora/ui";
+
+export function AuthNav() {
+  const { status, user, logout } = useAuth();
+
+  if (status === "loading") {
+    return <span className="text-sm text-neutral-500">Loading…</span>;
+  }
+
+  if (status === "authenticated" && user) {
+    return (
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-neutral-600">{user.email}</span>
+        <Link href="/users">
+          <Button variant="secondary">Users</Button>
+        </Link>
+        <Button variant="ghost" onClick={() => void logout()}>
+          Log out
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <Link href="/login">
+      <Button variant="primary">Sign in</Button>
+    </Link>
+  );
+}
