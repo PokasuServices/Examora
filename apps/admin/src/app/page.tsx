@@ -12,8 +12,9 @@ export default function AdminHomePage() {
         </Suspense>
       </div>
       <p className="text-body text-neutral-600">
-        Sprint 1 — user management (roles, status, audit trail). Course/CMS admin modules are Sprint
-        11. See{" "}
+        Sprint 2 — content management: categories, courses, and the Subject → Topic → Module →
+        Lesson hierarchy with draft/publish/archive workflow. Enrollment, quizzes and later modules
+        are still to come. See{" "}
         <code className="rounded bg-neutral-100 px-1.5 py-0.5 text-caption">
           docs/roadmap/SPRINT_BACKLOG.md
         </code>{" "}

@@ -12,9 +12,15 @@ export function AuthNav() {
   }
 
   if (status === "authenticated" && user) {
+    const canManageContent = user.permissions.includes("content:manage");
     return (
       <div className="flex items-center gap-3">
         <span className="text-sm text-neutral-600">{user.email}</span>
+        {canManageContent ? (
+          <Link href="/content/courses">
+            <Button variant="secondary">Content</Button>
+          </Link>
+        ) : null}
         <Link href="/users">
           <Button variant="secondary">Users</Button>
         </Link>
