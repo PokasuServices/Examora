@@ -1,0 +1,37 @@
+{
+  "name": "@examora/auth-client",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared React auth client (session bootstrap, login/register/logout) for apps/web and apps/admin",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --external react --external react-dom --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --external react --external react-dom --watch",
+    "lint": "eslint --config ../../eslint.config.mjs .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@examora/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1 || ^19.0.0",
+    "react-dom": "^18.3.1 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.0.2",
+    "@types/react-dom": "19.0.2",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3"
+  }
+}
