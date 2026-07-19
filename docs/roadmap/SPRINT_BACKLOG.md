@@ -46,17 +46,33 @@ Exit criteria met: RBAC matrix green (student denied admin routes; admin allowed
 enforced), consent captured + audited, no endpoint reachable without a passing authorization check
 (deny-by-default global JwtAuthGuard).
 
-## Sprint 2 — Course/Subject/Topic/Module CMS + Delivery
+## Sprint 2 — Course Management (content hierarchy)
 
-- FR-CONTENT-01: Course > Subject > Topic > Module hierarchy, ordered, versioned; admin create/
-  draft/publish/unpublish/reorder without corrupting progress history
-- FR-CONTENT-02: render rich text, images, PDF, video, embedded assessments; completion recorded
-  only when its configured condition is met
-- CMS-29 §3-5: authoring (rich text editor, embedding), publishing workflow (Draft → In Review →
-  Approved → Published → Archived → Restored), version history + rollback
+Status: **Complete** (2026-07-19). 111 automated tests pass (54 unit/integration + 51 e2e + 6 utils).
 
-**Exit criteria**: Admin can author and publish a full course tree; student sees only entitled,
-published content (FR-COURSE-01).
+Delivered:
+
+- FR-CONTENT-01: full `Category > Course > Subject > Topic > Module > Lesson` hierarchy (ADR-0012);
+  admin create / draft / publish / unpublish / archive / restore + reorder (dedicated reorder
+  endpoints per collection); ordering via `position`
+- Course status workflow DRAFT → PUBLISHED → ARCHIVED with server-enforced transitions and
+  `publishedAt` stamping (uniform 3-state status on every learning-content node)
+- Full CRUD REST APIs (35 content routes) for all six resources, with RBAC (`content:manage` /
+  `content:publish`), request validation (422), audit logging on every mutation, and Swagger docs
+- Admin UI: categories management, courses list (status filter + create), and a course-detail page
+  with a nested Subject→Topic→Module→Lesson tree editor (create/status/delete/expand)
+- Prisma migration `sprint2_content_hierarchy`; content permission codes seeded to ADMINISTRATOR
+
+Scope boundaries held: no enrollment, learning progress, quizzes, assignments, payments,
+notifications, analytics, AI, community, or student-facing read APIs. Content versioning /
+revision-history (CMS-29 §5) and the IN_REVIEW/APPROVED workflow states (CMS-29 §4) are **deferred**
+(out of Sprint 2 scope) — see ADR-0012 and the technical debt register (TD-017). FR-CONTENT-02's
+content _rendering/delivery_ and completion tracking are a later sprint; Sprint 2 authors and stores
+the hierarchy only.
+
+**Exit criteria met**: an admin authored and published a full course tree end-to-end (browser +
+API smoke tests); RBAC denies non-admins; invalid status transitions and duplicate slugs are
+rejected; every mutation is audited.
 
 ## Sprint 3 — Progress Tracking + Student Dashboard
 

@@ -5,12 +5,14 @@ entrance exams. Governed by [`documents/00_Master_Development_Guide_Examora_Plat
 
 ## Status
 
-**Sprint 1 — Authentication & Identity (complete).** Registration, email verification, login,
-logout, refresh-token rotation, forgot/reset password, session management, JWT auth, RBAC + a
-permissions framework, user profile, Google OAuth (config-gated), consent capture, and audit
-logging are implemented across `apps/api`, `apps/web` and `apps/admin`. Course/Learning/Assessment
-and all later modules are not started. See [`docs/roadmap/SPRINT_BACKLOG.md`](docs/roadmap/SPRINT_BACKLOG.md)
-for the full plan.
+**Sprint 2 — Course Management (complete).** The content hierarchy —
+`Category → Course → Subject → Topic → Module → Lesson` — with a DRAFT/PUBLISHED/ARCHIVED workflow,
+full CRUD APIs, reorder, RBAC (`content:manage` / `content:publish`), validation and audit logging,
+plus an admin content-management UI (categories, courses, and a nested curriculum tree editor).
+Builds on Sprint 1 (Authentication & Identity: registration, email verification, login/logout,
+refresh rotation, password reset, sessions, RBAC + permissions, profiles, Google OAuth, consent,
+audit). Enrollment, learning progress, quizzes, assignments and later modules are not started. See
+[`docs/roadmap/SPRINT_BACKLOG.md`](docs/roadmap/SPRINT_BACKLOG.md) for the full plan.
 
 > Email is not actually delivered yet — Sprint 1 uses a console-logging mailer stub (ADR-0009);
 > verification/reset tokens appear in the `apps/api` logs. Real delivery arrives with the
