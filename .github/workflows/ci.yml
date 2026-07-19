@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # NODE_ENV is deliberately NOT set globally — `next build` must be allowed to
+  # default to "production" itself (see docs/TECHNICAL_DEBT_REGISTER.md TD-010);
+  # Jest sets NODE_ENV=test on its own for the test/test:e2e steps.
+  DATABASE_URL: postgresql://examora:examora_ci_password@localhost:5432/examora?schema=public
+  REDIS_URL: redis://localhost:6379
+  JWT_ACCESS_SECRET: ci_only_access_secret_at_least_32_characters_long
+  JWT_REFRESH_SECRET: ci_only_refresh_secret_at_least_32_characters_long
+  JWT_ACCESS_EXPIRES_IN: 15m
+  JWT_REFRESH_EXPIRES_IN: 30d
+  API_PORT: 3001
+  API_GLOBAL_PREFIX: api/v1
+
+jobs:
+  ci:
+    name: Lint, Typecheck, Build, Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: examora
+          POSTGRES_PASSWORD: examora_ci_password
+          POSTGRES_DB: examora
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U examora"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # apps/web and apps/admin scripts load a root .env via dotenv-cli so a
+      # single .env works for local dev (see README "Getting Started"). CI
+      # supplies real values through the job-level `env:` block instead, but
+      # dotenv-cli still requires the file to exist — an empty file is enough
+      # since dotenv never overrides variables already present in the process env.
+      - name: Ensure placeholder .env exists for dotenv-cli
+        run: touch .env
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Apply database migrations
+        run: pnpm --filter @examora/database migrate:deploy
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: E2E tests (apps/api)
+        run: pnpm --filter @examora/api test:e2e

@@ -1,0 +1,72 @@
+name: examora
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-examora}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-examora_local_password}
+      POSTGRES_DB: ${POSTGRES_DB:-examora}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - examora_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-examora}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:-examora_local_password}"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - examora_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-examora_local_password}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-examora_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-examora_local_password}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - examora_minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-examora_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-examora_local_password}
+      MINIO_BUCKET: ${MINIO_BUCKET:-examora-uploads}
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD &&
+      mc mb --ignore-existing local/$$MINIO_BUCKET &&
+      echo 'MinIO bucket ready: '$$MINIO_BUCKET
+      "
+
+volumes:
+  examora_postgres_data:
+  examora_redis_data:
+  examora_minio_data:
