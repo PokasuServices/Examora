@@ -9,4 +9,8 @@ module.exports = {
   collectCoverageFrom: ["**/*.(t|j)s"],
   coverageDirectory: "../coverage",
   testEnvironment: "node",
+  // Integration specs each open a Prisma connection pool against the shared
+  // Postgres; run serially so parallel workers don't exhaust connections
+  // (see docs/TECHNICAL_DEBT_REGISTER.md TD-016).
+  maxWorkers: 1,
 };

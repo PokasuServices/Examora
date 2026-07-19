@@ -21,6 +21,7 @@ import { PermissionsModule } from "./permissions/permissions.module";
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
 import { AdminModule } from "./admin/admin.module";
+import { ContentModule } from "./content/content.module";
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { AdminModule } from "./admin/admin.module";
     AuthModule,
     UsersModule,
     AdminModule,
+    ContentModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
