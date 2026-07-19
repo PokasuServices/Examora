@@ -6,10 +6,11 @@ const prisma = new PrismaClient();
 const ROLES: RoleName[] = ["STUDENT", "MENTOR", "REVIEWER", "ADMINISTRATOR", "GUARDIAN"];
 
 /**
- * Sprint 1 permission matrix (DESIGN-03 §3) — Identity-domain codes only.
- * Every non-admin role gets the same baseline (manage their own profile and
- * sessions); ADMINISTRATOR gets everything. Future modules extend this map
- * as they seed their own permission codes.
+ * Role→permission matrix (DESIGN-03 §3). Every non-admin role gets the same
+ * baseline (manage their own profile and sessions); ADMINISTRATOR gets
+ * everything, which now includes the Sprint 2 content:manage / content:publish
+ * capabilities (CMS-29 §7 "Administrator: manage taxonomy"). Finer content
+ * roles (Author/Publisher) are deferred. Future modules extend this map.
  */
 const ROLE_PERMISSIONS: Record<RoleName, PermissionCode[]> = {
   STUDENT: ["profile:read:own", "profile:update:own", "sessions:manage:own"],

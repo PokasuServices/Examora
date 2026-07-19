@@ -3,8 +3,11 @@
 // Sprint 1 adds: email verification / password reset tokens, consent audit trail, and
 // identity-level profile fields (phone, DOB, guardian contact). Course/exam-related profile
 // fields (target exam, exam year) stay out of scope until the Learning module exists.
-// Business-domain models (Learning, Assessment, Creative, Mentoring, Commerce, Notifications)
-// are added incrementally per docs/roadmap/SPRINT_BACKLOG.md, sourced from DB-05 / DB-16 / DB-34.
+// Sprint 2 adds: the content hierarchy — Category > Course > Subject > Topic > Module > Lesson
+// (CMS-29 §2, DB-16/DB-34). Content nodes carry a 3-state ContentStatus (ADR-0012). Enrollment,
+// progress, quizzes, assignments, versioning/revision-history are NOT in Sprint 2.
+// Business-domain models (Assessment, Creative, Mentoring, Commerce, Notifications) are added
+// incrementally per docs/roadmap/SPRINT_BACKLOG.md, sourced from DB-05 / DB-16 / DB-34.
 //
 // Naming: snake_case columns/tables via @map/@@map (DB-16 §2). UUID surrogate keys (DB-34 §2).
 // "sessions" (DB-05 §3) is implemented as `refresh_tokens` — see ADR-0006 for the auth strategy
@@ -59,6 +62,28 @@ enum ConsentType {
   GUARDIAN_COMMUNICATION
 
   @@map("consent_type")
+}
+
+/// Publish lifecycle for content nodes (Sprint 2, ADR-0012). The fuller
+/// CMS-29 §4 workflow (IN_REVIEW / APPROVED / RESTORED) is deferred.
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+
+  @@map("content_status")
+}
+
+/// Lesson payload kind (SRS-02 FR-CONTENT-02). Sprint 2 stores a reference/body
+/// only — signed media upload and rendering land in a later sprint.
+enum LessonContentType {
+  TEXT
+  VIDEO
+  PDF
+  IMAGE
+  ARTICLE
+
+  @@map("lesson_content_type")
 }
 
 /// Platform user. Identity & Access core entity (DB-05 §3, SRS-02 Table 5).
@@ -232,4 +257,158 @@ model AuditLog {
   @@index([actorId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Content hierarchy (Sprint 2): Category > Course > Subject > Topic > Module > Lesson.
+// Common columns follow DB-05 §5 / DB-16 §4 conventions: position for ordering
+// (FR-CONTENT-01 "reorder"), `version` for optimistic locking (MDG-00 §10),
+// createdById for content ownership (CMS-29 §11), and soft delete via deletedAt.
+// The authoritative "who changed what" trail is AuditLog, not per-row columns.
+// ---------------------------------------------------------------------------
+
+/// Top-level taxonomy grouping courses by discipline/exam family (e.g. Design,
+/// Fashion). Pure taxonomy — not learning content — so it carries isActive
+/// rather than the ContentStatus publish lifecycle.
+model Category {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String    @unique
+  description String?
+  isActive    Boolean   @default(true) @map("is_active")
+  position    Int       @default(0)
+  createdById String?   @map("created_by_id") @db.Uuid
+  version     Int       @default(1)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  courses Course[]
+
+  @@index([isActive])
+  @@map("categories")
+}
+
+model Course {
+  id          String        @id @default(uuid()) @db.Uuid
+  categoryId  String?       @map("category_id") @db.Uuid
+  title       String
+  slug        String        @unique
+  description String?
+  examType    String?       @map("exam_type")
+  status      ContentStatus @default(DRAFT)
+  publishedAt DateTime?     @map("published_at")
+  position    Int           @default(0)
+  createdById String?       @map("created_by_id") @db.Uuid
+  version     Int           @default(1)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  deletedAt   DateTime?     @map("deleted_at")
+
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  subjects Subject[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([examType])
+  @@map("courses")
+}
+
+model Subject {
+  id          String        @id @default(uuid()) @db.Uuid
+  courseId    String        @map("course_id") @db.Uuid
+  title       String
+  slug        String
+  description String?
+  status      ContentStatus @default(DRAFT)
+  position    Int           @default(0)
+  createdById String?       @map("created_by_id") @db.Uuid
+  version     Int           @default(1)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  deletedAt   DateTime?     @map("deleted_at")
+
+  course Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topics Topic[]
+
+  @@unique([courseId, slug])
+  @@index([courseId])
+  @@index([status])
+  @@map("subjects")
+}
+
+model Topic {
+  id          String        @id @default(uuid()) @db.Uuid
+  subjectId   String        @map("subject_id") @db.Uuid
+  title       String
+  slug        String
+  description String?
+  status      ContentStatus @default(DRAFT)
+  position    Int           @default(0)
+  createdById String?       @map("created_by_id") @db.Uuid
+  version     Int           @default(1)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  deletedAt   DateTime?     @map("deleted_at")
+
+  subject Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  modules Module[]
+
+  @@unique([subjectId, slug])
+  @@index([subjectId])
+  @@index([status])
+  @@map("topics")
+}
+
+model Module {
+  id          String        @id @default(uuid()) @db.Uuid
+  topicId     String        @map("topic_id") @db.Uuid
+  title       String
+  slug        String
+  description String?
+  // Nullable classification label (DB-16 lists `modules.type`); e.g. LEARNING,
+  // PRACTICE, ESSENTIALS. Kept free-form and optional in Sprint 2.
+  type        String?
+  status      ContentStatus @default(DRAFT)
+  position    Int           @default(0)
+  createdById String?       @map("created_by_id") @db.Uuid
+  version     Int           @default(1)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  deletedAt   DateTime?     @map("deleted_at")
+
+  topic   Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@unique([topicId, slug])
+  @@index([topicId])
+  @@index([status])
+  @@map("modules")
+}
+
+model Lesson {
+  id              String            @id @default(uuid()) @db.Uuid
+  moduleId        String            @map("module_id") @db.Uuid
+  title           String
+  slug            String
+  contentType     LessonContentType @default(TEXT) @map("content_type")
+  // Rich-text/markdown body for TEXT/ARTICLE lessons; contentUrl references
+  // external/hosted media for VIDEO/PDF/IMAGE (real signed uploads: later sprint).
+  body            String?
+  contentUrl      String?           @map("content_url")
+  durationMinutes Int?              @map("duration_minutes")
+  status          ContentStatus     @default(DRAFT)
+  position        Int               @default(0)
+  createdById     String?           @map("created_by_id") @db.Uuid
+  version         Int               @default(1)
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  deletedAt       DateTime?         @map("deleted_at")
+
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([moduleId, slug])
+  @@index([moduleId])
+  @@index([status])
+  @@map("lessons")
 }
