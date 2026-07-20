@@ -74,15 +74,34 @@ the hierarchy only.
 API smoke tests); RBAC denies non-admins; invalid status transitions and duplicate slugs are
 rejected; every mutation is audited.
 
-## Sprint 3 — Progress Tracking + Student Dashboard
+## Sprint 3 — Learning Engine (student learning + progress)
 
-- FR-PROGRESS-01: module completion, video progress, last access, time spent, topic coverage
-- UX-07 Student Dashboard: progress, continue learning, upcoming tasks, recent scores, notifications
-- Syllabus heatmap / coverage chart (PRD-01 §6.1) — functional pattern reference only, original
-  visual design per ADR-0008
+Status: **Complete** (2026-07-20). 138 automated tests pass (69 unit/integration + 63 e2e + 6 utils).
 
-**Exit criteria**: Dashboard shows only the logged-in student's own computed progress (data isolation
-tested); no cross-student leakage.
+Delivered:
+
+- Student catalog: browse PUBLISHED courses, read a course's published curriculum, open a lesson —
+  published-chain visibility enforced (a lesson is only reachable when it and every ancestor is
+  PUBLISHED; otherwise 404) (ADR-0013)
+- FR-PROGRESS-01: per-lesson view + completion tracking (`LessonProgress`), derived per-course
+  completion %, "continue learning" (started-but-unfinished courses with the next lesson),
+  "recently viewed", and a student learning dashboard
+- Admin read-only progress dashboard: per-course learner/completion aggregates (progress:read)
+- RBAC (content:read for students, progress:read for the admin dashboard; own-progress endpoints
+  self-scoped), request validation, audit logging of lesson completions, Prisma migration, Swagger
+- Frontend: apps/web course catalog, course/curriculum page, lesson viewer (records view + mark
+  complete), learning dashboard; apps/admin read-only progress dashboard
+
+Scope boundaries held: **no enrollment/entitlement gate** (any authenticated student learns any
+published course — ADR-0013; entitlement is a commerce concern for a later sprint), and no
+Quiz/Assignment/Payment/Community/Notification/Analytics/AI/Mentor/CMS-enhancement work. Completion
+is an explicit student action; FR-CONTENT-02's "completion condition" config is deferred (TD-019).
+
+Bug fixed along the way: a latent Sprint-2 boolean-query-param coercion bug (`?isActive=false`
+inverted by the global ValidationPipe) — fixed with a regression guard (see technical debt register).
+
+**Exit criteria met**: dashboard/progress endpoints are self-scoped to the caller (no cross-student
+leakage — e2e verified); draft/unpublished content is invisible to students; completions audited.
 
 ## Sprint 4 — Quiz Engine: Configuration & Attempt Lifecycle
 

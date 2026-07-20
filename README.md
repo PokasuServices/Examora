@@ -5,13 +5,18 @@ entrance exams. Governed by [`documents/00_Master_Development_Guide_Examora_Plat
 
 ## Status
 
-**Sprint 2 — Course Management (complete).** The content hierarchy —
-`Category → Course → Subject → Topic → Module → Lesson` — with a DRAFT/PUBLISHED/ARCHIVED workflow,
-full CRUD APIs, reorder, RBAC (`content:manage` / `content:publish`), validation and audit logging,
-plus an admin content-management UI (categories, courses, and a nested curriculum tree editor).
-Builds on Sprint 1 (Authentication & Identity: registration, email verification, login/logout,
-refresh rotation, password reset, sessions, RBAC + permissions, profiles, Google OAuth, consent,
-audit). Enrollment, learning progress, quizzes, assignments and later modules are not started. See
+**Sprint 3 — Learning Engine (complete).** Students browse a published-only catalog, work through a
+lesson viewer, and mark lessons complete; per-lesson progress rolls up into derived course
+completion, a "continue learning" list, recently-viewed history and a progress dashboard. Lessons are
+visible only when their whole ancestor chain (course → subject → topic → module → lesson) is
+PUBLISHED — a published lesson inside a draft course returns 404. New permissions `content:read`
+(all roles) and `progress:read` (admin) back a read-only admin progress dashboard. Completions are
+audited; there is no enrollment gate yet (ADR-0013). Builds on Sprint 2 (Course Management: the
+`Category → Course → Subject → Topic → Module → Lesson` content hierarchy, DRAFT/PUBLISHED/ARCHIVED
+workflow, CRUD/reorder APIs, `content:manage` / `content:publish`, admin content UI) and Sprint 1
+(Authentication & Identity: registration, email verification, login/logout, refresh rotation,
+password reset, sessions, RBAC + permissions, profiles, Google OAuth, consent, audit). Enrollment,
+quizzes, assignments, payments and later modules are not started. See
 [`docs/roadmap/SPRINT_BACKLOG.md`](docs/roadmap/SPRINT_BACKLOG.md) for the full plan.
 
 > Email is not actually delivered yet — Sprint 1 uses a console-logging mailer stub (ADR-0009);
