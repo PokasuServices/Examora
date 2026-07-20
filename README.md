@@ -43,10 +43,11 @@ apps/
   api/        NestJS backend API
   admin/      Admin portal Next.js app
 packages/
-  ui/         Shared React component library
-  shared/     Shared business constants/logic
-  types/      Shared TypeScript types/DTOs
-  utils/      Shared utilities
+  ui/          Shared React component library
+  shared/      Shared business constants/logic
+  types/       Shared TypeScript types/DTOs
+  utils/       Shared utilities
+  auth-client/ Shared React auth context + API client (AuthProvider/useAuth) for web + admin
 database/     Prisma schema, migrations, seed (workspace package @examora/database)
 docs/         ADRs, roadmap, checklists, decisions log — see below
 infra/        Infrastructure as code (added from Sprint 2+)

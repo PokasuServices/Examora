@@ -12,12 +12,13 @@ section rather than deleting them, so the backlog stays a historical record.
 
 ## Sprint 0 — Infrastructure & Project Setup
 
-Status: **In progress**
+Status: **Complete** (2026-07-18).
 Backlog: monorepo scaffold, Docker Compose (Postgres/Redis/MinIO), CI pipeline, ESLint/Prettier/
 Husky/Commitlint/Changesets, Prisma baseline (identity/audit tables only), base NestJS app
 (config/logging/health/Swagger), base Next.js apps (web/admin), basic auth skeleton (register/
 login/refresh/logout, no business features).
-No business FR-IDs in scope. See `docs/DEVELOPMENT_CHECKLIST.md` Sprint 0 checklist for exit criteria.
+No business FR-IDs in scope. All exit-criteria items in `docs/DEVELOPMENT_CHECKLIST.md` Sprint 0
+checklist met (build/lint/typecheck/docker/health/Swagger/register-login-refresh-logout/CI all green).
 
 ## Sprint 1 — Authentication, Profiles, RBAC
 
