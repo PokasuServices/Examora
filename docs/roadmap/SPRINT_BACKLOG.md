@@ -104,19 +104,59 @@ inverted by the global ValidationPipe) — fixed with a regression guard (see te
 **Exit criteria met**: dashboard/progress endpoints are self-scoped to the caller (no cross-student
 leakage — e2e verified); draft/unpublished content is invisible to students; completions audited.
 
-## Sprint 4 — Quiz Engine: Configuration & Attempt Lifecycle
+## Sprint 4 — Assessment & Quiz Engine
 
-- FR-QUIZ-01: question pool, marks, negative marking, duration, attempt limit, availability,
-  randomization, result-release policy; attempt-start rejected when policy unmet
-- FR-QUIZ-02: autosave, progress display, flagging, idempotent final submission; refresh/reconnect
-  restores latest saved attempt
-- FR-QUIZ-03: answer-approach capture (Knowledge/Formula, Elimination, Random Choice)
-- BR-03: published question/version snapshotted into the attempt at start (immutability)
-- ASSESS-09 §8: anti-cheating (randomization, option shuffling, session timeout, duplicate-submission
-  prevention)
+Status: **Complete** (2026-07-21). 216 automated tests pass (120 unit/integration + 87 e2e + 9 utils).
 
-**Exit criteria**: Idempotent submit verified under simulated double-submit/network-retry; attempt
-snapshot immutable even if the source question is later edited.
+Delivered:
+
+- FR-QUIZ-01: question bank (SINGLE_CHOICE/MULTIPLE_CHOICE/TRUE_FALSE, difficulty, tags, explanation,
+  subject classification reusing the Sprint 2 curriculum taxonomy) and quiz authoring (sections,
+  per-assignment marks, time limit, passing score, negative marking, question/option shuffling,
+  DRAFT→PUBLISHED→ARCHIVED via the shared ContentStatus, with a publish gate requiring ≥1 assigned
+  question and every assigned question PUBLISHED) — ADR-0014
+- FR-QUIZ-02: start/resume, per-question autosave, idempotent submit, auto-submit-on-timeout
+  (access-triggered), attempt history; every attempt freezes its own question order, option order,
+  marks and marking rules at start so later quiz/question edits never retroactively change an
+  attempt already underway or submitted
+- Automatic scoring: all-or-nothing per question, unanswered never penalized, negative marking
+  applied only to attempted-and-wrong answers, pass/fail against the frozen passing threshold,
+  result summary + detailed per-question review with explanations
+- BR-03 (attempt immutability): question/option identity plus composition/marks/shuffle order is
+  frozen at attempt start (`questionSnapshot`/`optionOrder`); correctness is graded once, live, at
+  submission and then permanently fixed — a later question edit never rescoring a submitted attempt
+- ASSESS-09 §8 anti-cheating/reliability: shuffling frozen per attempt, session timeout via
+  access-triggered auto-submit, duplicate-submission prevention via an optimistic-lock-guarded
+  transaction (verified under 8-way concurrent submit calls: exactly one scoring pass, one version
+  increment, identical result returned to every caller)
+- Bulk-import foundation (`POST .../questions/bulk`, schema + transactional endpoint only — no
+  CSV/file pipeline this sprint, TD-022)
+- Admin: question bank + quiz authoring UI (sections, question assignment, publish gating), attempt
+  monitoring (list/detail, `effectivelyExpired` flag for stale-but-unaccessed expired attempts), a
+  per-quiz result dashboard (attempts, completion, pass rate, average/high/low score)
+- Student (apps/web): quiz catalog, quiz detail (metadata + sections, no question content before
+  starting), timed attempt-taking UI (autosave, countdown, auto-submit), result summary, detailed
+  review, per-quiz attempt history
+- RBAC (`question:manage`, `quiz:manage`, `quiz:publish`, `quiz:read` baseline, `quiz:attempts:read`
+  admin), validation, audit logging, soft deletes, optimistic locking (`QuizAttempt.version`),
+  Swagger, Prisma migration `sprint4_quiz_engine`
+- Bug fix (allowed): `ensureRolesAndPermissions` e2e test helper only wired ADMINISTRATOR, silently
+  depending on a prior `db:seed` run for non-admin baseline permissions — would 403 on a genuinely
+  fresh CI database. Fixed by extracting `BASELINE_PERMISSION_CODES` as the shared source of truth
+  for both `database/prisma/seed.ts` and the test helper.
+
+Scope boundaries held: no Creative Assignments/Mentoring/Community/Notifications/Payments/
+Analytics/AI/CMS-enhancement work. Question categorization reuses the existing Subject taxonomy and
+tags are a flat array rather than new normalized entities (ADR-0014) — deliberate scope reduction,
+not a gap. Note: this backlog entry originally also listed FR-QUIZ-03 (capturing whether a student's
+answer approach was Knowledge/Formula, Elimination, or Random Choice) from the pre-Sprint-4 planning
+draft; the actual Sprint 4 kickoff scope instruction did not include it, so it was not built — it
+remains open for a future sprint if still wanted.
+
+**Exit criteria met**: idempotent submit verified under real concurrent (8-way parallel) submit
+calls, not just simulated; attempt snapshot immutable even when the source question/quiz is edited
+after the attempt starts (integration-tested); a 500-question quiz starts/autosaves/scores correctly
+within the same request-time budget as a small quiz (performance-validated, not just asserted).
 
 ## Sprint 5 — Scoring, Reports & Recommendations v0
 
