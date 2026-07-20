@@ -44,4 +44,5 @@ added by seeding data rather than shipping code changes.
   cost becomes a real bottleneck.
 - **Runtime role-permission editing UI in Sprint 1**: rejected — DESIGN-03's "Permissions Framework"
   deliverable is the _mechanism_; a UI to edit role-permission mappings without a deploy is
-  reasonably ADMIN-08 (Sprint 11) scope. Sprint 1 seeds the initial mapping via `database/prisma/seed.ts`.
+  reasonably ADMIN-08 (Sprint 10, renumbered after the Sprint 5 resequencing; was Sprint 11 when
+  this ADR was written) scope. Sprint 1 seeds the initial mapping via `database/prisma/seed.ts`.

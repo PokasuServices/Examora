@@ -34,6 +34,7 @@ authoritative for implementation. COMM-11 and COMM-31 remain in `/documents` as 
 
 ## Alternatives Considered
 
-- **Carry the conflict forward, resolve inline during Sprint 9 (Notifications)**: rejected by
-  Product Owner in favor of resolving now, before any schema or service code depends on either
+- **Carry the conflict forward, resolve inline during the Notifications sprint** (Sprint 8; was
+  Sprint 9 when this ADR was written, before the Sprint 5 resequencing): rejected by Product Owner
+  in favor of resolving now, before any schema or service code depends on either
   taxonomy.

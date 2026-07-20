@@ -66,7 +66,8 @@ state-machine guard — not the header — is what actually prevents double-scor
 paths (auto-submit) that never carry a client-supplied key.
 
 **Auto-submit-on-timeout is access-triggered ("lazy"), not a background sweep.** No job queue
-exists yet (Sprint 0 deferred it; TD-005/BullMQ is still Sprint 6 scope). A shared
+exists yet (Sprint 0 deferred it; TD-005/BullMQ is still Sprint 5 scope, renumbered after the
+Sprint 5 resequencing — was Sprint 6 when this ADR was written). A shared
 `finalizeIfExpired()` check runs at the top of every attempt read/write path (resume, autosave,
 submit, admin single-attempt detail) — if `now > expiresAt` and the attempt is still
 `IN_PROGRESS`, it is scored and closed as `AUTO_SUBMITTED` (with `submittedAt` set to `expiresAt`,

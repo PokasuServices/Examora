@@ -17,7 +17,7 @@ Postgres/Redis/MinIO; `apps/api` boots and serves `/health` and `/api/docs`; `ap
 `apps/admin` boot and render a placeholder page; a user can register/login/refresh/logout against
 the skeleton auth endpoints.
 
-## Phase 1 — MVP: Core Learning & Assessment (Sprints 1-5)
+## Phase 1 — MVP: Core Learning & Assessment (Sprints 1-4, 6)
 
 **Goal**: A student can register, enroll, learn, and take a scored quiz.
 **Scope**: Full RBAC, course/subject/topic/module CMS + delivery, progress tracking, quiz engine
@@ -27,18 +27,25 @@ API-17.
 **Exit criteria**: All Phase 1 FR-IDs in SRS-02 Table 3 have passing automated tests; a full
 register → enroll → learn → quiz → report journey works end-to-end in staging.
 
-## Phase 2 — Mentor-Led Learning (Sprints 6-8)
+> Resequenced after Sprint 4: Scoring/Reports/Recommendations v0 (the phase's closing sprint) now
+> runs as Sprint 6, after Sprint 5 (Creative Assignment Engine, Phase 2's opening sprint) rather
+> than before it — approved ahead of Sprint 5. No functional dependency blocks this: Creative
+> Assignments have their own rubric-based marks, independent of the quiz engine's scoring/reports.
+> Phase 1 and Phase 2 therefore interleave by sprint number instead of running back-to-back; each
+> phase's own exit criteria still gate its own completion regardless of interleaving.
+
+## Phase 2 — Mentor-Led Learning (Sprints 5, 7-8)
 
 **Goal**: Creative submissions and human mentoring close the feedback loop.
 **Scope**: Creative assignment authoring/submission/upload validation/malware scan, rubric review
-workspace with annotations (private, pre-community), cohorts, mentor dashboard, Student 360, task
-assignment, merged notification service (COMM-MERGED) going live on real channels.
+workspace (annotations deferred — see Sprint 5 backlog note), cohorts, mentor dashboard, Student
+360, task assignment, merged notification service (COMM-MERGED) going live on real channels.
 **Key docs**: CREATIVE-10, DESIGN-03, COMM-MERGED, SRS-02 FR-ASSIGN/REVIEW/MENTOR.
-**Exit criteria**: A mentor can review a real submission end-to-end (annotate, score, publish
+**Exit criteria**: A mentor can review a real submission end-to-end (score via rubric, publish
 feedback, request revision) with full audit trail; notification delivery SLA ≥98% in staging load
 test.
 
-## Phase 3 — Creative Community (Sprint 9)
+## Phase 3 — Creative Community (Sprint 8)
 
 **Goal**: Safe peer learning.
 **Scope**: Revision cycles, XP/achievements with anti-fraud idempotency, consent-gated community
@@ -47,7 +54,7 @@ gallery, peer rating, moderation tooling (report/hide/restore/warn/audit).
 **Exit criteria**: Private-by-default enforced with tests; moderator can hide reported content within
 SLA; XP cannot be awarded twice for the same action (idempotency test).
 
-## Phase 4 — Growth & Counselling (Sprints 10-12)
+## Phase 4 — Growth & Counselling (Sprints 9-11)
 
 **Goal**: Monetization and acquisition.
 **Scope**: Razorpay payment orders/webhooks/entitlements/invoices, articles, events/webinars,
@@ -58,7 +65,7 @@ analytics dashboards, moderation escalation).
 granted only from verified webhook, never client callback; admin can complete every workflow listed
 in ADMIN-08 §5.
 
-## Phase 5 — Stabilization (Sprint 13)
+## Phase 5 — Stabilization (Sprint 12)
 
 **Goal**: Release readiness.
 **Scope**: Performance testing against PERF-32 targets, security review against SEC-13, accessibility

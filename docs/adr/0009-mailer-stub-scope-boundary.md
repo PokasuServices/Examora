@@ -4,6 +4,10 @@ Status: Accepted
 Date: 2026-07-18
 Deciders: Engineering
 
+> Note: every "Sprint 9" reference below is to the Notifications sprint under the numbering at the
+> time this ADR was written. After the Sprint 5 resequencing (see
+> `docs/roadmap/SPRINT_BACKLOG.md`), that sprint is now **Sprint 8**.
+
 ## Context
 
 Sprint 1's scope excludes "Notification ... functionality" (per the sprint instruction), but email

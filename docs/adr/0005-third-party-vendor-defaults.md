@@ -29,12 +29,13 @@ choice can change later without touching business logic:
 ## Consequences
 
 - Sprint 0 does not wire any of these live (no external network calls from the skeleton) — it only
-  needs to shape the codebase (adapter interfaces, config keys) so Sprint 9 (Notifications) and
-  Sprint 11 (Payments) can plug in real credentials without refactoring.
+  needs to shape the codebase (adapter interfaces, config keys) so the Notifications sprint (Sprint 8) and the Payments sprint (Sprint 9) can plug in real credentials without refactoring. (Sprint
+  numbers current as of the Sprint 5 resequencing; this ADR originally said Sprint 9/11.)
 - Config module must accept per-provider environment variables even when unused locally, validated
   as optional in Sprint 0 and required-in-production later.
 
 ## Alternatives Considered
 
 - **Wait for explicit vendor sign-off before writing any integration code**: rejected by Product
-  Owner — would block Sprint 9/11 entirely; adapters make the choice reversible.
+  Owner — would block the Notifications/Payments sprints entirely; adapters make the choice
+  reversible.

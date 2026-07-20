@@ -41,7 +41,8 @@ Delivered:
 
 Scope boundaries held: no Course/Learning/Quiz/Assignment/Payment/Notification/CMS/Analytics/AI/
 Community functionality. Email sending is a Sprint-1 console stub behind a port interface (ADR-0009);
-the real Notification Service remains Sprint 9.
+the real Notification Service remains Sprint 8 (renumbered after the Sprint 5 resequencing; was
+Sprint 9 at the time).
 
 Exit criteria met: RBAC matrix green (student denied admin routes; admin allowed; permission checks
 enforced), consent captured + audited, no endpoint reachable without a passing authorization check
@@ -158,7 +159,38 @@ calls, not just simulated; attempt snapshot immutable even when the source quest
 after the attempt starts (integration-tested); a 500-question quiz starts/autosaves/scores correctly
 within the same request-time budget as a small quiz (performance-validated, not just asserted).
 
-## Sprint 5 — Scoring, Reports & Recommendations v0
+## Sprint 5 — Creative Assignment Engine
+
+Status: **In progress.**
+
+Resequencing note (approved ahead of Sprint 5): this entry merges what the original plan split
+across two sprints — "Creative Assignment Authoring & Submission" and "Rubric Review Workspace &
+Annotations" — into one end-to-end vertical slice (author → submit → assign reviewer → rubric
+review → marks → history), per the approved Sprint 5 kickoff scope. "Scoring, Reports &
+Recommendations v0" (the original Sprint 5, closing out Phase 1) is renumbered to Sprint 6 — see
+`docs/roadmap/IMPLEMENTATION_ROADMAP.md` Phase 1/2 for why. Everything from Sprint 6 onward in the
+original plan shifts down by one sprint number accordingly.
+
+- FR-ASSIGN-01: brief, references, file rules, marks, rubric, deadline; assignment templates
+- FR-ASSIGN-02: signed upload, submission versioning per resubmission (draft + final), type/size
+  validation, malware scan before reviewer access (ClamAV per ADR-0005)
+- CREATIVE-10 §2-4: assignment lifecycle through reviewer allocation, submission workflow
+- FR-REVIEW-01: rubric-based review (self/peer/faculty per assignment policy) — criterion ratings,
+  comments, marks, publish/reject
+- CREATIVE-10 §6: weighted rubric scoring, mandatory feedback on low scores, rubric versioning
+- Reviewer dashboard (assigned-submission queue) and student assignment history
+- Admin management, RBAC, audit logging, Prisma migrations, Swagger, unit/integration/e2e tests
+
+Deferred (not in this sprint's approved scope): FR-REVIEW-02 positional image annotations
+(CREATIVE-10 §7 — coordinates stored relative to the original image, responsive scaling). Rubric
+review ships with structured criterion ratings + freeform comments but no annotation canvas; revisit
+in a later review-UX polish pass.
+
+**Exit criteria**: Unsupported/oversized files rejected client- and server-side; infected file
+never reaches reviewer or storage in a scanned state; a reviewer can complete a full rubric
+evaluation on a real submission; grading history immutable and audited.
+
+## Sprint 6 — Scoring, Reports & Recommendations v0
 
 - FR-QUIZ-04: automatic objective scoring per published rules, audit timestamp, persisted once
 - FR-QUIZ-05: question reporting (student flags a faulty question without affecting their result)
@@ -170,28 +202,7 @@ within the same request-time budget as a small quiz (performance-validated, not 
 **Exit criteria**: Phase 1 (MVP) complete — full register→enroll→learn→quiz→report journey passes
 E2E; all Phase 1 FR-IDs have automated test evidence per QA-15 §10.
 
-## Sprint 6 — Creative Assignment Authoring & Submission
-
-- FR-ASSIGN-01: brief, references, file rules, marks, rubric, deadline
-- FR-ASSIGN-02: signed upload, submission versioning per resubmission, type/size validation,
-  malware scan before reviewer access (ClamAV per ADR-0005)
-- CREATIVE-10 §2-4: assignment lifecycle through "reviewer allocation," submission workflow
-
-**Exit criteria**: Unsupported/oversized files rejected client- and server-side; infected file
-never reaches reviewer or storage in a scanned state.
-
-## Sprint 7 — Rubric Review Workspace & Annotations
-
-- FR-REVIEW-01: self/peer/faculty review per assignment policy; criterion ratings, comments,
-  publish/reject
-- FR-REVIEW-02: positional image annotations, coordinates stored relative to original image,
-  responsive scaling
-- CREATIVE-10 §6-7: weighted rubric scoring, mandatory feedback on low scores, rubric versioning
-
-**Exit criteria**: A reviewer can complete a full rubric evaluation with annotations on a real
-submission; grading history immutable and audited.
-
-## Sprint 8 — Mentoring: Cohorts, Dashboard, Student 360, Tasks
+## Sprint 7 — Mentoring: Cohorts, Dashboard, Student 360, Tasks
 
 - FR-MENTOR-01: mentor dashboard — assigned workload, reviews, doubts, sessions, at-risk alerts; no
   unassigned student in default queries
@@ -203,7 +214,7 @@ submission; grading history immutable and audited.
 **Exit criteria**: Phase 2 core complete — mentor can execute the full DESIGN-03 §4 lifecycle
 end-to-end against real cohort data; access-scoping tests (mentor sees only assigned students) green.
 
-## Sprint 9 — Notifications, Messaging & Community
+## Sprint 8 — Notifications, Messaging & Community
 
 - COMM-MERGED (supersedes COMM-11/COMM-31 per ADR-0004): full delivery workflow live on real
   channels (Email/SMS/WhatsApp/Web Push/In-App), DLQ + fallback, delivery-state tracking
@@ -214,7 +225,7 @@ end-to-end against real cohort data; access-scoping tests (mentor sees only assi
 **Exit criteria**: Phase 3 complete — delivery success ≥98% in staging load test; XP double-award
 prevented under concurrent-request test; moderator can hide reported content within SLA.
 
-## Sprint 10 — Payments & Entitlements
+## Sprint 9 — Payments & Entitlements
 
 - FR-PAY-01: Razorpay order creation, webhook-verified entitlement (never trust client callback),
   duplicate/forged webhook does not create duplicate access
@@ -224,7 +235,7 @@ prevented under concurrent-request test; moderator can hide reported content wit
 **Exit criteria**: Forged/duplicate webhook test suite passes; entitlement grant/revoke fully
 audited; invoice generation correct under refund/partial-refund scenarios.
 
-## Sprint 11 — Growth Modules & Full Admin
+## Sprint 10 — Growth Modules & Full Admin
 
 - FR-EVENT-01: webinar/event scheduling, registration (deduplicated by user+event), attendance
 - FR-COLLEGE-01: college directory search/filter/detail, published-only data
@@ -235,7 +246,7 @@ audited; invoice generation correct under refund/partial-refund scenarios.
 **Exit criteria**: Every ADMIN-08 §5 workflow completes end-to-end; consent stored/verified before
 any student contact data is shared externally.
 
-## Sprint 12 — Analytics & Reporting
+## Sprint 11 — Analytics & Reporting
 
 - ANALYTICS-12 §2-7: role-scoped dashboards (student/mentor/admin), learning/assessment/creative
   analytics, business + operational reports
@@ -246,7 +257,7 @@ any student contact data is shared externally.
 **Exit criteria**: Phase 4 complete — every dashboard/report in ANALYTICS-12 renders real data with
 role-based access enforced; PII masked in exports where required.
 
-## Sprint 13 — Stabilization & Release Readiness
+## Sprint 12 — Stabilization & Release Readiness
 
 - PERF-32: load/stress/spike/soak testing against target SLAs (API p95 <500ms, LCP <2.5s,
   availability >99.9%)
