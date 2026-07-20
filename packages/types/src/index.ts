@@ -2,6 +2,7 @@ export * from "./role";
 export * from "./permission";
 export * from "./consent";
 export * from "./content";
+export * from "./learning";
 export * from "./api-response";
 export * from "./notification";
 export * from "./user";

@@ -6,6 +6,8 @@
 // Sprint 2 adds: the content hierarchy — Category > Course > Subject > Topic > Module > Lesson
 // (CMS-29 §2, DB-16/DB-34). Content nodes carry a 3-state ContentStatus (ADR-0012). Enrollment,
 // progress, quizzes, assignments, versioning/revision-history are NOT in Sprint 2.
+// Sprint 3 adds: the learning engine — LessonProgress (per-student, per-lesson view/completion,
+// FR-PROGRESS-01, ADR-0013). No enrollment gate yet; quizzes/assignments still out of scope.
 // Business-domain models (Assessment, Creative, Mentoring, Commerce, Notifications) are added
 // incrementally per docs/roadmap/SPRINT_BACKLOG.md, sourced from DB-05 / DB-16 / DB-34.
 //
@@ -117,6 +119,7 @@ model User {
   refreshTokens      RefreshToken[]
   verificationTokens VerificationToken[]
   consentRecords     ConsentRecord[]
+  lessonProgress     LessonProgress[]
   auditLogs          AuditLog[]          @relation("AuditActor")
 
   @@index([status])
@@ -305,8 +308,9 @@ model Course {
   updatedAt   DateTime      @updatedAt @map("updated_at")
   deletedAt   DateTime?     @map("deleted_at")
 
-  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  subjects Subject[]
+  category       Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  subjects       Subject[]
+  lessonProgress LessonProgress[]
 
   @@index([categoryId])
   @@index([status])
@@ -405,10 +409,39 @@ model Lesson {
   updatedAt       DateTime          @updatedAt @map("updated_at")
   deletedAt       DateTime?         @map("deleted_at")
 
-  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  module   Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
 
   @@unique([moduleId, slug])
   @@index([moduleId])
   @@index([status])
   @@map("lessons")
+}
+
+// ---------------------------------------------------------------------------
+// Learning engine (Sprint 3): per-student, per-lesson progress. Sprint 3 has no
+// enrollment/entitlement gate (ADR-0013) — any authenticated student may learn
+// any fully-published course, and progress is tracked as they view/complete
+// lessons. `courseId` is denormalized for fast course-level aggregation.
+// ---------------------------------------------------------------------------
+model LessonProgress {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  lessonId      String    @map("lesson_id") @db.Uuid
+  courseId      String    @map("course_id") @db.Uuid
+  firstViewedAt DateTime  @default(now()) @map("first_viewed_at")
+  lastViewedAt  DateTime  @default(now()) @map("last_viewed_at")
+  completedAt   DateTime? @map("completed_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId, courseId])
+  @@index([userId, lastViewedAt])
+  @@index([courseId])
+  @@map("lesson_progress")
 }

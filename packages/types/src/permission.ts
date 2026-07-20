@@ -16,6 +16,12 @@ export const PERMISSION_CODES = [
   // separates Author from Publisher).
   "content:manage",
   "content:publish",
+  // Learning engine (Sprint 3). `content:read` authorises reading PUBLISHED
+  // content (every role); `progress:read` gates the admin read-only progress
+  // dashboard (ADMINISTRATOR only). Own-progress endpoints are self-scoped and
+  // need only authentication (ADR-0013).
+  "content:read",
+  "progress:read",
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];

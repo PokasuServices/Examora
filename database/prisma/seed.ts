@@ -6,17 +6,24 @@ const prisma = new PrismaClient();
 const ROLES: RoleName[] = ["STUDENT", "MENTOR", "REVIEWER", "ADMINISTRATOR", "GUARDIAN"];
 
 /**
- * Role→permission matrix (DESIGN-03 §3). Every non-admin role gets the same
- * baseline (manage their own profile and sessions); ADMINISTRATOR gets
- * everything, which now includes the Sprint 2 content:manage / content:publish
- * capabilities (CMS-29 §7 "Administrator: manage taxonomy"). Finer content
- * roles (Author/Publisher) are deferred. Future modules extend this map.
+ * Role→permission matrix (DESIGN-03 §3). Every role gets a baseline (own
+ * profile + sessions, plus content:read for the Sprint 3 learning engine);
+ * ADMINISTRATOR gets everything, including Sprint 2 content:manage/publish
+ * (CMS-29 §7) and the Sprint 3 admin progress dashboard (progress:read).
+ * Finer content roles (Author/Publisher) are deferred. Future modules extend this.
  */
+const BASELINE: PermissionCode[] = [
+  "profile:read:own",
+  "profile:update:own",
+  "sessions:manage:own",
+  "content:read",
+];
+
 const ROLE_PERMISSIONS: Record<RoleName, PermissionCode[]> = {
-  STUDENT: ["profile:read:own", "profile:update:own", "sessions:manage:own"],
-  MENTOR: ["profile:read:own", "profile:update:own", "sessions:manage:own"],
-  REVIEWER: ["profile:read:own", "profile:update:own", "sessions:manage:own"],
-  GUARDIAN: ["profile:read:own", "profile:update:own", "sessions:manage:own"],
+  STUDENT: BASELINE,
+  MENTOR: BASELINE,
+  REVIEWER: BASELINE,
+  GUARDIAN: BASELINE,
   ADMINISTRATOR: [...PERMISSION_CODES],
 };
 
