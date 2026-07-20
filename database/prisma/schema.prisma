@@ -8,7 +8,11 @@
 // progress, quizzes, assignments, versioning/revision-history are NOT in Sprint 2.
 // Sprint 3 adds: the learning engine — LessonProgress (per-student, per-lesson view/completion,
 // FR-PROGRESS-01, ADR-0013). No enrollment gate yet; quizzes/assignments still out of scope.
-// Business-domain models (Assessment, Creative, Mentoring, Commerce, Notifications) are added
+// Sprint 4 adds: the assessment/quiz engine — Question/QuestionOption bank, Quiz/QuizSection/
+// QuizQuestion authoring, and QuizAttempt/QuizAttemptAnswer with frozen-at-start scoring
+// (ASSESS-09, ADR-0014). Creative assignments, mentoring, community, notifications, payments,
+// analytics, AI and CMS enhancements are NOT in Sprint 4 scope.
+// Business-domain models (Creative, Mentoring, Commerce, Notifications) are added
 // incrementally per docs/roadmap/SPRINT_BACKLOG.md, sourced from DB-05 / DB-16 / DB-34.
 //
 // Naming: snake_case columns/tables via @map/@@map (DB-16 §2). UUID surrogate keys (DB-34 §2).
@@ -88,6 +92,34 @@ enum LessonContentType {
   @@map("lesson_content_type")
 }
 
+/// Server-gradable question formats only (ADR-0014) — no free-text/descriptive
+/// types, since automatic evaluation is a hard Sprint 4 requirement.
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+
+  @@map("question_type")
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+
+  @@map("difficulty_level")
+}
+
+/// A submitted/auto-submitted attempt is permanently closed (ADR-0014) — the
+/// `IN_PROGRESS -> {SUBMITTED, AUTO_SUBMITTED}` transition happens exactly once.
+enum QuizAttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  AUTO_SUBMITTED
+
+  @@map("quiz_attempt_status")
+}
+
 /// Platform user. Identity & Access core entity (DB-05 §3, SRS-02 Table 5).
 model User {
   id              String     @id @default(uuid()) @db.Uuid
@@ -120,6 +152,7 @@ model User {
   verificationTokens VerificationToken[]
   consentRecords     ConsentRecord[]
   lessonProgress     LessonProgress[]
+  quizAttempts       QuizAttempt[]
   auditLogs          AuditLog[]          @relation("AuditActor")
 
   @@index([status])
@@ -335,6 +368,11 @@ model Subject {
   course Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   topics Topic[]
 
+  // Sprint 4: questions and quizzes optionally classify under a subject
+  // (ADR-0014 — reuses the curriculum taxonomy instead of a parallel one).
+  questions Question[]
+  quizzes   Quiz[]
+
   @@unique([courseId, slug])
   @@index([courseId])
   @@index([status])
@@ -444,4 +482,199 @@ model LessonProgress {
   @@index([userId, lastViewedAt])
   @@index([courseId])
   @@map("lesson_progress")
+}
+
+// ---------------------------------------------------------------------------
+// Assessment & Quiz Engine (Sprint 4, ASSESS-09, ADR-0014). Question bank +
+// quiz authoring (DRAFT/PUBLISHED/ARCHIVED via the shared ContentStatus) and
+// timed student attempts with frozen-at-start scoring. Creative/manually-
+// graded question types are out of scope — every QuestionType is server-
+// gradable, so scoring is fully automatic.
+// ---------------------------------------------------------------------------
+
+/// Bank question. `subjectId` reuses the Sprint 2 curriculum taxonomy instead
+/// of a parallel "question category" entity (ADR-0014); `tags` is a flat
+/// array rather than a normalized Tag entity for the same reason.
+model Question {
+  id          String          @id @default(uuid()) @db.Uuid
+  subjectId   String?         @map("subject_id") @db.Uuid
+  type        QuestionType
+  difficulty  DifficultyLevel @default(MEDIUM)
+  text        String
+  explanation String?
+  tags        String[]        @default([])
+  status      ContentStatus   @default(DRAFT)
+  position    Int             @default(0)
+  createdById String?         @map("created_by_id") @db.Uuid
+  version     Int             @default(1)
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  deletedAt   DateTime?       @map("deleted_at")
+
+  subject        Subject?            @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  options        QuestionOption[]
+  quizQuestions  QuizQuestion[]
+  attemptAnswers QuizAttemptAnswer[]
+
+  @@index([subjectId])
+  @@index([status])
+  @@index([type])
+  @@index([difficulty])
+  @@map("questions")
+}
+
+model QuestionOption {
+  id         String   @id @default(uuid()) @db.Uuid
+  questionId String   @map("question_id") @db.Uuid
+  text       String
+  isCorrect  Boolean  @default(false) @map("is_correct")
+  position   Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+  @@map("question_options")
+}
+
+/// Quiz shell. Marking rules (passing score, negative marking, shuffle) live
+/// here as the *current* configuration; each QuizAttempt freezes its own copy
+/// at start (ADR-0014) so editing a quiz never retroactively changes an
+/// attempt already underway or submitted.
+model Quiz {
+  id                     String        @id @default(uuid()) @db.Uuid
+  subjectId              String?       @map("subject_id") @db.Uuid
+  title                  String
+  slug                   String        @unique
+  description            String?
+  status                 ContentStatus @default(DRAFT)
+  timeLimitMinutes       Int?          @map("time_limit_minutes")
+  passingScorePercent    Decimal       @default(40) @map("passing_score_percent") @db.Decimal(5, 2)
+  negativeMarkingEnabled Boolean       @default(false) @map("negative_marking_enabled")
+  negativeMarksPerWrong  Decimal       @default(0) @map("negative_marks_per_wrong") @db.Decimal(5, 2)
+  shuffleQuestions       Boolean       @default(false) @map("shuffle_questions")
+  shuffleOptions         Boolean       @default(false) @map("shuffle_options")
+  position               Int           @default(0)
+  publishedAt            DateTime?     @map("published_at")
+  createdById            String?       @map("created_by_id") @db.Uuid
+  version                Int           @default(1)
+  createdAt              DateTime      @default(now()) @map("created_at")
+  updatedAt              DateTime      @updatedAt @map("updated_at")
+  deletedAt              DateTime?     @map("deleted_at")
+
+  subject       Subject?       @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  sections      QuizSection[]
+  quizQuestions QuizQuestion[]
+  attempts      QuizAttempt[]
+
+  @@index([subjectId])
+  @@index([status])
+  @@map("quizzes")
+}
+
+model QuizSection {
+  id          String   @id @default(uuid()) @db.Uuid
+  quizId      String   @map("quiz_id") @db.Uuid
+  title       String
+  description String?
+  position    Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  quiz          Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizQuestions QuizQuestion[]
+
+  @@index([quizId])
+  @@map("quiz_sections")
+}
+
+/// Question-to-quiz assignment. `marks` is set per assignment (not inherited
+/// from the question) so the same question can carry different weight in
+/// different quizzes.
+model QuizQuestion {
+  id         String   @id @default(uuid()) @db.Uuid
+  quizId     String   @map("quiz_id") @db.Uuid
+  questionId String   @map("question_id") @db.Uuid
+  sectionId  String?  @map("section_id") @db.Uuid
+  marks      Decimal  @default(1) @db.Decimal(6, 2)
+  position   Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  quiz     Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  question Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  section  QuizSection? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+
+  @@unique([quizId, questionId])
+  @@index([quizId])
+  @@index([questionId])
+  @@index([sectionId])
+  @@map("quiz_questions")
+}
+
+/// A student's timed attempt at a quiz. Freezes composition/marks/shuffle at
+/// start; correctness is graded live at submit time and then permanently
+/// fixed (ADR-0014). `version` guards the submit transition against
+/// concurrent double-submission.
+model QuizAttempt {
+  id     String            @id @default(uuid()) @db.Uuid
+  quizId String            @map("quiz_id") @db.Uuid
+  userId String            @map("user_id") @db.Uuid
+  status QuizAttemptStatus @default(IN_PROGRESS)
+
+  /// {questionId, sectionId, marks}[] in frozen presentation order.
+  questionSnapshot Json @map("question_snapshot")
+  /// { [questionId]: optionId[] } frozen (possibly shuffled) option order.
+  optionOrder      Json @map("option_order")
+
+  passingScorePercent    Decimal @map("passing_score_percent") @db.Decimal(5, 2)
+  negativeMarkingEnabled Boolean @map("negative_marking_enabled")
+  negativeMarksPerWrong  Decimal @map("negative_marks_per_wrong") @db.Decimal(5, 2)
+  totalMarks             Decimal @map("total_marks") @db.Decimal(8, 2)
+
+  startedAt   DateTime  @default(now()) @map("started_at")
+  expiresAt   DateTime? @map("expires_at")
+  submittedAt DateTime? @map("submitted_at")
+
+  obtainedMarks   Decimal? @map("obtained_marks") @db.Decimal(8, 2)
+  percentage      Decimal? @db.Decimal(5, 2)
+  passed          Boolean?
+  correctCount    Int?     @map("correct_count")
+  wrongCount      Int?     @map("wrong_count")
+  unansweredCount Int?     @map("unanswered_count")
+
+  version   Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  quiz    Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers QuizAttemptAnswer[]
+
+  @@index([userId, quizId])
+  @@index([quizId])
+  @@index([userId, status])
+  @@index([status, expiresAt])
+  @@map("quiz_attempts")
+}
+
+model QuizAttemptAnswer {
+  id                String    @id @default(uuid()) @db.Uuid
+  attemptId         String    @map("attempt_id") @db.Uuid
+  questionId        String    @map("question_id") @db.Uuid
+  /// string[] of selected QuestionOption ids (supports MULTIPLE_CHOICE).
+  selectedOptionIds Json      @map("selected_option_ids")
+  isCorrect         Boolean?  @map("is_correct")
+  marksAwarded      Decimal?  @map("marks_awarded") @db.Decimal(6, 2)
+  answeredAt        DateTime? @map("answered_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  attempt  QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@index([questionId])
+  @@map("quiz_attempt_answers")
 }
