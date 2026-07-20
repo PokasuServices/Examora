@@ -61,7 +61,7 @@ export class CategoriesController {
     const { items, total } = await this.categoriesService.list({
       page: query.page,
       pageSize: query.pageSize,
-      isActive: query.isActive,
+      isActive: query.isActive === undefined ? undefined : query.isActive === "true",
     });
     return {
       items: items.map(toCategory),

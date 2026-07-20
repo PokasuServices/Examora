@@ -1,12 +1,14 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { Transform } from "class-transformer";
-import { IsBoolean, IsOptional } from "class-validator";
+import { IsIn, IsOptional } from "class-validator";
 import { PaginationQueryDto } from "../../../common/dto/pagination-query.dto";
 
 export class ListCategoriesQueryDto extends PaginationQueryDto {
-  @ApiPropertyOptional({ description: "Filter by active flag" })
+  // Accepted as an explicit "true"/"false" string rather than a boolean: the
+  // global ValidationPipe's enableImplicitConversion coerces the query string
+  // "false" to a truthy boolean, which silently inverted this filter. Parsing
+  // the string ourselves (in the controller) avoids that footgun.
+  @ApiPropertyOptional({ enum: ["true", "false"], description: "Filter by active flag" })
   @IsOptional()
-  @Transform(({ value }) => (value === "true" ? true : value === "false" ? false : value))
-  @IsBoolean()
-  isActive?: boolean;
+  @IsIn(["true", "false"])
+  isActive?: "true" | "false";
 }

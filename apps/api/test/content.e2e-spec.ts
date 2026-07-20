@@ -96,12 +96,21 @@ describe("Content management (e2e)", () => {
 
       // The isActive filter returns only inactive rows (avoid asserting our
       // specific row is on a given page — ordering/pagination over a shared
-      // DB makes that flaky).
-      const list = await request(app.getHttpServer())
+      // DB makes that flaky). Regression guard for the boolean-query coercion
+      // bug: ?isActive=false must NOT return active rows.
+      const inactive = await request(app.getHttpServer())
         .get("/api/v1/admin/content/categories?isActive=false&pageSize=100")
         .set(auth(adminToken))
         .expect(200);
-      expect(list.body.data.items.every((c: { isActive: boolean }) => c.isActive === false)).toBe(
+      expect(
+        inactive.body.data.items.every((c: { isActive: boolean }) => c.isActive === false),
+      ).toBe(true);
+
+      const active = await request(app.getHttpServer())
+        .get("/api/v1/admin/content/categories?isActive=true&pageSize=100")
+        .set(auth(adminToken))
+        .expect(200);
+      expect(active.body.data.items.every((c: { isActive: boolean }) => c.isActive === true)).toBe(
         true,
       );
     });
