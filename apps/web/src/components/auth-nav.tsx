@@ -17,8 +17,14 @@ export function AuthNav() {
         <span className="text-sm text-neutral-600">
           Signed in as {user.firstName ?? user.email}
         </span>
+        <Link href="/courses">
+          <Button variant="secondary">Explore courses</Button>
+        </Link>
+        <Link href="/dashboard">
+          <Button variant="secondary">My learning</Button>
+        </Link>
         <Link href="/profile">
-          <Button variant="secondary">My profile</Button>
+          <Button variant="ghost">Profile</Button>
         </Link>
       </div>
     );

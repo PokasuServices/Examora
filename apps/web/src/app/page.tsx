@@ -12,8 +12,8 @@ export default function HomePage() {
         </Suspense>
       </div>
       <p className="text-body text-neutral-600">
-        Sprint 1 — Authentication &amp; Identity. Course, learning and assessment features are not
-        implemented yet. See{" "}
+        Sprint 3 — Learning Engine. Browse published courses, work through lessons, and track your
+        progress. Quizzes, assignments and later modules are still to come. See{" "}
         <code className="rounded bg-neutral-100 px-1.5 py-0.5 text-caption">
           docs/roadmap/SPRINT_BACKLOG.md
         </code>{" "}
