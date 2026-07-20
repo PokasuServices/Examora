@@ -13,12 +13,18 @@ export function AuthNav() {
 
   if (status === "authenticated" && user) {
     const canManageContent = user.permissions.includes("content:manage");
+    const canReadProgress = user.permissions.includes("progress:read");
     return (
       <div className="flex items-center gap-3">
         <span className="text-sm text-neutral-600">{user.email}</span>
         {canManageContent ? (
           <Link href="/content/courses">
             <Button variant="secondary">Content</Button>
+          </Link>
+        ) : null}
+        {canReadProgress ? (
+          <Link href="/progress">
+            <Button variant="secondary">Progress</Button>
           </Link>
         ) : null}
         <Link href="/users">
