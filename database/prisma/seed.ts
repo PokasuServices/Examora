@@ -1,4 +1,9 @@
-import { PERMISSION_CODES, type PermissionCode, type RoleName } from "@examora/types";
+import {
+  BASELINE_PERMISSION_CODES,
+  PERMISSION_CODES,
+  type PermissionCode,
+  type RoleName,
+} from "@examora/types";
 import { PrismaClient } from "../generated/client/index.js";
 
 const prisma = new PrismaClient();
@@ -6,24 +11,19 @@ const prisma = new PrismaClient();
 const ROLES: RoleName[] = ["STUDENT", "MENTOR", "REVIEWER", "ADMINISTRATOR", "GUARDIAN"];
 
 /**
- * Role→permission matrix (DESIGN-03 §3). Every role gets a baseline (own
- * profile + sessions, plus content:read for the Sprint 3 learning engine);
- * ADMINISTRATOR gets everything, including Sprint 2 content:manage/publish
- * (CMS-29 §7) and the Sprint 3 admin progress dashboard (progress:read).
- * Finer content roles (Author/Publisher) are deferred. Future modules extend this.
+ * Role→permission matrix (DESIGN-03 §3). Every role gets BASELINE_PERMISSION_CODES
+ * (own profile + sessions, content:read, quiz:read); ADMINISTRATOR gets
+ * everything, including Sprint 2 content:manage/publish (CMS-29 §7), the
+ * Sprint 3 admin progress dashboard (progress:read), and the Sprint 4
+ * question bank / quiz authoring / attempt monitoring (question:manage,
+ * quiz:manage, quiz:publish, quiz:attempts:read). Finer content roles
+ * (Author/Publisher) are deferred. Future modules extend this.
  */
-const BASELINE: PermissionCode[] = [
-  "profile:read:own",
-  "profile:update:own",
-  "sessions:manage:own",
-  "content:read",
-];
-
 const ROLE_PERMISSIONS: Record<RoleName, PermissionCode[]> = {
-  STUDENT: BASELINE,
-  MENTOR: BASELINE,
-  REVIEWER: BASELINE,
-  GUARDIAN: BASELINE,
+  STUDENT: BASELINE_PERMISSION_CODES,
+  MENTOR: BASELINE_PERMISSION_CODES,
+  REVIEWER: BASELINE_PERMISSION_CODES,
+  GUARDIAN: BASELINE_PERMISSION_CODES,
   ADMINISTRATOR: [...PERMISSION_CODES],
 };
 
