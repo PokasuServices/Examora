@@ -120,6 +120,48 @@ enum QuizAttemptStatus {
   @@map("quiz_attempt_status")
 }
 
+/// Each resubmission is a new row (ADR-0015, mirrors QuizAttempt versioning).
+/// DRAFT: student editing. SUBMITTED: locked, awaiting a reviewer. UNDER_REVIEW:
+/// a reviewer has an unpublished AssignmentReview in progress. REVISION_REQUESTED
+/// / APPROVED: terminal — a published review's decision.
+enum AssignmentSubmissionStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  REVISION_REQUESTED
+  APPROVED
+
+  @@map("assignment_submission_status")
+}
+
+/// A reviewer can save rubric scores before publishing (ADR-0015) — only a
+/// PUBLISHED review is visible to the student and flips the submission status.
+enum ReviewStatus {
+  DRAFT
+  PUBLISHED
+
+  @@map("review_status")
+}
+
+enum ReviewDecision {
+  APPROVED
+  REVISION_REQUESTED
+
+  @@map("review_decision")
+}
+
+/// A file starts PENDING and is only ever downloadable once CLEAN (ADR-0015).
+/// INFECTED files are deleted from storage immediately; FAILED means the scan
+/// itself errored (treated the same as PENDING for access purposes — retry).
+enum FileScanStatus {
+  PENDING
+  CLEAN
+  INFECTED
+  FAILED
+
+  @@map("file_scan_status")
+}
+
 /// Platform user. Identity & Access core entity (DB-05 §3, SRS-02 Table 5).
 model User {
   id              String     @id @default(uuid()) @db.Uuid
@@ -146,14 +188,18 @@ model User {
   updatedAt       DateTime   @updatedAt @map("updated_at")
   deletedAt       DateTime?  @map("deleted_at")
 
-  roles              UserRole[]
-  oauthAccounts      OAuthAccount[]
-  refreshTokens      RefreshToken[]
-  verificationTokens VerificationToken[]
-  consentRecords     ConsentRecord[]
-  lessonProgress     LessonProgress[]
-  quizAttempts       QuizAttempt[]
-  auditLogs          AuditLog[]          @relation("AuditActor")
+  roles                 UserRole[]
+  oauthAccounts         OAuthAccount[]
+  refreshTokens         RefreshToken[]
+  verificationTokens    VerificationToken[]
+  consentRecords        ConsentRecord[]
+  lessonProgress        LessonProgress[]
+  quizAttempts          QuizAttempt[]
+  assignmentSubmissions AssignmentSubmission[] @relation("SubmissionsByStudent")
+  reviewedSubmissions   AssignmentSubmission[] @relation("SubmissionsByReviewer")
+  assignmentReviews     AssignmentReview[]
+  assignmentComments    AssignmentComment[]
+  auditLogs             AuditLog[]             @relation("AuditActor")
 
   @@index([status])
   @@map("users")
@@ -370,8 +416,10 @@ model Subject {
 
   // Sprint 4: questions and quizzes optionally classify under a subject
   // (ADR-0014 — reuses the curriculum taxonomy instead of a parallel one).
-  questions Question[]
-  quizzes   Quiz[]
+  questions   Question[]
+  quizzes     Quiz[]
+  // Sprint 5: assignments do the same (ADR-0015).
+  assignments Assignment[]
 
   @@unique([courseId, slug])
   @@index([courseId])
@@ -677,4 +725,173 @@ model QuizAttemptAnswer {
   @@index([attemptId])
   @@index([questionId])
   @@map("quiz_attempt_answers")
+}
+
+// ---------------------------------------------------------------------------
+// Creative Assignment Engine (Sprint 5, CREATIVE-10 §2-4/§6, ADR-0015). File
+// upload is presigned-URL-based (no bytes through the API); malware scanning
+// is quarantine-by-default (a file is never downloadable until CLEAN).
+// Positional image annotations (CREATIVE-10 §7) are deferred — not modeled.
+// ---------------------------------------------------------------------------
+
+/// Admin-authored preset copied onto a new Assignment at creation time — not
+/// a live relation (ADR-0015): editing a template never changes assignments
+/// already created from it.
+model AssignmentTemplate {
+  id          String    @id @default(uuid()) @db.Uuid
+  title       String
+  brief       String
+  /// { allowedMimeTypes: string[], maxFileSizeMb: number, maxFiles: number }
+  fileRules   Json      @map("file_rules")
+  marksTotal  Decimal   @map("marks_total") @db.Decimal(6, 2)
+  /// [{ title: string, description?: string, maxMarks: number }] skeleton.
+  rubric      Json
+  createdById String?   @map("created_by_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@map("assignment_templates")
+}
+
+model Assignment {
+  id          String        @id @default(uuid()) @db.Uuid
+  subjectId   String?       @map("subject_id") @db.Uuid
+  title       String
+  slug        String        @unique
+  brief       String
+  /// { allowedMimeTypes: string[], maxFileSizeMb: number, maxFiles: number }
+  fileRules   Json          @map("file_rules")
+  marksTotal  Decimal       @map("marks_total") @db.Decimal(6, 2)
+  deadline    DateTime?
+  status      ContentStatus @default(DRAFT)
+  position    Int           @default(0)
+  publishedAt DateTime?     @map("published_at")
+  createdById String?       @map("created_by_id") @db.Uuid
+  version     Int           @default(1)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  deletedAt   DateTime?     @map("deleted_at")
+
+  subject     Subject?               @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  criteria    RubricCriterion[]
+  submissions AssignmentSubmission[]
+
+  @@index([subjectId])
+  @@index([status])
+  @@map("assignments")
+}
+
+model RubricCriterion {
+  id           String   @id @default(uuid()) @db.Uuid
+  assignmentId String   @map("assignment_id") @db.Uuid
+  title        String
+  description  String?
+  maxMarks     Decimal  @map("max_marks") @db.Decimal(6, 2)
+  position     Int      @default(0)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  assignment Assignment    @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  scores     RubricScore[]
+
+  @@index([assignmentId])
+  @@map("rubric_criteria")
+}
+
+/// A student's submission. Each resubmission after REVISION_REQUESTED is a
+/// new row with an incremented version (ADR-0015) — "Student Assignment
+/// History" is simply every row for (assignmentId, studentId), newest first.
+model AssignmentSubmission {
+  id           String                     @id @default(uuid()) @db.Uuid
+  assignmentId String                     @map("assignment_id") @db.Uuid
+  studentId    String                     @map("student_id") @db.Uuid
+  version      Int                        @default(1)
+  status       AssignmentSubmissionStatus @default(DRAFT)
+  notes        String?
+  reviewerId   String?                    @map("reviewer_id") @db.Uuid
+  submittedAt  DateTime?                  @map("submitted_at")
+  createdAt    DateTime                   @default(now()) @map("created_at")
+  updatedAt    DateTime                   @updatedAt @map("updated_at")
+
+  assignment Assignment          @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    User                @relation("SubmissionsByStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  reviewer   User?               @relation("SubmissionsByReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  files      SubmissionFile[]
+  comments   AssignmentComment[]
+  review     AssignmentReview?
+
+  @@unique([assignmentId, studentId, version])
+  @@index([assignmentId, studentId])
+  @@index([reviewerId])
+  @@index([status])
+  @@map("assignment_submissions")
+}
+
+model SubmissionFile {
+  id           String         @id @default(uuid()) @db.Uuid
+  submissionId String         @map("submission_id") @db.Uuid
+  fileName     String         @map("file_name")
+  mimeType     String         @map("mime_type")
+  sizeBytes    Int            @map("size_bytes")
+  storageKey   String         @unique @map("storage_key")
+  scanStatus   FileScanStatus @default(PENDING) @map("scan_status")
+  uploadedAt   DateTime       @default(now()) @map("uploaded_at")
+
+  submission AssignmentSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("submission_files")
+}
+
+/// A reviewer's rubric evaluation of one submission. DRAFT lets a reviewer
+/// save partial scores without exposing them; publishing flips the parent
+/// submission's status to `decision` (ADR-0015).
+model AssignmentReview {
+  id             String          @id @default(uuid()) @db.Uuid
+  submissionId   String          @unique @map("submission_id") @db.Uuid
+  reviewerId     String          @map("reviewer_id") @db.Uuid
+  status         ReviewStatus    @default(DRAFT)
+  overallComment String?         @map("overall_comment")
+  decision       ReviewDecision?
+  obtainedMarks  Decimal?        @map("obtained_marks") @db.Decimal(6, 2)
+  publishedAt    DateTime?       @map("published_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  submission AssignmentSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewer   User                 @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  scores     RubricScore[]
+
+  @@map("assignment_reviews")
+}
+
+model RubricScore {
+  id           String  @id @default(uuid()) @db.Uuid
+  reviewId     String  @map("review_id") @db.Uuid
+  criterionId  String  @map("criterion_id") @db.Uuid
+  marksAwarded Decimal @map("marks_awarded") @db.Decimal(6, 2)
+  comment      String?
+
+  review    AssignmentReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  criterion RubricCriterion  @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, criterionId])
+  @@map("rubric_scores")
+}
+
+/// Freeform, submission-scoped notes — distinct from structured rubric
+/// feedback (ADR-0015). Visible to the student, the assigned reviewer, and admins.
+model AssignmentComment {
+  id           String   @id @default(uuid()) @db.Uuid
+  submissionId String   @map("submission_id") @db.Uuid
+  authorId     String   @map("author_id") @db.Uuid
+  body         String
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  submission AssignmentSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  author     User                 @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("assignment_comments")
 }

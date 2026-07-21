@@ -1,9 +1,15 @@
-import { BASELINE_PERMISSION_CODES, PERMISSION_CODES, ROLE_NAMES } from "@examora/types";
+import {
+  BASELINE_PERMISSION_CODES,
+  PERMISSION_CODES,
+  REVIEWER_PERMISSION_CODES,
+  ROLE_NAMES,
+} from "@examora/types";
 import type { PrismaService } from "../../src/prisma/prisma.service";
 
 /**
  * Makes an e2e spec self-sufficient: ensures all roles + permissions exist,
- * that ADMINISTRATOR holds every permission, and that every other role holds
+ * that ADMINISTRATOR holds every permission, MENTOR/REVIEWER hold
+ * REVIEWER_PERMISSION_CODES, and every other role holds
  * BASELINE_PERMISSION_CODES — mirroring database/prisma/seed.ts's role
  * matrix — regardless of whether `db:seed` has been run against the test
  * database. (Previously this only wired ADMINISTRATOR, which happened to
@@ -29,7 +35,12 @@ export async function ensureRolesAndPermissions(prisma: PrismaService): Promise<
   const permissionIdByCode = new Map(permissions.map((p) => [p.code, p.id]));
 
   for (const role of roles) {
-    const codes = role.name === "ADMINISTRATOR" ? PERMISSION_CODES : BASELINE_PERMISSION_CODES;
+    const codes =
+      role.name === "ADMINISTRATOR"
+        ? PERMISSION_CODES
+        : role.name === "MENTOR" || role.name === "REVIEWER"
+          ? REVIEWER_PERMISSION_CODES
+          : BASELINE_PERMISSION_CODES;
     for (const code of codes) {
       const permissionId = permissionIdByCode.get(code);
       if (!permissionId) continue;

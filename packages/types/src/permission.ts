@@ -34,6 +34,18 @@ export const PERMISSION_CODES = [
   "quiz:publish",
   "quiz:read",
   "quiz:attempts:read",
+  // Creative Assignment Engine (Sprint 5, ADR-0015). `assignment:manage`
+  // authors assignments/templates/rubrics and assigns reviewers;
+  // `assignment:publish` mirrors the content/quiz author-publisher split.
+  // `assignment:read` authorises browsing PUBLISHED assignments and
+  // submitting to them (every role, like content:read/quiz:read — own-
+  // submission endpoints are self-scoped per the ADR-0013 precedent).
+  // `assignment:review` gates the reviewer dashboard and rubric review
+  // actions (MENTOR + REVIEWER roles, not baseline).
+  "assignment:manage",
+  "assignment:publish",
+  "assignment:read",
+  "assignment:review",
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];
@@ -51,4 +63,11 @@ export const BASELINE_PERMISSION_CODES: PermissionCode[] = [
   "sessions:manage:own",
   "content:read",
   "quiz:read",
+  "assignment:read",
+];
+
+/** Granted to MENTOR and REVIEWER in addition to the baseline (ADR-0015). */
+export const REVIEWER_PERMISSION_CODES: PermissionCode[] = [
+  ...BASELINE_PERMISSION_CODES,
+  "assignment:review",
 ];
