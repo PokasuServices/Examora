@@ -2,6 +2,8 @@ import type { MiddlewareConsumer, NestModule } from "@nestjs/common";
 import { Module } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
+import { BullModule } from "@nestjs/bullmq";
+import type Redis from "ioredis";
 import { LoggerModule } from "nestjs-pino";
 import { generateCorrelationId } from "@examora/utils";
 import configuration from "./config/configuration";
@@ -14,6 +16,9 @@ import { RolesGuard } from "./common/guards/roles.guard";
 import { PermissionsGuard } from "./common/guards/permissions.guard";
 import { PrismaModule } from "./prisma/prisma.module";
 import { RedisModule } from "./redis/redis.module";
+import { BULLMQ_REDIS_CLIENT } from "./redis/redis.constants";
+import { StorageModule } from "./storage/storage.module";
+import { MalwareScanModule } from "./malware-scan/malware-scan.module";
 import { HealthModule } from "./health/health.module";
 import { MailerModule } from "./mailer/mailer.module";
 import { AuditModule } from "./audit/audit.module";
@@ -24,6 +29,7 @@ import { AdminModule } from "./admin/admin.module";
 import { ContentModule } from "./content/content.module";
 import { LearningModule } from "./learning/learning.module";
 import { AssessmentModule } from "./assessment/assessment.module";
+import { AssignmentsModule } from "./assignments/assignments.module";
 
 @Module({
   imports: [
@@ -49,8 +55,20 @@ import { AssessmentModule } from "./assessment/assessment.module";
         redact: ["req.headers.authorization", "req.headers.cookie"],
       },
     }),
+    // Reuses RedisModule's BULLMQ_REDIS_CLIENT (maxRetriesPerRequest: null,
+    // required by BullMQ — incompatible with REDIS_CLIENT's settings) so the
+    // connection has a single owner with a proper shutdown hook
+    // (RedisShutdownService). An inline `new Redis(...)` here would create an
+    // untracked connection that never closes, leaving Jest/the process
+    // hanging after app.close().
+    BullModule.forRootAsync({
+      inject: [BULLMQ_REDIS_CLIENT],
+      useFactory: (bullmqRedis: Redis) => ({ connection: bullmqRedis }),
+    }),
     PrismaModule,
     RedisModule,
+    StorageModule,
+    MalwareScanModule,
     MailerModule,
     AuditModule,
     PermissionsModule,
@@ -61,6 +79,7 @@ import { AssessmentModule } from "./assessment/assessment.module";
     ContentModule,
     LearningModule,
     AssessmentModule,
+    AssignmentsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

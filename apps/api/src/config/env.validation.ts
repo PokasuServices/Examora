@@ -66,6 +66,34 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   GOOGLE_OAUTH_CALLBACK_URL?: string;
+
+  // Object storage (ADR-0005, ADR-0015) — S3-compatible, MinIO locally.
+  @IsString()
+  S3_ENDPOINT!: string;
+
+  @IsString()
+  S3_REGION = "us-east-1";
+
+  @IsString()
+  S3_ACCESS_KEY_ID!: string;
+
+  @IsString()
+  S3_SECRET_ACCESS_KEY!: string;
+
+  @IsString()
+  S3_BUCKET!: string;
+
+  @IsOptional()
+  @IsString()
+  S3_FORCE_PATH_STYLE = "true";
+
+  // Malware scanning (ADR-0005, ADR-0015, TD-005).
+  @IsString()
+  CLAMAV_HOST = "localhost";
+
+  @Type(() => Number)
+  @IsInt()
+  CLAMAV_PORT = 3310;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

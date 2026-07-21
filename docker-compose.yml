@@ -66,7 +66,27 @@ services:
       echo 'MinIO bucket ready: '$$MINIO_BUCKET
       "
 
+  # Malware scanning daemon (ADR-0005/ADR-0015, TD-005). First boot downloads
+  # virus signatures (freshclam) and can take a few minutes; the automated
+  # test suite does not depend on this service (see ADR-0015 — tests use
+  # FakeMalwareScannerService). Optional for local dev unless you're
+  # exercising the real ClamAvScannerService end-to-end.
+  clamav:
+    image: clamav/clamav:stable
+    restart: unless-stopped
+    ports:
+      - "${CLAMAV_PORT:-3310}:3310"
+    volumes:
+      - examora_clamav_data:/var/lib/clamav
+    healthcheck:
+      test: ["CMD-SHELL", "echo PING | timeout 5 nc -w 5 127.0.0.1 3310 | grep -q PONG"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+
 volumes:
   examora_postgres_data:
   examora_redis_data:
   examora_minio_data:
+  examora_clamav_data:
