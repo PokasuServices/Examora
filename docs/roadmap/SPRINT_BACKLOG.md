@@ -161,7 +161,8 @@ within the same request-time budget as a small quiz (performance-validated, not 
 
 ## Sprint 5 — Creative Assignment Engine
 
-Status: **In progress.**
+Status: **Complete** (2026-07-21). 270 automated tests pass (152 unit/integration + 109 e2e +
+9 utils).
 
 Resequencing note (approved ahead of Sprint 5): this entry merges what the original plan split
 across two sprints — "Creative Assignment Authoring & Submission" and "Rubric Review Workspace &
@@ -171,24 +172,65 @@ Recommendations v0" (the original Sprint 5, closing out Phase 1) is renumbered t
 `docs/roadmap/IMPLEMENTATION_ROADMAP.md` Phase 1/2 for why. Everything from Sprint 6 onward in the
 original plan shifts down by one sprint number accordingly.
 
+Delivered:
+
 - FR-ASSIGN-01: brief, references, file rules, marks, rubric, deadline; assignment templates
-- FR-ASSIGN-02: signed upload, submission versioning per resubmission (draft + final), type/size
-  validation, malware scan before reviewer access (ClamAV per ADR-0005)
-- CREATIVE-10 §2-4: assignment lifecycle through reviewer allocation, submission workflow
-- FR-REVIEW-01: rubric-based review (self/peer/faculty per assignment policy) — criterion ratings,
-  comments, marks, publish/reject
-- CREATIVE-10 §6: weighted rubric scoring, mandatory feedback on low scores, rubric versioning
-- Reviewer dashboard (assigned-submission queue) and student assignment history
-- Admin management, RBAC, audit logging, Prisma migrations, Swagger, unit/integration/e2e tests
+  (title/brief/fileRules/marksTotal/rubric skeleton, copied — not live-linked — into a new
+  assignment at creation time so later template edits never retroactively change an assignment
+  already created from it) — ADR-0015
+- FR-ASSIGN-02: presigned direct-to-storage upload (S3-compatible/MinIO), submission versioning
+  per resubmission (each resubmission is a new row, mirroring the QuizAttempt precedent from
+  ADR-0014), type/size validation against the assignment's file rules, quarantine-by-default
+  malware scanning (ClamAV via BullMQ, files start PENDING and are only ever downloadable once
+  CLEAN; INFECTED files are deleted from storage immediately) — ADR-0005, ADR-0015
+- CREATIVE-10 §2-4: assignment lifecycle (DRAFT→PUBLISHED→ARCHIVED via the shared ContentStatus,
+  publish gated on ≥1 rubric criterion) through reviewer allocation (admin assigns/reassigns any
+  MENTOR/REVIEWER-role user) and the 5-state submission workflow (DRAFT/SUBMITTED/UNDER_REVIEW/
+  REVISION_REQUESTED/APPROVED)
+- FR-REVIEW-01: rubric-based review — per-criterion marks + comment, overall comment, draft-then-
+  publish workflow (a draft review is never visible to the student; publishing records the
+  APPROVED/REVISION_REQUESTED decision, sums obtained marks, and closes out the submission)
+- CREATIVE-10 §6: weighted rubric scoring (marks per criterion, summed on publish), flat threaded
+  comments visible to the student and assigned reviewer
+- Reviewer dashboard (assigned-submission queue, filterable by status) and student assignment
+  history (all versions across all assignments, filterable by assignment)
+- Admin: assignment + template CRUD, rubric authoring, publish gating, submission monitoring
+  (filter by assignment/reviewer/status, reviewer assign/reassign), reviewer scoring workspace —
+  apps/admin/src/app/assignments/**
+- Student (apps/web): assignment catalog, detail + start/resume, draft editing + file upload +
+  notes + final submit, awaiting-review/decided views with resubmit, comment thread, submission
+  history — apps/web/src/app/assignments/**
+- RBAC (`assignment:manage`, `assignment:publish`, `assignment:read` baseline, `assignment:review`
+  — new `REVIEWER_PERMISSION_CODES` group for MENTOR/REVIEWER), validation, audit logging,
+  Prisma migration `20260721091804_sprint5_creative_assignment_engine`, Swagger,
+  unit/integration/e2e tests
+- Bug fixes (allowed, all caught by e2e/browser testing before merge, none shipped):
+  ClamAV's background init used a fire-and-forget promise with no `.catch()` — with
+  `MalwareScanModule` global and now wired into `AppModule`, an unreachable clamd crashed the
+  entire process via an unhandled rejection on every e2e spec, not just this sprint's. Fixed with
+  `.catch()` + logging and clearing the cached init promise on failure so a later scan retries
+  fresh (TD-024 records the underlying pattern). Separately, `BullModule.forRootAsync` created its
+  own untracked inline Redis connection with no shutdown hook, leaving Jest hanging after
+  `app.close()`; fixed by giving BullMQ a dedicated, DI-managed `BULLMQ_REDIS_CLIENT` that
+  `RedisShutdownService` closes alongside the general-purpose connection. `ListHistoryQueryDto`'s
+  `assignmentId` query param had no class-validator decorators, so the global
+  `whitelist`/`forbidNonWhitelisted` pipe rejected it outright; and `admin/assignments/:id`'s
+  dynamic route was registered before `admin/assignments/submissions`, so Express matched
+  "submissions" as an `:id` — fixed by adding the missing decorators and reordering controller
+  registration (TD-025). A manual browser pass over the new admin pages (no prior automated
+  coverage of admin UI) also caught two client-only bugs: decimal marks inputs (`min={0.01}`) had
+  no `step`, so the browser's native numeric-step validation silently blocked form submission; and
+  the reviewer-picker dropdown requested `pageSize=200` against an endpoint capped at 100.
 
 Deferred (not in this sprint's approved scope): FR-REVIEW-02 positional image annotations
 (CREATIVE-10 §7 — coordinates stored relative to the original image, responsive scaling). Rubric
 review ships with structured criterion ratings + freeform comments but no annotation canvas; revisit
 in a later review-UX polish pass.
 
-**Exit criteria**: Unsupported/oversized files rejected client- and server-side; infected file
-never reaches reviewer or storage in a scanned state; a reviewer can complete a full rubric
-evaluation on a real submission; grading history immutable and audited.
+**Exit criteria met**: unsupported/oversized files rejected client- and server-side; an infected
+file (EICAR test string) is quarantined and never resolves a download URL; a reviewer completed a
+full rubric evaluation (score every criterion, publish an APPROVED decision) against a real
+submission, verified both via e2e and a live browser pass; grading history immutable and audited.
 
 ## Sprint 6 — Scoring, Reports & Recommendations v0
 

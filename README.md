@@ -5,23 +5,30 @@ entrance exams. Governed by [`documents/00_Master_Development_Guide_Examora_Plat
 
 ## Status
 
-**Sprint 4 — Assessment & Quiz Engine (complete).** A question bank (single/multiple-choice,
-true/false; difficulty, tags, explanations) and quiz authoring (sections, per-question marks, time
-limit, passing score, negative marking, question/option shuffling) sit behind a publish gate that
-requires every assigned question to itself be published. Students take timed, autosaving attempts;
-each attempt freezes its own question order, marks and marking rules at start so later edits never
-retroactively change it. Submission is idempotent and safe under concurrent double-submits
-(optimistic-lock-guarded); an expired attempt auto-submits the next time anyone accesses it. Scoring
-is automatic — all-or-nothing per question, unanswered never penalized — with a result summary,
-detailed review, and admin attempt monitoring + a per-quiz result dashboard. Builds on Sprint 3
-(Learning Engine: published-only catalog, lesson viewer/completion, progress dashboard, no
-enrollment gate) and Sprint 2 (Course Management: the `Category → Course → Subject → Topic → Module
-→ Lesson` content hierarchy, DRAFT/PUBLISHED/ARCHIVED workflow, CRUD/reorder APIs, admin content UI)
-and Sprint 1 (Authentication & Identity: registration, email verification, login/logout, refresh
-rotation, password reset, sessions, RBAC + permissions, profiles, Google OAuth, consent, audit).
-Creative assignments, mentoring, community, notifications, payments, analytics, AI and further CMS
-enhancements are not started. See
+**Sprint 5 — Creative Assignment Engine (complete).** Admins author assignments (brief, file
+rules, marks, rubric criteria, deadline) directly or from a reusable template (copied — not
+live-linked — at creation time) and publish once ≥1 rubric criterion exists. Students upload files
+via presigned direct-to-storage URLs; every file is quarantined (`PENDING`) until an async ClamAV
+scan marks it `CLEAN` — only then does it ever resolve a download URL, and an `INFECTED` file is
+deleted from storage immediately. Each resubmission is a new versioned row, never an in-place edit.
+Admins assign a MENTOR/REVIEWER-role reviewer per submission; the reviewer scores every rubric
+criterion, leaves comments, and publishes an APPROVED/REVISION_REQUESTED decision that closes out
+the submission and notifies the student via the shared comment thread. Full admin (authoring,
+monitoring, reviewer workspace) and student (catalog, submission, history) UIs ship this sprint.
+Builds on Sprint 4 (Assessment & Quiz Engine: question bank, quiz authoring, timed autosaving
+attempts, automatic scoring, attempt monitoring), Sprint 3 (Learning Engine: published-only catalog,
+lesson viewer/completion, progress dashboard, no enrollment gate), Sprint 2 (Course Management: the
+`Category → Course → Subject → Topic → Module → Lesson` content hierarchy, DRAFT/PUBLISHED/ARCHIVED
+workflow, CRUD/reorder APIs, admin content UI), and Sprint 1 (Authentication & Identity:
+registration, email verification, login/logout, refresh rotation, password reset, sessions, RBAC +
+permissions, profiles, Google OAuth, consent, audit). Positional image annotations on rubric review
+(CREATIVE-10 §7) are explicitly deferred. Mentoring, community, notifications, payments, analytics,
+AI and further CMS enhancements are not started. See
 [`docs/roadmap/SPRINT_BACKLOG.md`](docs/roadmap/SPRINT_BACKLOG.md) for the full plan.
+
+> Malware scanning and object storage run against real ClamAV/S3-compatible (MinIO) adapters in
+> dev/prod, but every automated test uses fake in-memory adapters instead (ADR-0015) — the real
+> adapters are only manually verified, not CI-covered (TD-027).
 
 > Email is not actually delivered yet — Sprint 1 uses a console-logging mailer stub (ADR-0009);
 > verification/reset tokens appear in the `apps/api` logs. Real delivery arrives with the
@@ -80,7 +87,7 @@ screens/      Competitor reference screenshots — functional reference ONLY, se
 ```bash
 pnpm install
 cp .env.example .env          # fill in local values
-docker compose up -d          # starts Postgres, Redis, MinIO
+docker compose up -d          # starts Postgres, Redis, MinIO (add `clamav` too for real malware scanning — optional, see TD-027)
 pnpm db:migrate                # applies Prisma migrations
 pnpm dev                       # runs api (3001), web (3000), admin (3002) in parallel
 ```
