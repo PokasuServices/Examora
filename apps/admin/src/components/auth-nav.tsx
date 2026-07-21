@@ -17,6 +17,8 @@ export function AuthNav() {
     const canManageAssessment =
       user.permissions.includes("question:manage") || user.permissions.includes("quiz:manage");
     const canReadAttempts = user.permissions.includes("quiz:attempts:read");
+    const canManageAssignments = user.permissions.includes("assignment:manage");
+    const canReview = user.permissions.includes("assignment:review");
     return (
       <div className="flex items-center gap-3">
         <span className="text-sm text-neutral-600">{user.email}</span>
@@ -33,6 +35,16 @@ export function AuthNav() {
         {canReadAttempts ? (
           <Link href="/assessment/attempts">
             <Button variant="secondary">Attempts</Button>
+          </Link>
+        ) : null}
+        {canManageAssignments ? (
+          <Link href="/assignments">
+            <Button variant="secondary">Assignments</Button>
+          </Link>
+        ) : null}
+        {canReview ? (
+          <Link href="/assignments/reviewer">
+            <Button variant="secondary">Reviews</Button>
           </Link>
         ) : null}
         {canReadProgress ? (
