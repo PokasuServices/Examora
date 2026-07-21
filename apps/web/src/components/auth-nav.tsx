@@ -23,6 +23,9 @@ export function AuthNav() {
         <Link href="/quizzes">
           <Button variant="secondary">Quizzes</Button>
         </Link>
+        <Link href="/assignments">
+          <Button variant="secondary">Assignments</Button>
+        </Link>
         <Link href="/dashboard">
           <Button variant="secondary">My learning</Button>
         </Link>
