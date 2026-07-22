@@ -232,7 +232,72 @@ file (EICAR test string) is quarantined and never resolves a download URL; a rev
 full rubric evaluation (score every criterion, publish an APPROVED decision) against a real
 submission, verified both via e2e and a live browser pass; grading history immutable and audited.
 
-## Sprint 6 — Scoring, Reports & Recommendations v0
+## Sprint 6 — Mentor Management
+
+Status: **Complete** (2026-07-22). 319 automated tests pass (180 unit/integration + 130 e2e + 9
+utils).
+
+Resequencing note (approved ahead of Sprint 6, mirroring the Sprint 5 precedent): this entry runs
+what was previously planned as Sprint 7 ("Mentoring: Cohorts, Dashboard, Student 360, Tasks") ahead
+of "Scoring, Reports & Recommendations v0" (previously Sprint 6, now Sprint 7) — see
+`docs/roadmap/IMPLEMENTATION_ROADMAP.md` Phase 1/2 for why. No functional dependency blocks this:
+Mentor Management operates on the existing Learning/Assessment/Assignment data, independent of the
+quiz engine's own scoring/reports/recommendations feature. Scope is also narrower than the original
+Sprint 7 planning note: **Cohorts and at-risk-alert escalation are not part of this sprint's
+approved scope** (see Deferred below) — the approved scope is Mentor Management, Student 360, and
+the Mentor Workflow (notes/tasks/feedback/meetings/progress-quiz-assignment review), reusing the
+existing Sprint 5 reviewer workflow for assignment review rather than rebuilding it.
+
+Delivered:
+
+- Mentor Management: mentor CRUD (admin creates/edits/deletes a mentor profile extending an
+  existing MENTOR-role user — bio, specialization, workload capacity), mentor assignment
+  (admin assigns/reassigns a student to a mentor via a history-preserving join table — reassigning
+  supersedes rather than deletes the previous row), workload (active-student-count vs. capacity,
+  computed on read, never stored)
+- Student 360: student profile, learning progress, quiz history, assignment history, activity
+  timeline (a merge-and-sort over lesson completions, quiz attempts, assignment submissions, and
+  mentor notes/tasks/feedback/meetings) — a read-only aggregator composed entirely from Sprint
+  3/4/5's existing `ProgressService`, `AdminQuizAttemptsService`, `SubmissionsService`, and
+  `UsersService` (ADR-0016) — each already accepted a target-user id, so no new progress/scoring/
+  submission query logic was written, only a new `exports:` entry on each owning module
+- Mentor Workflow: the mentor's own dashboard (caseload, pending tasks, recent meetings), notes
+  (private, never visible to the student), tasks (with due dates and a PENDING/IN_PROGRESS/
+  COMPLETED status), feedback, meeting history, and progress/quiz/assignment review via Student
+  360 and Sprint 5's existing reviewer workflow — no new review write path was built
+- Admin: mentor management, mentor assignment, mentor workload, and an admin mentor dashboard
+  (every mentor's utilization, for capacity planning) — `apps/admin/src/app/mentors/**`,
+  `apps/admin/src/app/mentor-dashboard`, `apps/admin/src/app/students/[id]`
+- A server-side `role` filter added to the existing `GET /admin/users` endpoint (`UsersService.list`)
+  for the mentor/student pickers — previously this filtering was done client-side only, over-fetching
+  every user on every admin assignment page
+- FR-MENTOR-01/02/03, DESIGN-03 §4 (assignment → dashboard → review → task lifecycle; escalation
+  deferred)
+- RBAC: `mentor:manage` (ADMINISTRATOR only) and a new `mentor:workflow` permission on MENTOR only —
+  the first sprint where MENTOR and REVIEWER permissions diverge (previously identical). Every
+  mentor-workflow endpoint is gated by `mentor:workflow` alone (ADMINISTRATOR already holds every
+  permission code, so admin oversight passes the same gate); ownership — the actor is the student's
+  currently assigned mentor, or an admin — is enforced in the service layer via
+  `MentorAssignmentService.assertAssignedOrAdmin`, verified by e2e (a non-assigned mentor is
+  denied; an admin is not)
+- Validation, audit logging (`mentoring.mentor_assigned`, `mentoring.note_created`,
+  `mentoring.task_created`, etc.), Prisma migration `20260722101659_sprint6_mentor_management`,
+  Swagger, unit/integration/e2e tests
+
+Deferred (not in this sprint's approved scope, per the kickoff instruction): Community, Payments,
+Notifications, Analytics, AI, further CMS enhancements. Also deferred from the original Sprint 7
+planning note: cohort grouping/management and "at-risk" alerting/escalation — the mentor dashboard
+this sprint shows assigned students and workload but does not compute an at-risk score or send
+escalations (no notification service exists yet — TD-013; tracked as TD-028).
+
+**Exit criteria met**: a mentor executed the full lifecycle end-to-end against real data (assigned →
+dashboard → Student 360 review → note/task/feedback added → meeting logged), verified both by e2e
+and a live browser pass with zero client-only bugs found; access-scoping enforced and tested — a
+non-assigned mentor is denied Student 360/notes/tasks/feedback/meetings (403), a plain REVIEWER
+(not MENTOR) is denied the mentor-workflow routes entirely, and an admin can access any student's
+data regardless of assignment.
+
+## Sprint 7 — Scoring, Reports & Recommendations v0
 
 - FR-QUIZ-04: automatic objective scoring per published rules, audit timestamp, persisted once
 - FR-QUIZ-05: question reporting (student flags a faulty question without affecting their result)
@@ -243,18 +308,6 @@ submission, verified both via e2e and a live browser pass; grading history immut
 
 **Exit criteria**: Phase 1 (MVP) complete — full register→enroll→learn→quiz→report journey passes
 E2E; all Phase 1 FR-IDs have automated test evidence per QA-15 §10.
-
-## Sprint 7 — Mentoring: Cohorts, Dashboard, Student 360, Tasks
-
-- FR-MENTOR-01: mentor dashboard — assigned workload, reviews, doubts, sessions, at-risk alerts; no
-  unassigned student in default queries
-- FR-MENTOR-02: Student 360 (progress, activity, results, submissions, tasks, internal notes);
-  internal notes never visible to students/guardians; every access audited
-- FR-MENTOR-03: task assignment with due dates/resources/feedback; student notified
-- DESIGN-03 §4: full mentor lifecycle (assignment → dashboard → review → task → escalation)
-
-**Exit criteria**: Phase 2 core complete — mentor can execute the full DESIGN-03 §4 lifecycle
-end-to-end against real cohort data; access-scoping tests (mentor sees only assigned students) green.
 
 ## Sprint 8 — Notifications, Messaging & Community
 

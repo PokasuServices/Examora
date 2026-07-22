@@ -17,7 +17,7 @@ Postgres/Redis/MinIO; `apps/api` boots and serves `/health` and `/api/docs`; `ap
 `apps/admin` boot and render a placeholder page; a user can register/login/refresh/logout against
 the skeleton auth endpoints.
 
-## Phase 1 — MVP: Core Learning & Assessment (Sprints 1-4, 6)
+## Phase 1 — MVP: Core Learning & Assessment (Sprints 1-4, 7)
 
 **Goal**: A student can register, enroll, learn, and take a scored quiz.
 **Scope**: Full RBAC, course/subject/topic/module CMS + delivery, progress tracking, quiz engine
@@ -27,19 +27,24 @@ API-17.
 **Exit criteria**: All Phase 1 FR-IDs in SRS-02 Table 3 have passing automated tests; a full
 register → enroll → learn → quiz → report journey works end-to-end in staging.
 
-> Resequenced after Sprint 4: Scoring/Reports/Recommendations v0 (the phase's closing sprint) now
-> runs as Sprint 6, after Sprint 5 (Creative Assignment Engine, Phase 2's opening sprint) rather
-> than before it — approved ahead of Sprint 5. No functional dependency blocks this: Creative
-> Assignments have their own rubric-based marks, independent of the quiz engine's scoring/reports.
-> Phase 1 and Phase 2 therefore interleave by sprint number instead of running back-to-back; each
-> phase's own exit criteria still gate its own completion regardless of interleaving.
+> Resequenced after Sprint 4: Scoring/Reports/Recommendations v0 (the phase's closing sprint) first
+> moved to Sprint 6, after Sprint 5 (Creative Assignment Engine, Phase 2's opening sprint) rather
+> than before it — approved ahead of Sprint 5. Resequenced again after Sprint 5: Mentor Management
+> (Phase 2, previously planned as Sprint 7) was approved to run as Sprint 6 instead, ahead of
+> Scoring/Reports/Recommendations v0, which moves to Sprint 7. No functional dependency blocks
+> either move: Creative Assignments and Mentor Management both operate independently of the quiz
+> engine's own scoring/reports/recommendations feature. Phase 1 and Phase 2 therefore interleave by
+> sprint number instead of running back-to-back; each phase's own exit criteria still gate its own
+> completion regardless of interleaving.
 
-## Phase 2 — Mentor-Led Learning (Sprints 5, 7-8)
+## Phase 2 — Mentor-Led Learning (Sprints 5-6, 8)
 
 **Goal**: Creative submissions and human mentoring close the feedback loop.
 **Scope**: Creative assignment authoring/submission/upload validation/malware scan, rubric review
-workspace (annotations deferred — see Sprint 5 backlog note), cohorts, mentor dashboard, Student
-360, task assignment, merged notification service (COMM-MERGED) going live on real channels.
+workspace (annotations deferred — see Sprint 5 backlog note), mentor management, Student 360,
+mentor workflow (notes/tasks/feedback/meetings), merged notification service (COMM-MERGED) going
+live on real channels. Cohorts and at-risk-alert escalation, originally scoped into this phase's
+mentoring sprint, are deferred — see Sprint 6 backlog note.
 **Key docs**: CREATIVE-10, DESIGN-03, COMM-MERGED, SRS-02 FR-ASSIGN/REVIEW/MENTOR.
 **Exit criteria**: A mentor can review a real submission end-to-end (score via rubric, publish
 feedback, request revision) with full audit trail; notification delivery SLA ≥98% in staging load

@@ -5,25 +5,29 @@ entrance exams. Governed by [`documents/00_Master_Development_Guide_Examora_Plat
 
 ## Status
 
-**Sprint 5 — Creative Assignment Engine (complete).** Admins author assignments (brief, file
-rules, marks, rubric criteria, deadline) directly or from a reusable template (copied — not
-live-linked — at creation time) and publish once ≥1 rubric criterion exists. Students upload files
-via presigned direct-to-storage URLs; every file is quarantined (`PENDING`) until an async ClamAV
-scan marks it `CLEAN` — only then does it ever resolve a download URL, and an `INFECTED` file is
-deleted from storage immediately. Each resubmission is a new versioned row, never an in-place edit.
-Admins assign a MENTOR/REVIEWER-role reviewer per submission; the reviewer scores every rubric
-criterion, leaves comments, and publishes an APPROVED/REVISION_REQUESTED decision that closes out
-the submission and notifies the student via the shared comment thread. Full admin (authoring,
-monitoring, reviewer workspace) and student (catalog, submission, history) UIs ship this sprint.
-Builds on Sprint 4 (Assessment & Quiz Engine: question bank, quiz authoring, timed autosaving
+**Sprint 6 — Mentor Management (complete).** Admins create mentor profiles (extending an existing
+MENTOR-role user with bio, specialization, and workload capacity) and assign/reassign students to
+mentors via a history-preserving join table — reassigning a student never deletes the previous
+assignment, it just supersedes it. Mentors get their own dashboard (caseload, pending tasks, recent
+meetings) and, for each assigned student, a "Student 360" view aggregating learning progress, quiz
+history, assignment history, and a merged activity timeline — composed entirely from the existing
+Learning/Assessment/Assignment services rather than new query logic. From there a mentor manages
+private notes (never visible to the student), tasks, feedback, and a meeting log, and reviews
+assignment submissions via Sprint 5's existing reviewer workflow. Every mentor-workflow action is
+scoped to the mentor's own assigned students (an admin can access any student); MENTOR and REVIEWER
+permissions diverge for the first time (`mentor:workflow` is MENTOR-only). Admins get a workload
+dashboard across all mentors for capacity planning. Builds on Sprint 5 (Creative Assignment Engine:
+assignment authoring/templates, presigned upload + quarantine-by-default malware scanning, rubric
+review), Sprint 4 (Assessment & Quiz Engine: question bank, quiz authoring, timed autosaving
 attempts, automatic scoring, attempt monitoring), Sprint 3 (Learning Engine: published-only catalog,
 lesson viewer/completion, progress dashboard, no enrollment gate), Sprint 2 (Course Management: the
 `Category → Course → Subject → Topic → Module → Lesson` content hierarchy, DRAFT/PUBLISHED/ARCHIVED
 workflow, CRUD/reorder APIs, admin content UI), and Sprint 1 (Authentication & Identity:
 registration, email verification, login/logout, refresh rotation, password reset, sessions, RBAC +
-permissions, profiles, Google OAuth, consent, audit). Positional image annotations on rubric review
-(CREATIVE-10 §7) are explicitly deferred. Mentoring, community, notifications, payments, analytics,
-AI and further CMS enhancements are not started. See
+permissions, profiles, Google OAuth, consent, audit). Cohort grouping and at-risk-alert escalation
+(from the original mentoring planning note) are explicitly deferred — no notification channel
+exists yet to alert on. Community, payments, notifications, analytics, AI and further CMS
+enhancements are not started. See
 [`docs/roadmap/SPRINT_BACKLOG.md`](docs/roadmap/SPRINT_BACKLOG.md) for the full plan.
 
 > Malware scanning and object storage run against real ClamAV/S3-compatible (MinIO) adapters in
