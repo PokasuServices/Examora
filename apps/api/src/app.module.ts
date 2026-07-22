@@ -31,6 +31,7 @@ import { LearningModule } from "./learning/learning.module";
 import { AssessmentModule } from "./assessment/assessment.module";
 import { AssignmentsModule } from "./assignments/assignments.module";
 import { MentoringModule } from "./mentoring/mentoring.module";
+import { CommunityModule } from "./community/community.module";
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { MentoringModule } from "./mentoring/mentoring.module";
     AssessmentModule,
     AssignmentsModule,
     MentoringModule,
+    CommunityModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
