@@ -5,6 +5,7 @@ export * from "./content";
 export * from "./learning";
 export * from "./quiz";
 export * from "./assignment";
+export * from "./mentoring";
 export * from "./api-response";
 export * from "./notification";
 export * from "./user";

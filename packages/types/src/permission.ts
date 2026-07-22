@@ -46,6 +46,14 @@ export const PERMISSION_CODES = [
   "assignment:publish",
   "assignment:read",
   "assignment:review",
+  // Mentor Management (Sprint 6, ADR-0016). `mentor:manage` is ADMINISTRATOR-
+  // only: mentor profile CRUD, mentor↔student assignment, workload dashboard.
+  // `mentor:workflow` is the first permission to diverge MENTOR from REVIEWER
+  // — it gates Student 360, notes, tasks, feedback and meetings for a
+  // mentor's own assigned students (ownership enforced in the service layer,
+  // since ADMINISTRATOR already holds every code and this guard is AND-only).
+  "mentor:manage",
+  "mentor:workflow",
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];
@@ -70,4 +78,15 @@ export const BASELINE_PERMISSION_CODES: PermissionCode[] = [
 export const REVIEWER_PERMISSION_CODES: PermissionCode[] = [
   ...BASELINE_PERMISSION_CODES,
   "assignment:review",
+];
+
+/**
+ * Granted to MENTOR only, in addition to REVIEWER_PERMISSION_CODES (ADR-0016,
+ * Sprint 6) — the first sprint where MENTOR and REVIEWER permissions diverge.
+ * A plain REVIEWER reviews creative-assignment submissions but does not get
+ * a student caseload, notes, tasks, feedback, or meetings.
+ */
+export const MENTOR_PERMISSION_CODES: PermissionCode[] = [
+  ...REVIEWER_PERMISSION_CODES,
+  "mentor:workflow",
 ];

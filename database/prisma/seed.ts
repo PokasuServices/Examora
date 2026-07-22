@@ -1,5 +1,6 @@
 import {
   BASELINE_PERMISSION_CODES,
+  MENTOR_PERMISSION_CODES,
   PERMISSION_CODES,
   REVIEWER_PERMISSION_CODES,
   type PermissionCode,
@@ -14,16 +15,20 @@ const ROLES: RoleName[] = ["STUDENT", "MENTOR", "REVIEWER", "ADMINISTRATOR", "GU
 /**
  * Role→permission matrix (DESIGN-03 §3). Every role gets BASELINE_PERMISSION_CODES
  * (own profile + sessions, content:read, quiz:read, assignment:read);
- * MENTOR/REVIEWER additionally get REVIEWER_PERMISSION_CODES (assignment:review,
- * Sprint 5 ADR-0015); ADMINISTRATOR gets everything, including Sprint 2
+ * REVIEWER additionally gets REVIEWER_PERMISSION_CODES (assignment:review,
+ * Sprint 5 ADR-0015); MENTOR gets MENTOR_PERMISSION_CODES (REVIEWER_PERMISSION_CODES
+ * plus mentor:workflow — Student 360, notes, tasks, feedback, meetings for their
+ * assigned students, Sprint 6 ADR-0016 — the first sprint where MENTOR and
+ * REVIEWER diverge); ADMINISTRATOR gets everything, including Sprint 2
  * content:manage/publish (CMS-29 §7), the Sprint 3 admin progress dashboard
  * (progress:read), Sprint 4 question bank / quiz authoring / attempt
- * monitoring, and Sprint 5 assignment authoring/publishing
- * (assignment:manage, assignment:publish). Future modules extend this.
+ * monitoring, Sprint 5 assignment authoring/publishing (assignment:manage,
+ * assignment:publish), and Sprint 6 mentor management (mentor:manage).
+ * Future modules extend this.
  */
 const ROLE_PERMISSIONS: Record<RoleName, PermissionCode[]> = {
   STUDENT: BASELINE_PERMISSION_CODES,
-  MENTOR: REVIEWER_PERMISSION_CODES,
+  MENTOR: MENTOR_PERMISSION_CODES,
   REVIEWER: REVIEWER_PERMISSION_CODES,
   GUARDIAN: BASELINE_PERMISSION_CODES,
   ADMINISTRATOR: [...PERMISSION_CODES],

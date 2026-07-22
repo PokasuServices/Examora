@@ -162,6 +162,14 @@ enum FileScanStatus {
   @@map("file_scan_status")
 }
 
+enum MentorTaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+
+  @@map("mentor_task_status")
+}
+
 /// Platform user. Identity & Access core entity (DB-05 §3, SRS-02 Table 5).
 model User {
   id              String     @id @default(uuid()) @db.Uuid
@@ -200,6 +208,19 @@ model User {
   assignmentReviews     AssignmentReview[]
   assignmentComments    AssignmentComment[]
   auditLogs             AuditLog[]             @relation("AuditActor")
+
+  mentorProfile              MentorProfile?
+  mentorAssignmentsAsStudent MentorAssignment[] @relation("MentorAssignmentsByStudent")
+  mentorAssignmentsAsMentor  MentorAssignment[] @relation("MentorAssignmentsByMentor")
+  mentorAssignmentsMade      MentorAssignment[] @relation("MentorAssignmentsByAdmin")
+  mentorNotesAsStudent       MentorNote[]       @relation("MentorNotesByStudent")
+  mentorNotesAsMentor        MentorNote[]       @relation("MentorNotesByMentor")
+  mentorTasksAsStudent       MentorTask[]       @relation("MentorTasksByStudent")
+  mentorTasksAsMentor        MentorTask[]       @relation("MentorTasksByMentor")
+  mentorFeedbackAsStudent    MentorFeedback[]   @relation("MentorFeedbackByStudent")
+  mentorFeedbackAsMentor     MentorFeedback[]   @relation("MentorFeedbackByMentor")
+  mentorMeetingsAsStudent    MentorMeeting[]    @relation("MentorMeetingsByStudent")
+  mentorMeetingsAsMentor     MentorMeeting[]    @relation("MentorMeetingsByMentor")
 
   @@index([status])
   @@map("users")
@@ -894,4 +915,117 @@ model AssignmentComment {
 
   @@index([submissionId])
   @@map("assignment_comments")
+}
+
+/// Thin extension of a MENTOR-role User (ADR-0016) — name/email/phone/status
+/// stay on User; this only holds what doesn't belong on the core identity
+/// model. Workload (assigned-student count vs. maxStudents) is computed from
+/// MentorAssignment, not stored here.
+model MentorProfile {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @unique @map("user_id") @db.Uuid
+  bio            String?
+  specialization String?
+  maxStudents    Int      @default(10) @map("max_students")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("mentor_profiles")
+}
+
+/// History-preserving mentor↔student relationship (ADR-0016) — reassigning a
+/// student sets unassignedAt on the current active row (unassignedAt IS NULL)
+/// and inserts a new one; rows are never edited or deleted. "At most one
+/// active mentor per student" is enforced in MentorAssignmentService, not a
+/// DB constraint (mirrors D-07's raw-SQL-is-an-exception stance).
+model MentorAssignment {
+  id           String    @id @default(uuid()) @db.Uuid
+  studentId    String    @map("student_id") @db.Uuid
+  mentorId     String    @map("mentor_id") @db.Uuid
+  assignedById String    @map("assigned_by_id") @db.Uuid
+  assignedAt   DateTime  @default(now()) @map("assigned_at")
+  unassignedAt DateTime? @map("unassigned_at")
+
+  student    User @relation("MentorAssignmentsByStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  mentor     User @relation("MentorAssignmentsByMentor", fields: [mentorId], references: [id], onDelete: Cascade)
+  assignedBy User @relation("MentorAssignmentsByAdmin", fields: [assignedById], references: [id], onDelete: Cascade)
+
+  @@index([studentId, unassignedAt])
+  @@index([mentorId, unassignedAt])
+  @@map("mentor_assignments")
+}
+
+/// Private mentor note about a student — never visible to the student or a
+/// guardian (ADR-0016).
+model MentorNote {
+  id        String   @id @default(uuid()) @db.Uuid
+  studentId String   @map("student_id") @db.Uuid
+  mentorId  String   @map("mentor_id") @db.Uuid
+  body      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  student User @relation("MentorNotesByStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  mentor  User @relation("MentorNotesByMentor", fields: [mentorId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@map("mentor_notes")
+}
+
+/// A task a mentor assigns to a student, with a due date (ADR-0016).
+model MentorTask {
+  id          String           @id @default(uuid()) @db.Uuid
+  studentId   String           @map("student_id") @db.Uuid
+  mentorId    String           @map("mentor_id") @db.Uuid
+  title       String
+  description String?
+  dueDate     DateTime?        @map("due_date")
+  status      MentorTaskStatus @default(PENDING)
+  completedAt DateTime?        @map("completed_at")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  student User @relation("MentorTasksByStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  mentor  User @relation("MentorTasksByMentor", fields: [mentorId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([mentorId, status])
+  @@map("mentor_tasks")
+}
+
+/// Feedback a mentor shares with a student — distinct from a MentorNote
+/// (private-forever) in that feedback is the thing a mentor explicitly
+/// shares (ADR-0016).
+model MentorFeedback {
+  id        String   @id @default(uuid()) @db.Uuid
+  studentId String   @map("student_id") @db.Uuid
+  mentorId  String   @map("mentor_id") @db.Uuid
+  body      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  student User @relation("MentorFeedbackByStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  mentor  User @relation("MentorFeedbackByMentor", fields: [mentorId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@map("mentor_feedback")
+}
+
+/// A logged 1:1 mentor-student meeting (manually recorded, no calendar
+/// integration — ADR-0016).
+model MentorMeeting {
+  id              String   @id @default(uuid()) @db.Uuid
+  studentId       String   @map("student_id") @db.Uuid
+  mentorId        String   @map("mentor_id") @db.Uuid
+  occurredAt      DateTime @map("occurred_at")
+  durationMinutes Int?     @map("duration_minutes")
+  summary         String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  student User @relation("MentorMeetingsByStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  mentor  User @relation("MentorMeetingsByMentor", fields: [mentorId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@map("mentor_meetings")
 }
