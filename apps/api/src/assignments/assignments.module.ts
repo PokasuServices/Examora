@@ -47,5 +47,9 @@ import { TemplatesService } from "./templates/templates.service";
     MalwareScanQueueService,
     MalwareScanProcessor,
   ],
+  // SubmissionsService is reused by MentoringModule's Student 360 aggregator
+  // (ADR-0016) — listHistory already takes the target student's id, since
+  // the student-facing history endpoint was written that way in Sprint 5.
+  exports: [SubmissionsService],
 })
 export class AssignmentsModule {}

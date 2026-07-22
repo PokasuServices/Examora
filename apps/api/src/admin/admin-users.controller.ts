@@ -4,13 +4,13 @@ import type { Request } from "express";
 import type { PaginatedData, UserProfile } from "@examora/types";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { RequirePermissions } from "../common/decorators/require-permissions.decorator";
-import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
 import { AuditService } from "../audit/audit.service";
 import { PermissionsService } from "../permissions/permissions.service";
 import type { RequestUser } from "../auth/types/request-user";
 import { toUserProfile } from "../users/user-profile.mapper";
 import { UsersService } from "../users/users.service";
 import { AssignRolesDto } from "./dto/assign-roles.dto";
+import { ListUsersQueryDto } from "./dto/list-users-query.dto";
 import { UpdateUserStatusDto } from "./dto/update-user-status.dto";
 
 @ApiTags("admin")
@@ -24,9 +24,9 @@ export class AdminUsersController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: "List users (admin only)" })
-  async list(@Query() query: PaginationQueryDto): Promise<PaginatedData<UserProfile>> {
-    const { items, total } = await this.usersService.list(query.page, query.pageSize);
+  @ApiOperation({ summary: "List users, optionally filtered by role (admin only)" })
+  async list(@Query() query: ListUsersQueryDto): Promise<PaginatedData<UserProfile>> {
+    const { items, total } = await this.usersService.list(query.page, query.pageSize, query.role);
     const profiles = await Promise.all(items.map((item) => this.toProfile(item)));
     return { items: profiles, page: query.page, pageSize: query.pageSize, total };
   }

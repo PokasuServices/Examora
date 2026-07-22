@@ -39,5 +39,9 @@ import { QuizSectionsService } from "./quizzes/sections.service";
     QuizAttemptsService,
     AdminQuizAttemptsService,
   ],
+  // AdminQuizAttemptsService is reused by MentoringModule's Student 360
+  // aggregator (ADR-0016) — it already supports an admin-side userId filter,
+  // so no new quiz-history query logic is needed.
+  exports: [AdminQuizAttemptsService],
 })
 export class AssessmentModule {}

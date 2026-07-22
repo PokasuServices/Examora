@@ -14,5 +14,8 @@ import { ProgressService } from "./progress.service";
 @Module({
   controllers: [CatalogController, ProgressController, AdminProgressController],
   providers: [CatalogService, ProgressService, AdminProgressService],
+  // ProgressService is reused by MentoringModule's Student 360 aggregator
+  // (ADR-0016) rather than re-implementing progress queries.
+  exports: [ProgressService],
 })
 export class LearningModule {}

@@ -189,15 +189,17 @@ export class UsersService {
     return this.findByIdWithRoles(userId);
   }
 
-  async list(page: number, pageSize: number) {
+  async list(page: number, pageSize: number, role?: RoleName) {
+    const where = role ? { roles: { some: { role: { name: role } } } } : {};
     const [items, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
+        where,
         include: USER_WITH_ROLES_INCLUDE,
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
-      this.prisma.user.count(),
+      this.prisma.user.count({ where }),
     ]);
 
     return { items, total };
