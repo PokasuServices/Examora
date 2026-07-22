@@ -30,6 +30,7 @@ import { ContentModule } from "./content/content.module";
 import { LearningModule } from "./learning/learning.module";
 import { AssessmentModule } from "./assessment/assessment.module";
 import { AssignmentsModule } from "./assignments/assignments.module";
+import { MentoringModule } from "./mentoring/mentoring.module";
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { AssignmentsModule } from "./assignments/assignments.module";
     LearningModule,
     AssessmentModule,
     AssignmentsModule,
+    MentoringModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
