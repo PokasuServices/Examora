@@ -19,6 +19,8 @@ export function AuthNav() {
     const canReadAttempts = user.permissions.includes("quiz:attempts:read");
     const canManageAssignments = user.permissions.includes("assignment:manage");
     const canReview = user.permissions.includes("assignment:review");
+    const canManageMentors = user.permissions.includes("mentor:manage");
+    const canMentorWorkflow = user.permissions.includes("mentor:workflow");
     return (
       <div className="flex items-center gap-3">
         <span className="text-sm text-neutral-600">{user.email}</span>
@@ -45,6 +47,16 @@ export function AuthNav() {
         {canReview ? (
           <Link href="/assignments/reviewer">
             <Button variant="secondary">Reviews</Button>
+          </Link>
+        ) : null}
+        {canManageMentors ? (
+          <Link href="/mentors">
+            <Button variant="secondary">Mentors</Button>
+          </Link>
+        ) : null}
+        {canMentorWorkflow ? (
+          <Link href="/mentor-dashboard">
+            <Button variant="secondary">My mentees</Button>
           </Link>
         ) : null}
         {canReadProgress ? (
