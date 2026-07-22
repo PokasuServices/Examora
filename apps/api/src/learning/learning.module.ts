@@ -15,7 +15,8 @@ import { ProgressService } from "./progress.service";
   controllers: [CatalogController, ProgressController, AdminProgressController],
   providers: [CatalogService, ProgressService, AdminProgressService],
   // ProgressService is reused by MentoringModule's Student 360 aggregator
-  // (ADR-0016) rather than re-implementing progress queries.
-  exports: [ProgressService],
+  // (ADR-0016). CatalogService is reused by CommunityModule (ADR-0017) to
+  // validate a thread's optional related-course/lesson link.
+  exports: [ProgressService, CatalogService],
 })
 export class LearningModule {}

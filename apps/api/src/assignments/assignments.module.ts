@@ -50,6 +50,8 @@ import { TemplatesService } from "./templates/templates.service";
   // SubmissionsService is reused by MentoringModule's Student 360 aggregator
   // (ADR-0016) — listHistory already takes the target student's id, since
   // the student-facing history endpoint was written that way in Sprint 5.
-  exports: [SubmissionsService],
+  // AssignmentCatalogService is reused by CommunityModule (ADR-0017) to
+  // validate a thread's optional related-assignment link.
+  exports: [SubmissionsService, AssignmentCatalogService],
 })
 export class AssignmentsModule {}
