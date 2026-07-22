@@ -54,6 +54,16 @@ export const PERMISSION_CODES = [
   // since ADMINISTRATOR already holds every code and this guard is AND-only).
   "mentor:manage",
   "mentor:workflow",
+  // Community & Discussion Module (Sprint 7, ADR-0017). `community:read` is
+  // baseline: browsing forums/threads plus self-scoped writing (post a
+  // thread/reply/question/answer, like, bookmark, follow, report), mirroring
+  // the assignment:read/quiz:read precedent (ADR-0013). `community:manage`
+  // is ADMINISTRATOR-only: forum category/board CRUD. `community:moderate`
+  // is ADMINISTRATOR-only: hide/restore/delete, lock/unlock, pin/unpin, and
+  // report-queue review. No dedicated MODERATOR role yet (TD-030).
+  "community:read",
+  "community:manage",
+  "community:moderate",
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];
@@ -72,6 +82,7 @@ export const BASELINE_PERMISSION_CODES: PermissionCode[] = [
   "content:read",
   "quiz:read",
   "assignment:read",
+  "community:read",
 ];
 
 /** Granted to MENTOR and REVIEWER in addition to the baseline (ADR-0015). */

@@ -170,6 +170,44 @@ enum MentorTaskStatus {
   @@map("mentor_task_status")
 }
 
+/// A thread is either a general discussion or a doubt-resolution question —
+/// the same model serves both (ADR-0017) so "answer" behavior (accepted
+/// answer, solved/unsolved) is just Reply/Thread fields that are unused on
+/// DISCUSSION-type threads.
+enum ThreadType {
+  DISCUSSION
+  QUESTION
+
+  @@map("thread_type")
+}
+
+/// The linear part of thread status (ADR-0017) — pin/lock/hide are
+/// independent booleans, not part of this enum, since a thread can be
+/// pinned AND locked AND closed simultaneously.
+enum ThreadStatus {
+  OPEN
+  CLOSED
+
+  @@map("thread_status")
+}
+
+/// Shared by CommunityLike and CommunityReport — a like/report can target
+/// either a thread or a reply (ADR-0017).
+enum CommunityTargetType {
+  THREAD
+  REPLY
+
+  @@map("community_target_type")
+}
+
+enum CommunityReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+
+  @@map("community_report_status")
+}
+
 /// Platform user. Identity & Access core entity (DB-05 §3, SRS-02 Table 5).
 model User {
   id              String     @id @default(uuid()) @db.Uuid
@@ -221,6 +259,21 @@ model User {
   mentorFeedbackAsMentor     MentorFeedback[]   @relation("MentorFeedbackByMentor")
   mentorMeetingsAsStudent    MentorMeeting[]    @relation("MentorMeetingsByStudent")
   mentorMeetingsAsMentor     MentorMeeting[]    @relation("MentorMeetingsByMentor")
+
+  communityProfile     CommunityProfile?
+  forumCategoriesMade  ForumCategory[]
+  forumBoardsMade      ForumBoard[]
+  threads              Thread[]              @relation("ThreadsByAuthor")
+  moderatedThreads     Thread[]              @relation("ThreadsByModerator")
+  replies              Reply[]               @relation("RepliesByAuthor")
+  moderatedReplies     Reply[]               @relation("RepliesByModerator")
+  communityLikes       CommunityLike[]
+  communityBookmarks   CommunityBookmark[]
+  threadFollows        ThreadFollow[]
+  communityReports     CommunityReport[]     @relation("ReportsByReporter")
+  reviewedReports      CommunityReport[]     @relation("ReportsByReviewer")
+  reputationEvents     ReputationEvent[]
+  communityAttachments CommunityAttachment[]
 
   @@index([status])
   @@map("users")
@@ -411,6 +464,7 @@ model Course {
   category       Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   subjects       Subject[]
   lessonProgress LessonProgress[]
+  relatedThreads Thread[]         @relation("ThreadsByCourse")
 
   @@index([categoryId])
   @@index([status])
@@ -516,8 +570,9 @@ model Lesson {
   updatedAt       DateTime          @updatedAt @map("updated_at")
   deletedAt       DateTime?         @map("deleted_at")
 
-  module   Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  progress LessonProgress[]
+  module         Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress       LessonProgress[]
+  relatedThreads Thread[]         @relation("ThreadsByLesson")
 
   @@unique([moduleId, slug])
   @@index([moduleId])
@@ -632,10 +687,11 @@ model Quiz {
   updatedAt              DateTime      @updatedAt @map("updated_at")
   deletedAt              DateTime?     @map("deleted_at")
 
-  subject       Subject?       @relation(fields: [subjectId], references: [id], onDelete: SetNull)
-  sections      QuizSection[]
-  quizQuestions QuizQuestion[]
-  attempts      QuizAttempt[]
+  subject        Subject?       @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  sections       QuizSection[]
+  quizQuestions  QuizQuestion[]
+  attempts       QuizAttempt[]
+  relatedThreads Thread[]       @relation("ThreadsByQuiz")
 
   @@index([subjectId])
   @@index([status])
@@ -794,9 +850,10 @@ model Assignment {
   updatedAt   DateTime      @updatedAt @map("updated_at")
   deletedAt   DateTime?     @map("deleted_at")
 
-  subject     Subject?               @relation(fields: [subjectId], references: [id], onDelete: SetNull)
-  criteria    RubricCriterion[]
-  submissions AssignmentSubmission[]
+  subject        Subject?               @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  criteria       RubricCriterion[]
+  submissions    AssignmentSubmission[]
+  relatedThreads Thread[]               @relation("ThreadsByAssignment")
 
   @@index([subjectId])
   @@index([status])
@@ -1028,4 +1085,252 @@ model MentorMeeting {
 
   @@index([studentId])
   @@map("mentor_meetings")
+}
+
+// ---------------------------------------------------------------------------
+// Community & Discussion Module (Sprint 7, ADR-0017): forums, doubt
+// resolution (Thread.type = QUESTION), comments/likes/bookmarks/follows, a
+// reputation foundation, moderation, and attachments. "Topics"/"Comments" in
+// the sprint scope map onto Thread/Reply rather than separate models — see
+// ADR-0017 for the full reasoning.
+// ---------------------------------------------------------------------------
+
+/// Thin extension of a User for community participation — mirrors
+/// MentorProfile's shape. reputationPoints is a denormalized running total
+/// backed by the append-only ReputationEvent ledger below.
+model CommunityProfile {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @unique @map("user_id") @db.Uuid
+  reputationPoints Int      @default(0) @map("reputation_points")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("community_profiles")
+}
+
+/// Append-only reputation ledger — every point change is recorded here;
+/// CommunityProfile.reputationPoints is the denormalized sum.
+model ReputationEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  points    Int
+  reason    String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("reputation_events")
+}
+
+/// Top-level forum grouping (e.g. "General Discussion", "Design Help"),
+/// admin-managed.
+model ForumCategory {
+  id          String    @id @default(uuid()) @db.Uuid
+  title       String
+  slug        String    @unique
+  description String?
+  position    Int       @default(0)
+  isActive    Boolean   @default(true) @map("is_active")
+  createdById String?   @map("created_by_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  createdBy User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  boards    ForumBoard[]
+
+  @@map("forum_categories")
+}
+
+/// A board within a category (e.g. "Fashion Design"), admin-managed.
+model ForumBoard {
+  id          String    @id @default(uuid()) @db.Uuid
+  categoryId  String    @map("category_id") @db.Uuid
+  title       String
+  slug        String
+  description String?
+  position    Int       @default(0)
+  isActive    Boolean   @default(true) @map("is_active")
+  createdById String?   @map("created_by_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  category  ForumCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdBy User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  threads   Thread[]
+
+  @@unique([categoryId, slug])
+  @@index([categoryId])
+  @@map("forum_boards")
+}
+
+/// A discussion thread OR a doubt-resolution question (ADR-0017 — the same
+/// model serves both via `type`). isSolved/related* fields only apply to
+/// QUESTION-type threads. status is the linear OPEN/CLOSED dimension;
+/// isPinned/isLocked/isHidden are independent toggles a thread can hold
+/// simultaneously (a pinned+locked+closed announcement is a normal state).
+model Thread {
+  id                  String       @id @default(uuid()) @db.Uuid
+  boardId             String       @map("board_id") @db.Uuid
+  authorId            String       @map("author_id") @db.Uuid
+  type                ThreadType   @default(DISCUSSION)
+  title               String
+  body                String
+  status              ThreadStatus @default(OPEN)
+  isPinned            Boolean      @default(false) @map("is_pinned")
+  isLocked            Boolean      @default(false) @map("is_locked")
+  isHidden            Boolean      @default(false) @map("is_hidden")
+  hiddenReason        String?      @map("hidden_reason")
+  isSolved            Boolean      @default(false) @map("is_solved")
+  viewCount           Int          @default(0) @map("view_count")
+  relatedCourseId     String?      @map("related_course_id") @db.Uuid
+  relatedLessonId     String?      @map("related_lesson_id") @db.Uuid
+  relatedQuizId       String?      @map("related_quiz_id") @db.Uuid
+  relatedAssignmentId String?      @map("related_assignment_id") @db.Uuid
+  moderatedById       String?      @map("moderated_by_id") @db.Uuid
+  createdAt           DateTime     @default(now()) @map("created_at")
+  updatedAt           DateTime     @updatedAt @map("updated_at")
+  deletedAt           DateTime?    @map("deleted_at")
+
+  board             ForumBoard            @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  author            User                  @relation("ThreadsByAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  moderatedBy       User?                 @relation("ThreadsByModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  relatedCourse     Course?               @relation("ThreadsByCourse", fields: [relatedCourseId], references: [id], onDelete: SetNull)
+  relatedLesson     Lesson?               @relation("ThreadsByLesson", fields: [relatedLessonId], references: [id], onDelete: SetNull)
+  relatedQuiz       Quiz?                 @relation("ThreadsByQuiz", fields: [relatedQuizId], references: [id], onDelete: SetNull)
+  relatedAssignment Assignment?           @relation("ThreadsByAssignment", fields: [relatedAssignmentId], references: [id], onDelete: SetNull)
+  replies           Reply[]
+  follows           ThreadFollow[]
+  bookmarks         CommunityBookmark[]
+  attachments       CommunityAttachment[] @relation("AttachmentsByThread")
+
+  @@index([boardId, status])
+  @@index([authorId])
+  @@index([type])
+  @@map("threads")
+}
+
+/// A reply to a thread — also serves as a Doubt Resolution "answer" when
+/// isAcceptedAnswer is set. Nested via parentReplyId (self-relation).
+model Reply {
+  id               String    @id @default(uuid()) @db.Uuid
+  threadId         String    @map("thread_id") @db.Uuid
+  authorId         String    @map("author_id") @db.Uuid
+  parentReplyId    String?   @map("parent_reply_id") @db.Uuid
+  body             String
+  isAcceptedAnswer Boolean   @default(false) @map("is_accepted_answer")
+  isHidden         Boolean   @default(false) @map("is_hidden")
+  hiddenReason     String?   @map("hidden_reason")
+  moderatedById    String?   @map("moderated_by_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  deletedAt        DateTime? @map("deleted_at")
+
+  thread      Thread                @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author      User                  @relation("RepliesByAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  moderatedBy User?                 @relation("RepliesByModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  parent      Reply?                @relation("NestedReplies", fields: [parentReplyId], references: [id], onDelete: Cascade)
+  children    Reply[]               @relation("NestedReplies")
+  attachments CommunityAttachment[] @relation("AttachmentsByReply")
+
+  @@index([threadId])
+  @@index([parentReplyId])
+  @@map("replies")
+}
+
+/// A like on a thread or reply — targetType/targetId is a polymorphic-lite
+/// pattern (no DB-level FK, since a single column can't reference two
+/// different tables); application code validates the target exists.
+model CommunityLike {
+  id         String              @id @default(uuid()) @db.Uuid
+  userId     String              @map("user_id") @db.Uuid
+  targetType CommunityTargetType @map("target_type")
+  targetId   String              @map("target_id") @db.Uuid
+  createdAt  DateTime            @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@map("community_likes")
+}
+
+/// Bookmarking a thread for later — threads only (not replies), matching
+/// typical "save this discussion" UX.
+model CommunityBookmark {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  threadId  String   @map("thread_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, threadId])
+  @@map("community_bookmarks")
+}
+
+/// Following a thread — a foundation for a future notification sprint; this
+/// sprint only records who follows what.
+model ThreadFollow {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  threadId  String   @map("thread_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, threadId])
+  @@map("thread_follows")
+}
+
+/// A report queued for moderator review — targetType/targetId mirror
+/// CommunityLike's polymorphic-lite pattern.
+model CommunityReport {
+  id           String                @id @default(uuid()) @db.Uuid
+  reporterId   String                @map("reporter_id") @db.Uuid
+  targetType   CommunityTargetType   @map("target_type")
+  targetId     String                @map("target_id") @db.Uuid
+  reason       String
+  status       CommunityReportStatus @default(PENDING)
+  reviewedById String?               @map("reviewed_by_id") @db.Uuid
+  reviewedAt   DateTime?             @map("reviewed_at")
+  createdAt    DateTime              @default(now()) @map("created_at")
+
+  reporter   User  @relation("ReportsByReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("ReportsByReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([targetType, targetId])
+  @@map("community_reports")
+}
+
+/// Image/document attachment on a thread or reply — reuses the existing
+/// FileScanStatus enum from Sprint 5's assignment uploads; scanned by a
+/// second, dedicated BullMQ queue+processor since Sprint 5's processor is
+/// compile-time bound to AssignmentSubmission's SubmissionFile (ADR-0017).
+model CommunityAttachment {
+  id         String         @id @default(uuid()) @db.Uuid
+  threadId   String?        @map("thread_id") @db.Uuid
+  replyId    String?        @map("reply_id") @db.Uuid
+  uploaderId String         @map("uploader_id") @db.Uuid
+  storageKey String         @map("storage_key")
+  fileName   String         @map("file_name")
+  mimeType   String         @map("mime_type")
+  sizeBytes  Int            @map("size_bytes")
+  scanStatus FileScanStatus @default(PENDING) @map("scan_status")
+  uploadedAt DateTime       @default(now()) @map("uploaded_at")
+
+  thread   Thread? @relation("AttachmentsByThread", fields: [threadId], references: [id], onDelete: Cascade)
+  reply    Reply?  @relation("AttachmentsByReply", fields: [replyId], references: [id], onDelete: Cascade)
+  uploader User    @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([replyId])
+  @@map("community_attachments")
 }
