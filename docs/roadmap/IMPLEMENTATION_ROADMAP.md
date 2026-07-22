@@ -17,7 +17,7 @@ Postgres/Redis/MinIO; `apps/api` boots and serves `/health` and `/api/docs`; `ap
 `apps/admin` boot and render a placeholder page; a user can register/login/refresh/logout against
 the skeleton auth endpoints.
 
-## Phase 1 — MVP: Core Learning & Assessment (Sprints 1-4, 7)
+## Phase 1 — MVP: Core Learning & Assessment (Sprints 1-4, 8)
 
 **Goal**: A student can register, enroll, learn, and take a scored quiz.
 **Scope**: Full RBAC, course/subject/topic/module CMS + delivery, progress tracking, quiz engine
@@ -30,14 +30,16 @@ register → enroll → learn → quiz → report journey works end-to-end in st
 > Resequenced after Sprint 4: Scoring/Reports/Recommendations v0 (the phase's closing sprint) first
 > moved to Sprint 6, after Sprint 5 (Creative Assignment Engine, Phase 2's opening sprint) rather
 > than before it — approved ahead of Sprint 5. Resequenced again after Sprint 5: Mentor Management
-> (Phase 2, previously planned as Sprint 7) was approved to run as Sprint 6 instead, ahead of
-> Scoring/Reports/Recommendations v0, which moves to Sprint 7. No functional dependency blocks
-> either move: Creative Assignments and Mentor Management both operate independently of the quiz
-> engine's own scoring/reports/recommendations feature. Phase 1 and Phase 2 therefore interleave by
-> sprint number instead of running back-to-back; each phase's own exit criteria still gate its own
-> completion regardless of interleaving.
+> (Phase 2, previously planned as Sprint 7) was approved to run as Sprint 6 instead, moving
+> Scoring/Reports/Recommendations v0 to Sprint 7. Resequenced a third time after Sprint 6: the
+> Community & Discussion module (split out of old Sprint 8's bundle) was approved to run as Sprint
+> 7 instead, moving Scoring/Reports/Recommendations v0 to Sprint 8. No functional dependency blocks
+> any of these moves: Creative Assignments, Mentor Management, and Community/Discussion all operate
+> independently of the quiz engine's own scoring/reports/recommendations feature. Phase 1 therefore
+> interleaves with Phases 2/3 by sprint number instead of running back-to-back; each phase's own
+> exit criteria still gate its own completion regardless of interleaving.
 
-## Phase 2 — Mentor-Led Learning (Sprints 5-6, 8)
+## Phase 2 — Mentor-Led Learning (Sprints 5-6, 9)
 
 **Goal**: Creative submissions and human mentoring close the feedback loop.
 **Scope**: Creative assignment authoring/submission/upload validation/malware scan, rubric review
@@ -50,16 +52,24 @@ mentoring sprint, are deferred — see Sprint 6 backlog note.
 feedback, request revision) with full audit trail; notification delivery SLA ≥98% in staging load
 test.
 
-## Phase 3 — Creative Community (Sprint 8)
+## Phase 3 — Creative Community (Sprints 7, 9)
 
 **Goal**: Safe peer learning.
-**Scope**: Revision cycles, XP/achievements with anti-fraud idempotency, consent-gated community
-gallery, peer rating, moderation tooling (report/hide/restore/warn/audit).
+**Scope**: Discussion forums, doubt resolution, comments/likes/bookmarks/follow, moderation tooling
+(report/hide/restore/lock/pin), search (Sprint 7 — the discussion/moderation half of FR-COMM-01/02);
+revision cycles, XP/achievements with anti-fraud idempotency, consent-gated community gallery, peer
+rating (Sprint 9, alongside notification delivery — CREATIVE-10 §8-10).
 **Key docs**: CREATIVE-10 §8-10, SRS-02 FR-COMM-01/02, doc 08 §Community Moderation.
 **Exit criteria**: Private-by-default enforced with tests; moderator can hide reported content within
 SLA; XP cannot be awarded twice for the same action (idempotency test).
 
-## Phase 4 — Growth & Counselling (Sprints 9-11)
+> Resequenced after Sprint 6: this phase's scope splits across two sprints instead of one — the
+> discussion-forum/doubt-resolution/moderation half (FR-COMM-01/02) runs as Sprint 7, ahead of the
+> creative gallery/peer-rating/XP half (CREATIVE-10 §8-10), which moves to Sprint 9 alongside
+> notification delivery. The two halves are functionally independent (text-based discussion threads
+> vs. a media gallery with ratings/gamification), so splitting them does not block either.
+
+## Phase 4 — Growth & Counselling (Sprints 10-12)
 
 **Goal**: Monetization and acquisition.
 **Scope**: Razorpay payment orders/webhooks/entitlements/invoices, articles, events/webinars,
@@ -70,7 +80,7 @@ analytics dashboards, moderation escalation).
 granted only from verified webhook, never client callback; admin can complete every workflow listed
 in ADMIN-08 §5.
 
-## Phase 5 — Stabilization (Sprint 12)
+## Phase 5 — Stabilization (Sprint 13)
 
 **Goal**: Release readiness.
 **Scope**: Performance testing against PERF-32 targets, security review against SEC-13, accessibility

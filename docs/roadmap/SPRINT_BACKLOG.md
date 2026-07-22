@@ -41,8 +41,8 @@ Delivered:
 
 Scope boundaries held: no Course/Learning/Quiz/Assignment/Payment/Notification/CMS/Analytics/AI/
 Community functionality. Email sending is a Sprint-1 console stub behind a port interface (ADR-0009);
-the real Notification Service remains Sprint 8 (renumbered after the Sprint 5 resequencing; was
-Sprint 9 at the time).
+the real Notification Service remains Sprint 9 (renumbered after the Sprint 7 resequencing; was
+Sprint 8 before that, Sprint 9 before the Sprint 5 resequencing).
 
 Exit criteria met: RBAC matrix green (student denied admin routes; admin allowed; permission checks
 enforced), consent captured + audited, no endpoint reachable without a passing authorization check
@@ -297,7 +297,49 @@ non-assigned mentor is denied Student 360/notes/tasks/feedback/meetings (403), a
 (not MENTOR) is denied the mentor-workflow routes entirely, and an admin can access any student's
 data regardless of assignment.
 
-## Sprint 7 — Scoring, Reports & Recommendations v0
+## Sprint 7 — Community & Discussion Module
+
+Status: **Complete** (2026-07-22). 374 automated tests pass (217 unit/integration + 157 e2e),
+including 64 new Sprint 7 tests (37 unit/integration + 27 e2e). See ADR-0017 for the full design
+(Thread/Reply unification, polymorphic-lite likes/reports, reputation foundation, moderation, and
+the duplicated attachment-scan queue).
+
+Resequencing note (approved ahead of Sprint 7, mirroring the Sprint 5/6 precedent): this entry
+splits the discussion/moderation half of what was previously bundled into Sprint 8 ("Notifications,
+Messaging & Community") out into its own sprint, ahead of "Scoring, Reports & Recommendations v0"
+(previously Sprint 7, now Sprint 8). The remaining half of old Sprint 8 — merged notification
+delivery (COMM-MERGED) and the creative community gallery/peer-rating/XP (CREATIVE-10 §8-10) — is
+not part of this sprint's approved scope and becomes Sprint 9 ("Notifications & Creative Gallery").
+Sprints 9-12 in the old numbering shift down to 10-13 accordingly. No functional dependency blocks
+this: discussion forums/doubt-resolution operate on existing Auth/RBAC/Learning/Quiz/Assignment/
+Mentor data, independent of the quiz engine's scoring/reports or the notification/gallery features.
+
+- Discussion Forums: forum categories, discussion boards, topics, threads, replies (including
+  nested replies), thread status (OPEN/CLOSED/PINNED/LOCKED)
+- Doubt Resolution: ask/answer a question, accepted answer, solved/unsolved status, linking a
+  question to related learning content (course/lesson/quiz/assignment)
+- Community Features: comments, likes, bookmarks, follow a thread, a reputation foundation (points
+  from accepted answers/likes received, no badges/levels yet), a community activity timeline
+- Moderation: report content, moderate (hide/restore), delete/restore, lock/unlock threads,
+  pin/unpin threads
+- Search: search forums/questions/discussions with filters and pagination
+- Attachments: image/document upload on posts, validated and quarantine-scanned exactly like
+  Sprint 5's assignment file upload (reuses `StoragePort`/`MalwareScannerPort` as-is)
+- FR-COMM-01/02 (the discussion/moderation half only — gallery/peer-rating/XP is Sprint 9 scope)
+- RBAC, validation, audit logging, Prisma migrations, Swagger, unit/integration/e2e tests
+
+Deferred (not in this sprint's approved scope, per the kickoff instruction): Notifications,
+real-time chat, WebSockets, AI moderation, AI recommendations, payments, analytics, further CMS
+enhancements. Also deferred: the creative community gallery, peer rating, and XP/achievements
+(CREATIVE-10 §8-10) — these move to Sprint 9 alongside notification delivery, since neither was
+part of this kickoff's explicit scope.
+
+**Exit criteria**: A student can ask a question, receive answers, accept one, and see it marked
+solved; a thread can be pinned/locked/closed by a moderator and access-scoping is enforced
+(non-moderators cannot lock/pin/delete); search returns paginated, filtered results; an uploaded
+attachment is quarantined until scanned clean, exactly like assignment file uploads.
+
+## Sprint 8 — Scoring, Reports & Recommendations v0
 
 - FR-QUIZ-04: automatic objective scoring per published rules, audit timestamp, persisted once
 - FR-QUIZ-05: question reporting (student flags a faulty question without affecting their result)
@@ -309,18 +351,17 @@ data regardless of assignment.
 **Exit criteria**: Phase 1 (MVP) complete — full register→enroll→learn→quiz→report journey passes
 E2E; all Phase 1 FR-IDs have automated test evidence per QA-15 §10.
 
-## Sprint 8 — Notifications, Messaging & Community
+## Sprint 9 — Notifications & Creative Gallery
 
 - COMM-MERGED (supersedes COMM-11/COMM-31 per ADR-0004): full delivery workflow live on real
   channels (Email/SMS/WhatsApp/Web Push/In-App), DLQ + fallback, delivery-state tracking
 - CREATIVE-10 §8-10: revision cycles, community gallery (consent-gated, private by default), peer
   rating, XP/achievement idempotency
-- FR-COMM-01/02: scoped discussions, gallery visibility, moderation (report/hide/restore/warn/audit)
 
 **Exit criteria**: Phase 3 complete — delivery success ≥98% in staging load test; XP double-award
-prevented under concurrent-request test; moderator can hide reported content within SLA.
+prevented under concurrent-request test.
 
-## Sprint 9 — Payments & Entitlements
+## Sprint 10 — Payments & Entitlements
 
 - FR-PAY-01: Razorpay order creation, webhook-verified entitlement (never trust client callback),
   duplicate/forged webhook does not create duplicate access
@@ -330,7 +371,7 @@ prevented under concurrent-request test; moderator can hide reported content wit
 **Exit criteria**: Forged/duplicate webhook test suite passes; entitlement grant/revoke fully
 audited; invoice generation correct under refund/partial-refund scenarios.
 
-## Sprint 10 — Growth Modules & Full Admin
+## Sprint 11 — Growth Modules & Full Admin
 
 - FR-EVENT-01: webinar/event scheduling, registration (deduplicated by user+event), attendance
 - FR-COLLEGE-01: college directory search/filter/detail, published-only data
@@ -341,7 +382,7 @@ audited; invoice generation correct under refund/partial-refund scenarios.
 **Exit criteria**: Every ADMIN-08 §5 workflow completes end-to-end; consent stored/verified before
 any student contact data is shared externally.
 
-## Sprint 11 — Analytics & Reporting
+## Sprint 12 — Analytics & Reporting
 
 - ANALYTICS-12 §2-7: role-scoped dashboards (student/mentor/admin), learning/assessment/creative
   analytics, business + operational reports
@@ -352,7 +393,7 @@ any student contact data is shared externally.
 **Exit criteria**: Phase 4 complete — every dashboard/report in ANALYTICS-12 renders real data with
 role-based access enforced; PII masked in exports where required.
 
-## Sprint 12 — Stabilization & Release Readiness
+## Sprint 13 — Stabilization & Release Readiness
 
 - PERF-32: load/stress/spike/soak testing against target SLAs (API p95 <500ms, LCP <2.5s,
   availability >99.9%)

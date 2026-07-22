@@ -5,29 +5,32 @@ entrance exams. Governed by [`documents/00_Master_Development_Guide_Examora_Plat
 
 ## Status
 
-**Sprint 6 — Mentor Management (complete).** Admins create mentor profiles (extending an existing
-MENTOR-role user with bio, specialization, and workload capacity) and assign/reassign students to
-mentors via a history-preserving join table — reassigning a student never deletes the previous
-assignment, it just supersedes it. Mentors get their own dashboard (caseload, pending tasks, recent
-meetings) and, for each assigned student, a "Student 360" view aggregating learning progress, quiz
-history, assignment history, and a merged activity timeline — composed entirely from the existing
-Learning/Assessment/Assignment services rather than new query logic. From there a mentor manages
-private notes (never visible to the student), tasks, feedback, and a meeting log, and reviews
-assignment submissions via Sprint 5's existing reviewer workflow. Every mentor-workflow action is
-scoped to the mentor's own assigned students (an admin can access any student); MENTOR and REVIEWER
-permissions diverge for the first time (`mentor:workflow` is MENTOR-only). Admins get a workload
-dashboard across all mentors for capacity planning. Builds on Sprint 5 (Creative Assignment Engine:
-assignment authoring/templates, presigned upload + quarantine-by-default malware scanning, rubric
-review), Sprint 4 (Assessment & Quiz Engine: question bank, quiz authoring, timed autosaving
-attempts, automatic scoring, attempt monitoring), Sprint 3 (Learning Engine: published-only catalog,
-lesson viewer/completion, progress dashboard, no enrollment gate), Sprint 2 (Course Management: the
+**Sprint 7 — Community & Discussion Module (complete).** Students browse admin-managed forum
+categories/boards and post threads — a "thread" is either a plain discussion or a Doubt Resolution
+question (`type: DISCUSSION | QUESTION`), the same underlying model rather than two parallel
+systems. Replies nest under one another; a question's author (or a moderator) can accept one reply
+as the answer, marking the thread solved. Likes (threads and replies), bookmarks, and follows are
+supported, alongside a thin reputation foundation (a denormalized point total backed by an
+append-only ledger — no badges/levels yet) and a merged community activity timeline. Anyone can
+report a thread or reply; `community:moderate` (admin-only this sprint) reviews the report queue and
+can hide/restore, lock/unlock, and pin/unpin threads independently of one another (a thread can be
+simultaneously pinned, locked, and closed). Search is keyword-based (Prisma `contains`, no full-text
+index yet). Image/document attachments on threads/replies reuse Sprint 5's presigned-upload +
+quarantine-by-default malware-scanning ports as-is, via a second, duplicated BullMQ scan queue bound
+to the new attachment table. See [ADR-0017](docs/adr/0017-community-discussion-module.md) for the
+full design. Builds on Sprint 6 (Mentor Management: mentor profiles, history-preserving mentor↔
+student assignment, Student 360, mentor workflow), Sprint 5 (Creative Assignment Engine: assignment
+authoring/templates, presigned upload + quarantine-by-default malware scanning, rubric review),
+Sprint 4 (Assessment & Quiz Engine: question bank, quiz authoring, timed autosaving attempts,
+automatic scoring, attempt monitoring), Sprint 3 (Learning Engine: published-only catalog, lesson
+viewer/completion, progress dashboard, no enrollment gate), Sprint 2 (Course Management: the
 `Category → Course → Subject → Topic → Module → Lesson` content hierarchy, DRAFT/PUBLISHED/ARCHIVED
 workflow, CRUD/reorder APIs, admin content UI), and Sprint 1 (Authentication & Identity:
 registration, email verification, login/logout, refresh rotation, password reset, sessions, RBAC +
-permissions, profiles, Google OAuth, consent, audit). Cohort grouping and at-risk-alert escalation
-(from the original mentoring planning note) are explicitly deferred — no notification channel
-exists yet to alert on. Community, payments, notifications, analytics, AI and further CMS
-enhancements are not started. See
+permissions, profiles, Google OAuth, consent, audit). A dedicated non-admin MODERATOR role, full-text
+search, and the creative gallery/peer-rating/XP half of the original community scope are explicitly
+deferred (see TD-030/TD-031 and the Sprint 9 backlog entry). Payments, notifications, analytics, AI
+and further CMS enhancements are not started. See
 [`docs/roadmap/SPRINT_BACKLOG.md`](docs/roadmap/SPRINT_BACKLOG.md) for the full plan.
 
 > Malware scanning and object storage run against real ClamAV/S3-compatible (MinIO) adapters in
