@@ -41,8 +41,9 @@ Delivered:
 
 Scope boundaries held: no Course/Learning/Quiz/Assignment/Payment/Notification/CMS/Analytics/AI/
 Community functionality. Email sending is a Sprint-1 console stub behind a port interface (ADR-0009);
-the real Notification Service remains Sprint 9 (renumbered after the Sprint 7 resequencing; was
-Sprint 8 before that, Sprint 9 before the Sprint 5 resequencing).
+the real Notification Service remains Sprint 10 (renumbered after the Sprint 8 resequencing; was
+Sprint 9 after the Sprint 7 resequencing, Sprint 8 before that, and Sprint 9 before the Sprint 5
+resequencing).
 
 Exit criteria met: RBAC matrix green (student denied admin routes; admin allowed; permission checks
 enforced), consent captured + audited, no endpoint reachable without a passing authorization check
@@ -307,12 +308,13 @@ the duplicated attachment-scan queue).
 Resequencing note (approved ahead of Sprint 7, mirroring the Sprint 5/6 precedent): this entry
 splits the discussion/moderation half of what was previously bundled into Sprint 8 ("Notifications,
 Messaging & Community") out into its own sprint, ahead of "Scoring, Reports & Recommendations v0"
-(previously Sprint 7, now Sprint 8). The remaining half of old Sprint 8 — merged notification
-delivery (COMM-MERGED) and the creative community gallery/peer-rating/XP (CREATIVE-10 §8-10) — is
-not part of this sprint's approved scope and becomes Sprint 9 ("Notifications & Creative Gallery").
-Sprints 9-12 in the old numbering shift down to 10-13 accordingly. No functional dependency blocks
-this: discussion forums/doubt-resolution operate on existing Auth/RBAC/Learning/Quiz/Assignment/
-Mentor data, independent of the quiz engine's scoring/reports or the notification/gallery features.
+(previously Sprint 7, then Sprint 8, now Sprint 9 after the Sprint 8 resequencing below). The
+remaining half of old Sprint 8 — merged notification delivery (COMM-MERGED) and the creative
+community gallery/peer-rating/XP (CREATIVE-10 §8-10) — is not part of this sprint's approved scope
+and becomes Sprint 10 ("Notifications & Creative Gallery"; was Sprint 9 before the Sprint 8
+resequencing). No functional dependency blocks this: discussion forums/doubt-resolution operate on
+existing Auth/RBAC/Learning/Quiz/Assignment/Mentor data, independent of the quiz engine's
+scoring/reports or the notification/gallery features.
 
 - Discussion Forums: forum categories, discussion boards, topics, threads, replies (including
   nested replies), thread status (OPEN/CLOSED/PINNED/LOCKED)
@@ -325,13 +327,13 @@ Mentor data, independent of the quiz engine's scoring/reports or the notificatio
 - Search: search forums/questions/discussions with filters and pagination
 - Attachments: image/document upload on posts, validated and quarantine-scanned exactly like
   Sprint 5's assignment file upload (reuses `StoragePort`/`MalwareScannerPort` as-is)
-- FR-COMM-01/02 (the discussion/moderation half only — gallery/peer-rating/XP is Sprint 9 scope)
+- FR-COMM-01/02 (the discussion/moderation half only — gallery/peer-rating/XP is Sprint 10 scope)
 - RBAC, validation, audit logging, Prisma migrations, Swagger, unit/integration/e2e tests
 
 Deferred (not in this sprint's approved scope, per the kickoff instruction): Notifications,
 real-time chat, WebSockets, AI moderation, AI recommendations, payments, analytics, further CMS
 enhancements. Also deferred: the creative community gallery, peer rating, and XP/achievements
-(CREATIVE-10 §8-10) — these move to Sprint 9 alongside notification delivery, since neither was
+(CREATIVE-10 §8-10) — these move to Sprint 10 alongside notification delivery, since neither was
 part of this kickoff's explicit scope.
 
 **Exit criteria**: A student can ask a question, receive answers, accept one, and see it marked
@@ -339,7 +341,48 @@ solved; a thread can be pinned/locked/closed by a moderator and access-scoping i
 (non-moderators cannot lock/pin/delete); search returns paginated, filtered results; an uploaded
 attachment is quarantined until scanned clean, exactly like assignment file uploads.
 
-## Sprint 8 — Scoring, Reports & Recommendations v0
+## Sprint 8 — Commerce, Enrollment & Payments
+
+Status: **Complete** (2026-07-23). 437 automated tests pass (251 unit/integration + 186 e2e),
+including 63 new Sprint 8 tests (34 unit/integration + 29 e2e). See ADR-0018 for the full design
+(EnrollmentModule as a new base-tier module to avoid a Learning/Assessment/Assignments ↔ Commerce
+cycle, the PaymentGatewayPort/RazorpayGatewayService/FakePaymentGatewayService port-adapter split
+mirroring ADR-0015, webhook-only entitlement grant, and the coupon/refund state machines).
+
+Resequencing note (approved ahead of Sprint 8, mirroring the Sprint 5/6/7 precedent): this entry
+runs Commerce/Enrollment/Payments now, absorbing the narrower "Payments & Entitlements" scope
+previously planned as Sprint 10 (Razorpay orders/webhooks/entitlements/invoices) and adding
+Enrollment (course enrollment/status/access-control/purchase-history — resolving TD-020's deferred
+enrollment gate) and Commerce (pricing, coupons, discounts, refund-workflow foundation), none of
+which were previously scoped in any sprint. Scoring/Reports/Recommendations v0 (previously Sprint 8)
+moves to Sprint 9; Notifications & Creative Gallery (previously Sprint 9) moves to Sprint 10; Growth
+Modules & Full Admin and Analytics & Reporting keep their sprint numbers (11, 12) since removing the
+old Sprint 10 slot exactly offsets inserting this one — see D-53. No functional dependency blocks
+this: enrollment/entitlement gating operates on the existing Learning/Assessment/Assignment/
+Community services (adding an access check, not new business logic), independent of the quiz
+engine's own scoring/reports or the notification/gallery features.
+
+- Enrollment: course enrollment, enrollment status (active/expired/revoked), access-control gate on
+  paid content, course entitlements, purchase history
+- Commerce: pricing (per-course/plan), coupons, discounts, orders, invoices, a refund workflow
+  foundation (request/approve/deny; full refund-to-gateway settlement is a later iteration)
+- Payments: a gateway-agnostic payment abstraction (ADR-0005 already names Razorpay as the concrete
+  adapter), payment verification (server-side webhook signature verification, mandatory — never
+  trust a client callback), payment history, transaction logging
+- FR-PAY-01: Razorpay order creation, webhook-verified entitlement, duplicate/forged webhook does
+  not create duplicate access
+- Commerce data model: plans, orders, payments, invoices, entitlements, coupons (DB-05 §3)
+- SRS-02 Table 6: webhook signature verification server-side, mandatory
+- Access control integration: Learning, Quiz Engine, Creative Assignments, and Mentor workflows all
+  gate on entitlement — only entitled students access paid content
+- Reuses existing Authentication, RBAC, User Management, Learning, Quiz, Assignments, Mentor, and
+  Community services; does not duplicate their business logic
+
+**Exit criteria**: Forged/duplicate webhook test suite passes; entitlement grant/revoke fully
+audited; invoice generation correct under refund/partial-refund scenarios; a non-entitled student is
+denied access to paid Learning/Quiz/Assignment/Mentor content, and an entitled student is not.
+
+## Sprint 9 — Scoring, Reports & Recommendations v0
 
 - FR-QUIZ-04: automatic objective scoring per published rules, audit timestamp, persisted once
 - FR-QUIZ-05: question reporting (student flags a faulty question without affecting their result)
@@ -351,7 +394,7 @@ attachment is quarantined until scanned clean, exactly like assignment file uplo
 **Exit criteria**: Phase 1 (MVP) complete — full register→enroll→learn→quiz→report journey passes
 E2E; all Phase 1 FR-IDs have automated test evidence per QA-15 §10.
 
-## Sprint 9 — Notifications & Creative Gallery
+## Sprint 10 — Notifications & Creative Gallery
 
 - COMM-MERGED (supersedes COMM-11/COMM-31 per ADR-0004): full delivery workflow live on real
   channels (Email/SMS/WhatsApp/Web Push/In-App), DLQ + fallback, delivery-state tracking
@@ -361,23 +404,13 @@ E2E; all Phase 1 FR-IDs have automated test evidence per QA-15 §10.
 **Exit criteria**: Phase 3 complete — delivery success ≥98% in staging load test; XP double-award
 prevented under concurrent-request test.
 
-## Sprint 10 — Payments & Entitlements
-
-- FR-PAY-01: Razorpay order creation, webhook-verified entitlement (never trust client callback),
-  duplicate/forged webhook does not create duplicate access
-- Commerce data model: plans, orders, payments, invoices, entitlements (DB-05 §3)
-- SRS-02 Table 6: webhook signature verification server-side, mandatory
-
-**Exit criteria**: Forged/duplicate webhook test suite passes; entitlement grant/revoke fully
-audited; invoice generation correct under refund/partial-refund scenarios.
-
 ## Sprint 11 — Growth Modules & Full Admin
 
 - FR-EVENT-01: webinar/event scheduling, registration (deduplicated by user+event), attendance
 - FR-COLLEGE-01: college directory search/filter/detail, published-only data
 - FR-ENQ-01: consented enquiry sharing with colleges, consent version/time stored
-- ADMIN-08 §4-5: remaining admin modules (question-bank approval workflow, payments admin, community
-  moderation admin, system settings/feature flags) and their workflows
+- ADMIN-08 §4-5: remaining admin modules (question-bank approval workflow, community moderation
+  admin, system settings/feature flags) and their workflows — payments admin moves to Sprint 8
 
 **Exit criteria**: Every ADMIN-08 §5 workflow completes end-to-end; consent stored/verified before
 any student contact data is shared externally.

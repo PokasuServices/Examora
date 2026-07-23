@@ -5,41 +5,44 @@ entrance exams. Governed by [`documents/00_Master_Development_Guide_Examora_Plat
 
 ## Status
 
-**Sprint 7 — Community & Discussion Module (complete).** Students browse admin-managed forum
-categories/boards and post threads — a "thread" is either a plain discussion or a Doubt Resolution
-question (`type: DISCUSSION | QUESTION`), the same underlying model rather than two parallel
-systems. Replies nest under one another; a question's author (or a moderator) can accept one reply
-as the answer, marking the thread solved. Likes (threads and replies), bookmarks, and follows are
-supported, alongside a thin reputation foundation (a denormalized point total backed by an
-append-only ledger — no badges/levels yet) and a merged community activity timeline. Anyone can
-report a thread or reply; `community:moderate` (admin-only this sprint) reviews the report queue and
-can hide/restore, lock/unlock, and pin/unpin threads independently of one another (a thread can be
-simultaneously pinned, locked, and closed). Search is keyword-based (Prisma `contains`, no full-text
-index yet). Image/document attachments on threads/replies reuse Sprint 5's presigned-upload +
-quarantine-by-default malware-scanning ports as-is, via a second, duplicated BullMQ scan queue bound
-to the new attachment table. See [ADR-0017](docs/adr/0017-community-discussion-module.md) for the
-full design. Builds on Sprint 6 (Mentor Management: mentor profiles, history-preserving mentor↔
+**Sprint 8 — Commerce, Enrollment & Payments (complete).** Courses can carry a price
+(`priceAmount`/`priceCurrency`; `null` means free, preserving all prior free-course behavior).
+Students check out a paid course through a gateway-agnostic payment abstraction (Razorpay is the
+concrete adapter, mirroring the `StoragePort`/`MalwareScannerPort` split from ADR-0015) — entitlement
+is granted only by a server-verified webhook, never a client callback (SRS-02 Table 6). A new
+base-tier `EnrollmentModule` tracks course entitlements (active/expired/revoked) and gates
+Learning/Assessment/Assignments on it, deliberately split out of Commerce to avoid a circular
+dependency (Commerce grants entitlements, Learning/Assessment/Assignments check them). Coupons
+(percentage/fixed, redemption-capped, date-bounded) apply at checkout; refunds are a
+request → review → process state machine (foundation only — no real gateway-side settlement yet,
+TD-037) that revokes the enrollment and marks the order refunded when processed. Admins get
+coupon/order/refund/enrollment management UI; students get pricing display, a checkout flow, and
+purchase/payment/invoice history. See [ADR-0018](docs/adr/0018-commerce-enrollment-payments.md) for
+the full design. Builds on Sprint 7 (Community & Discussion Module: forums, doubt resolution,
+reputation, moderation), Sprint 6 (Mentor Management: mentor profiles, history-preserving mentor↔
 student assignment, Student 360, mentor workflow), Sprint 5 (Creative Assignment Engine: assignment
 authoring/templates, presigned upload + quarantine-by-default malware scanning, rubric review),
 Sprint 4 (Assessment & Quiz Engine: question bank, quiz authoring, timed autosaving attempts,
 automatic scoring, attempt monitoring), Sprint 3 (Learning Engine: published-only catalog, lesson
-viewer/completion, progress dashboard, no enrollment gate), Sprint 2 (Course Management: the
+viewer/completion, progress dashboard), Sprint 2 (Course Management: the
 `Category → Course → Subject → Topic → Module → Lesson` content hierarchy, DRAFT/PUBLISHED/ARCHIVED
 workflow, CRUD/reorder APIs, admin content UI), and Sprint 1 (Authentication & Identity:
 registration, email verification, login/logout, refresh rotation, password reset, sessions, RBAC +
 permissions, profiles, Google OAuth, consent, audit). A dedicated non-admin MODERATOR role, full-text
-search, and the creative gallery/peer-rating/XP half of the original community scope are explicitly
-deferred (see TD-030/TD-031 and the Sprint 9 backlog entry). Payments, notifications, analytics, AI
-and further CMS enhancements are not started. See
+search, real gateway-side refund settlement, and multi-tier/promotional pricing are explicitly
+deferred (see TD-030/TD-031/TD-036/TD-037). Notifications, analytics, AI, and further CMS
+enhancements are not started. See
 [`docs/roadmap/SPRINT_BACKLOG.md`](docs/roadmap/SPRINT_BACKLOG.md) for the full plan.
 
 > Malware scanning and object storage run against real ClamAV/S3-compatible (MinIO) adapters in
 > dev/prod, but every automated test uses fake in-memory adapters instead (ADR-0015) — the real
-> adapters are only manually verified, not CI-covered (TD-027).
+> adapters are only manually verified, not CI-covered (TD-027). Razorpay follows the same pattern
+> (TD-038): `RazorpayGatewayService` is the real adapter, `FakePaymentGatewayService` backs every
+> automated test.
 
 > Email is not actually delivered yet — Sprint 1 uses a console-logging mailer stub (ADR-0009);
 > verification/reset tokens appear in the `apps/api` logs. Real delivery arrives with the
-> Notification Service in Sprint 9.
+> Notification Service in Sprint 10.
 
 ### First administrator
 
