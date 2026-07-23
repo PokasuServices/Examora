@@ -32,6 +32,8 @@ export function toCourse(row: Course): CourseDto {
     status: row.status,
     publishedAt: row.publishedAt ? row.publishedAt.toISOString() : null,
     position: row.position,
+    priceAmount: row.priceAmount === null ? null : Number(row.priceAmount),
+    priceCurrency: row.priceCurrency,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };

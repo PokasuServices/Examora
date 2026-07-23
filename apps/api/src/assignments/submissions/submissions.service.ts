@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import type { FileRules } from "@examora/types";
+import { EnrollmentService } from "../../enrollment/enrollment.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { STORAGE_PORT, type StoragePort } from "../../storage/storage.port";
 import { AssignmentCatalogService } from "../catalog/assignment-catalog.service";
@@ -33,16 +34,19 @@ export class SubmissionsService {
     private readonly catalog: AssignmentCatalogService,
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     private readonly scanQueue: MalwareScanQueueService,
+    private readonly enrollmentService: EnrollmentService,
   ) {}
 
   /**
    * Idempotent start/resume (ADR-0015, mirrors QuizAttemptsService.start):
    * no existing submission -> create version 1; latest is DRAFT -> resume it;
    * latest is REVISION_REQUESTED -> create the next version; otherwise
-   * (SUBMITTED/UNDER_REVIEW/APPROVED) -> return the latest read-only.
+   * (SUBMITTED/UNDER_REVIEW/APPROVED) -> return the latest read-only. Sprint
+   * 8 (ADR-0018): gated on the assignment's course entitlement, if it has one.
    */
   async start(assignmentId: string, studentId: string) {
-    await this.catalog.getPublishedOrThrow(assignmentId);
+    const assignment = await this.catalog.getPublishedOrThrow(assignmentId);
+    await this.enrollmentService.assertSubjectCourseAccess(studentId, assignment.subjectId);
 
     const latest = await this.prisma.assignmentSubmission.findFirst({
       where: { assignmentId, studentId },

@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, NotFoundException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
+import { EnrollmentService } from "../../enrollment/enrollment.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { seedPublishedQuiz } from "../../../test/support/assessment-seed";
 import { QuizCatalogService } from "../quiz-catalog/quiz-catalog.service";
@@ -14,7 +15,7 @@ describe("QuizAttemptsService (integration)", () => {
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
-      providers: [QuizAttemptsService, QuizCatalogService, PrismaService],
+      providers: [QuizAttemptsService, QuizCatalogService, EnrollmentService, PrismaService],
     }).compile();
     attempts = moduleRef.get(QuizAttemptsService);
     prisma = moduleRef.get(PrismaService);

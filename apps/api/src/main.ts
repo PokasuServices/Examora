@@ -8,7 +8,11 @@ import type { AppConfig } from "./config/configuration";
 import { configureApp } from "./setup-app";
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  // rawBody: true (ADR-0018) — preserves the exact request bytes on
+  // req.rawBody alongside the parsed JSON body, needed for the payments
+  // webhook's HMAC signature verification (re-serializing the parsed JSON
+  // would not byte-for-byte match what the gateway actually signed).
+  const app = await NestFactory.create(AppModule, { bufferLogs: true, rawBody: true });
   app.useLogger(app.get(Logger));
   app.enableShutdownHooks();
 

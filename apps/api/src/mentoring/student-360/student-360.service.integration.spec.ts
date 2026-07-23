@@ -7,6 +7,7 @@ import { AssignmentCatalogService } from "../../assignments/catalog/assignment-c
 import { MalwareScanQueueService } from "../../assignments/malware-scan-queue.service";
 import { SubmissionsService } from "../../assignments/submissions/submissions.service";
 import type { RequestUser } from "../../auth/types/request-user";
+import { EnrollmentService } from "../../enrollment/enrollment.service";
 import { CatalogService } from "../../learning/catalog.service";
 import { ProgressService } from "../../learning/progress.service";
 import { PermissionsService } from "../../permissions/permissions.service";
@@ -42,6 +43,7 @@ describe("Student360Service (integration)", () => {
         SubmissionsService,
         AssignmentCatalogService,
         MentorAssignmentService,
+        EnrollmentService,
         PrismaService,
         { provide: STORAGE_PORT, useClass: FakeStorageService },
         { provide: MalwareScanQueueService, useValue: { enqueue: async () => undefined } },

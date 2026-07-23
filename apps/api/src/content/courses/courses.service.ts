@@ -34,6 +34,8 @@ export class CoursesService {
         position,
         createdById: actorId,
         // status defaults to DRAFT (schema default).
+        priceAmount: dto.priceAmount,
+        priceCurrency: dto.priceCurrency ?? "INR",
       },
     });
   }
@@ -94,6 +96,8 @@ export class CoursesService {
         description: dto.description,
         examType: dto.examType,
         position: dto.position,
+        priceAmount: dto.isFree ? null : dto.priceAmount,
+        priceCurrency: dto.priceCurrency,
       },
     });
   }

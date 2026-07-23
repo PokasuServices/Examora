@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, NotFoundException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
+import { EnrollmentService } from "../../enrollment/enrollment.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { STORAGE_PORT } from "../../storage/storage.port";
 import { FakeStorageService } from "../../../test/support/fake-storage.service";
@@ -21,6 +22,7 @@ describe("SubmissionsService (integration)", () => {
       providers: [
         SubmissionsService,
         AssignmentCatalogService,
+        EnrollmentService,
         PrismaService,
         { provide: STORAGE_PORT, useClass: FakeStorageService },
         // Real BullMQ isn't wired in this lightweight testing module — a

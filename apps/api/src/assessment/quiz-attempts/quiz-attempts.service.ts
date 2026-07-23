@@ -7,6 +7,7 @@ import {
 import type { Prisma, QuizAttempt } from "@examora/database";
 import { shuffle } from "@examora/utils";
 import { decToNum } from "../assessment.mappers";
+import { EnrollmentService } from "../../enrollment/enrollment.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { QuizCatalogService } from "../quiz-catalog/quiz-catalog.service";
 import type { OptionOrder, QuestionSnapshot } from "./attempt-snapshot.types";
@@ -17,15 +18,18 @@ export class QuizAttemptsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly catalog: QuizCatalogService,
+    private readonly enrollmentService: EnrollmentService,
   ) {}
 
   /**
    * Starts a new attempt, or resumes an existing non-expired IN_PROGRESS one
    * (ADR-0014 — calling "start" again is how a student resumes). Freezes
-   * question/option order, marks, and marking rules at this moment.
+   * question/option order, marks, and marking rules at this moment. Sprint 8
+   * (ADR-0018): gated on the quiz's course entitlement, if it has one.
    */
   async start(quizId: string, userId: string): Promise<{ attempt: QuizAttempt; created: boolean }> {
     const quiz = await this.catalog.getPublishedQuizOrThrow(quizId);
+    await this.enrollmentService.assertSubjectCourseAccess(userId, quiz.subjectId);
 
     const existing = await this.prisma.quizAttempt.findFirst({
       where: { quizId, userId, status: "IN_PROGRESS" },

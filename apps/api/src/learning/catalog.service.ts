@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import type { Prisma } from "@examora/database";
+import { EnrollmentService } from "../enrollment/enrollment.service";
 import { PrismaService } from "../prisma/prisma.service";
 
 const PUBLISHED = { status: "PUBLISHED" as const, deletedAt: null };
@@ -13,7 +14,10 @@ const BY_POSITION = { position: "asc" as const };
  */
 @Injectable()
 export class CatalogService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly enrollmentService: EnrollmentService,
+  ) {}
 
   async listPublishedCourses(params: {
     page: number;
@@ -76,6 +80,7 @@ export class CatalogService {
     if (!course) {
       throw new NotFoundException("Course not found");
     }
+    await this.enrollmentService.assertCourseAccess(userId, courseId);
 
     const progress = await this.prisma.lessonProgress.findMany({
       where: { userId, courseId },
@@ -103,13 +108,15 @@ export class CatalogService {
     if (!lesson || !this.isChainPublished(lesson)) {
       throw new NotFoundException("Lesson not found");
     }
+    const courseId = lesson.module.topic.subject.course.id;
+    await this.enrollmentService.assertCourseAccess(userId, courseId);
 
     const progress = await this.prisma.lessonProgress.findUnique({
       where: { userId_lessonId: { userId, lessonId } },
       select: { completedAt: true, lastViewedAt: true },
     });
 
-    return { lesson, courseId: lesson.module.topic.subject.course.id, progress };
+    return { lesson, courseId, progress };
   }
 
   private isChainPublished(lesson: {

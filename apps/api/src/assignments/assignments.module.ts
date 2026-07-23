@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { BullModule } from "@nestjs/bullmq";
+import { EnrollmentModule } from "../enrollment/enrollment.module";
 import { AdminSubmissionsController } from "./admin-monitoring/admin-submissions.controller";
 import { AdminSubmissionsService } from "./admin-monitoring/admin-submissions.service";
 import { AssignmentsAdminController } from "./authoring/assignments-admin.controller";
@@ -24,7 +25,7 @@ import { TemplatesService } from "./templates/templates.service";
  * assignment/monitoring (admin).
  */
 @Module({
-  imports: [BullModule.registerQueue({ name: MALWARE_SCAN_QUEUE })],
+  imports: [BullModule.registerQueue({ name: MALWARE_SCAN_QUEUE }), EnrollmentModule],
   // AdminSubmissionsController's "admin/assignments/submissions" must be
   // registered before AssignmentsAdminController's "admin/assignments/:id" —
   // Nest/Express matches routes in registration order, so the dynamic :id

@@ -2,6 +2,7 @@ import { Test, type TestingModule } from "@nestjs/testing";
 import { AssignmentCatalogService } from "../../assignments/catalog/assignment-catalog.service";
 import type { RequestUser } from "../../auth/types/request-user";
 import { QuizCatalogService } from "../../assessment/quiz-catalog/quiz-catalog.service";
+import { EnrollmentService } from "../../enrollment/enrollment.service";
 import { CatalogService } from "../../learning/catalog.service";
 import { PermissionsService } from "../../permissions/permissions.service";
 import { PrismaService } from "../../prisma/prisma.service";
@@ -48,6 +49,7 @@ describe("CommunityReportsService (integration)", () => {
         CatalogService,
         QuizCatalogService,
         AssignmentCatalogService,
+        EnrollmentService,
         PermissionsService,
         PrismaService,
       ],

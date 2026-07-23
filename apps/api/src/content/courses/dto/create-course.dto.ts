@@ -1,5 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsInt, IsOptional, IsString, IsUUID, Matches, MaxLength, Min } from "class-validator";
+import {
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  IsUUID,
+  Matches,
+  MaxLength,
+  Min,
+} from "class-validator";
 
 export class CreateCourseDto {
   @ApiPropertyOptional({ description: "Owning category id" })
@@ -36,4 +46,19 @@ export class CreateCourseDto {
   @IsInt()
   @Min(0)
   position?: number;
+
+  @ApiPropertyOptional({
+    description: "Sprint 8 (ADR-0018): omit or leave unset for a free course",
+    example: 1499,
+  })
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  priceAmount?: number;
+
+  @ApiPropertyOptional({ default: "INR" })
+  @IsOptional()
+  @IsString()
+  @MaxLength(3)
+  priceCurrency?: string;
 }

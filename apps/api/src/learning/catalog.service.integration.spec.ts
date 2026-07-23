@@ -1,5 +1,6 @@
-import { NotFoundException } from "@nestjs/common";
+import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
+import { EnrollmentService } from "../enrollment/enrollment.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { seedPublishedCourseTree, type SeededCourseTree } from "../../test/support/content-seed";
 import { CatalogService } from "./catalog.service";
@@ -13,7 +14,7 @@ describe("CatalogService (integration)", () => {
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
-      providers: [CatalogService, PrismaService],
+      providers: [CatalogService, EnrollmentService, PrismaService],
     }).compile();
     service = moduleRef.get(CatalogService);
     prisma = moduleRef.get(PrismaService);
@@ -63,5 +64,45 @@ describe("CatalogService (integration)", () => {
     await expect(service.getLessonForStudent(tree.draftLessonId, userId)).rejects.toBeInstanceOf(
       NotFoundException,
     );
+  });
+
+  describe("entitlement gate (Sprint 8, ADR-0018)", () => {
+    it("rejects curriculum and lesson access for a non-entitled paid course, then allows it once enrolled", async () => {
+      const student = await prisma.user.create({
+        data: { email: `catalog-entitlement-${Date.now()}@example.test`, status: "ACTIVE" },
+      });
+
+      await prisma.course.update({
+        where: { id: tree.courseId },
+        data: { priceAmount: 999, priceCurrency: "INR" },
+      });
+
+      await expect(service.getCurriculum(tree.courseId, student.id)).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      await expect(
+        service.getLessonForStudent(tree.lessonIds[0]!, student.id),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+
+      await prisma.enrollment.create({
+        data: {
+          userId: student.id,
+          courseId: tree.courseId,
+          status: "ACTIVE",
+          source: "ADMIN_GRANT",
+        },
+      });
+      await expect(service.getCurriculum(tree.courseId, student.id)).resolves.toBeDefined();
+      await expect(
+        service.getLessonForStudent(tree.lessonIds[0]!, student.id),
+      ).resolves.toBeDefined();
+
+      await prisma.enrollment.deleteMany({ where: { userId: student.id } });
+      await prisma.course.update({
+        where: { id: tree.courseId },
+        data: { priceAmount: null },
+      });
+      await prisma.user.delete({ where: { id: student.id } });
+    });
   });
 });

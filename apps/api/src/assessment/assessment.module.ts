@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { EnrollmentModule } from "../enrollment/enrollment.module";
 import { AdminQuizAttemptsController } from "./admin-monitoring/admin-quiz-attempts.controller";
 import { AdminQuizAttemptsService } from "./admin-monitoring/admin-quiz-attempts.service";
 import { QuestionsController } from "./question-bank/questions.controller";
@@ -21,6 +22,7 @@ import { QuizSectionsService } from "./quizzes/sections.service";
  * result dashboards (admin).
  */
 @Module({
+  imports: [EnrollmentModule],
   controllers: [
     QuestionsController,
     QuizzesController,
