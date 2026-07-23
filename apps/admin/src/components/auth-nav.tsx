@@ -23,6 +23,7 @@ export function AuthNav() {
     const canMentorWorkflow = user.permissions.includes("mentor:workflow");
     const canManageCommunity = user.permissions.includes("community:manage");
     const canModerateCommunity = user.permissions.includes("community:moderate");
+    const canManageCommerce = user.permissions.includes("commerce:manage");
     return (
       <div className="flex items-center gap-3">
         <span className="text-sm text-neutral-600">{user.email}</span>
@@ -69,6 +70,11 @@ export function AuthNav() {
         {canModerateCommunity ? (
           <Link href="/community/moderation">
             <Button variant="secondary">Moderation</Button>
+          </Link>
+        ) : null}
+        {canManageCommerce ? (
+          <Link href="/commerce/orders">
+            <Button variant="secondary">Commerce</Button>
           </Link>
         ) : null}
         {canReadProgress ? (

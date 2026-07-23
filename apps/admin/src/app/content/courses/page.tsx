@@ -7,6 +7,7 @@ import type { Category, ContentStatus, Course } from "@examora/types";
 import { Button, FieldError, Input, Label } from "@examora/ui";
 import { RequirePermission } from "@/components/require-permission";
 import { StatusBadge } from "@/components/status-badge";
+import { formatMoney } from "@/lib/commerce-api";
 import { useContentApi } from "@/lib/content-api";
 
 const STATUS_FILTERS: (ContentStatus | "ALL")[] = ["ALL", "DRAFT", "PUBLISHED", "ARCHIVED"];
@@ -19,6 +20,7 @@ function CoursesContent() {
   const [title, setTitle] = React.useState("");
   const [categoryId, setCategoryId] = React.useState("");
   const [examType, setExamType] = React.useState("");
+  const [priceAmount, setPriceAmount] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
   const load = React.useCallback(() => {
@@ -49,9 +51,11 @@ function CoursesContent() {
         title,
         categoryId: categoryId || undefined,
         examType: examType || undefined,
+        priceAmount: priceAmount ? Number(priceAmount) : undefined,
       });
       setTitle("");
       setExamType("");
+      setPriceAmount("");
       load();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Could not create course");
@@ -98,6 +102,18 @@ function CoursesContent() {
           <Label htmlFor="examType">Exam type</Label>
           <Input id="examType" value={examType} onChange={(e) => setExamType(e.target.value)} />
         </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="priceAmount">Price (INR, blank = free)</Label>
+          <Input
+            id="priceAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            value={priceAmount}
+            onChange={(e) => setPriceAmount(e.target.value)}
+            className="w-32"
+          />
+        </div>
         <Button type="submit">Create course</Button>
       </form>
       <FieldError>{error}</FieldError>
@@ -124,6 +140,7 @@ function CoursesContent() {
               <th className="px-4 py-3 font-medium">Title</th>
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Exam</th>
+              <th className="px-4 py-3 font-medium">Price</th>
               <th className="px-4 py-3 font-medium">Status</th>
             </tr>
           </thead>
@@ -141,13 +158,18 @@ function CoursesContent() {
                 <td className="px-4 py-3">{categoryName(course.categoryId)}</td>
                 <td className="px-4 py-3">{course.examType ?? "—"}</td>
                 <td className="px-4 py-3">
+                  {course.priceAmount === null
+                    ? "Free"
+                    : formatMoney(course.priceAmount, course.priceCurrency)}
+                </td>
+                <td className="px-4 py-3">
                   <StatusBadge status={course.status} />
                 </td>
               </tr>
             ))}
             {courses.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-neutral-500">
+                <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
                   No courses.
                 </td>
               </tr>

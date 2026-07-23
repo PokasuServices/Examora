@@ -18,6 +18,7 @@ function CourseDetailContent() {
   const [course, setCourse] = React.useState<Course | null>(null);
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
+  const [priceAmount, setPriceAmount] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [saved, setSaved] = React.useState(false);
 
@@ -28,6 +29,7 @@ function CourseDetailContent() {
         setCourse(c);
         setTitle(c.title);
         setDescription(c.description ?? "");
+        setPriceAmount(c.priceAmount === null ? "" : String(c.priceAmount));
       })
       .catch((err: unknown) => setError(err instanceof ApiError ? err.message : "Failed to load"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -42,7 +44,12 @@ function CourseDetailContent() {
     setError(null);
     setSaved(false);
     try {
-      const updated = await api.updateCourse(id, { title, description });
+      const updated = await api.updateCourse(id, {
+        title,
+        description,
+        isFree: priceAmount === "",
+        priceAmount: priceAmount === "" ? undefined : Number(priceAmount),
+      });
       setCourse(updated);
       setSaved(true);
     } catch (err) {
@@ -101,6 +108,18 @@ function CourseDetailContent() {
             className="min-h-24 rounded-md border border-neutral-300 p-3 text-sm"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="priceAmount">Price (INR, blank = free — ADR-0018)</Label>
+          <Input
+            id="priceAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            value={priceAmount}
+            onChange={(e) => setPriceAmount(e.target.value)}
+            className="w-40"
           />
         </div>
         <FieldError>{error}</FieldError>

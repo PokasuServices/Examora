@@ -43,10 +43,20 @@ export function useContentApi() {
       categoryId?: string;
       examType?: string;
       description?: string;
+      priceAmount?: number;
+      priceCurrency?: string;
     }) => request<Course>(`${BASE}/courses`, { method: "POST", body }),
     updateCourse: (
       id: string,
-      body: Partial<{ title: string; description: string; examType: string; categoryId: string }>,
+      body: Partial<{
+        title: string;
+        description: string;
+        examType: string;
+        categoryId: string;
+        priceAmount: number;
+        priceCurrency: string;
+        isFree: boolean;
+      }>,
     ) => request<Course>(`${BASE}/courses/${id}`, { method: "PATCH", body }),
     setCourseStatus: (id: string, status: ContentStatus) =>
       request<Course>(`${BASE}/courses/${id}/status`, { method: "PATCH", body: { status } }),
