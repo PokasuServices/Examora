@@ -33,12 +33,23 @@ export interface AppConfig {
     host: string;
     port: number;
   };
+  payments: {
+    razorpay: {
+      configured: boolean;
+      keyId: string;
+      keySecret: string;
+      webhookSecret: string;
+    };
+  };
 }
 
 /** Consumed via ConfigService.get<AppConfig>('app'). Values validated in env.validation.ts. */
 export default (): { app: AppConfig } => {
   const googleClientId = process.env.GOOGLE_OAUTH_CLIENT_ID ?? "";
   const googleClientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET ?? "";
+  const razorpayKeyId = process.env.RAZORPAY_KEY_ID ?? "";
+  const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET ?? "";
+  const razorpayWebhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET ?? "";
 
   return {
     app: {
@@ -88,6 +99,18 @@ export default (): { app: AppConfig } => {
       malwareScanner: {
         host: process.env.CLAMAV_HOST ?? "localhost",
         port: parseInt(process.env.CLAMAV_PORT ?? "3310", 10),
+      },
+      payments: {
+        razorpay: {
+          // ADR-0005/0018: Razorpay is the default gateway, but real
+          // credentials are not available in every environment — the port/
+          // adapter split (mirroring StoragePort/MalwareScannerPort) means the
+          // app boots and the fake adapter serves all automated tests either way.
+          configured: razorpayKeyId.length > 0 && razorpayKeySecret.length > 0,
+          keyId: razorpayKeyId,
+          keySecret: razorpayKeySecret,
+          webhookSecret: razorpayWebhookSecret,
+        },
       },
     },
   };

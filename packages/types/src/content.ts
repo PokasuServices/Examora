@@ -36,6 +36,9 @@ export interface Course extends DescribedContentNode {
   categoryId: string | null;
   examType: string | null;
   publishedAt: string | null;
+  /** Sprint 8 (ADR-0018): null means the course is free. */
+  priceAmount: number | null;
+  priceCurrency: string;
 }
 
 export interface Subject extends DescribedContentNode {

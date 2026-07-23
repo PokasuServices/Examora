@@ -94,6 +94,21 @@ class EnvironmentVariables {
   @Type(() => Number)
   @IsInt()
   CLAMAV_PORT = 3310;
+
+  // Payments (ADR-0005, ADR-0018) — optional: the app must boot without real
+  // credentials, mirroring GoogleConfiguredGuard's pattern (see
+  // PaymentGatewayPort's `configured` flag for the runtime-facing behavior).
+  @IsOptional()
+  @IsString()
+  RAZORPAY_KEY_ID?: string;
+
+  @IsOptional()
+  @IsString()
+  RAZORPAY_KEY_SECRET?: string;
+
+  @IsOptional()
+  @IsString()
+  RAZORPAY_WEBHOOK_SECRET?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

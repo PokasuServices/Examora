@@ -7,6 +7,7 @@ export * from "./quiz";
 export * from "./assignment";
 export * from "./mentoring";
 export * from "./community";
+export * from "./commerce";
 export * from "./api-response";
 export * from "./notification";
 export * from "./user";

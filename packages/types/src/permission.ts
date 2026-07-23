@@ -64,6 +64,15 @@ export const PERMISSION_CODES = [
   "community:read",
   "community:manage",
   "community:moderate",
+  // Commerce, Enrollment & Payments (Sprint 8, ADR-0018). `commerce:read` is
+  // baseline: browse course pricing (already public via the catalog),
+  // purchase a course, view own enrollments/orders/payments/invoices, and
+  // request a refund on your own order — mirroring the assignment:read/
+  // quiz:read/community:read precedent (ADR-0013). `commerce:manage` is
+  // ADMINISTRATOR-only: coupon CRUD, order/payment monitoring, refund
+  // review, and manually granting/revoking enrollment.
+  "commerce:read",
+  "commerce:manage",
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];
@@ -83,6 +92,7 @@ export const BASELINE_PERMISSION_CODES: PermissionCode[] = [
   "quiz:read",
   "assignment:read",
   "community:read",
+  "commerce:read",
 ];
 
 /** Granted to MENTOR and REVIEWER in addition to the baseline (ADR-0015). */

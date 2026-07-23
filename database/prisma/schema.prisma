@@ -208,6 +208,72 @@ enum CommunityReportStatus {
   @@map("community_report_status")
 }
 
+/// A single current-access-state row per (user, course) — ADR-0018. Renewed
+/// by updating the same row, not by inserting a new one (Order already
+/// provides the historical/audit trail).
+enum EnrollmentStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+
+  @@map("enrollment_status")
+}
+
+enum EnrollmentSource {
+  FREE
+  PURCHASE
+  ADMIN_GRANT
+
+  @@map("enrollment_source")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+  PARTIALLY_REFUNDED
+
+  @@map("order_status")
+}
+
+enum CouponDiscountType {
+  PERCENTAGE
+  FIXED
+
+  @@map("coupon_discount_type")
+}
+
+/// Gateway-agnostic (ADR-0018) — Razorpay is the only concrete adapter today
+/// (ADR-0005), but Payment.gateway is not hardcoded to it.
+enum PaymentGateway {
+  RAZORPAY
+
+  @@map("payment_gateway")
+}
+
+enum PaymentStatus {
+  CREATED
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+
+  @@map("payment_status")
+}
+
+/// A request/review state machine (foundation only, ADR-0018) — actual
+/// gateway-side refund settlement is deferred (TD-037).
+enum RefundStatus {
+  REQUESTED
+  APPROVED
+  DENIED
+  PROCESSED
+
+  @@map("refund_status")
+}
+
 /// Platform user. Identity & Access core entity (DB-05 §3, SRS-02 Table 5).
 model User {
   id              String     @id @default(uuid()) @db.Uuid
@@ -274,6 +340,12 @@ model User {
   reviewedReports      CommunityReport[]     @relation("ReportsByReviewer")
   reputationEvents     ReputationEvent[]
   communityAttachments CommunityAttachment[]
+
+  enrollments      Enrollment[]
+  orders           Order[]
+  couponsCreated   Coupon[]
+  refundsRequested Refund[]     @relation("RefundsByRequester")
+  refundsReviewed  Refund[]     @relation("RefundsByReviewer")
 
   @@index([status])
   @@map("users")
@@ -446,25 +518,32 @@ model Category {
 }
 
 model Course {
-  id          String        @id @default(uuid()) @db.Uuid
-  categoryId  String?       @map("category_id") @db.Uuid
-  title       String
-  slug        String        @unique
-  description String?
-  examType    String?       @map("exam_type")
-  status      ContentStatus @default(DRAFT)
-  publishedAt DateTime?     @map("published_at")
-  position    Int           @default(0)
-  createdById String?       @map("created_by_id") @db.Uuid
-  version     Int           @default(1)
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-  deletedAt   DateTime?     @map("deleted_at")
+  id            String        @id @default(uuid()) @db.Uuid
+  categoryId    String?       @map("category_id") @db.Uuid
+  title         String
+  slug          String        @unique
+  description   String?
+  examType      String?       @map("exam_type")
+  status        ContentStatus @default(DRAFT)
+  publishedAt   DateTime?     @map("published_at")
+  position      Int           @default(0)
+  createdById   String?       @map("created_by_id") @db.Uuid
+  version       Int           @default(1)
+  // Sprint 8 (ADR-0018): a null priceAmount means the course is free — the
+  // same behavior every course has had since Sprint 3. No separate pricing/
+  // plan model this sprint (TD-036).
+  priceAmount   Decimal?      @map("price_amount") @db.Decimal(10, 2)
+  priceCurrency String        @default("INR") @map("price_currency")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  deletedAt     DateTime?     @map("deleted_at")
 
   category       Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   subjects       Subject[]
   lessonProgress LessonProgress[]
   relatedThreads Thread[]         @relation("ThreadsByCourse")
+  enrollments    Enrollment[]
+  orders         Order[]
 
   @@index([categoryId])
   @@index([status])
@@ -1333,4 +1412,145 @@ model CommunityAttachment {
   @@index([threadId])
   @@index([replyId])
   @@map("community_attachments")
+}
+
+// ---------------------------------------------------------------------------
+// Commerce, Enrollment & Payments (Sprint 8, ADR-0018): a single current-
+// access-state Enrollment per (user, course), commerce (coupons/orders/
+// invoices/a refund-workflow foundation), and gateway-agnostic payments
+// (webhook-verified — a client callback never grants an entitlement).
+// ---------------------------------------------------------------------------
+
+/// The current access-control record for (user, course) — ADR-0018. Renewed
+/// in place (new expiresAt, status back to ACTIVE), never re-inserted; Order
+/// is the historical purchase record.
+model Enrollment {
+  id         String           @id @default(uuid()) @db.Uuid
+  userId     String           @map("user_id") @db.Uuid
+  courseId   String           @map("course_id") @db.Uuid
+  orderId    String?          @unique @map("order_id") @db.Uuid
+  status     EnrollmentStatus @default(ACTIVE)
+  source     EnrollmentSource @default(FREE)
+  enrolledAt DateTime         @default(now()) @map("enrolled_at")
+  expiresAt  DateTime?        @map("expires_at")
+  revokedAt  DateTime?        @map("revoked_at")
+  createdAt  DateTime         @default(now()) @map("created_at")
+  updatedAt  DateTime         @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  order  Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@map("enrollments")
+}
+
+/// Applies to a single order at checkout time (ADR-0018 — no cart/bundle
+/// model yet). redemptionCount only increments once the order reaches PAID.
+model Coupon {
+  id              String             @id @default(uuid()) @db.Uuid
+  code            String             @unique
+  discountType    CouponDiscountType @map("discount_type")
+  discountValue   Decimal            @map("discount_value") @db.Decimal(10, 2)
+  maxRedemptions  Int?               @map("max_redemptions")
+  redemptionCount Int                @default(0) @map("redemption_count")
+  validFrom       DateTime?          @map("valid_from")
+  validUntil      DateTime?          @map("valid_until")
+  isActive        Boolean            @default(true) @map("is_active")
+  createdById     String?            @map("created_by_id") @db.Uuid
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  createdBy User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  orders    Order[]
+
+  @@map("coupons")
+}
+
+/// One row per purchase attempt — a single course per order (ADR-0018, no
+/// line-items model yet). The historical/audit trail Enrollment does not
+/// preserve on its own.
+model Order {
+  id             String      @id @default(uuid()) @db.Uuid
+  userId         String      @map("user_id") @db.Uuid
+  courseId       String      @map("course_id") @db.Uuid
+  couponId       String?     @map("coupon_id") @db.Uuid
+  status         OrderStatus @default(PENDING)
+  subtotalAmount Decimal     @map("subtotal_amount") @db.Decimal(10, 2)
+  discountAmount Decimal     @default(0) @map("discount_amount") @db.Decimal(10, 2)
+  totalAmount    Decimal     @map("total_amount") @db.Decimal(10, 2)
+  currency       String      @default("INR")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course      @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  coupon     Coupon?     @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  payments   Payment[]
+  invoice    Invoice?
+  enrollment Enrollment?
+  refunds    Refund[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+/// A gateway payment attempt for an Order (ADR-0018) — only a verified
+/// webhook (never a client callback) moves this to CAPTURED and the parent
+/// Order to PAID. Idempotent by gatewayPaymentId.
+model Payment {
+  id               String         @id @default(uuid()) @db.Uuid
+  orderId          String         @map("order_id") @db.Uuid
+  gateway          PaymentGateway @default(RAZORPAY)
+  gatewayOrderId   String         @map("gateway_order_id")
+  gatewayPaymentId String?        @unique @map("gateway_payment_id")
+  status           PaymentStatus  @default(CREATED)
+  amount           Decimal        @db.Decimal(10, 2)
+  currency         String         @default("INR")
+  verifiedAt       DateTime?      @map("verified_at")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([gatewayOrderId])
+  @@map("payments")
+}
+
+model Invoice {
+  id            String   @id @default(uuid()) @db.Uuid
+  orderId       String   @unique @map("order_id") @db.Uuid
+  invoiceNumber String   @unique @map("invoice_number")
+  amount        Decimal  @db.Decimal(10, 2)
+  currency      String   @default("INR")
+  issuedAt      DateTime @default(now()) @map("issued_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+/// A request/review state machine only — actual gateway-side refund
+/// settlement is deferred (TD-037, ADR-0018). Approving revokes the
+/// associated Enrollment and marks the Order REFUNDED/PARTIALLY_REFUNDED.
+model Refund {
+  id            String       @id @default(uuid()) @db.Uuid
+  orderId       String       @map("order_id") @db.Uuid
+  requestedById String       @map("requested_by_id") @db.Uuid
+  reviewedById  String?      @map("reviewed_by_id") @db.Uuid
+  status        RefundStatus @default(REQUESTED)
+  amount        Decimal      @db.Decimal(10, 2)
+  reason        String
+  requestedAt   DateTime     @default(now()) @map("requested_at")
+  reviewedAt    DateTime?    @map("reviewed_at")
+
+  order       Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  requestedBy User  @relation("RefundsByRequester", fields: [requestedById], references: [id], onDelete: Cascade)
+  reviewedBy  User? @relation("RefundsByReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@map("refunds")
 }
