@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import type { Course } from "@examora/types";
 import { RequireAuth } from "@/components/require-auth";
+import { formatMoney } from "@/lib/commerce-api";
 import { useLearningApi } from "@/lib/learning-api";
 
 function CatalogContent() {
@@ -41,7 +42,20 @@ function CatalogContent() {
             href={`/courses/${course.id}`}
             className="rounded-lg border border-neutral-200 bg-white p-5 transition-colors hover:border-primary-400"
           >
-            <h2 className="text-lg font-semibold">{course.title}</h2>
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-lg font-semibold">{course.title}</h2>
+              <span
+                className={
+                  course.priceAmount === null
+                    ? "shrink-0 rounded-full bg-success-50 px-2 py-0.5 text-xs font-medium text-success-700"
+                    : "shrink-0 rounded-full bg-primary-50 px-2 py-0.5 text-xs font-medium text-primary-700"
+                }
+              >
+                {course.priceAmount === null
+                  ? "Free"
+                  : formatMoney(course.priceAmount, course.priceCurrency)}
+              </span>
+            </div>
             {course.examType ? (
               <span className="mt-1 inline-block rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600">
                 {course.examType}

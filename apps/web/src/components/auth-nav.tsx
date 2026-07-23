@@ -32,6 +32,9 @@ export function AuthNav() {
         <Link href="/dashboard">
           <Button variant="secondary">My learning</Button>
         </Link>
+        <Link href="/orders">
+          <Button variant="secondary">My purchases</Button>
+        </Link>
         <Link href="/profile">
           <Button variant="ghost">Profile</Button>
         </Link>
