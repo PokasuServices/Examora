@@ -2,6 +2,7 @@ import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { PrismaService } from "../prisma/prisma.service";
 import type { RequestUser } from "../auth/types/request-user";
+import { fakeNotificationsServiceProvider } from "../../test/support/fake-notifications-service";
 import { MentorAssignmentService } from "./assignment/mentor-assignment.service";
 import { MentorFeedbackService } from "./feedback/mentor-feedback.service";
 import { MentorMeetingsService } from "./meetings/mentor-meetings.service";
@@ -35,6 +36,7 @@ describe("Mentor workflow services (integration)", () => {
         MentorMeetingsService,
         MentorAssignmentService,
         PrismaService,
+        fakeNotificationsServiceProvider(),
       ],
     }).compile();
     notes = moduleRef.get(MentorNotesService);

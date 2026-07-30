@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import type { Prisma } from "@examora/database";
 import type { RefundStatus } from "@examora/types";
 import { EnrollmentService } from "../../enrollment/enrollment.service";
+import { NotificationsService } from "../../notifications/notifications.service";
 import { PrismaService } from "../../prisma/prisma.service";
 
 const REFUND_INCLUDE = {
@@ -19,6 +20,7 @@ export class RefundsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly enrollmentService: EnrollmentService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async request(userId: string, orderId: string, reason: string) {
@@ -71,6 +73,17 @@ export class RefundsService {
       }),
     ]);
     await this.enrollmentService.revokeForRefund(refund.order.userId, refund.order.courseId);
+
+    await this.notificationsService.enqueue({
+      userId: refund.order.userId,
+      eventType: "commerce.refund_processed",
+      category: "commerce",
+      title: "Your refund has been processed",
+      body: `A refund of ${refund.order.currency} ${Number(refund.amount).toFixed(2)} has been processed for your order.`,
+      data: { orderId: refund.orderId, amount: Number(refund.amount) },
+      channels: ["EMAIL"],
+      isTransactional: true,
+    });
 
     return this.findByIdOrThrow(refundId);
   }

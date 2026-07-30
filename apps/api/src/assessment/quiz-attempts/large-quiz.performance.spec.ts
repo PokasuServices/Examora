@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { EnrollmentService } from "../../enrollment/enrollment.service";
 import { PrismaService } from "../../prisma/prisma.service";
+import { fakeNotificationsServiceProvider } from "../../../test/support/fake-notifications-service";
 import { QuizCatalogService } from "../quiz-catalog/quiz-catalog.service";
 import { QuizAttemptsService } from "./quiz-attempts.service";
 
@@ -24,7 +25,13 @@ describe("QuizAttemptsService (performance — large quiz)", () => {
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
-      providers: [QuizAttemptsService, QuizCatalogService, EnrollmentService, PrismaService],
+      providers: [
+        QuizAttemptsService,
+        QuizCatalogService,
+        EnrollmentService,
+        PrismaService,
+        fakeNotificationsServiceProvider(),
+      ],
     }).compile();
     attempts = moduleRef.get(QuizAttemptsService);
     prisma = moduleRef.get(PrismaService);

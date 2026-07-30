@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { NotificationsService } from "../../notifications/notifications.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import type { RequestUser } from "../../auth/types/request-user";
 
@@ -20,7 +21,10 @@ const ASSIGNMENT_RELATIONS = {
  */
 @Injectable()
 export class MentorAssignmentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async getActiveAssignment(studentId: string) {
     return this.prisma.mentorAssignment.findFirst({
@@ -72,7 +76,7 @@ export class MentorAssignmentService {
       throw new BadRequestException("mentorId must belong to a user with the MENTOR role");
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const assignment = await this.prisma.$transaction(async (tx) => {
       await tx.mentorAssignment.updateMany({
         where: { studentId, unassignedAt: null },
         data: { unassignedAt: new Date() },
@@ -82,6 +86,27 @@ export class MentorAssignmentService {
         include: ASSIGNMENT_RELATIONS,
       });
     });
+
+    await this.notificationsService.enqueue({
+      userId: studentId,
+      eventType: "mentor.assigned",
+      category: "mentoring",
+      title: "You have a new mentor",
+      body: `${assignment.mentor.email} is now your assigned mentor.`,
+      data: { mentorId },
+      channels: ["EMAIL"],
+    });
+    await this.notificationsService.enqueue({
+      userId: mentorId,
+      eventType: "mentor.assigned",
+      category: "mentoring",
+      title: "New student assigned",
+      body: `${assignment.student.email} has been assigned to your caseload.`,
+      data: { studentId },
+      channels: ["EMAIL"],
+    });
+
+    return assignment;
   }
 
   async unassign(studentId: string): Promise<void> {

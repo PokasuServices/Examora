@@ -8,6 +8,7 @@ import {
 } from "@nestjs/common";
 import type { FileRules } from "@examora/types";
 import { EnrollmentService } from "../../enrollment/enrollment.service";
+import { NotificationQueueService } from "../../notifications/notification-queue.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { STORAGE_PORT, type StoragePort } from "../../storage/storage.port";
 import { AssignmentCatalogService } from "../catalog/assignment-catalog.service";
@@ -35,6 +36,7 @@ export class SubmissionsService {
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     private readonly scanQueue: MalwareScanQueueService,
     private readonly enrollmentService: EnrollmentService,
+    private readonly notificationQueue: NotificationQueueService,
   ) {}
 
   /**
@@ -54,9 +56,16 @@ export class SubmissionsService {
     });
 
     if (!latest) {
-      return this.prisma.assignmentSubmission.create({
+      const submission = await this.prisma.assignmentSubmission.create({
         data: { assignmentId, studentId, version: 1, status: "DRAFT" },
       });
+      await this.scheduleDueReminder(
+        studentId,
+        assignment.id,
+        assignment.title,
+        assignment.deadline,
+      );
+      return submission;
     }
     if (latest.status === "DRAFT") {
       return latest;
@@ -67,6 +76,40 @@ export class SubmissionsService {
       });
     }
     return latest;
+  }
+
+  /**
+   * Reminds the student 24h before the deadline, if there is one and it's
+   * still more than 24h away (ADR-0019 §10 — proves the scheduled-
+   * notification capability via BullMQ's delayed jobs; a general-purpose
+   * reminder engine is deferred, see TD-041).
+   */
+  private async scheduleDueReminder(
+    studentId: string,
+    assignmentId: string,
+    assignmentTitle: string,
+    deadline: Date | null,
+  ): Promise<void> {
+    if (!deadline) {
+      return;
+    }
+    const reminderAt = deadline.getTime() - 24 * 60 * 60 * 1000;
+    const delayMs = reminderAt - Date.now();
+    if (delayMs <= 0) {
+      return;
+    }
+    await this.notificationQueue.scheduleNotification(
+      {
+        userId: studentId,
+        eventType: "assignment.due_reminder",
+        category: "assignments",
+        title: "Assignment due soon",
+        body: `"${assignmentTitle}" is due in 24 hours.`,
+        data: { assignmentId },
+        channels: ["EMAIL"],
+      },
+      delayMs,
+    );
   }
 
   async getDetail(id: string, callerId: string) {

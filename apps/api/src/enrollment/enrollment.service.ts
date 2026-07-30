@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import type { Prisma } from "@examora/database";
+import { NotificationsService } from "../notifications/notifications.service";
 import { PrismaService } from "../prisma/prisma.service";
 
 const ENROLLMENT_INCLUDE = {
@@ -19,7 +20,10 @@ const ENROLLMENT_INCLUDE = {
  */
 @Injectable()
 export class EnrollmentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   /** Throws unless the course is free or the user holds an ACTIVE enrollment for it. */
   async assertCourseAccess(userId: string, courseId: string): Promise<void> {
@@ -83,17 +87,19 @@ export class EnrollmentService {
       throw new BadRequestException("This course requires payment — use checkout instead");
     }
 
-    return this.prisma.enrollment.upsert({
+    const enrollment = await this.prisma.enrollment.upsert({
       where: { userId_courseId: { userId, courseId } },
       create: { userId, courseId, status: "ACTIVE", source: "FREE" },
       update: { status: "ACTIVE", source: "FREE", revokedAt: null, expiresAt: null },
       include: ENROLLMENT_INCLUDE,
     });
+    await this.notifyEnrollmentGranted(enrollment);
+    return enrollment;
   }
 
   /** Called by PaymentsService once a webhook confirms payment (ADR-0018 — never a client callback). */
   async grantFromOrder(userId: string, courseId: string, orderId: string, expiresAt?: Date) {
-    return this.prisma.enrollment.upsert({
+    const enrollment = await this.prisma.enrollment.upsert({
       where: { userId_courseId: { userId, courseId } },
       create: { userId, courseId, orderId, status: "ACTIVE", source: "PURCHASE", expiresAt },
       update: {
@@ -104,6 +110,24 @@ export class EnrollmentService {
         expiresAt: expiresAt ?? null,
       },
       include: ENROLLMENT_INCLUDE,
+    });
+    await this.notifyEnrollmentGranted(enrollment);
+    return enrollment;
+  }
+
+  private async notifyEnrollmentGranted(enrollment: {
+    userId: string;
+    courseId: string;
+    course: { title: string };
+  }): Promise<void> {
+    await this.notificationsService.enqueue({
+      userId: enrollment.userId,
+      eventType: "enrollment.granted",
+      category: "learning",
+      title: "You're enrolled",
+      body: `You now have access to "${enrollment.course.title}".`,
+      data: { courseId: enrollment.courseId },
+      channels: ["EMAIL"],
     });
   }
 
@@ -116,7 +140,7 @@ export class EnrollmentService {
       throw new NotFoundException("Course not found");
     }
 
-    return this.prisma.enrollment.upsert({
+    const enrollment = await this.prisma.enrollment.upsert({
       where: { userId_courseId: { userId, courseId } },
       create: { userId, courseId, status: "ACTIVE", source: "ADMIN_GRANT" },
       // Clears any stale expiresAt from a prior lapsed enrollment — an admin
@@ -124,6 +148,8 @@ export class EnrollmentService {
       update: { status: "ACTIVE", source: "ADMIN_GRANT", revokedAt: null, expiresAt: null },
       include: ENROLLMENT_INCLUDE,
     });
+    await this.notifyEnrollmentGranted(enrollment);
+    return enrollment;
   }
 
   async adminRevoke(enrollmentId: string) {

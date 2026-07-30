@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import type { AssignmentSubmissionStatus, ReviewDecision } from "@examora/types";
+import { NotificationsService } from "../../notifications/notifications.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { decToNum } from "../assignments.mappers";
 import type { SaveReviewDto } from "./dto/save-review.dto";
@@ -21,7 +22,10 @@ const WITH_REVIEW_CONTEXT = {
 
 @Injectable()
 export class ReviewerService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async listQueue(
     reviewerId: string,
@@ -126,6 +130,16 @@ export class ReviewerService {
         data: { status: decision === "APPROVED" ? "APPROVED" : "REVISION_REQUESTED" },
       }),
     ]);
+
+    await this.notificationsService.enqueue({
+      userId: submission.studentId,
+      eventType: "assignment.review_published",
+      category: "assignments",
+      title: decision === "APPROVED" ? "Your submission was approved" : "Revision requested",
+      body: `Feedback is ready for "${assignment.title}" — you scored ${obtainedMarks} marks.`,
+      data: { submissionId, assignmentId: assignment.id, decision, obtainedMarks },
+      channels: ["EMAIL"],
+    });
 
     return this.getSubmissionForReview(submissionId, reviewerId);
   }

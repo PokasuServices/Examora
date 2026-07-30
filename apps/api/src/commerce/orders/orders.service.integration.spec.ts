@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { EnrollmentService } from "../../enrollment/enrollment.service";
 import { PrismaService } from "../../prisma/prisma.service";
+import { fakeNotificationsServiceProvider } from "../../../test/support/fake-notifications-service";
 import { FakePaymentGatewayService } from "../../../test/support/fake-payment-gateway.service";
 import { CouponsService } from "../coupons/coupons.service";
 import { PAYMENT_GATEWAY_PORT } from "../payment-gateway.port";
@@ -30,6 +31,7 @@ describe("OrdersService (integration)", () => {
           provide: ConfigService,
           useValue: { getOrThrow: () => ({ payments: { razorpay: { keyId: "test_key_id" } } }) },
         },
+        fakeNotificationsServiceProvider(),
       ],
     }).compile();
     service = moduleRef.get(OrdersService);

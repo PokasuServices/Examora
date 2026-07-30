@@ -3,6 +3,7 @@ import { Test, type TestingModule } from "@nestjs/testing";
 import { AuditService } from "../../audit/audit.service";
 import { EnrollmentService } from "../../enrollment/enrollment.service";
 import { PrismaService } from "../../prisma/prisma.service";
+import { fakeNotificationsServiceProvider } from "../../../test/support/fake-notifications-service";
 import { FakePaymentGatewayService } from "../../../test/support/fake-payment-gateway.service";
 import { CouponsService } from "../coupons/coupons.service";
 import { PAYMENT_GATEWAY_PORT } from "../payment-gateway.port";
@@ -25,6 +26,7 @@ describe("PaymentsService (integration)", () => {
         AuditService,
         PrismaService,
         { provide: PAYMENT_GATEWAY_PORT, useClass: FakePaymentGatewayService },
+        fakeNotificationsServiceProvider(),
       ],
     }).compile();
     service = moduleRef.get(PaymentsService);

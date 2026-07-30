@@ -14,6 +14,10 @@ import { PermissionsService } from "../../permissions/permissions.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { STORAGE_PORT } from "../../storage/storage.port";
 import { FakeStorageService } from "../../../test/support/fake-storage.service";
+import {
+  fakeNotificationQueueServiceProvider,
+  fakeNotificationsServiceProvider,
+} from "../../../test/support/fake-notifications-service";
 import { UsersService } from "../../users/users.service";
 import { MentorAssignmentService } from "../assignment/mentor-assignment.service";
 import { Student360Service } from "./student-360.service";
@@ -47,6 +51,8 @@ describe("Student360Service (integration)", () => {
         PrismaService,
         { provide: STORAGE_PORT, useClass: FakeStorageService },
         { provide: MalwareScanQueueService, useValue: { enqueue: async () => undefined } },
+        fakeNotificationsServiceProvider(),
+        fakeNotificationQueueServiceProvider(),
       ],
     }).compile();
     service = moduleRef.get(Student360Service);

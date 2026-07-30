@@ -2,6 +2,7 @@ import { Test, type TestingModule } from "@nestjs/testing";
 import { EnrollmentService } from "../enrollment/enrollment.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { seedPublishedCourseTree, type SeededCourseTree } from "../../test/support/content-seed";
+import { fakeNotificationsServiceProvider } from "../../test/support/fake-notifications-service";
 import { CatalogService } from "./catalog.service";
 import { ProgressService } from "./progress.service";
 
@@ -14,7 +15,13 @@ describe("ProgressService (integration)", () => {
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
-      providers: [ProgressService, CatalogService, EnrollmentService, PrismaService],
+      providers: [
+        ProgressService,
+        CatalogService,
+        EnrollmentService,
+        PrismaService,
+        fakeNotificationsServiceProvider(),
+      ],
     }).compile();
     progress = moduleRef.get(ProgressService);
     prisma = moduleRef.get(PrismaService);

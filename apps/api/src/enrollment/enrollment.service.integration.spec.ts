@@ -1,6 +1,7 @@
 import { ForbiddenException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { PrismaService } from "../prisma/prisma.service";
+import { fakeNotificationsServiceProvider } from "../../test/support/fake-notifications-service";
 import { EnrollmentService } from "./enrollment.service";
 
 describe("EnrollmentService (integration)", () => {
@@ -15,7 +16,7 @@ describe("EnrollmentService (integration)", () => {
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
-      providers: [EnrollmentService, PrismaService],
+      providers: [EnrollmentService, PrismaService, fakeNotificationsServiceProvider()],
     }).compile();
     service = moduleRef.get(EnrollmentService);
     prisma = moduleRef.get(PrismaService);

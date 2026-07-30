@@ -5,6 +5,10 @@ import { PrismaService } from "../../prisma/prisma.service";
 import { STORAGE_PORT } from "../../storage/storage.port";
 import { FakeStorageService } from "../../../test/support/fake-storage.service";
 import { seedPublishedAssignment } from "../../../test/support/assignment-seed";
+import {
+  fakeNotificationQueueServiceProvider,
+  fakeNotificationsServiceProvider,
+} from "../../../test/support/fake-notifications-service";
 import { AssignmentCatalogService } from "../catalog/assignment-catalog.service";
 import { MalwareScanQueueService } from "../malware-scan-queue.service";
 import { SubmissionsService } from "./submissions.service";
@@ -30,6 +34,8 @@ describe("SubmissionsService (integration)", () => {
         // rows/state transitions, not the scan job's execution (covered by
         // malware-scan.processor.spec.ts).
         { provide: MalwareScanQueueService, useValue: { enqueue: async () => undefined } },
+        fakeNotificationsServiceProvider(),
+        fakeNotificationQueueServiceProvider(),
       ],
     }).compile();
     submissions = moduleRef.get(SubmissionsService);

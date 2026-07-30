@@ -1,4 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { NotificationsService } from "../../notifications/notifications.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import type { RequestUser } from "../../auth/types/request-user";
 import { CommunityAccessService } from "../common/community-access.service";
@@ -25,6 +26,7 @@ export class RepliesService {
     private readonly threadsService: ThreadsService,
     private readonly accessService: CommunityAccessService,
     private readonly reputationService: ReputationService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(actor: RequestUser, threadId: string, dto: CreateReplyDto) {
@@ -56,6 +58,20 @@ export class RepliesService {
     });
 
     await this.reputationService.award(actor.id, REPUTATION_REPLY_CREATED, "Reply posted");
+
+    if (thread.authorId !== actor.id) {
+      await this.notificationsService.enqueue({
+        userId: thread.authorId,
+        eventType: "community.reply_received",
+        category: "community",
+        title: "New reply to your thread",
+        body: `${reply.author.email} replied to "${thread.title}".`,
+        data: { threadId, replyId: reply.id },
+        // In-app only (implicit — every enqueue() gets it) — a reply is not
+        // urgent enough to warrant an email per occurrence.
+      });
+    }
+
     return reply;
   }
 

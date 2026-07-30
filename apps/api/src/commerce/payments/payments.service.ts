@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger, UnauthorizedException } from "@nestjs/commo
 import type { Prisma } from "@examora/database";
 import { AuditService } from "../../audit/audit.service";
 import { EnrollmentService } from "../../enrollment/enrollment.service";
+import { NotificationsService } from "../../notifications/notifications.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { CouponsService } from "../coupons/coupons.service";
 import { PAYMENT_GATEWAY_PORT, type PaymentGatewayPort } from "../payment-gateway.port";
@@ -24,6 +25,7 @@ export class PaymentsService {
     private readonly enrollmentService: EnrollmentService,
     private readonly couponsService: CouponsService,
     private readonly auditService: AuditService,
+    private readonly notificationsService: NotificationsService,
     @Inject(PAYMENT_GATEWAY_PORT) private readonly gateway: PaymentGatewayPort,
   ) {}
 
@@ -53,7 +55,7 @@ export class PaymentsService {
     if (SUCCESS_EVENTS.has(event.event)) {
       await this.markCaptured(payment.id, event.gatewayPaymentId, payment.order);
     } else if (FAILURE_EVENTS.has(event.event)) {
-      await this.markFailed(payment.id, event.gatewayPaymentId, payment.orderId);
+      await this.markFailed(payment.id, event.gatewayPaymentId, payment.order);
     } else {
       this.logger.warn(`Unhandled webhook event type: ${event.event}`);
     }
@@ -84,24 +86,46 @@ export class PaymentsService {
       entityId: order.id,
       after: { userId: order.userId, courseId: order.courseId, amount: Number(order.totalAmount) },
     });
+
+    await this.notificationsService.enqueue({
+      userId: order.userId,
+      eventType: "commerce.payment_success",
+      category: "commerce",
+      title: "Payment received",
+      body: `We received your payment of ${order.currency} ${Number(order.totalAmount).toFixed(2)}. Your invoice is ready.`,
+      data: { orderId: order.id, amount: Number(order.totalAmount), currency: order.currency },
+      channels: ["EMAIL"],
+      isTransactional: true,
+    });
   }
 
   private async markFailed(
     paymentId: string,
     gatewayPaymentId: string,
-    orderId: string,
+    order: Prisma.OrderGetPayload<{ include: { coupon: true } }>,
   ): Promise<void> {
     await this.prisma.$transaction([
       this.prisma.payment.update({
         where: { id: paymentId },
         data: { gatewayPaymentId, status: "FAILED" },
       }),
-      this.prisma.order.update({ where: { id: orderId }, data: { status: "FAILED" } }),
+      this.prisma.order.update({ where: { id: order.id }, data: { status: "FAILED" } }),
     ]);
     await this.auditService.record({
       action: "commerce.payment_failed",
       entityType: "Order",
-      entityId: orderId,
+      entityId: order.id,
+    });
+
+    await this.notificationsService.enqueue({
+      userId: order.userId,
+      eventType: "commerce.payment_failed",
+      category: "commerce",
+      title: "Payment failed",
+      body: "Your payment could not be completed. Please try checking out again.",
+      data: { orderId: order.id },
+      channels: ["EMAIL"],
+      isTransactional: true,
     });
   }
 

@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, NotFoundException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { PrismaService } from "../../prisma/prisma.service";
+import { fakeNotificationsServiceProvider } from "../../../test/support/fake-notifications-service";
 import { MentorAssignmentService } from "../assignment/mentor-assignment.service";
 import { MentorProfilesService } from "./mentor-profiles.service";
 
@@ -17,7 +18,12 @@ describe("MentorProfilesService (integration)", () => {
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
-      providers: [MentorProfilesService, MentorAssignmentService, PrismaService],
+      providers: [
+        MentorProfilesService,
+        MentorAssignmentService,
+        PrismaService,
+        fakeNotificationsServiceProvider(),
+      ],
     }).compile();
     service = moduleRef.get(MentorProfilesService);
     assignmentService = moduleRef.get(MentorAssignmentService);

@@ -2,6 +2,7 @@ import { BadRequestException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { EnrollmentService } from "../../enrollment/enrollment.service";
 import { PrismaService } from "../../prisma/prisma.service";
+import { fakeNotificationsServiceProvider } from "../../../test/support/fake-notifications-service";
 import { RefundsService } from "./refunds.service";
 
 describe("RefundsService (integration)", () => {
@@ -16,7 +17,12 @@ describe("RefundsService (integration)", () => {
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
-      providers: [RefundsService, EnrollmentService, PrismaService],
+      providers: [
+        RefundsService,
+        EnrollmentService,
+        PrismaService,
+        fakeNotificationsServiceProvider(),
+      ],
     }).compile();
     service = moduleRef.get(RefundsService);
     enrollmentService = moduleRef.get(EnrollmentService);

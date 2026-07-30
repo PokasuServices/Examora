@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import type { Prisma } from "@examora/database";
 import type { ThreadStatus, ThreadType } from "@examora/types";
+import { NotificationsService } from "../../notifications/notifications.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import type { RequestUser } from "../../auth/types/request-user";
 import { CatalogService } from "../../learning/catalog.service";
@@ -51,6 +52,7 @@ export class ThreadsService {
     private readonly catalogService: CatalogService,
     private readonly quizCatalogService: QuizCatalogService,
     private readonly assignmentCatalogService: AssignmentCatalogService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(actor: RequestUser, dto: CreateThreadDto) {
@@ -194,6 +196,17 @@ export class ThreadsService {
       REPUTATION_ANSWER_ACCEPTED,
       "Answer accepted",
     );
+
+    if (reply.authorId !== thread.authorId) {
+      await this.notificationsService.enqueue({
+        userId: reply.authorId,
+        eventType: "community.answer_accepted",
+        category: "community",
+        title: "Your answer was accepted",
+        body: `Your answer to "${thread.title}" was marked as the accepted answer.`,
+        data: { threadId, replyId },
+      });
+    }
 
     return this.getByIdOrThrow(actor, threadId);
   }

@@ -6,6 +6,7 @@ import { EnrollmentService } from "../../enrollment/enrollment.service";
 import { CatalogService } from "../../learning/catalog.service";
 import { PermissionsService } from "../../permissions/permissions.service";
 import { PrismaService } from "../../prisma/prisma.service";
+import { fakeNotificationsServiceProvider } from "../../../test/support/fake-notifications-service";
 import { ensureRolesAndPermissions } from "../../../test/support/seed-helpers";
 import { CommunityAccessService } from "../common/community-access.service";
 import { ForumBoardsService } from "../forums/forum-boards.service";
@@ -52,6 +53,7 @@ describe("CommunityReportsService (integration)", () => {
         EnrollmentService,
         PermissionsService,
         PrismaService,
+        fakeNotificationsServiceProvider(),
       ],
     }).compile();
     service = moduleRef.get(CommunityReportsService);

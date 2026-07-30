@@ -2,6 +2,7 @@ import { BadRequestException, ForbiddenException, NotFoundException } from "@nes
 import { Test, type TestingModule } from "@nestjs/testing";
 import { PrismaService } from "../../prisma/prisma.service";
 import type { RequestUser } from "../../auth/types/request-user";
+import { fakeNotificationsServiceProvider } from "../../../test/support/fake-notifications-service";
 import { MentorAssignmentService } from "./mentor-assignment.service";
 
 describe("MentorAssignmentService (integration)", () => {
@@ -16,7 +17,7 @@ describe("MentorAssignmentService (integration)", () => {
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
-      providers: [MentorAssignmentService, PrismaService],
+      providers: [MentorAssignmentService, PrismaService, fakeNotificationsServiceProvider()],
     }).compile();
     service = moduleRef.get(MentorAssignmentService);
     prisma = moduleRef.get(PrismaService);
