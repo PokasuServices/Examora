@@ -3,40 +3,51 @@ import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module";
-import { MAILER_PORT } from "../src/mailer/mailer.port";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { configureApp } from "../src/setup-app";
-import { TestMailerService } from "./support/test-mailer";
 
 /**
  * Sprint 1 auth e2e coverage: registration/consent, email verification,
  * login, forgot/reset password (with session invalidation), refresh
  * rotation, session management, and logout — all against a real Postgres
  * instance (docker-compose locally, service containers in CI).
+ *
+ * Verification/reset tokens are embedded in the `Notification.data` JSON
+ * payload (ADR-0019) rather than a captured "sent email" — `Notification`
+ * rows are created synchronously inside `NotificationsService.enqueue()`
+ * before the async BullMQ delivery job even runs, so reading them via Prisma
+ * needs no polling/waiting for the (now-async) send to complete.
  */
 describe("Auth (e2e)", () => {
   let app: INestApplication;
   let prisma: PrismaService;
-  let mailer: TestMailerService;
   const email = `sprint1-auth-${Date.now()}@example.test`;
   const password = "a-strong-password-123";
   // Reassigned once reset-password changes it, so later describe blocks log in correctly.
   let currentPassword = password;
 
+  async function latestNotificationToken(eventType: string): Promise<string> {
+    const notification = await prisma.notification.findFirst({
+      where: { eventType, user: { email } },
+      orderBy: { createdAt: "desc" },
+    });
+    const token = (notification?.data as { token?: string } | null)?.token;
+    if (!token) {
+      throw new Error(`No ${eventType} notification with a token found for ${email}`);
+    }
+    return token;
+  }
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      .overrideProvider(MAILER_PORT)
-      .useClass(TestMailerService)
-      .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
     configureApp(app);
     await app.init();
 
     prisma = app.get(PrismaService);
-    mailer = app.get(MAILER_PORT);
 
     await prisma.role.upsert({
       where: { name: "STUDENT" },
@@ -70,7 +81,10 @@ describe("Auth (e2e)", () => {
         expect.arrayContaining(["profile:read:own", "profile:update:own"]),
       );
       expect(res.headers["set-cookie"]).toBeDefined();
-      expect(mailer.sent.some((m) => m.to === email && m.subject.includes("Verify"))).toBe(true);
+      const verificationNotification = await prisma.notification.findFirst({
+        where: { eventType: "auth.email_verification", user: { email } },
+      });
+      expect(verificationNotification?.title).toContain("Verify");
 
       const consent = await prisma.consentRecord.findFirst({
         where: { user: { email }, type: "TERMS_OF_SERVICE" },
@@ -94,7 +108,7 @@ describe("Auth (e2e)", () => {
     });
 
     it("verifies the account and promotes it to ACTIVE", async () => {
-      const token = mailer.latestTokenFor(email);
+      const token = await latestNotificationToken("auth.email_verification");
 
       await request(app.getHttpServer())
         .post("/api/v1/auth/verify-email")
@@ -116,12 +130,17 @@ describe("Auth (e2e)", () => {
     });
 
     it("resend-verification is a silent no-op once already verified", async () => {
-      const sentBefore = mailer.sent.length;
+      const countBefore = await prisma.notification.count({
+        where: { eventType: "auth.email_verification", user: { email } },
+      });
       await request(app.getHttpServer())
         .post("/api/v1/auth/resend-verification")
         .send({ email })
         .expect(204);
-      expect(mailer.sent.length).toBe(sentBefore);
+      const countAfter = await prisma.notification.count({
+        where: { eventType: "auth.email_verification", user: { email } },
+      });
+      expect(countAfter).toBe(countBefore);
     });
 
     it("resend-verification never confirms whether an email is registered", async () => {
@@ -147,6 +166,36 @@ describe("Auth (e2e)", () => {
         .expect(401);
       expect(res.body.error.message).toBe("Invalid email or password");
     });
+
+    it("sends a security alert on an unrecognized device, but not again from that same device", async () => {
+      const device = `e2e-security-alert-device-${Date.now()}`;
+      const countBefore = await prisma.notification.count({
+        where: { eventType: "auth.security_alert", user: { email } },
+      });
+
+      await request(app.getHttpServer())
+        .post("/api/v1/auth/login")
+        .set("User-Agent", device)
+        .send({ email, password: currentPassword })
+        .expect(200);
+
+      const countAfterFirst = await prisma.notification.count({
+        where: { eventType: "auth.security_alert", user: { email } },
+      });
+      expect(countAfterFirst).toBe(countBefore + 1);
+
+      // Same device (User-Agent) again — now recognized, no duplicate alert.
+      await request(app.getHttpServer())
+        .post("/api/v1/auth/login")
+        .set("User-Agent", device)
+        .send({ email, password: currentPassword })
+        .expect(200);
+
+      const countAfterSecond = await prisma.notification.count({
+        where: { eventType: "auth.security_alert", user: { email } },
+      });
+      expect(countAfterSecond).toBe(countAfterFirst);
+    });
   });
 
   describe("forgot / reset password", () => {
@@ -169,7 +218,7 @@ describe("Auth (e2e)", () => {
         .expect(200);
       const staleCookie = loginRes.headers["set-cookie"];
 
-      const resetToken = mailer.latestTokenFor(email);
+      const resetToken = await latestNotificationToken("auth.password_reset");
       const newPassword = "a-new-strong-password-456";
 
       await request(app.getHttpServer())

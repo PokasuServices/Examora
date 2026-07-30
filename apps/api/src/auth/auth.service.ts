@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -15,7 +14,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { UsersService } from "../users/users.service";
 import { PermissionsService } from "../permissions/permissions.service";
 import { AuditService } from "../audit/audit.service";
-import { MAILER_PORT, type MailerPort } from "../mailer/mailer.port";
+import { NotificationsService } from "../notifications/notifications.service";
 import type { LoginDto } from "./dto/login.dto";
 import type { RegisterDto } from "./dto/register.dto";
 import { expiresAtFromNow, generateOpaqueToken, hashToken } from "./refresh-token.util";
@@ -62,7 +61,7 @@ export class AuthService {
     private readonly auditService: AuditService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    @Inject(MAILER_PORT) private readonly mailer: MailerPort,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async register(dto: RegisterDto, meta: RequestMeta): Promise<IssuedTokens> {
@@ -93,7 +92,7 @@ export class AuthService {
       },
     });
 
-    await this.sendEmailVerification(user.id, user.email);
+    await this.sendEmailVerification(user.id);
 
     await this.auditService.record({
       actorId: user.id,
@@ -164,7 +163,37 @@ export class AuthService {
       correlationId: meta.correlationId,
     });
 
+    await this.maybeAlertNewDevice(user.id, meta);
+
     return this.issueTokens(user, meta);
+  }
+
+  /**
+   * Best-effort "new device" security alert (ADR-0019) — a minimal heuristic:
+   * an unrecognized user-agent for this user is treated as a new device. No
+   * IP-geolocation or full device-fingerprinting exists yet (see TD-041).
+   */
+  private async maybeAlertNewDevice(userId: string, meta: RequestMeta): Promise<void> {
+    if (!meta.userAgent) {
+      return;
+    }
+    const knownDevice = await this.prisma.refreshToken.findFirst({
+      where: { userId, userAgent: meta.userAgent },
+    });
+    if (knownDevice) {
+      return;
+    }
+    await this.notificationsService.enqueue({
+      userId,
+      eventType: "auth.security_alert",
+      category: "account_security",
+      title: "New sign-in to your account",
+      body: `We noticed a new sign-in to your Examora account${
+        meta.ipAddress ? ` from ${meta.ipAddress}` : ""
+      }. If this wasn't you, reset your password immediately.`,
+      channels: ["EMAIL"],
+      isTransactional: true,
+    });
   }
 
   /** Rotates the refresh token on every use — old token is revoked immediately (closes TD-008). */
@@ -223,7 +252,7 @@ export class AuthService {
   // Email verification
   // ---------------------------------------------------------------------
 
-  async sendEmailVerification(userId: string, email: string): Promise<void> {
+  async sendEmailVerification(userId: string): Promise<void> {
     const token = generateOpaqueToken();
     await this.prisma.verificationToken.create({
       data: {
@@ -234,10 +263,15 @@ export class AuthService {
       },
     });
 
-    await this.mailer.send({
-      to: email,
-      subject: "Verify your Examora account",
-      text: `Welcome to Examora. Verify your email using this token: ${token}`,
+    await this.notificationsService.enqueue({
+      userId,
+      eventType: "auth.email_verification",
+      category: "account_security",
+      title: "Verify your Examora account",
+      body: `Welcome to Examora. Verify your email using this token: ${token}`,
+      data: { token },
+      channels: ["EMAIL"],
+      isTransactional: true,
     });
   }
 
@@ -253,7 +287,7 @@ export class AuthService {
       data: { usedAt: new Date() },
     });
 
-    await this.sendEmailVerification(user.id, user.email);
+    await this.sendEmailVerification(user.id);
   }
 
   async verifyEmail(tokenPlain: string, meta: RequestMeta): Promise<void> {
@@ -308,10 +342,15 @@ export class AuthService {
       },
     });
 
-    await this.mailer.send({
-      to: user.email,
-      subject: "Reset your Examora password",
-      text: `Reset your password using this token: ${token}. It expires in 1 hour.`,
+    await this.notificationsService.enqueue({
+      userId: user.id,
+      eventType: "auth.password_reset",
+      category: "account_security",
+      title: "Reset your Examora password",
+      body: `Reset your password using this token: ${token}. It expires in 1 hour.`,
+      data: { token },
+      channels: ["EMAIL"],
+      isTransactional: true,
     });
 
     await this.auditService.record({

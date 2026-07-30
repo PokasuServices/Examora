@@ -3,10 +3,8 @@ import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module";
-import { MAILER_PORT } from "../src/mailer/mailer.port";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { configureApp } from "../src/setup-app";
-import { TestMailerService } from "./support/test-mailer";
 
 describe("Users (e2e)", () => {
   let app: INestApplication;
@@ -20,10 +18,7 @@ describe("Users (e2e)", () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      .overrideProvider(MAILER_PORT)
-      .useClass(TestMailerService)
-      .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
     configureApp(app);
