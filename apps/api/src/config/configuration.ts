@@ -41,6 +41,28 @@ export interface AppConfig {
       webhookSecret: string;
     };
   };
+  notifications: {
+    ses: {
+      configured: boolean;
+      region: string;
+      accessKeyId: string;
+      secretAccessKey: string;
+      fromEmail: string;
+    };
+    twilio: {
+      configured: boolean;
+      accountSid: string;
+      authToken: string;
+      smsFrom: string;
+      whatsappFrom: string;
+    };
+    webPush: {
+      configured: boolean;
+      publicKey: string;
+      privateKey: string;
+      subject: string;
+    };
+  };
 }
 
 /** Consumed via ConfigService.get<AppConfig>('app'). Values validated in env.validation.ts. */
@@ -50,6 +72,12 @@ export default (): { app: AppConfig } => {
   const razorpayKeyId = process.env.RAZORPAY_KEY_ID ?? "";
   const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET ?? "";
   const razorpayWebhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET ?? "";
+  const sesAccessKeyId = process.env.SES_ACCESS_KEY_ID ?? "";
+  const sesSecretAccessKey = process.env.SES_SECRET_ACCESS_KEY ?? "";
+  const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID ?? "";
+  const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN ?? "";
+  const vapidPublicKey = process.env.VAPID_PUBLIC_KEY ?? "";
+  const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY ?? "";
 
   return {
     app: {
@@ -110,6 +138,32 @@ export default (): { app: AppConfig } => {
           keyId: razorpayKeyId,
           keySecret: razorpayKeySecret,
           webhookSecret: razorpayWebhookSecret,
+        },
+      },
+      notifications: {
+        // ADR-0019 §6: every channel adapter logs instead of sending when
+        // unconfigured (unlike payments, no money is on the line), so the app
+        // boots and the whole delivery pipeline is exercisable in tests with
+        // zero real vendor credentials.
+        ses: {
+          configured: sesAccessKeyId.length > 0 && sesSecretAccessKey.length > 0,
+          region: process.env.SES_REGION ?? "us-east-1",
+          accessKeyId: sesAccessKeyId,
+          secretAccessKey: sesSecretAccessKey,
+          fromEmail: process.env.SES_FROM_EMAIL ?? "no-reply@examora.test",
+        },
+        twilio: {
+          configured: twilioAccountSid.length > 0 && twilioAuthToken.length > 0,
+          accountSid: twilioAccountSid,
+          authToken: twilioAuthToken,
+          smsFrom: process.env.TWILIO_SMS_FROM ?? "",
+          whatsappFrom: process.env.TWILIO_WHATSAPP_FROM ?? "",
+        },
+        webPush: {
+          configured: vapidPublicKey.length > 0 && vapidPrivateKey.length > 0,
+          publicKey: vapidPublicKey,
+          privateKey: vapidPrivateKey,
+          subject: process.env.VAPID_SUBJECT ?? "mailto:admin@examora.test",
         },
       },
     },

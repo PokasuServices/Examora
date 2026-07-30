@@ -20,7 +20,7 @@ import { BULLMQ_REDIS_CLIENT } from "./redis/redis.constants";
 import { StorageModule } from "./storage/storage.module";
 import { MalwareScanModule } from "./malware-scan/malware-scan.module";
 import { HealthModule } from "./health/health.module";
-import { MailerModule } from "./mailer/mailer.module";
+import { NotificationModule } from "./notifications/notification.module";
 import { AuditModule } from "./audit/audit.module";
 import { PermissionsModule } from "./permissions/permissions.module";
 import { AuthModule } from "./auth/auth.module";
@@ -73,7 +73,7 @@ import { CommerceModule } from "./commerce/commerce.module";
     RedisModule,
     StorageModule,
     MalwareScanModule,
-    MailerModule,
+    NotificationModule,
     AuditModule,
     PermissionsModule,
     HealthModule,

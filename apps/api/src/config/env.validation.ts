@@ -109,6 +109,54 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   RAZORPAY_WEBHOOK_SECRET?: string;
+
+  // Notification, Communication & Engagement (ADR-0005, ADR-0019) — every
+  // channel is optional: the app boots and every automated test passes with
+  // zero real credentials, each adapter logging instead of sending when
+  // unconfigured (see ChannelSendResult ports for the runtime-facing behavior).
+  @IsOptional()
+  @IsString()
+  SES_REGION?: string;
+
+  @IsOptional()
+  @IsString()
+  SES_ACCESS_KEY_ID?: string;
+
+  @IsOptional()
+  @IsString()
+  SES_SECRET_ACCESS_KEY?: string;
+
+  @IsOptional()
+  @IsString()
+  SES_FROM_EMAIL?: string;
+
+  @IsOptional()
+  @IsString()
+  TWILIO_ACCOUNT_SID?: string;
+
+  @IsOptional()
+  @IsString()
+  TWILIO_AUTH_TOKEN?: string;
+
+  @IsOptional()
+  @IsString()
+  TWILIO_SMS_FROM?: string;
+
+  @IsOptional()
+  @IsString()
+  TWILIO_WHATSAPP_FROM?: string;
+
+  @IsOptional()
+  @IsString()
+  VAPID_PUBLIC_KEY?: string;
+
+  @IsOptional()
+  @IsString()
+  VAPID_PRIVATE_KEY?: string;
+
+  @IsOptional()
+  @IsString()
+  VAPID_SUBJECT?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {
