@@ -17,7 +17,7 @@ Postgres/Redis/MinIO; `apps/api` boots and serves `/health` and `/api/docs`; `ap
 `apps/admin` boot and render a placeholder page; a user can register/login/refresh/logout against
 the skeleton auth endpoints.
 
-## Phase 1 — MVP: Core Learning & Assessment (Sprints 1-4, 9)
+## Phase 1 — MVP: Core Learning & Assessment (Sprints 1-4, 10)
 
 **Goal**: A student can register, enroll, learn, and take a scored quiz.
 **Scope**: Full RBAC, course/subject/topic/module CMS + delivery, progress tracking, quiz engine
@@ -36,13 +36,16 @@ register → enroll → learn → quiz → report journey works end-to-end in st
 > 7 instead, moving Scoring/Reports/Recommendations v0 to Sprint 8. Resequenced a fourth time after
 > Sprint 7: Commerce, Enrollment & Payments (see Phase 4) was approved to run as Sprint 8 instead,
 > moving Scoring/Reports/Recommendations v0 to Sprint 9 — this also resolves TD-020's deferred
-> enrollment gate far earlier than originally planned. No functional dependency blocks any of these
-> moves: Creative Assignments, Mentor Management, Community/Discussion, and Commerce/Enrollment all
-> operate independently of the quiz engine's own scoring/reports/recommendations feature. Phase 1
-> therefore interleaves with Phases 2/3/4 by sprint number instead of running back-to-back; each
-> phase's own exit criteria still gate its own completion regardless of interleaving.
+> enrollment gate far earlier than originally planned. Resequenced a fifth time after Sprint 8: the
+> notification/communication half of Phase 2's notification-service sprint (see below) was approved
+> to run as Sprint 9 instead, moving Scoring/Reports/Recommendations v0 to Sprint 10. No functional
+> dependency blocks any of these moves: Creative Assignments, Mentor Management, Community/
+> Discussion, Commerce/Enrollment, and notification delivery all operate independently of the quiz
+> engine's own scoring/reports/recommendations feature. Phase 1 therefore interleaves with Phases
+> 2/3/4 by sprint number instead of running back-to-back; each phase's own exit criteria still gate
+> its own completion regardless of interleaving.
 
-## Phase 2 — Mentor-Led Learning (Sprints 5-6, 10)
+## Phase 2 — Mentor-Led Learning (Sprints 5-6, 9)
 
 **Goal**: Creative submissions and human mentoring close the feedback loop.
 **Scope**: Creative assignment authoring/submission/upload validation/malware scan, rubric review
@@ -50,19 +53,21 @@ workspace (annotations deferred — see Sprint 5 backlog note), mentor managemen
 mentor workflow (notes/tasks/feedback/meetings), merged notification service (COMM-MERGED) going
 live on real channels. Cohorts and at-risk-alert escalation, originally scoped into this phase's
 mentoring sprint, are deferred — see Sprint 6 backlog note. (The notification-service sprint was
-renumbered from 9 to 10 by the Sprint 8 resequencing below.)
+renumbered from 9 to 10 by the Sprint 8 resequencing, then to 9 by the Sprint 9 resequencing below —
+back to its original number, now carrying only the notification/communication half of the old
+combined sprint.)
 **Key docs**: CREATIVE-10, DESIGN-03, COMM-MERGED, SRS-02 FR-ASSIGN/REVIEW/MENTOR.
 **Exit criteria**: A mentor can review a real submission end-to-end (score via rubric, publish
 feedback, request revision) with full audit trail; notification delivery SLA ≥98% in staging load
 test.
 
-## Phase 3 — Creative Community (Sprints 7, 10)
+## Phase 3 — Creative Community (Sprints 7, 11)
 
 **Goal**: Safe peer learning.
 **Scope**: Discussion forums, doubt resolution, comments/likes/bookmarks/follow, moderation tooling
 (report/hide/restore/lock/pin), search (Sprint 7 — the discussion/moderation half of FR-COMM-01/02);
 revision cycles, XP/achievements with anti-fraud idempotency, consent-gated community gallery, peer
-rating (Sprint 10, alongside notification delivery — CREATIVE-10 §8-10).
+rating (Sprint 11, alongside Growth Modules & Full Admin — CREATIVE-10 §8-10).
 **Key docs**: CREATIVE-10 §8-10, SRS-02 FR-COMM-01/02, doc 08 §Community Moderation.
 **Exit criteria**: Private-by-default enforced with tests; moderator can hide reported content within
 SLA; XP cannot be awarded twice for the same action (idempotency test).
@@ -70,9 +75,12 @@ SLA; XP cannot be awarded twice for the same action (idempotency test).
 > Resequenced after Sprint 6: this phase's scope splits across two sprints instead of one — the
 > discussion-forum/doubt-resolution/moderation half (FR-COMM-01/02) runs as Sprint 7, ahead of the
 > creative gallery/peer-rating/XP half (CREATIVE-10 §8-10), which moved to Sprint 9 alongside
-> notification delivery, then to Sprint 10 after the Sprint 8 resequencing below. The two halves are
-> functionally independent (text-based discussion threads vs. a media gallery with
-> ratings/gamification), so splitting them does not block either.
+> notification delivery, then to Sprint 10 after the Sprint 8 resequencing, then to Sprint 11
+> (alongside Growth Modules & Full Admin rather than notifications) after the Sprint 9 resequencing
+> below — see D-54. The gallery/peer-rating/XP half is functionally independent of both the
+> discussion-forum half (text-based threads vs. a media gallery with ratings/gamification) and of
+> notification delivery, so it can attach to whichever adjacent sprint has room without blocking
+> anything.
 
 ## Phase 4 — Growth & Counselling (Sprint 8, 11-12)
 
@@ -90,9 +98,10 @@ Learning/Quiz/Assignment/Mentor content; admin can complete every workflow liste
 > Resequenced after Sprint 7: Commerce, Enrollment & Payments (previously planned as Sprint 10,
 > narrower in scope — payments/entitlements only, no enrollment or commerce/coupon model) was
 > approved to run as Sprint 8 instead, immediately after Community & Discussion, absorbing the
-> enrollment gate TD-020 had deferred. This phase therefore now interleaves with Phase 1 (Sprint 9)
-> and Phase 2/3 (Sprint 10) by sprint number rather than running as a contiguous block — the same
-> interleaving pattern Phase 1 already established. No functional dependency is violated: Commerce/
+> enrollment gate TD-020 had deferred. This phase therefore now interleaves with Phase 2 (Sprint 9),
+> Phase 1 (Sprint 10), and Phase 3 (Sprint 11) by sprint number rather than running as a contiguous
+> block — the same interleaving pattern Phase 1 already established. No functional dependency is
+> violated: Commerce/
 > Enrollment/Payments only needs read access to existing Learning/Quiz/Assignment/Mentor/Community
 > catalog data to gate it, not the reverse.
 

@@ -382,7 +382,51 @@ engine's own scoring/reports or the notification/gallery features.
 audited; invoice generation correct under refund/partial-refund scenarios; a non-entitled student is
 denied access to paid Learning/Quiz/Assignment/Mentor content, and an entitled student is not.
 
-## Sprint 9 — Scoring, Reports & Recommendations v0
+## Sprint 9 — Notification, Communication & Engagement
+
+Status: **Complete** (2026-07-30). 500 automated tests pass (299 unit/integration + 201 e2e),
+including 63 new Sprint 9 tests (48 unit/integration + 15 e2e). See ADR-0019 for the full design
+(module shape, provider adapters, BullMQ delivery/schedule queues, delivery-state taxonomy,
+transactional-bypass, DLQ + channel fallback, Notification/Delivery split).
+
+Resequencing note (approved ahead of Sprint 9, mirroring the Sprint 5/6/7/8 precedent): this entry
+runs the notification/communication half of old Sprint 10 ("Notifications & Creative Gallery") now,
+ahead of Scoring/Reports/Recommendations v0 (previously Sprint 9, moves to Sprint 10). The other half
+of old Sprint 10 — the creative community gallery, peer rating, and XP/achievements (CREATIVE-10
+§8-10) — is not part of this sprint's approved scope and folds into Sprint 11 ("Growth Modules, Full
+Admin & Creative Gallery") instead, alongside its existing growth/admin scope — see D-54. No
+functional dependency blocks this: notification delivery is a cross-cutting concern that only needs
+read access to existing Auth/Enrollment/Payments/Learning/Quiz/Assignment/Mentor/Community data to
+fire events off of, independent of the quiz engine's own scoring/reports/recommendations feature or
+the community gallery's media/rating/XP model.
+
+- Notification Engine: Notification Service, Notification Templates, Notification Preferences,
+  Notification Queue, Retry Policy, Delivery Tracking, Read/Unread, In-App Notifications
+- Communication Channels: Email, Browser (Web) Push, SMS provider abstraction, WhatsApp provider
+  abstraction, Mobile Push adapter interface (foundation only — no live integration, per ADR-0004)
+- COMM-MERGED (supersedes COMM-11/COMM-31 per ADR-0004): full delivery workflow live on real
+  channels (Email/SMS/WhatsApp/Web Push/In-App), DLQ + fallback-channel escalation, delivery-state
+  tracking (`Queued → Sent → Delivered → Opened → Clicked → Acknowledged`, plus `Failed`/
+  `Retried`/`Suppressed`)
+- Event integration: Authentication (registration, email verification, password reset, security
+  alert), Enrollment, Payments (success/refund), Learning/Quiz (reminders), Assignments (review
+  published), Mentor (assignment), Community (reply, accepted answer, moderation action)
+- Engagement: Notification Center, user preferences (channel opt-in/out, mute by category, DND
+  schedule, digest vs. instant, language, timezone)
+- Reliability: retry policy with backoff, dead-letter queue, channel fallback, delivery tracking,
+  audit logging — maintaining the ≥98% delivery-success SLA (COMM-MERGED §11)
+- Reuses existing Authentication, RBAC, Audit, Commerce, Assignment, Community, Mentor, Storage, and
+  queue infrastructure (BullMQ/Redis, same pattern as the Sprint 5 malware-scan queue); replaces
+  `ConsoleMailerService`/`MailerPort` (TD-013) wholesale — `AuthService` call sites do not change
+
+**Exit criteria**: Delivery success ≥98% in staging load test; a forged/duplicate provider webhook
+does not double-count delivery state; DLQ captures a message after exhausted retries; channel
+fallback escalates on primary-channel failure; a muted/opted-out category is never delivered
+(`Suppressed` state recorded); read/unread state is accurate in the notification center.
+
+## Sprint 10 — Scoring, Reports & Recommendations v0
+
+Status: Planned (renumbered from Sprint 9 by the Sprint 9 resequencing above).
 
 - FR-QUIZ-04: automatic objective scoring per published rules, audit timestamp, persisted once
 - FR-QUIZ-05: question reporting (student flags a faulty question without affecting their result)
@@ -394,26 +438,20 @@ denied access to paid Learning/Quiz/Assignment/Mentor content, and an entitled s
 **Exit criteria**: Phase 1 (MVP) complete — full register→enroll→learn→quiz→report journey passes
 E2E; all Phase 1 FR-IDs have automated test evidence per QA-15 §10.
 
-## Sprint 10 — Notifications & Creative Gallery
-
-- COMM-MERGED (supersedes COMM-11/COMM-31 per ADR-0004): full delivery workflow live on real
-  channels (Email/SMS/WhatsApp/Web Push/In-App), DLQ + fallback, delivery-state tracking
-- CREATIVE-10 §8-10: revision cycles, community gallery (consent-gated, private by default), peer
-  rating, XP/achievement idempotency
-
-**Exit criteria**: Phase 3 complete — delivery success ≥98% in staging load test; XP double-award
-prevented under concurrent-request test.
-
-## Sprint 11 — Growth Modules & Full Admin
+## Sprint 11 — Growth Modules, Full Admin & Creative Gallery
 
 - FR-EVENT-01: webinar/event scheduling, registration (deduplicated by user+event), attendance
 - FR-COLLEGE-01: college directory search/filter/detail, published-only data
 - FR-ENQ-01: consented enquiry sharing with colleges, consent version/time stored
 - ADMIN-08 §4-5: remaining admin modules (question-bank approval workflow, community moderation
   admin, system settings/feature flags) and their workflows — payments admin moves to Sprint 8
+- CREATIVE-10 §8-10 (moved from old Sprint 10 by the Sprint 9 resequencing — see D-54): revision
+  cycles, consent-gated community gallery (private by default), peer rating, XP/achievement
+  idempotency
 
 **Exit criteria**: Every ADMIN-08 §5 workflow completes end-to-end; consent stored/verified before
-any student contact data is shared externally.
+any student contact data is shared externally; XP cannot be awarded twice for the same action
+(idempotency test).
 
 ## Sprint 12 — Analytics & Reporting
 

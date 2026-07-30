@@ -5,44 +5,51 @@ entrance exams. Governed by [`documents/00_Master_Development_Guide_Examora_Plat
 
 ## Status
 
-**Sprint 8 — Commerce, Enrollment & Payments (complete).** Courses can carry a price
-(`priceAmount`/`priceCurrency`; `null` means free, preserving all prior free-course behavior).
-Students check out a paid course through a gateway-agnostic payment abstraction (Razorpay is the
-concrete adapter, mirroring the `StoragePort`/`MalwareScannerPort` split from ADR-0015) — entitlement
-is granted only by a server-verified webhook, never a client callback (SRS-02 Table 6). A new
-base-tier `EnrollmentModule` tracks course entitlements (active/expired/revoked) and gates
-Learning/Assessment/Assignments on it, deliberately split out of Commerce to avoid a circular
-dependency (Commerce grants entitlements, Learning/Assessment/Assignments check them). Coupons
-(percentage/fixed, redemption-capped, date-bounded) apply at checkout; refunds are a
-request → review → process state machine (foundation only — no real gateway-side settlement yet,
-TD-037) that revokes the enrollment and marks the order refunded when processed. Admins get
-coupon/order/refund/enrollment management UI; students get pricing display, a checkout flow, and
-purchase/payment/invoice history. See [ADR-0018](docs/adr/0018-commerce-enrollment-payments.md) for
-the full design. Builds on Sprint 7 (Community & Discussion Module: forums, doubt resolution,
-reputation, moderation), Sprint 6 (Mentor Management: mentor profiles, history-preserving mentor↔
-student assignment, Student 360, mentor workflow), Sprint 5 (Creative Assignment Engine: assignment
-authoring/templates, presigned upload + quarantine-by-default malware scanning, rubric review),
-Sprint 4 (Assessment & Quiz Engine: question bank, quiz authoring, timed autosaving attempts,
-automatic scoring, attempt monitoring), Sprint 3 (Learning Engine: published-only catalog, lesson
-viewer/completion, progress dashboard), Sprint 2 (Course Management: the
+**Sprint 9 — Notification, Communication & Engagement (complete).** A cross-cutting
+`NotificationModule` (`@Global()`, mirroring `AuditModule`) gives every other module a single
+`NotificationsService.enqueue()` call to fire notifications through — Email (AWS SES), SMS/WhatsApp
+(Twilio), Browser Push (Web Push/VAPID), and always an in-app Notification Center entry; Mobile Push
+is an adapter-interface stub only (ADR-0004). Every unconfigured channel logs instead of sending and
+reports success rather than throwing — unlike payments, no money is on the line. Delivery follows the
+COMM-MERGED delivery-state taxonomy (`Queued → Sent → Delivered → Opened → Clicked → Acknowledged`,
+plus `Failed`/`Retried`/`Suppressed`) via two BullMQ queues (immediate delivery with
+exponential-backoff retry, and deferred whole-notification scheduling); a delivery that exhausts its
+retries records a DLQ audit entry and, for WhatsApp, escalates to a fallback SMS delivery. User
+preferences (channel opt-in/out, category mute, DND window, digest mode, language, timezone) suppress
+non-transactional sends only — transactional notifications (email verification, password reset,
+security alerts, payment/refund confirmations) always go through. `ConsoleMailerService`/`MailerPort`
+(TD-013) is retired outright, replaced by the same `enqueue()` path used everywhere else. Wired into
+Authentication (registration, email verification, password reset, new-device security alert),
+Enrollment, Payments/Refunds, Assignments (review published + a due-date reminder proving the
+scheduled-notification capability), Mentor assignment, and Community (reply received, answer
+accepted, moderation action). Students get a Notification Center, preferences page, and Web Push
+opt-in; admins get a delivery-tracking dashboard, a broadcast/announcement composer, and template
+management. See [ADR-0019](docs/adr/0019-notification-communication-engagement.md) for the full
+design. Builds on Sprint 8 (Commerce, Enrollment & Payments: course pricing, Razorpay checkout,
+entitlement gating, coupons, refunds), Sprint 7 (Community & Discussion Module: forums, doubt
+resolution, reputation, moderation), Sprint 6 (Mentor Management: mentor profiles, history-preserving
+mentor↔student assignment, Student 360, mentor workflow), Sprint 5 (Creative Assignment Engine:
+assignment authoring/templates, presigned upload + quarantine-by-default malware scanning, rubric
+review), Sprint 4 (Assessment & Quiz Engine: question bank, quiz authoring, timed autosaving
+attempts, automatic scoring, attempt monitoring), Sprint 3 (Learning Engine: published-only catalog,
+lesson viewer/completion, progress dashboard), Sprint 2 (Course Management: the
 `Category → Course → Subject → Topic → Module → Lesson` content hierarchy, DRAFT/PUBLISHED/ARCHIVED
 workflow, CRUD/reorder APIs, admin content UI), and Sprint 1 (Authentication & Identity:
 registration, email verification, login/logout, refresh rotation, password reset, sessions, RBAC +
-permissions, profiles, Google OAuth, consent, audit). A dedicated non-admin MODERATOR role, full-text
-search, real gateway-side refund settlement, and multi-tier/promotional pricing are explicitly
-deferred (see TD-030/TD-031/TD-036/TD-037). Notifications, analytics, AI, and further CMS
-enhancements are not started. See
+permissions, profiles, Google OAuth, consent, audit). A general-purpose daily/quiz-reminder cron
+engine is deferred (TD-041); a dedicated non-admin MODERATOR role, full-text search, real
+gateway-side refund settlement, and multi-tier/promotional pricing remain deferred (see
+TD-030/TD-031/TD-036/TD-037). Analytics, AI, and further CMS enhancements are not started. See
 [`docs/roadmap/SPRINT_BACKLOG.md`](docs/roadmap/SPRINT_BACKLOG.md) for the full plan.
 
 > Malware scanning and object storage run against real ClamAV/S3-compatible (MinIO) adapters in
 > dev/prod, but every automated test uses fake in-memory adapters instead (ADR-0015) — the real
 > adapters are only manually verified, not CI-covered (TD-027). Razorpay follows the same pattern
 > (TD-038): `RazorpayGatewayService` is the real adapter, `FakePaymentGatewayService` backs every
-> automated test.
-
-> Email is not actually delivered yet — Sprint 1 uses a console-logging mailer stub (ADR-0009);
-> verification/reset tokens appear in the `apps/api` logs. Real delivery arrives with the
-> Notification Service in Sprint 10.
+> automated test. Email/SMS/WhatsApp/Web Push follow the same pattern again (Sprint 9): the real
+> adapters run in dev/prod, unconfigured ones log-and-succeed, and automated tests exercise the real
+> code paths against unconfigured (stub) adapters rather than fakes, since a "not configured" branch
+> is itself part of the contract.
 
 ### First administrator
 
