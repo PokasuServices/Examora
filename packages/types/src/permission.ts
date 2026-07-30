@@ -73,6 +73,13 @@ export const PERMISSION_CODES = [
   // review, and manually granting/revoking enrollment.
   "commerce:read",
   "commerce:manage",
+  // Notification, Communication & Engagement (Sprint 9, ADR-0019). `notification:read`
+  // is baseline: read own notifications (Notification Center), own preferences,
+  // manage own Web Push subscriptions — mirroring the commerce:read/community:read
+  // precedent (ADR-0013). `notification:manage` is ADMINISTRATOR-only: template CRUD,
+  // broadcast/announcement composition, delivery-tracking dashboard.
+  "notification:read",
+  "notification:manage",
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];
@@ -93,6 +100,7 @@ export const BASELINE_PERMISSION_CODES: PermissionCode[] = [
   "assignment:read",
   "community:read",
   "commerce:read",
+  "notification:read",
 ];
 
 /** Granted to MENTOR and REVIEWER in addition to the baseline (ADR-0015). */

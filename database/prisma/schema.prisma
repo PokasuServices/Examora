@@ -274,6 +274,46 @@ enum RefundStatus {
   @@map("refund_status")
 }
 
+/// COMM-MERGED §2 (ADR-0004/0019). MOBILE_PUSH is an adapter-interface-only
+/// channel — no live delivery integration exists (native app is a PRD-01 §9
+/// non-goal).
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  WEB_PUSH
+  IN_APP
+  MOBILE_PUSH
+
+  @@map("notification_channel")
+}
+
+/// The reconciled delivery-state taxonomy — COMM-MERGED §7 (ADR-0004),
+/// unmodified. FAILED/RETRIED/SUPPRESSED are side/terminal states reachable
+/// from QUEUED at any point; SUPPRESSED (not sent, due to opt-out/consent
+/// gate/rate limit) is required for DATA-27 consent-compliance reporting.
+enum NotificationDeliveryStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  ACKNOWLEDGED
+  FAILED
+  RETRIED
+  SUPPRESSED
+
+  @@map("notification_delivery_status")
+}
+
+enum NotificationDigestMode {
+  INSTANT
+  DAILY
+  WEEKLY
+
+  @@map("notification_digest_mode")
+}
+
 /// Platform user. Identity & Access core entity (DB-05 §3, SRS-02 Table 5).
 model User {
   id              String     @id @default(uuid()) @db.Uuid
@@ -346,6 +386,10 @@ model User {
   couponsCreated   Coupon[]
   refundsRequested Refund[]     @relation("RefundsByRequester")
   refundsReviewed  Refund[]     @relation("RefundsByReviewer")
+
+  notifications          Notification[]
+  notificationPreference NotificationPreference?
+  webPushSubscriptions   WebPushSubscription[]
 
   @@index([status])
   @@map("users")
@@ -1553,4 +1597,127 @@ model Refund {
 
   @@index([orderId])
   @@map("refunds")
+}
+
+/// Reusable, per-(event, channel) message content with `{{placeholder}}`
+/// variables (COMM-MERGED §4, ADR-0019). `bodyTemplate` is plain text with
+/// Mustache-style placeholders; channels that support rich content (Email)
+/// may additionally use `subject`.
+model NotificationTemplate {
+  id           String              @id @default(uuid()) @db.Uuid
+  eventType    String              @map("event_type")
+  channel      NotificationChannel
+  subject      String?
+  bodyTemplate String              @map("body_template")
+  isActive     Boolean             @default(true) @map("is_active")
+  createdAt    DateTime            @default(now()) @map("created_at")
+  updatedAt    DateTime            @updatedAt @map("updated_at")
+
+  @@unique([eventType, channel])
+  @@map("notification_templates")
+}
+
+/// One row per user (COMM-MERGED §5, ADR-0019) — channel opt-in/out, mute by
+/// category, a single daily Do-Not-Disturb window (stored as minute-of-day,
+/// interpreted in `timezone`), digest cadence, language and timezone.
+/// Transactional notifications (password reset, email verification) bypass
+/// all suppression here — see ADR-0019 §5.
+model NotificationPreference {
+  id              String                 @id @default(uuid()) @db.Uuid
+  userId          String                 @unique @map("user_id") @db.Uuid
+  emailEnabled    Boolean                @default(true) @map("email_enabled")
+  smsEnabled      Boolean                @default(true) @map("sms_enabled")
+  whatsappEnabled Boolean                @default(true) @map("whatsapp_enabled")
+  webPushEnabled  Boolean                @default(true) @map("web_push_enabled")
+  inAppEnabled    Boolean                @default(true) @map("in_app_enabled")
+  mutedCategories String[]               @default([]) @map("muted_categories")
+  dndStartMinute  Int?                   @map("dnd_start_minute")
+  dndEndMinute    Int?                   @map("dnd_end_minute")
+  digestMode      NotificationDigestMode @default(INSTANT) @map("digest_mode")
+  language        String                 @default("en")
+  timezone        String                 @default("UTC")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+/// One row per (user, event) — powers the Notification Center and
+/// read/unread (ADR-0019 §8). Distinct from NotificationDelivery, which
+/// tracks per-channel delivery state; a single Notification can fan out to
+/// several NotificationDelivery rows (e.g. Email + In-App + Web Push).
+model Notification {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  eventType       String    @map("event_type")
+  category        String
+  title           String
+  body            String
+  data            Json?
+  isTransactional Boolean   @default(false) @map("is_transactional")
+  isRead          Boolean   @default(false) @map("is_read")
+  readAt          DateTime? @map("read_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  user       User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries NotificationDelivery[]
+
+  @@index([userId, createdAt])
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+/// One row per (notification, channel) attempt — the COMM-MERGED §7 delivery
+/// state machine lives here. `fallbackFromId` links a fallback-channel
+/// delivery (e.g. SMS) back to the original delivery it escalated from (e.g.
+/// WhatsApp) after exhausted retries (ADR-0019 §7).
+model NotificationDelivery {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  notificationId      String                     @map("notification_id") @db.Uuid
+  channel             NotificationChannel
+  status              NotificationDeliveryStatus @default(QUEUED)
+  attempts            Int                        @default(0)
+  lastError           String?                    @map("last_error")
+  providerMessageId   String?                    @map("provider_message_id")
+  fallbackFromId      String?                    @map("fallback_from_id") @db.Uuid
+  suppressedReason    String?                    @map("suppressed_reason")
+  // Snapshotted at delivery-creation time (WEB_PUSH only) rather than a live FK
+  // to WebPushSubscription — a subscription can expire/be removed by the time
+  // the queued job runs, and the delivery record should still show what was
+  // attempted.
+  webPushSubscription Json?                      @map("web_push_subscription")
+  queuedAt            DateTime                   @default(now()) @map("queued_at")
+  sentAt              DateTime?                  @map("sent_at")
+  deliveredAt         DateTime?                  @map("delivered_at")
+  openedAt            DateTime?                  @map("opened_at")
+  clickedAt           DateTime?                  @map("clicked_at")
+  acknowledgedAt      DateTime?                  @map("acknowledged_at")
+  failedAt            DateTime?                  @map("failed_at")
+  createdAt           DateTime                   @default(now()) @map("created_at")
+  updatedAt           DateTime                   @updatedAt @map("updated_at")
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@index([notificationId])
+  @@index([status])
+  @@index([providerMessageId])
+  @@map("notification_deliveries")
+}
+
+/// A browser's Web Push subscription (standard Web Push API, VAPID —
+/// ADR-0019 §6). One user may have several (one per browser/device).
+model WebPushSubscription {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("web_push_subscriptions")
 }
