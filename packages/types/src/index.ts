@@ -12,3 +12,4 @@ export * from "./api-response";
 export * from "./notification";
 export * from "./user";
 export * from "./audit";
+export * from "./analytics";

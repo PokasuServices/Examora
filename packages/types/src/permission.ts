@@ -80,6 +80,16 @@ export const PERMISSION_CODES = [
   // broadcast/announcement composition, delivery-tracking dashboard.
   "notification:read",
   "notification:manage",
+  // Analytics & Reporting (Sprint 10, ADR-0020). `analytics:read:own` is baseline:
+  // a student's own learning/quiz/assignment analytics dashboard — mirrors
+  // profile:read:own. `analytics:mentor` is MENTOR-role-only, added alongside
+  // mentor:workflow: a mentor's dashboard scoped to their own assigned students,
+  // ownership enforced in the service layer (ADR-0016 precedent). `analytics:admin`
+  // is ADMINISTRATOR-only: every cross-user/cross-course platform dashboard, the
+  // report builder, exports, and scheduled reports.
+  "analytics:read:own",
+  "analytics:mentor",
+  "analytics:admin",
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];
@@ -101,6 +111,7 @@ export const BASELINE_PERMISSION_CODES: PermissionCode[] = [
   "community:read",
   "commerce:read",
   "notification:read",
+  "analytics:read:own",
 ];
 
 /** Granted to MENTOR and REVIEWER in addition to the baseline (ADR-0015). */
@@ -118,4 +129,5 @@ export const REVIEWER_PERMISSION_CODES: PermissionCode[] = [
 export const MENTOR_PERMISSION_CODES: PermissionCode[] = [
   ...REVIEWER_PERMISSION_CODES,
   "mentor:workflow",
+  "analytics:mentor",
 ];

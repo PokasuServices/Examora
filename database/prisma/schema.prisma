@@ -314,6 +314,40 @@ enum NotificationDigestMode {
   @@map("notification_digest_mode")
 }
 
+/// Analytics & Reporting (Sprint 10, ADR-0020 §5) — one entry per report the
+/// Report Builder can compute; kept as an enum (not a free-form string) so
+/// ScheduledReport.reportType stays validatable and each report's query
+/// implementation is a switch-case, not string matching.
+enum ReportType {
+  STUDENT_PROGRESS
+  COURSE_COMPLETION
+  QUIZ_PERFORMANCE
+  ASSIGNMENT_PERFORMANCE
+  ENROLLMENT
+  REVENUE
+  COURSE_PERFORMANCE
+  MENTOR_PERFORMANCE
+  COMMUNITY_ACTIVITY
+  NOTIFICATION_DELIVERY
+
+  @@map("report_type")
+}
+
+enum ReportCadence {
+  DAILY
+  WEEKLY
+  MONTHLY
+
+  @@map("report_cadence")
+}
+
+enum ReportFormat {
+  CSV
+  PDF
+
+  @@map("report_format")
+}
+
 /// Platform user. Identity & Access core entity (DB-05 §3, SRS-02 Table 5).
 model User {
   id              String     @id @default(uuid()) @db.Uuid
@@ -390,6 +424,8 @@ model User {
   notifications          Notification[]
   notificationPreference NotificationPreference?
   webPushSubscriptions   WebPushSubscription[]
+
+  scheduledReports ScheduledReport[]
 
   @@index([status])
   @@map("users")
@@ -1720,4 +1756,32 @@ model WebPushSubscription {
 
   @@index([userId])
   @@map("web_push_subscriptions")
+}
+
+/// Analytics & Reporting (Sprint 10, ADR-0020 §5) — the scheduled-reports
+/// foundation. A repeatable BullMQ job (`scheduled-reports` queue) fires on
+/// `cadence`, recomputes `reportType`'s query with `filters`, and enqueues a
+/// summary Notification to `createdBy` — it does not attach the CSV/PDF file
+/// (TD-042); an admin opens the live dashboard or on-demand export for that.
+model ScheduledReport {
+  id          String         @id @default(uuid()) @db.Uuid
+  createdById String         @map("created_by_id") @db.Uuid
+  name        String
+  reportType  ReportType     @map("report_type")
+  format      ReportFormat   @default(CSV)
+  cadence     ReportCadence
+  /// Report-type-specific filter params (date range, courseId, etc.) — shape
+  /// validated per reportType in ReportBuilderService, not at the DB layer.
+  filters     Json?
+  isActive    Boolean        @default(true) @map("is_active")
+  lastRunAt   DateTime?      @map("last_run_at")
+  nextRunAt   DateTime?      @map("next_run_at")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
+  @@index([isActive, nextRunAt])
+  @@map("scheduled_reports")
 }
