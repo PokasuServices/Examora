@@ -60,6 +60,9 @@ export function AuthNav() {
         <Link href="/dashboard">
           <Button variant="secondary">My learning</Button>
         </Link>
+        <Link href="/analytics">
+          <Button variant="secondary">Analytics</Button>
+        </Link>
         <Link href="/orders">
           <Button variant="secondary">My purchases</Button>
         </Link>
