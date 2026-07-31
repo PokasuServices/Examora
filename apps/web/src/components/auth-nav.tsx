@@ -63,6 +63,9 @@ export function AuthNav() {
         <Link href="/analytics">
           <Button variant="secondary">Analytics</Button>
         </Link>
+        <Link href="/recommendations">
+          <Button variant="secondary">Recommended</Button>
+        </Link>
         <Link href="/orders">
           <Button variant="secondary">My purchases</Button>
         </Link>
