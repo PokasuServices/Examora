@@ -348,6 +348,19 @@ enum ReportFormat {
   @@map("report_format")
 }
 
+/// Recommendation types the feature-flag toggle covers (Sprint 11, ADR-0021 §4).
+enum RecommendationType {
+  COURSE
+  SIMILAR_COURSES
+  LEARNING_PATH
+  CONTINUE_LEARNING
+  QUIZ
+  ASSIGNMENT
+  COMMUNITY_DISCUSSION
+
+  @@map("recommendation_type")
+}
+
 /// Platform user. Identity & Access core entity (DB-05 §3, SRS-02 Table 5).
 model User {
   id              String     @id @default(uuid()) @db.Uuid
@@ -426,6 +439,8 @@ model User {
   webPushSubscriptions   WebPushSubscription[]
 
   scheduledReports ScheduledReport[]
+
+  recommendationFeatureFlagsUpdated RecommendationFeatureFlag[]
 
   @@index([status])
   @@map("users")
@@ -1784,4 +1799,20 @@ model ScheduledReport {
   @@index([createdById])
   @@index([isActive, nextRunAt])
   @@map("scheduled_reports")
+}
+
+/// Per-recommendation-type kill switch (Sprint 11, ADR-0021 §4) — lets an
+/// admin disable a specific recommendation surface platform-wide without a
+/// deploy. Absence of a row for a type means enabled (fail-open default).
+model RecommendationFeatureFlag {
+  id          String             @id @default(uuid()) @db.Uuid
+  type        RecommendationType @unique
+  isEnabled   Boolean            @default(true) @map("is_enabled")
+  updatedById String?            @map("updated_by_id") @db.Uuid
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("recommendation_feature_flags")
 }

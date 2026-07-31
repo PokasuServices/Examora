@@ -90,6 +90,13 @@ export const PERMISSION_CODES = [
   "analytics:read:own",
   "analytics:mentor",
   "analytics:admin",
+  // AI Recommendation Engine (Sprint 11, ADR-0021). `recommendations:read:own`
+  // is baseline: a student's own personalized recommendations (courses,
+  // quizzes, assignments, learning path, continue learning, similar courses,
+  // related discussions) — mirrors analytics:read:own. `recommendations:admin`
+  // is ADMINISTRATOR-only: per-type feature-flag management.
+  "recommendations:read:own",
+  "recommendations:admin",
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];
@@ -112,6 +119,7 @@ export const BASELINE_PERMISSION_CODES: PermissionCode[] = [
   "commerce:read",
   "notification:read",
   "analytics:read:own",
+  "recommendations:read:own",
 ];
 
 /** Granted to MENTOR and REVIEWER in addition to the baseline (ADR-0015). */
