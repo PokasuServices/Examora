@@ -78,5 +78,9 @@ import { ThreadsService } from "./threads/threads.service";
     CommunityAttachmentScanQueueService,
     CommunityAttachmentScanProcessor,
   ],
+  // CommunitySearchService.search() is reused by RecommendationsModule
+  // (Sprint 11, ADR-0021) to surface discussions related to a student's
+  // enrolled courses/subjects, rather than duplicating the query.
+  exports: [CommunitySearchService],
 })
 export class CommunityModule {}

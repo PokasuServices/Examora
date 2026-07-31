@@ -30,4 +30,19 @@ export class MentorFeedbackService {
       include: FEEDBACK_INCLUDE,
     });
   }
+
+  /**
+   * A student reading their own feedback — unlike list(), there is no
+   * assignment check to make, since the caller can only ever be the student
+   * themselves (RecommendationService, ADR-0021 §2, always passes the
+   * authenticated user's own id). Only recency/count is used as an
+   * engagement signal — the feedback text itself is not analyzed.
+   */
+  async listRecentForStudent(studentId: string, limit = 5) {
+    return this.prisma.mentorFeedback.findMany({
+      where: { studentId },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+  }
 }

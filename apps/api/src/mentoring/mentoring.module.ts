@@ -53,7 +53,8 @@ import { MentorTasksService } from "./tasks/mentor-tasks.service";
   // MentorProfilesService.findByUserIdOrThrow() are reused by AnalyticsModule
   // (Sprint 10, ADR-0020) to scope a mentor's analytics dashboard to their
   // own active students and workload capacity, rather than duplicating those
-  // queries.
-  exports: [MentorAssignmentService, MentorProfilesService],
+  // queries. MentorFeedbackService is reused by RecommendationsModule
+  // (Sprint 11, ADR-0021) as an engagement signal.
+  exports: [MentorAssignmentService, MentorProfilesService, MentorFeedbackService],
 })
 export class MentoringModule {}

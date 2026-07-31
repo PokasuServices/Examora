@@ -20,12 +20,13 @@ import { StudentAnalyticsController } from "./student/student-analytics.controll
 import { StudentAnalyticsService } from "./student/student-analytics.service";
 
 /**
- * Analytics & Reporting (Sprint 10, ADR-0020) — a leaf module: nothing else
- * injects from here, it only reads other modules' data. Imports LearningModule
+ * Analytics & Reporting (Sprint 10, ADR-0020). Imports LearningModule
  * (ProgressService), AssignmentsModule (SubmissionsService), and
  * MentoringModule (MentorAssignmentService/MentorProfilesService) to reuse
  * their existing queries rather than duplicating them; everything else is a
- * direct PrismaService aggregate query (ADR-0020 §1/§2).
+ * direct PrismaService aggregate query (ADR-0020 §1/§2). StudentAnalyticsService
+ * is exported for RecommendationsModule (Sprint 11, ADR-0021) to reuse as a
+ * personalization-signal source.
  */
 @Module({
   imports: [
@@ -52,5 +53,6 @@ import { StudentAnalyticsService } from "./student/student-analytics.service";
     ScheduledReportsService,
     ScheduledReportProcessor,
   ],
+  exports: [StudentAnalyticsService],
 })
 export class AnalyticsModule {}
