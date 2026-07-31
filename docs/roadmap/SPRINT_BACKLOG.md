@@ -424,19 +424,42 @@ does not double-count delivery state; DLQ captures a message after exhausted ret
 fallback escalates on primary-channel failure; a muted/opted-out category is never delivered
 (`Suppressed` state recorded); read/unread state is accurate in the notification center.
 
-## Sprint 10 — Scoring, Reports & Recommendations v0
+## Sprint 10 — Analytics & Reporting
 
-Status: Planned (renumbered from Sprint 9 by the Sprint 9 resequencing above).
+Status: **Complete** (2026-07-31). 561 automated tests pass (337 unit/integration + 224 e2e),
+including 61 new Sprint 10 tests (38 unit/integration + 23 e2e). See ADR-0020 for the full design
+(module shape, permission model, report export/scheduled-report approach, page placement).
 
-- FR-QUIZ-04: automatic objective scoring per published rules, audit timestamp, persisted once
-- FR-QUIZ-05: question reporting (student flags a faulty question without affecting their result)
-- FR-REPORT-01: score, accuracy, time, answer approach, topic performance, question review;
-  completed-attempt snapshot stable even if questions are later edited
-- FR-REC-01: next-step recommendations from mastery/recency/results/weightage, each with a stored,
-  reproducible reason (no black-box output yet — full AI engine is Phase 6)
+Resequencing note (approved ahead of Sprint 10, mirroring the Sprint 5/6/7/8/9 precedent — see
+D-55): this entry runs ANALYTICS-12 (previously planned as Sprint 12) now, pulled forward ahead of
+"Scoring, Reports & Recommendations v0" (previously Sprint 10, moves to Sprint 12 — a straight swap,
+since Sprint 11's Growth Modules/Full Admin/Creative Gallery content is unaffected and sits
+unchanged between them). No functional dependency blocks this: analytics/reporting is a read-only
+aggregation layer over existing Auth/Course/Learning/Quiz/Assignment/Mentor/Community/Commerce/
+Notification data, independent of the quiz engine's own per-attempt scoring/reports/recommendations
+feature (FR-QUIZ-04/05, FR-REPORT-01, FR-REC-01) — Sprint 4 already shipped automatic scoring and
+attempt monitoring, so the remaining old-Sprint-10 scope (question reporting, the individual
+per-attempt report view, and the recommendation engine — itself explicitly out of scope for this
+sprint) has no bearing on cross-user/cross-course analytics dashboards.
 
-**Exit criteria**: Phase 1 (MVP) complete — full register→enroll→learn→quiz→report journey passes
-E2E; all Phase 1 FR-IDs have automated test evidence per QA-15 §10.
+- Student Analytics: Learning Progress, Course Completion Reports, Quiz Performance, Assignment
+  Performance, Learning Timeline, Activity Summary, Achievement Summary
+- Mentor Analytics: Student Progress Dashboard, Student Performance Trends, Quiz Performance,
+  Assignment Review Statistics, Mentor Workload, Student Engagement Summary
+- Admin Analytics: Platform Dashboard, User Growth, Enrollment, Revenue, Course Performance, Mentor
+  Performance, Community Analytics, Notification Delivery Analytics, Assignment Analytics, Quiz
+  Analytics
+- Reporting: Report Builder, date filters, CSV export, PDF export, Scheduled Reports (foundation
+  only), aggregated statistics
+- Visualization: dashboard cards, charts, trend graphs, tables, KPIs
+- Reuses existing Authentication, Course Management, Learning Engine, Quiz Engine, Creative
+  Assignment Engine, Mentor Management, Community, Commerce & Enrollment, and Notification modules
+  — no duplicated business logic; a read-only aggregation layer per ADR-0007/DB-34 §6
+
+**Exit criteria**: Every dashboard/report renders real data with role-based access enforced (a
+student only ever sees their own analytics; a mentor only their assigned students'; admin-only
+platform-wide views gated on the correct permission); CSV/PDF exports match the underlying
+dashboard's figures; scheduled-report foundation proven end-to-end for at least one report type.
 
 ## Sprint 11 — Growth Modules, Full Admin & Creative Gallery
 
@@ -453,16 +476,21 @@ E2E; all Phase 1 FR-IDs have automated test evidence per QA-15 §10.
 any student contact data is shared externally; XP cannot be awarded twice for the same action
 (idempotency test).
 
-## Sprint 12 — Analytics & Reporting
+## Sprint 12 — Scoring, Reports & Recommendations v0
 
-- ANALYTICS-12 §2-7: role-scoped dashboards (student/mentor/admin), learning/assessment/creative
-  analytics, business + operational reports
-- ANALYTICS-12 §8, §10: CSV/PDF export, scheduled reports, ETL-ready/star-schema-compatible
-  reporting tables (foundation for Phase 6, not full BI yet)
-- Raw-SQL views/materialized views per ADR-0007, justified per DB-34 §6
+Status: Planned (renumbered from Sprint 10 by the Sprint 10 resequencing above — see D-55).
 
-**Exit criteria**: Phase 4 complete — every dashboard/report in ANALYTICS-12 renders real data with
-role-based access enforced; PII masked in exports where required.
+- FR-QUIZ-04: automatic objective scoring per published rules, audit timestamp, persisted once —
+  substantially already delivered by Sprint 4's automatic scoring; this sprint closes any remaining
+  gaps against the full FR-QUIZ-04 acceptance criteria
+- FR-QUIZ-05: question reporting (student flags a faulty question without affecting their result)
+- FR-REPORT-01: score, accuracy, time, answer approach, topic performance, question review;
+  completed-attempt snapshot stable even if questions are later edited
+- FR-REC-01: next-step recommendations from mastery/recency/results/weightage, each with a stored,
+  reproducible reason (no black-box output yet — full AI engine is Phase 6)
+
+**Exit criteria**: Phase 1 (MVP) complete — full register→enroll→learn→quiz→report journey passes
+E2E; all Phase 1 FR-IDs have automated test evidence per QA-15 §10.
 
 ## Sprint 13 — Stabilization & Release Readiness
 

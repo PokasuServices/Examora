@@ -5,6 +5,24 @@ entrance exams. Governed by [`documents/00_Master_Development_Guide_Examora_Plat
 
 ## Status
 
+**Sprint 10 — Analytics & Reporting (complete).** A read-only aggregation layer — no new business
+logic, no duplicated queries — built as a non-`@Global()` `AnalyticsModule` that imports and reuses
+existing services (`ProgressService`, `SubmissionsService`, `MentorAssignmentService`,
+`MentorProfilesService`, etc.) across three permission tiers: `analytics:read:own` (every
+authenticated user, their own data — learning progress, course completion, quiz/assignment
+performance, timeline, activity, achievements), `analytics:mentor` (MENTOR role, their assigned
+students only — student progress, performance trends, workload, engagement), and `analytics:admin`
+(ADMINISTRATOR, platform-wide — user growth, enrollment, revenue, course/mentor performance,
+community, notification delivery, assignment/quiz analytics). The Report Builder runs any of ten
+report types with date filters and streams CSV/PDF exports on demand (no persistence); Scheduled
+Reports is a real BullMQ `upsertJobScheduler`/`removeJobScheduler`-backed repeatable-job foundation
+with a run-now convenience action, though the generated file isn't yet attached to its completion
+email (TD-042). Charts (`recharts`) and dashboard cards live at `/analytics` (student, `apps/web`),
+`/mentor-analytics` (`apps/admin`), and `/analytics` + `/reports` (admin, `apps/admin`). See
+[ADR-0020](docs/adr/0020-analytics-and-reporting.md) for the full design. Builds on Sprint 9
+(Notification, Communication & Engagement), whose notification-delivery analytics this sprint
+surfaces on the admin dashboard.
+
 **Sprint 9 — Notification, Communication & Engagement (complete).** A cross-cutting
 `NotificationModule` (`@Global()`, mirroring `AuditModule`) gives every other module a single
 `NotificationsService.enqueue()` call to fire notifications through — Email (AWS SES), SMS/WhatsApp
@@ -39,7 +57,7 @@ registration, email verification, login/logout, refresh rotation, password reset
 permissions, profiles, Google OAuth, consent, audit). A general-purpose daily/quiz-reminder cron
 engine is deferred (TD-041); a dedicated non-admin MODERATOR role, full-text search, real
 gateway-side refund settlement, and multi-tier/promotional pricing remain deferred (see
-TD-030/TD-031/TD-036/TD-037). Analytics, AI, and further CMS enhancements are not started. See
+TD-030/TD-031/TD-036/TD-037). AI recommendations and further CMS enhancements are not started. See
 [`docs/roadmap/SPRINT_BACKLOG.md`](docs/roadmap/SPRINT_BACKLOG.md) for the full plan.
 
 > Malware scanning and object storage run against real ClamAV/S3-compatible (MinIO) adapters in

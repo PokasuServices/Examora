@@ -17,7 +17,7 @@ Postgres/Redis/MinIO; `apps/api` boots and serves `/health` and `/api/docs`; `ap
 `apps/admin` boot and render a placeholder page; a user can register/login/refresh/logout against
 the skeleton auth endpoints.
 
-## Phase 1 — MVP: Core Learning & Assessment (Sprints 1-4, 10)
+## Phase 1 — MVP: Core Learning & Assessment (Sprints 1-4, 12)
 
 **Goal**: A student can register, enroll, learn, and take a scored quiz.
 **Scope**: Full RBAC, course/subject/topic/module CMS + delivery, progress tracking, quiz engine
@@ -38,12 +38,18 @@ register → enroll → learn → quiz → report journey works end-to-end in st
 > moving Scoring/Reports/Recommendations v0 to Sprint 9 — this also resolves TD-020's deferred
 > enrollment gate far earlier than originally planned. Resequenced a fifth time after Sprint 8: the
 > notification/communication half of Phase 2's notification-service sprint (see below) was approved
-> to run as Sprint 9 instead, moving Scoring/Reports/Recommendations v0 to Sprint 10. No functional
-> dependency blocks any of these moves: Creative Assignments, Mentor Management, Community/
-> Discussion, Commerce/Enrollment, and notification delivery all operate independently of the quiz
-> engine's own scoring/reports/recommendations feature. Phase 1 therefore interleaves with Phases
-> 2/3/4 by sprint number instead of running back-to-back; each phase's own exit criteria still gate
-> its own completion regardless of interleaving.
+> to run as Sprint 9 instead, moving Scoring/Reports/Recommendations v0 to Sprint 10. Resequenced a
+> sixth time after Sprint 9: Analytics & Reporting (Phase 4, previously planned as Sprint 12) was
+> approved to run as Sprint 10 instead — a straight swap, since Sprint 4 already shipped automatic
+> scoring/attempt monitoring, leaving Scoring/Reports/Recommendations v0's remaining scope
+> (question reporting, per-attempt reports, the deferred recommendation engine) with no dependency
+> on cross-user analytics dashboards — moving Scoring/Reports/Recommendations v0 to Sprint 12 (see
+> D-55). No functional dependency blocks any of these moves: Creative Assignments, Mentor
+> Management, Community/Discussion, Commerce/Enrollment, notification delivery, and analytics/
+> reporting all operate independently of the quiz engine's own scoring/reports/recommendations
+> feature. Phase 1 therefore interleaves with Phases 2/3/4 by sprint number instead of running
+> back-to-back; each phase's own exit criteria still gate its own completion regardless of
+> interleaving.
 
 ## Phase 2 — Mentor-Led Learning (Sprints 5-6, 9)
 
@@ -82,28 +88,37 @@ SLA; XP cannot be awarded twice for the same action (idempotency test).
 > notification delivery, so it can attach to whichever adjacent sprint has room without blocking
 > anything.
 
-## Phase 4 — Growth & Counselling (Sprint 8, 11-12)
+## Phase 4 — Growth & Counselling (Sprint 8, 10-11)
 
 **Goal**: Monetization and acquisition.
 **Scope**: Course enrollment/access-control/entitlements/purchase history, pricing/coupons/discounts,
 orders/invoices, a refund-workflow foundation, Razorpay payment orders/webhooks/entitlements,
-transaction logging (Sprint 8 — Commerce, Enrollment & Payments); articles, events/webinars, college
-directory, consented enquiries, full admin (question-bank approval workflow, community moderation
-admin, analytics dashboards, moderation escalation) (Sprints 11-12).
+transaction logging (Sprint 8 — Commerce, Enrollment & Payments); role-scoped student/mentor/admin
+analytics dashboards, business + operational reports, CSV/PDF export, scheduled-reports foundation
+(Sprint 10 — Analytics & Reporting, ANALYTICS-12, pulled forward from Sprint 12 — see D-55); articles,
+events/webinars, college directory, consented enquiries, remaining full admin (question-bank approval
+workflow, community moderation admin, moderation escalation) (Sprint 11).
 **Key docs**: SRS-02 FR-PAY/EVENT/COLLEGE/ENQ, ADMIN-08, ANALYTICS-12, DB-05 §3.
 **Exit criteria**: Webhook signature verification tested against forged/duplicate events; entitlement
 granted only from verified webhook, never client callback; a non-entitled student cannot access paid
-Learning/Quiz/Assignment/Mentor content; admin can complete every workflow listed in ADMIN-08 §5.
+Learning/Quiz/Assignment/Mentor content; admin can complete every workflow listed in ADMIN-08 §5;
+every analytics dashboard/report enforces role-scoped access and CSV/PDF exports match the underlying
+data.
 
 > Resequenced after Sprint 7: Commerce, Enrollment & Payments (previously planned as Sprint 10,
 > narrower in scope — payments/entitlements only, no enrollment or commerce/coupon model) was
 > approved to run as Sprint 8 instead, immediately after Community & Discussion, absorbing the
-> enrollment gate TD-020 had deferred. This phase therefore now interleaves with Phase 2 (Sprint 9),
-> Phase 1 (Sprint 10), and Phase 3 (Sprint 11) by sprint number rather than running as a contiguous
-> block — the same interleaving pattern Phase 1 already established. No functional dependency is
-> violated: Commerce/
-> Enrollment/Payments only needs read access to existing Learning/Quiz/Assignment/Mentor/Community
-> catalog data to gate it, not the reverse.
+> enrollment gate TD-020 had deferred. Resequenced again after Sprint 9: Analytics & Reporting
+> (previously planned as Sprint 12, alongside the rest of this phase's admin/growth scope) was
+> approved to run as Sprint 10 instead of Scoring/Reports/Recommendations v0 (Phase 1's closing
+> sprint, which moves to Sprint 12 in its place) — see D-55. This phase therefore now interleaves
+> with Phase 2 (Sprint 9) and Phase 3 (Sprint 11) by sprint number rather than running as a
+> contiguous block — the same interleaving pattern Phase 1 already established. No functional
+> dependency is violated: Commerce/Enrollment/Payments only needs read access to existing Learning/
+> Quiz/Assignment/Mentor/Community catalog data to gate it, not the reverse; analytics/reporting is
+> a read-only aggregation layer over all of the above, so it can run as soon as the modules it reads
+> from exist (which they all do, as of Sprint 9), without waiting for the rest of this phase's
+> growth/counselling scope.
 
 ## Phase 5 — Stabilization (Sprint 13)
 
