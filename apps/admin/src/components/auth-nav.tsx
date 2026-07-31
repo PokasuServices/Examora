@@ -25,6 +25,8 @@ export function AuthNav() {
     const canModerateCommunity = user.permissions.includes("community:moderate");
     const canManageCommerce = user.permissions.includes("commerce:manage");
     const canManageNotifications = user.permissions.includes("notification:manage");
+    const canViewMentorAnalytics = user.permissions.includes("analytics:mentor");
+    const canViewAdminAnalytics = user.permissions.includes("analytics:admin");
     return (
       <div className="flex items-center gap-3">
         <span className="text-sm text-neutral-600">{user.email}</span>
@@ -86,6 +88,21 @@ export function AuthNav() {
         {canManageNotifications ? (
           <Link href="/notifications">
             <Button variant="secondary">Notifications</Button>
+          </Link>
+        ) : null}
+        {canViewMentorAnalytics ? (
+          <Link href="/mentor-analytics">
+            <Button variant="secondary">Mentor analytics</Button>
+          </Link>
+        ) : null}
+        {canViewAdminAnalytics ? (
+          <Link href="/analytics">
+            <Button variant="secondary">Analytics</Button>
+          </Link>
+        ) : null}
+        {canViewAdminAnalytics ? (
+          <Link href="/reports">
+            <Button variant="secondary">Reports</Button>
           </Link>
         ) : null}
         <Link href="/users">
