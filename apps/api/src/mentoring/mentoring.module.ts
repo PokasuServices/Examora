@@ -49,5 +49,11 @@ import { MentorTasksService } from "./tasks/mentor-tasks.service";
     MentorFeedbackService,
     MentorMeetingsService,
   ],
+  // MentorAssignmentService.listAssignedStudentIds()/getWorkload() and
+  // MentorProfilesService.findByUserIdOrThrow() are reused by AnalyticsModule
+  // (Sprint 10, ADR-0020) to scope a mentor's analytics dashboard to their
+  // own active students and workload capacity, rather than duplicating those
+  // queries.
+  exports: [MentorAssignmentService, MentorProfilesService],
 })
 export class MentoringModule {}

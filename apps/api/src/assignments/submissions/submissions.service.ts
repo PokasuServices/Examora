@@ -124,7 +124,10 @@ export class SubmissionsService {
     return this.prisma.assignmentSubmission.findMany({
       where: { studentId, ...(assignmentId ? { assignmentId } : {}) },
       include: {
-        assignment: { select: { title: true } },
+        // marksTotal is projected for StudentAnalyticsService (Sprint 10,
+        // ADR-0020) to compute obtainedMarks/marksTotal percentages without a
+        // second query.
+        assignment: { select: { title: true, marksTotal: true } },
         review: { select: { obtainedMarks: true, decision: true } },
       },
       orderBy: [{ createdAt: "desc" }],

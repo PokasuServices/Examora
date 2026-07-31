@@ -34,6 +34,7 @@ import { MentoringModule } from "./mentoring/mentoring.module";
 import { CommunityModule } from "./community/community.module";
 import { EnrollmentModule } from "./enrollment/enrollment.module";
 import { CommerceModule } from "./commerce/commerce.module";
+import { AnalyticsModule } from "./analytics/analytics.module";
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { CommerceModule } from "./commerce/commerce.module";
     CommunityModule,
     EnrollmentModule,
     CommerceModule,
+    AnalyticsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
