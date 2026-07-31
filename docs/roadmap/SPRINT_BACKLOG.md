@@ -463,7 +463,7 @@ dashboard's figures; scheduled-report foundation proven end-to-end for at least 
 
 ## Sprint 11 — AI Recommendation Engine
 
-Status: **Complete** (2026-07-31). 395 automated tests pass (359 unit/integration + 236 e2e),
+Status: **Complete** (2026-07-31). 595 automated tests pass (359 unit/integration + 236 e2e),
 including 34 new Sprint 11 tests (22 unit/integration + 12 e2e). See ADR-0021 for the full design
 (rule-based scoring, no external AI services, module shape, permission model, page placement).
 
