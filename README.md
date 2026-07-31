@@ -5,6 +5,25 @@ entrance exams. Governed by [`documents/00_Master_Development_Guide_Examora_Plat
 
 ## Status
 
+**Sprint 11 — AI Recommendation Engine (complete).** A rule-based personalization layer — no
+external AI services, no ML — built as a `RecommendationsModule` that scores existing platform data
+with deterministic weighted signals and attaches a plain-English `reason` to every result. Two of
+seven recommendation surfaces are pure reuse: Continue Learning delegates directly to
+`ProgressService.listContinueLearning()` (Sprint 3), and every personalization signal the kickoff
+named (learning progress, quiz/assignment performance, enrollment) comes straight from
+`StudentAnalyticsService` (Sprint 10) rather than new queries. The rest — Course Recommendations,
+Similar Courses, Learning Path Recommendations, Quiz Recommendations, Assignment Recommendations,
+and Related Community Discussions — are thin rule layers over existing catalog/search services
+(`CatalogService`, `QuizCatalogService`, `AssignmentCatalogService`, `CommunitySearchService`).
+Mentor Feedback contributes only as a recency signal (a small score boost on Continue Learning when
+a mentor has left recent feedback) — never its text content. A new `RecommendationFeatureFlag` model
+lets an admin disable any recommendation type platform-wide, fail-closed to an empty list rather than
+an error. Gated by `recommendations:read:own` (every student, their own data) and
+`recommendations:admin` (ADMINISTRATOR, feature-flag management). Lives at `/recommendations`
+(student, `apps/web`) and `/feature-flags` (`apps/admin`). See
+[ADR-0021](docs/adr/0021-ai-recommendation-engine.md) for the full design, and D-56 for how this
+sprint's content diverged from the previously-planned Sprint 11.
+
 **Sprint 10 — Analytics & Reporting (complete).** A read-only aggregation layer — no new business
 logic, no duplicated queries — built as a non-`@Global()` `AnalyticsModule` that imports and reuses
 existing services (`ProgressService`, `SubmissionsService`, `MentorAssignmentService`,
@@ -57,7 +76,10 @@ registration, email verification, login/logout, refresh rotation, password reset
 permissions, profiles, Google OAuth, consent, audit). A general-purpose daily/quiz-reminder cron
 engine is deferred (TD-041); a dedicated non-admin MODERATOR role, full-text search, real
 gateway-side refund settlement, and multi-tier/promotional pricing remain deferred (see
-TD-030/TD-031/TD-036/TD-037). AI recommendations and further CMS enhancements are not started. See
+TD-030/TD-031/TD-036/TD-037). AI recommendation quality is untuned — no click-through/effectiveness
+tracking exists yet (TD-044). Event scheduling, the college directory, consented enquiry sharing,
+remaining admin workflows, the creative community gallery, AI chatbot/tutor/content/question
+generation/grading/moderation, and further CMS enhancements are not started. See
 [`docs/roadmap/SPRINT_BACKLOG.md`](docs/roadmap/SPRINT_BACKLOG.md) for the full plan.
 
 > Malware scanning and object storage run against real ClamAV/S3-compatible (MinIO) adapters in

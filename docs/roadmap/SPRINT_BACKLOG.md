@@ -461,7 +461,16 @@ student only ever sees their own analytics; a mentor only their assigned student
 platform-wide views gated on the correct permission); CSV/PDF exports match the underlying
 dashboard's figures; scheduled-report foundation proven end-to-end for at least one report type.
 
-## Sprint 11 — Growth Modules, Full Admin & Creative Gallery
+## Sprint 11 — AI Recommendation Engine
+
+Status: **Complete** (2026-07-31). 395 automated tests pass (359 unit/integration + 236 e2e),
+including 34 new Sprint 11 tests (22 unit/integration + 12 e2e). See ADR-0021 for the full design
+(rule-based scoring, no external AI services, module shape, permission model, page placement).
+
+Content note (see D-56): this kickoff explicitly redefined Sprint 11 to "AI Recommendation Engine,"
+directing that the roadmap not otherwise be modified. The previously-planned Sprint 11 content below
+— Growth Modules, remaining Admin workflows, and the Creative Gallery — is therefore **unplaced**,
+not cancelled; it needs a future sprint kickoff to assign it a slot:
 
 - FR-EVENT-01: webinar/event scheduling, registration (deduplicated by user+event), attendance
 - FR-COLLEGE-01: college directory search/filter/detail, published-only data
@@ -472,9 +481,29 @@ dashboard's figures; scheduled-report foundation proven end-to-end for at least 
   cycles, consent-gated community gallery (private by default), peer rating, XP/achievement
   idempotency
 
-**Exit criteria**: Every ADMIN-08 §5 workflow completes end-to-end; consent stored/verified before
-any student contact data is shared externally; XP cannot be awarded twice for the same action
-(idempotency test).
+Sprint 11's actual delivered scope:
+
+- Course Recommendations, Similar Courses, Continue Learning (delegates to the existing
+  `ProgressService.listContinueLearning()`, Sprint 3), Learning Path Recommendations
+- Quiz Recommendations, Assignment Recommendations, Related Community Discussions
+- Personalization signals reused from existing data: Learning Progress/Quiz Performance/Assignment
+  Performance (`StudentAnalyticsService`, Sprint 10), Community Activity, Mentor Feedback (recency
+  only, no text analysis), Enrollment, and a derived category-affinity "interests" signal
+- Recommendation Engine: `RecommendationService` facade, per-type domain services, rule-based
+  scoring + ranking utilities, explainable `{score, reason}` metadata on every result
+- Feature flags: a new `RecommendationFeatureFlag` model lets an admin disable any recommendation
+  type platform-wide; `/feature-flags` (admin)
+- Reuses existing Authentication, Course Management, Learning Engine, Quiz Engine, Creative
+  Assignment Engine, Mentor Management, and Community modules — no duplicated business logic; three
+  modules (`AnalyticsModule`, `CommunityModule`, `MentoringModule`) gained new `exports` entries to
+  make that reuse possible
+- No external AI services — every recommendation is a deterministic, rule-based score over existing
+  Prisma data
+
+**Exit criteria**: Every recommendation surface returns real, explainable results computed from
+existing platform data with no external AI calls; an admin can disable any recommendation type via
+feature flag and it fails closed (empty list, not an error) for students; RBAC enforced
+(`recommendations:read:own` for students, `recommendations:admin` for feature-flag management).
 
 ## Sprint 12 — Scoring, Reports & Recommendations v0
 
