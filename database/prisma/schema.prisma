@@ -361,6 +361,37 @@ enum RecommendationType {
   @@map("recommendation_type")
 }
 
+/// CMS content-type discriminator for the shared CmsContentVersion/
+/// CmsAssetUsage tables (Sprint 12, ADR-0022 §3/§5).
+enum CmsContentType {
+  PAGE
+  FAQ
+  ANNOUNCEMENT
+  BANNER
+
+  @@map("cms_content_type")
+}
+
+enum CmsPageType {
+  LANDING
+  STATIC
+
+  @@map("cms_page_type")
+}
+
+/// Draft -> Review -> Approval -> Publish -> Archive (Sprint 12, ADR-0022 §1).
+/// Deliberately separate from the curriculum hierarchy's ContentStatus
+/// (Sprint 2) — see ADR-0022 §1.
+enum CmsWorkflowStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  PUBLISHED
+  ARCHIVED
+
+  @@map("cms_workflow_status")
+}
+
 /// Platform user. Identity & Access core entity (DB-05 §3, SRS-02 Table 5).
 model User {
   id              String     @id @default(uuid()) @db.Uuid
@@ -441,6 +472,17 @@ model User {
   scheduledReports ScheduledReport[]
 
   recommendationFeatureFlagsUpdated RecommendationFeatureFlag[]
+
+  cmsAssetsUploaded    CmsAsset[]
+  cmsPagesCreated      CmsPage[]           @relation("CmsPageCreatedBy")
+  cmsPagesUpdated      CmsPage[]           @relation("CmsPageUpdatedBy")
+  cmsFaqItemsCreated   CmsFaqItem[]        @relation("CmsFaqItemCreatedBy")
+  cmsFaqItemsUpdated   CmsFaqItem[]        @relation("CmsFaqItemUpdatedBy")
+  cmsAnnouncementsCreated CmsAnnouncement[] @relation("CmsAnnouncementCreatedBy")
+  cmsAnnouncementsUpdated CmsAnnouncement[] @relation("CmsAnnouncementUpdatedBy")
+  cmsBannersCreated    CmsBanner[]         @relation("CmsBannerCreatedBy")
+  cmsBannersUpdated    CmsBanner[]         @relation("CmsBannerUpdatedBy")
+  cmsContentVersionsCreated CmsContentVersion[]
 
   @@index([status])
   @@map("users")
@@ -1815,4 +1857,159 @@ model RecommendationFeatureFlag {
   updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
 
   @@map("recommendation_feature_flags")
+}
+
+/// Media Library (Sprint 12, ADR-0022 §5). Uploaded via the same presigned
+/// StoragePort flow as assignment submissions (ADR-0015); scanStatus defaults
+/// to PENDING (quarantine-by-default) until the shared malware scanner
+/// primitive marks it CLEAN via CmsAssetScanQueueService.
+model CmsAsset {
+  id           String         @id @default(uuid()) @db.Uuid
+  fileName     String         @map("file_name")
+  mimeType     String         @map("mime_type")
+  sizeBytes    Int            @map("size_bytes")
+  storageKey   String         @unique @map("storage_key")
+  scanStatus   FileScanStatus @default(PENDING) @map("scan_status")
+  altText      String?        @map("alt_text")
+  uploadedById String         @map("uploaded_by_id") @db.Uuid
+  createdAt    DateTime       @default(now()) @map("created_at")
+
+  uploadedBy User             @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  usages     CmsAssetUsage[]
+  banners    CmsBanner[]
+
+  @@map("cms_assets")
+}
+
+/// Tracks which content items reference a given asset — "Asset Reuse"
+/// (ADR-0022 §5) without scanning content bodies for asset references.
+model CmsAssetUsage {
+  id          String         @id @default(uuid()) @db.Uuid
+  assetId     String         @map("asset_id") @db.Uuid
+  contentType CmsContentType @map("content_type")
+  contentId   String         @map("content_id") @db.Uuid
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  asset CmsAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, contentType, contentId])
+  @@index([contentType, contentId])
+  @@map("cms_asset_usages")
+}
+
+/// Landing Pages and Static Pages (Sprint 12, ADR-0022 §2) — one model, a
+/// `pageType` discriminator, since both are identically shaped.
+model CmsPage {
+  id                  String            @id @default(uuid()) @db.Uuid
+  pageType            CmsPageType       @map("page_type")
+  slug                String            @unique
+  title               String
+  body                String
+  seoTitle            String?           @map("seo_title")
+  seoDescription      String?           @map("seo_description")
+  status              CmsWorkflowStatus @default(DRAFT)
+  version             Int               @default(1)
+  scheduledPublishAt  DateTime?         @map("scheduled_publish_at")
+  scheduledUnpublishAt DateTime?        @map("scheduled_unpublish_at")
+  publishedAt         DateTime?         @map("published_at")
+  createdById         String            @map("created_by_id") @db.Uuid
+  updatedById         String?           @map("updated_by_id") @db.Uuid
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  createdBy User  @relation("CmsPageCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  updatedBy User? @relation("CmsPageUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([pageType, status])
+  @@map("cms_pages")
+}
+
+model CmsFaqItem {
+  id                  String            @id @default(uuid()) @db.Uuid
+  question            String
+  answer              String
+  category            String?
+  position            Int               @default(0)
+  status              CmsWorkflowStatus @default(DRAFT)
+  version             Int               @default(1)
+  scheduledPublishAt  DateTime?         @map("scheduled_publish_at")
+  scheduledUnpublishAt DateTime?        @map("scheduled_unpublish_at")
+  publishedAt         DateTime?         @map("published_at")
+  createdById         String            @map("created_by_id") @db.Uuid
+  updatedById         String?           @map("updated_by_id") @db.Uuid
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  createdBy User  @relation("CmsFaqItemCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  updatedBy User? @relation("CmsFaqItemUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status, position])
+  @@map("cms_faq_items")
+}
+
+model CmsAnnouncement {
+  id                  String            @id @default(uuid()) @db.Uuid
+  title               String
+  body                String
+  status              CmsWorkflowStatus @default(DRAFT)
+  version             Int               @default(1)
+  scheduledPublishAt  DateTime?         @map("scheduled_publish_at")
+  scheduledUnpublishAt DateTime?        @map("scheduled_unpublish_at")
+  publishedAt         DateTime?         @map("published_at")
+  createdById         String            @map("created_by_id") @db.Uuid
+  updatedById         String?           @map("updated_by_id") @db.Uuid
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  createdBy User  @relation("CmsAnnouncementCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  updatedBy User? @relation("CmsAnnouncementUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@map("cms_announcements")
+}
+
+model CmsBanner {
+  id                  String            @id @default(uuid()) @db.Uuid
+  title                String
+  imageAssetId         String?           @map("image_asset_id") @db.Uuid
+  linkUrl              String?           @map("link_url")
+  placement            String
+  position             Int               @default(0)
+  status               CmsWorkflowStatus @default(DRAFT)
+  version              Int               @default(1)
+  scheduledPublishAt   DateTime?         @map("scheduled_publish_at")
+  scheduledUnpublishAt DateTime?         @map("scheduled_unpublish_at")
+  publishedAt          DateTime?         @map("published_at")
+  createdById          String            @map("created_by_id") @db.Uuid
+  updatedById          String?           @map("updated_by_id") @db.Uuid
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt             DateTime         @updatedAt @map("updated_at")
+
+  imageAsset CmsAsset? @relation(fields: [imageAssetId], references: [id], onDelete: SetNull)
+  createdBy  User      @relation("CmsBannerCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  updatedBy  User?     @relation("CmsBannerUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([placement, status, position])
+  @@map("cms_banners")
+}
+
+/// Generic version history for every CMS content type (Sprint 12, ADR-0022
+/// §3) — one table backs Content Version History/Compare/Restore for
+/// Pages/FAQ/Announcements/Banners alike, keyed by (contentType, contentId).
+model CmsContentVersion {
+  id            String            @id @default(uuid()) @db.Uuid
+  contentType   CmsContentType    @map("content_type")
+  contentId     String            @map("content_id") @db.Uuid
+  versionNumber Int               @map("version_number")
+  snapshot      Json
+  status        CmsWorkflowStatus
+  changeNote    String?           @map("change_note")
+  createdById   String            @map("created_by_id") @db.Uuid
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@unique([contentType, contentId, versionNumber])
+  @@index([contentType, contentId])
+  @@map("cms_content_versions")
 }
