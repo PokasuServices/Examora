@@ -17,7 +17,23 @@ RUN pnpm install --frozen-lockfile
 
 FROM installer AS builder
 COPY --from=pruner /repo/out/full/ .
+# `turbo prune --docker` doesn't carry root-level files that aren't inside a
+# workspace package (every package's tsconfig.json extends this one) — copy
+# it explicitly or every tsup/next build in the graph fails with
+# "TS5083: Cannot read file '/repo/tsconfig.base.json'".
+COPY --from=pruner /repo/tsconfig.base.json .
 ENV NEXT_TELEMETRY_DISABLED=1
+# next.config.mjs only enables output:"standalone" (required by the runner
+# stage below) when this is set — see next.config.mjs for why it's gated
+# rather than unconditional.
+ENV DOCKER_BUILD=1
+# apps/admin's build script is `dotenv -e ../../.env -- next build` (a single
+# .env works for local dev too — see README). .dockerignore deliberately
+# excludes the real .env from the build context, so production config must
+# come from real container env vars (docker run -e / compose / k8s secrets),
+# never a baked-in file; this placeholder only satisfies dotenv-cli's
+# requirement that the path it's given exists, mirroring ci.yml's same step.
+RUN touch .env
 RUN pnpm turbo run build --filter=@examora/admin...
 
 FROM base AS runner

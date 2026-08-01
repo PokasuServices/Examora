@@ -17,6 +17,11 @@ RUN pnpm install --frozen-lockfile
 
 FROM installer AS builder
 COPY --from=pruner /repo/out/full/ .
+# `turbo prune --docker` doesn't carry root-level files that aren't inside a
+# workspace package (every package's tsconfig.json extends this one) — copy
+# it explicitly or every tsup/nest build in the graph fails with
+# "TS5083: Cannot read file '/repo/tsconfig.base.json'".
+COPY --from=pruner /repo/tsconfig.base.json .
 RUN pnpm --filter @examora/database generate
 RUN pnpm turbo run build --filter=@examora/api...
 
