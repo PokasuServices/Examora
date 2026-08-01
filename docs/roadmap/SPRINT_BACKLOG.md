@@ -505,9 +505,17 @@ existing platform data with no external AI calls; an admin can disable any recom
 feature flag and it fails closed (empty list, not an error) for students; RBAC enforced
 (`recommendations:read:own` for students, `recommendations:admin` for feature-flag management).
 
-## Sprint 12 — Scoring, Reports & Recommendations v0
+## Sprint 12 — CMS & Publishing Workflow
 
-Status: Planned (renumbered from Sprint 10 by the Sprint 10 resequencing above — see D-55).
+Status: **Complete** (2026-08-01). 667 automated tests pass (413 unit/integration + 254 e2e),
+including 72 new Sprint 12 tests (54 unit/integration + 18 e2e). See ADR-0022 for the full design
+(workflow/versioning engine, media library, scheduling, permission model, page placement).
+
+Content note (see D-57): this kickoff explicitly redefined Sprint 12 to "CMS & Publishing
+Workflow," directing that the roadmap not otherwise be modified. The previously-planned Sprint 12
+content below — "Scoring, Reports & Recommendations v0" — is therefore **unplaced**, not
+cancelled; it joins Sprint 11's unplaced Growth Modules/Full Admin/Creative Gallery scope (see
+D-56) pending a future sprint kickoff to assign it a slot:
 
 - FR-QUIZ-04: automatic objective scoring per published rules, audit timestamp, persisted once —
   substantially already delivered by Sprint 4's automatic scoring; this sprint closes any remaining
@@ -518,8 +526,41 @@ Status: Planned (renumbered from Sprint 10 by the Sprint 10 resequencing above �
 - FR-REC-01: next-step recommendations from mastery/recency/results/weightage, each with a stored,
   reproducible reason (no black-box output yet — full AI engine is Phase 6)
 
-**Exit criteria**: Phase 1 (MVP) complete — full register→enroll→learn→quiz→report journey passes
-E2E; all Phase 1 FR-IDs have automated test evidence per QA-15 §10.
+Sprint 12's actual delivered scope:
+
+- Content Workflow: Draft → Review → Approval → Publish → Archive for Landing Pages, Static Pages,
+  FAQ, Announcements, and Banners — one shared `assertValidCmsTransition` state machine and
+  `CmsVersioningService` engine reused by all four content-type services (`CmsPagesService`,
+  `CmsFaqService`, `CmsAnnouncementsService`, `CmsBannersService`), rather than four bespoke
+  implementations
+- Versioning: Content Version History, Compare Versions (field-by-field diff), Restore Version
+  (writes a new version rather than mutating history) — one generic `CmsContentVersion` table keyed
+  by `(contentType, contentId)`, not a table per content type
+- Publishing: Scheduled Publish/Unpublish via a one-time delayed BullMQ job per
+  `(contentType, contentId, action)` (`CmsSchedulingProcessor`, mirroring Sprint 9's
+  `NotificationQueueService.scheduleNotification` delayed-job pattern, not ADR-0020's repeatable
+  scheduler); Preview Mode via the admin `GET :id` route returning full content regardless of
+  workflow status, rather than a separate preview-token mechanism
+- Media Management: presigned-upload Media Library reusing Sprint 5's `StoragePort`/
+  `MalwareScannerPort` primitives, quarantine-by-default scanning (`CmsAssetScanQueueService`/
+  `CmsAssetScanProcessor`, a third sibling of Sprint 5/7's malware-scan queue trio per the
+  established ADR-0017 precedent), and Asset Reuse tracking (`CmsAssetUsage`) scoped to Banners'
+  structural `imageAssetId` FK
+- CMS: Landing Pages and Static Pages unified as one `CmsPage` model (`pageType` discriminator),
+  FAQ, Announcements, Banner Management (placement/position)
+- Search: `CmsSearchService` keyword search across published Pages/FAQ/Announcements, mirroring
+  `CommunitySearchService`'s MVP shape (Prisma `contains`, no full-text index yet)
+- Public reads (`@Public()`, no permission required) for every PUBLISHED content item; admin
+  authoring gated by new `cms:manage`/`cms:publish` permissions (ADMINISTRATOR-only — no dedicated
+  content-editor/reviewer role exists yet, tracked as TD-045), mirroring Sprint 2's
+  `content:manage`/`content:publish` Author/Publisher split
+- Reuses existing Authentication, Storage, Malware Scanning, Audit, and BullMQ scheduling
+  infrastructure — no duplicated business logic
+
+**Exit criteria**: Every content type completes the full Draft→Review→Approval→Publish→Archive
+lifecycle with version history and restore; scheduled publish/unpublish fires without manual
+intervention; public routes only ever serve PUBLISHED content; RBAC enforced (`cms:manage` for
+authoring, `cms:publish` for publish/schedule/archive transitions).
 
 ## Sprint 13 — Stabilization & Release Readiness
 

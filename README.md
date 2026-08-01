@@ -5,6 +5,22 @@ entrance exams. Governed by [`documents/00_Master_Development_Guide_Examora_Plat
 
 ## Status
 
+**Sprint 12 — CMS & Publishing Workflow (complete).** Draft → Review → Approval → Publish → Archive
+for Landing Pages, Static Pages, FAQ, Announcements, and Banners — one shared state-machine and
+version-history engine (`assertValidCmsTransition`, `CmsVersioningService`) reused by all four
+content-type services rather than four separate implementations. Content Version History, Compare
+Versions, and Restore Version are backed by one generic `CmsContentVersion` table keyed by
+`(contentType, contentId)`. Scheduled Publish/Unpublish fires via a one-time delayed BullMQ job per
+content item (`CmsSchedulingProcessor`, mirroring Sprint 9's notification-scheduling pattern); Preview
+Mode is the admin `GET :id` route returning content regardless of workflow status, not a separate
+mechanism. The Media Library reuses Sprint 5's presigned-upload storage and malware-scan ports
+end-to-end — every upload is quarantined until scanned CLEAN — and tracks Asset Reuse for banners'
+`imageAssetId`. Public reads (`@Public()`) only ever serve PUBLISHED content; admin authoring is
+gated by new `cms:manage`/`cms:publish` permissions (ADMINISTRATOR-only for now — see TD-045). Lives
+at `/pages/[slug]`, `/faq`, `/announcements` (public, `apps/web`) and `/cms/*` (`apps/admin`). See
+[ADR-0022](docs/adr/0022-cms-and-publishing-workflow.md) for the full design, and D-57 for how this
+sprint's content diverged from the previously-planned Sprint 12.
+
 **Sprint 11 — AI Recommendation Engine (complete).** A rule-based personalization layer — no
 external AI services, no ML — built as a `RecommendationsModule` that scores existing platform data
 with deterministic weighted signals and attaches a plain-English `reason` to every result. Two of
