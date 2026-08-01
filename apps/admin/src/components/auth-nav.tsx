@@ -28,6 +28,7 @@ export function AuthNav() {
     const canViewMentorAnalytics = user.permissions.includes("analytics:mentor");
     const canViewAdminAnalytics = user.permissions.includes("analytics:admin");
     const canManageRecommendations = user.permissions.includes("recommendations:admin");
+    const canManageCms = user.permissions.includes("cms:manage");
     return (
       <div className="flex items-center gap-3">
         <span className="text-sm text-neutral-600">{user.email}</span>
@@ -109,6 +110,11 @@ export function AuthNav() {
         {canManageRecommendations ? (
           <Link href="/feature-flags">
             <Button variant="secondary">Feature flags</Button>
+          </Link>
+        ) : null}
+        {canManageCms ? (
+          <Link href="/cms/pages">
+            <Button variant="secondary">CMS</Button>
           </Link>
         ) : null}
         <Link href="/users">
