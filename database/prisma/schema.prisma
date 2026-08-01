@@ -1117,6 +1117,7 @@ model AssignmentSubmission {
 
   @@unique([assignmentId, studentId, version])
   @@index([assignmentId, studentId])
+  @@index([studentId])
   @@index([reviewerId])
   @@index([status])
   @@map("assignment_submissions")
@@ -1157,6 +1158,7 @@ model AssignmentReview {
   reviewer   User                 @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
   scores     RubricScore[]
 
+  @@index([reviewerId])
   @@map("assignment_reviews")
 }
 
@@ -1455,6 +1457,7 @@ model Reply {
 
   @@index([threadId])
   @@index([parentReplyId])
+  @@index([authorId])
   @@map("replies")
 }
 
@@ -1631,6 +1634,7 @@ model Order {
 
   @@index([userId])
   @@index([status])
+  @@index([courseId])
   @@map("orders")
 }
 
@@ -1759,6 +1763,7 @@ model Notification {
 
   @@index([userId, createdAt])
   @@index([userId, isRead])
+  @@index([createdAt])
   @@map("notifications")
 }
 
@@ -1796,6 +1801,7 @@ model NotificationDelivery {
   @@index([notificationId])
   @@index([status])
   @@index([providerMessageId])
+  @@index([channel, status])
   @@map("notification_deliveries")
 }
 
