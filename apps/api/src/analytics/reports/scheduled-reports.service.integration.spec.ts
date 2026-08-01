@@ -123,7 +123,11 @@ describe("ScheduledReportsService (integration)", () => {
       cadence: "MONTHLY",
     });
     await service.runNow(report.id);
-    expect(add).toHaveBeenCalledWith("run-scheduled-report", { scheduledReportId: report.id });
+    expect(add).toHaveBeenCalledWith(
+      "run-scheduled-report",
+      { scheduledReportId: report.id },
+      expect.objectContaining({ attempts: 3 }),
+    );
   });
 
   it("throws NotFoundException for a non-existent scheduled report", async () => {

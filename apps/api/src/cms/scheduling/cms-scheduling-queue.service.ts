@@ -34,7 +34,12 @@ export class CmsSchedulingQueueService {
     await this.queue.add(
       "transition",
       { contentType, contentId, action },
-      { jobId: cmsSchedulingJobId(contentType, contentId, action), delay },
+      {
+        jobId: cmsSchedulingJobId(contentType, contentId, action),
+        delay,
+        attempts: 3,
+        backoff: { type: "exponential", delay: 5000 },
+      },
     );
   }
 

@@ -43,7 +43,11 @@ export class ScheduledReportsService {
     await this.queue.upsertJobScheduler(
       id,
       { every: CADENCE_INTERVAL_MS[cadence] },
-      { name: "run-scheduled-report", data: { scheduledReportId: id } },
+      {
+        name: "run-scheduled-report",
+        data: { scheduledReportId: id },
+        opts: { attempts: 3, backoff: { type: "exponential", delay: 5000 } },
+      },
     );
   }
 
@@ -91,7 +95,11 @@ export class ScheduledReportsService {
   /** Fires the report's job immediately — admin convenience + testability, ADR-0020 §5. */
   async runNow(id: string): Promise<void> {
     const report = await this.findByIdOrThrow(id);
-    await this.queue.add("run-scheduled-report", { scheduledReportId: report.id });
+    await this.queue.add(
+      "run-scheduled-report",
+      { scheduledReportId: report.id },
+      { attempts: 3, backoff: { type: "exponential", delay: 5000 } },
+    );
   }
 
   async markRun(id: string): Promise<void> {

@@ -67,11 +67,9 @@ import { WebPushSubscriptionsService } from "./web-push-subscriptions.service";
     { provide: WEB_PUSH_CHANNEL_PORT, useClass: WebPushChannelService },
     { provide: MOBILE_PUSH_CHANNEL_PORT, useClass: MobilePushChannelService },
   ],
-  exports: [
-    NotificationsService,
-    NotificationQueueService,
-    NotificationPreferencesService,
-    WebPushSubscriptionsService,
-  ],
+  // NotificationPreferencesService/WebPushSubscriptionsService are only ever
+  // injected into their own controllers (declared above, in this same
+  // module) — no other module needs them exported.
+  exports: [NotificationsService, NotificationQueueService],
 })
 export class NotificationModule {}

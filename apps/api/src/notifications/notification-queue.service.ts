@@ -28,6 +28,10 @@ export class NotificationQueueService {
 
   /** Defers the whole Notification's creation, not just one channel's send (ADR-0019 §10). */
   async scheduleNotification(payload: NotificationScheduleJobData, delayMs: number): Promise<void> {
-    await this.scheduleQueue.add("create", payload, { delay: delayMs, attempts: 1 });
+    await this.scheduleQueue.add("create", payload, {
+      delay: delayMs,
+      attempts: 3,
+      backoff: { type: "exponential", delay: 5000 },
+    });
   }
 }

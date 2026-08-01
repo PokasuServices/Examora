@@ -19,6 +19,8 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, GoogleStrategy, GoogleConfiguredGuard],
-  exports: [AuthService],
+  // No other module imports AuthModule — nothing outside auth/ needs
+  // AuthService directly (every cross-cutting concern it touches, e.g.
+  // audit logging, goes through its own @Global() module instead).
 })
 export class AuthModule {}

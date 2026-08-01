@@ -15,11 +15,23 @@ import type { AppConfig } from "./config/configuration";
  */
 export function configureApp(app: INestApplication): void {
   const configService = app.get(ConfigService);
-  const { globalPrefix, corsOrigins } = configService.getOrThrow<AppConfig>("app");
+  const { globalPrefix, corsOrigins, nodeEnv } = configService.getOrThrow<AppConfig>("app");
 
   app.use(helmet());
   app.use(compression());
   app.use(cookieParser());
+
+  // Sprint 13 hardening: an unset CORS_ORIGINS used to fall back to `origin:
+  // true` (reflects any origin) unconditionally — fine for local dev (no
+  // fixed frontend port list), but a silent wide-open default is exactly the
+  // kind of production misconfiguration that should fail loudly at boot
+  // instead (same "fail fast on missing config" philosophy as env.validation.ts),
+  // not fail open. Non-production keeps the permissive fallback for convenience.
+  if (nodeEnv === "production" && corsOrigins.length === 0) {
+    throw new Error(
+      "CORS_ORIGINS must be set in production — refusing to boot with an open (reflect-any-origin) CORS policy",
+    );
+  }
 
   app.enableCors({
     origin: corsOrigins.length > 0 ? corsOrigins : true,

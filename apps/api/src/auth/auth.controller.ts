@@ -15,6 +15,7 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AuthGuard } from "@nestjs/passport";
+import { Throttle } from "@nestjs/throttler";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { Request, Response } from "express";
 import ms from "ms";
@@ -47,6 +48,7 @@ export class AuthController {
   ) {}
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("register")
   @ApiOperation({ summary: "Create a new account (self-registration; STUDENT role only)" })
   async register(
@@ -60,6 +62,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("login")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Authenticate with email and password" })
@@ -125,6 +128,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("resend-verification")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Resend the email verification link (no-op if already verified)" })
@@ -137,6 +141,7 @@ export class AuthController {
   // ---------------------------------------------------------------------
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("forgot-password")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Request a password-reset email (always returns 204)" })
@@ -145,6 +150,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("reset-password")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Complete a password reset using a one-time token" })

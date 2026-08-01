@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { BullModule } from "@nestjs/bullmq";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import type Redis from "ioredis";
 import { LoggerModule } from "nestjs-pino";
 import { generateCorrelationId } from "@examora/utils";
@@ -14,6 +15,7 @@ import { CorrelationIdMiddleware } from "./common/middleware/correlation-id.midd
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { RolesGuard } from "./common/guards/roles.guard";
 import { PermissionsGuard } from "./common/guards/permissions.guard";
+import { THROTTLER_OPTIONS } from "./common/rate-limit.config";
 import { PrismaModule } from "./prisma/prisma.module";
 import { RedisModule } from "./redis/redis.module";
 import { BULLMQ_REDIS_CLIENT } from "./redis/redis.constants";
@@ -72,6 +74,7 @@ import { CmsModule } from "./cms/cms.module";
       inject: [BULLMQ_REDIS_CLIENT],
       useFactory: (bullmqRedis: Redis) => ({ connection: bullmqRedis }),
     }),
+    ThrottlerModule.forRoot(THROTTLER_OPTIONS),
     PrismaModule,
     RedisModule,
     StorageModule,
@@ -98,6 +101,9 @@ import { CmsModule } from "./cms/cms.module";
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+    // Throttler runs first (before auth) so brute-force/scraping is capped
+    // regardless of whether the target endpoint is @Public() or gated.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },
