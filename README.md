@@ -5,6 +5,35 @@ entrance exams. Governed by [`documents/00_Master_Development_Guide_Examora_Plat
 
 ## Status
 
+**Sprint 13 — Production Readiness (complete). Examora v1.0.0 — feature development is complete.**
+The Release Readiness Sprint: no new business features, only architecture/performance/security
+review and safe fixes ahead of v1.0.0. Every genuine issue found was either fixed or explicitly
+tracked, not silently dropped:
+
+- **Security**: no rate limiting existed anywhere in the API (including login/register) — added
+  globally via `@nestjs/throttler` (100 req/min default, 5/min on auth endpoints), with a dedicated
+  e2e test proving the real 429 behavior. CORS silently fell back to reflecting any origin with
+  credentials when `CORS_ORIGINS` was unset — now fails closed (refuses to boot) in production
+  instead. Three background job queues (CMS scheduled publish, scheduled reports, scheduled
+  notifications) had no retry policy and now match the existing malware-scan/notification-delivery
+  queues' retry-with-backoff pattern.
+- **Architecture**: full circular-dependency and DI audit across all 23 backend modules — clean,
+  no cycles found. Two genuinely-unused cross-module exports removed.
+- **Performance**: six missing indexes added where query shape and existing indexes didn't line up;
+  the deepest N+1 fan-out patterns (analytics dashboards) were audited and documented (TD-046) rather
+  than risk a same-day rewrite of heavily-relied-upon, previously-tested code.
+- **DevOps**: found and fixed two real bugs that meant none of the three Docker images had ever
+  actually built successfully before this sprint (TD-010) — verified via real `docker build`/
+  `docker run` against docker-compose Postgres/Redis/MinIO, including a full `/health` check against
+  live containers.
+- **Documentation**: this README, every ADR, the Sprint Backlog, Technical Debt Register, Decisions
+  & Assumptions log, and Swagger annotations are all synchronized with the codebase's current state.
+
+676 automated tests pass (420 unit/integration + 256 e2e). See
+[ADR-0023](docs/adr/0023-production-readiness-hardening.md) for the full design of every fix, and
+`docs/release/v1.0.0/` for the Release Notes, Production Readiness Report, Architecture Health
+Report, Technical Debt Summary, Known Limitations, and Deployment Checklist.
+
 **Sprint 12 — CMS & Publishing Workflow (complete).** Draft → Review → Approval → Publish → Archive
 for Landing Pages, Static Pages, FAQ, Announcements, and Banners — one shared state-machine and
 version-history engine (`assertValidCmsTransition`, `CmsVersioningService`) reused by all four

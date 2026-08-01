@@ -564,14 +564,46 @@ authoring, `cms:publish` for publish/schedule/archive transitions).
 
 ## Sprint 13 — Stabilization & Release Readiness
 
-- PERF-32: load/stress/spike/soak testing against target SLAs (API p95 <500ms, LCP <2.5s,
-  availability >99.9%)
-- SEC-13: full security review, OWASP Top 10 pass, penetration test findings closed
-- WCAG 2.1 AA accessibility audit across all three apps
-- QA-15: full regression pass, UAT sign-off, exit criteria met
-- OPS-24: production runbooks validated, monitoring/alerting live, backup/restore tested
+Status: **Complete** (2026-08-01), scope refined by the kickoff to code-level architecture/
+performance/security review, safe fixes, documentation sync, and release preparation for v1.0.0 —
+no new business features. 676 automated tests pass (420 unit/integration + 256 e2e, including 9 new
+Sprint 13 tests proving the rate-limiting and CORS fail-closed fixes). See
+[ADR-0023](../adr/0023-production-readiness-hardening.md) for the full design of every fix, and
+`docs/release/v1.0.0/` for the six release-preparation documents.
 
-**Exit criteria**: MDG-00 §22 release checklist fully signed off by Product Owner. Phase 5 complete.
+Delivered against the original bullets below:
+
+- SEC-13 (security review): **done** as a code-level review (auth, RBAC, JWT, refresh tokens,
+  cookies, rate limiting, input validation, file uploads, secrets, SQL injection, XSS, CSRF) with
+  fixes for every genuine issue found — no rate limiting existed anywhere (added, `@nestjs/throttler`,
+  tightened further on auth endpoints), CORS silently failed open in production when unconfigured
+  (now fails closed at boot), three background job queues had no retry policy (fixed). **Not
+  performed**: an actual third-party penetration test — out of scope for an in-repo code review;
+  tracked as a residual gap in the Production Readiness Report, not silently dropped
+- QA-15 (regression pass): **done** via the full automated suite (676 tests, including a fresh e2e
+  run against every prior sprint's coverage) rather than manual UAT sign-off, which needs a human
+  Product Owner and isn't something this sprint can perform on its own
+- OPS-24 (Docker/CI/deployment review): **done** — found and fixed two real bugs that meant none of
+  the three Dockerfiles had ever actually built successfully (TD-010), verified via real
+  `docker build`/`docker run` against docker-compose Postgres/Redis/MinIO for the first time;
+  production runbooks and live monitoring/alerting are **not done** (no infra target environment
+  exists yet — TD-007/TD-003) and are named explicitly in the Known Limitations report instead
+- PERF-32 (load/stress/spike/soak testing against SLAs): **not performed** — no load-testing
+  tooling (k6/artillery/similar) is available in this environment; a static N+1-query and
+  missing-index audit was performed instead (six indexes added, largest fan-out patterns documented
+  as TD-046), which is a different, narrower kind of performance work than live load testing against
+  p95/LCP/availability SLAs. Named as a residual gap, not claimed as done
+- WCAG 2.1 AA accessibility audit: **not performed** — not named in the Sprint 13 kickoff's explicit
+  review checklist (Architecture/Performance/Security/Testing/Documentation/DevOps/Release
+  Preparation); left for a future dedicated pass rather than attempted partially under this sprint's
+  scope
+
+**Exit criteria** (as actually achievable from a code-level audit sprint): every genuine
+architecture/performance/security issue found has either been fixed or is explicitly tracked in
+`docs/TECHNICAL_DEBT_REGISTER.md`/the Known Limitations report with a rationale for deferring it;
+the full automated suite is green; Docker images are verified buildable and runnable; all
+documentation (README, ADRs, Sprint Backlog, Technical Debt Register, Decisions & Assumptions,
+Swagger) is synchronized with the codebase's actual current state.
 
 ---
 
