@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { ApiStatus } from "@/components/api-status";
 import { AuthNav } from "@/components/auth-nav";
+import { HomepageBanner } from "@/components/homepage-banner";
 
 export default function HomePage() {
   return (
@@ -11,6 +12,9 @@ export default function HomePage() {
           <ApiStatus />
         </Suspense>
       </div>
+      <Suspense fallback={null}>
+        <HomepageBanner />
+      </Suspense>
       <p className="text-body text-neutral-600">
         Sprint 3 — Learning Engine. Browse published courses, work through lessons, and track your
         progress. Quizzes, assignments and later modules are still to come. See{" "}

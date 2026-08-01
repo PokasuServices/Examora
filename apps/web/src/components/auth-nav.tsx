@@ -69,6 +69,12 @@ export function AuthNav() {
         <Link href="/orders">
           <Button variant="secondary">My purchases</Button>
         </Link>
+        <Link href="/announcements">
+          <Button variant="ghost">Announcements</Button>
+        </Link>
+        <Link href="/faq">
+          <Button variant="ghost">FAQ</Button>
+        </Link>
         <NotificationsLink />
         <Link href="/profile">
           <Button variant="ghost">Profile</Button>
@@ -79,6 +85,12 @@ export function AuthNav() {
 
   return (
     <div className="flex items-center gap-3">
+      <Link href="/announcements">
+        <Button variant="ghost">Announcements</Button>
+      </Link>
+      <Link href="/faq">
+        <Button variant="ghost">FAQ</Button>
+      </Link>
       <Link href="/login">
         <Button variant="secondary">Log in</Button>
       </Link>
