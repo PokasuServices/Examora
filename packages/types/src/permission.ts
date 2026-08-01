@@ -97,6 +97,14 @@ export const PERMISSION_CODES = [
   // is ADMINISTRATOR-only: per-type feature-flag management.
   "recommendations:read:own",
   "recommendations:admin",
+  // CMS & Publishing Workflow (Sprint 12, ADR-0022). Both ADMINISTRATOR-only —
+  // no dedicated content-editor/reviewer role exists yet (TD-045). `cms:manage`
+  // authors drafts, submits for review, and restores versions; `cms:publish`
+  // approves, publishes, schedules, and archives — mirroring content:manage/
+  // content:publish's Author/Publisher split (Sprint 2). Public reads of
+  // PUBLISHED pages/FAQ/announcements/banners need no permission (@Public()).
+  "cms:manage",
+  "cms:publish",
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];

@@ -36,6 +36,7 @@ import { EnrollmentModule } from "./enrollment/enrollment.module";
 import { CommerceModule } from "./commerce/commerce.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 import { RecommendationsModule } from "./recommendations/recommendations.module";
+import { CmsModule } from "./cms/cms.module";
 
 @Module({
   imports: [
@@ -92,6 +93,7 @@ import { RecommendationsModule } from "./recommendations/recommendations.module"
     CommerceModule,
     AnalyticsModule,
     RecommendationsModule,
+    CmsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
