@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CheckCircle2, Circle, FileText, Image as ImageIcon, PlayCircle } from "lucide-react";
+import { cn } from "@examora/ui";
 import type { Curriculum, LessonContentType } from "@examora/types";
 import { Chip } from "@/components/ui/chip";
 import type { SubjectStats } from "./types";
@@ -22,27 +23,40 @@ export function CurriculumAccordion({
   courseId,
   curriculum,
   subjectStats,
+  currentLessonId,
+  showHeading = true,
 }: {
   courseId: string;
   curriculum: Curriculum;
   subjectStats: Map<string, SubjectStats> | null;
+  /** Highlights the active lesson and auto-expands its subject — used when reused as the Lesson Viewer's course-navigation sidebar. */
+  currentLessonId?: string;
+  showHeading?: boolean;
 }) {
   return (
-    <section aria-labelledby="curriculum-heading">
-      <h2 id="curriculum-heading" className="font-heading text-xl font-semibold text-neutral-900">
-        Curriculum
-      </h2>
-      <div className="mt-4 flex flex-col gap-3">
+    <section aria-labelledby={showHeading ? "curriculum-heading" : undefined}>
+      {showHeading ? (
+        <h2 id="curriculum-heading" className="font-heading text-xl font-semibold text-neutral-900">
+          Curriculum
+        </h2>
+      ) : null}
+      <div className={showHeading ? "mt-4 flex flex-col gap-3" : "flex flex-col gap-3"}>
         {curriculum.subjects.map((subject, index) => {
           const stats = subjectStats?.get(subject.id);
           const lessonCount = subject.topics
             .flatMap((t) => t.modules)
             .flatMap((m) => m.lessons).length;
+          const containsCurrent = currentLessonId
+            ? subject.topics
+                .flatMap((t) => t.modules)
+                .flatMap((m) => m.lessons)
+                .some((l) => l.id === currentLessonId)
+            : false;
 
           return (
             <details
               key={subject.id}
-              open={index === 0}
+              open={currentLessonId ? containsCurrent : index === 0}
               className="group rounded-card border border-neutral-900/[0.06] bg-white shadow-soft [&_summary::-webkit-details-marker]:hidden"
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
@@ -92,11 +106,18 @@ export function CurriculumAccordion({
                         <ul className="mt-1 flex flex-col divide-y divide-neutral-100 overflow-hidden rounded-md border border-neutral-100">
                           {mod.lessons.map((lesson) => {
                             const Icon = CONTENT_ICON[lesson.contentType];
+                            const isCurrent = lesson.id === currentLessonId;
                             return (
                               <li key={lesson.id}>
                                 <Link
                                   href={`/courses/${courseId}/lessons/${lesson.id}`}
-                                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500"
+                                  aria-current={isCurrent ? "page" : undefined}
+                                  className={cn(
+                                    "flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500",
+                                    isCurrent
+                                      ? "bg-primary-50 font-medium text-primary-700"
+                                      : "text-neutral-700",
+                                  )}
                                 >
                                   <Icon
                                     size={16}

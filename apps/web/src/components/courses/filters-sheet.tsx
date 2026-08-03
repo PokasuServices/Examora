@@ -8,11 +8,13 @@ export function FiltersSheet({
   open,
   onClose,
   title = "Filters",
+  footerLabel = "Show results",
   children,
 }: {
   open: boolean;
   onClose: () => void;
   title?: string;
+  footerLabel?: string;
   children: React.ReactNode;
 }) {
   React.useEffect(() => {
@@ -40,7 +42,7 @@ export function FiltersSheet({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close filters"
+            aria-label={`Close ${title.toLowerCase()}`}
             className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             <X size={20} aria-hidden="true" />
@@ -53,7 +55,7 @@ export function FiltersSheet({
             onClick={onClose}
             className="flex h-11 w-full items-center justify-center rounded-md bg-primary-600 text-sm font-medium text-white hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
-            Show results
+            {footerLabel}
           </button>
         </div>
       </div>

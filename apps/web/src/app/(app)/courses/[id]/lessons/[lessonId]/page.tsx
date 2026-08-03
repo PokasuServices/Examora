@@ -1,122 +1,170 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import type { LessonWithProgress } from "@examora/types";
-import { Button } from "@examora/ui";
+import { useParams } from "next/navigation";
+import { Lock } from "lucide-react";
 import { RequireAuth } from "@/components/require-auth";
-import { useLearningApi } from "@/lib/learning-api";
+import { EmptyState } from "@/components/ui/empty-state";
+import { useLessonData } from "@/components/lesson-viewer/use-lesson-data";
+import { useLessonKeyboardShortcuts } from "@/components/lesson-viewer/use-lesson-keyboard-shortcuts";
+import { LessonBreadcrumb } from "@/components/lesson-viewer/lesson-breadcrumb";
+import { StickyProgressBar } from "@/components/lesson-viewer/sticky-progress-bar";
+import { LessonContent } from "@/components/lesson-viewer/lesson-content";
+import { LessonNavButtons } from "@/components/lesson-viewer/lesson-nav-buttons";
+import { LessonCompleteBar } from "@/components/lesson-viewer/lesson-complete-bar";
+import {
+  CollapsedNavToggle,
+  DesktopCourseNav,
+  MobileCourseNavTrigger,
+} from "@/components/lesson-viewer/course-nav-sidebar";
+import { LessonViewerSkeleton } from "@/components/lesson-viewer/skeletons";
 
-function LessonContent() {
+function LessonViewerContent() {
   const { id: courseId, lessonId } = useParams<{ id: string; lessonId: string }>();
-  const router = useRouter();
-  const api = useLearningApi();
-  const [lesson, setLesson] = React.useState<LessonWithProgress | null>(null);
-  const [completed, setCompleted] = React.useState(false);
-  const [notFound, setNotFound] = React.useState(false);
-  const [saving, setSaving] = React.useState(false);
+  const {
+    access,
+    lesson,
+    curriculum,
+    courseProgress,
+    location,
+    previousLesson,
+    nextLesson,
+    completing,
+    markComplete,
+  } = useLessonData(courseId, lessonId);
+  const [navCollapsed, setNavCollapsed] = React.useState(false);
 
-  React.useEffect(() => {
-    api
-      .getLesson(lessonId)
-      .then((l) => {
-        setLesson(l);
-        setCompleted(l.completed);
-        // Record the view as a side effect of opening the lesson.
-        void api.recordView(lessonId).catch(() => undefined);
-      })
-      .catch(() => setNotFound(true));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lessonId]);
+  useLessonKeyboardShortcuts(courseId, previousLesson, nextLesson);
 
-  async function markComplete(): Promise<void> {
-    setSaving(true);
-    try {
-      await api.completeLesson(lessonId);
-      setCompleted(true);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  if (notFound) {
+  if (access === "not-found") {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-12">
-        <h1 className="text-heading">Lesson not available</h1>
-        <Link
-          href={`/courses/${courseId}`}
-          className="mt-4 inline-block text-sm text-primary-600 hover:underline"
-        >
-          Back to course
-        </Link>
+      <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+        <EmptyState
+          icon={Lock}
+          heading="Lesson not available"
+          body="This lesson doesn't exist, isn't published, or has been removed."
+          actionLabel="Back to course"
+          actionHref={`/courses/${courseId}`}
+        />
       </main>
     );
   }
 
-  if (!lesson) {
+  if (access === "locked") {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-12">
-        <p className="text-sm text-neutral-500">Loading…</p>
+      <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+        <EmptyState
+          icon={Lock}
+          heading="This lesson is locked"
+          body="You need to enroll in this course to access its lessons."
+          actionLabel="Go to course"
+          actionHref={`/courses/${courseId}`}
+        />
       </main>
     );
   }
+
+  if (access === "checking" || !lesson || !curriculum) {
+    return <LessonViewerSkeleton />;
+  }
+
+  const moduleTotal = location?.moduleLessonIds.length ?? 0;
+  const moduleCompleted = location?.moduleCompletedCount ?? 0;
+  const modulePercent = moduleTotal > 0 ? Math.round((moduleCompleted / moduleTotal) * 100) : 0;
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <nav className="mb-6 text-sm text-neutral-500">
-        <Link href={`/courses/${courseId}`} className="hover:underline">
-          Course
-        </Link>{" "}
-        · <span className="text-neutral-800">{lesson.title}</span>
-      </nav>
+    <div className="flex flex-col">
+      <StickyProgressBar percent={courseProgress?.percentComplete ?? 0} />
 
-      <div className="flex items-center gap-3">
-        <h1 className="text-heading">{lesson.title}</h1>
-        <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600">
-          {lesson.contentType}
-        </span>
-      </div>
-
-      <article className="mt-6 rounded-lg border border-neutral-200 bg-white p-6">
-        {lesson.contentType === "TEXT" || lesson.contentType === "ARTICLE" ? (
-          <div className="whitespace-pre-wrap text-body text-neutral-800">
-            {lesson.body ?? "No content."}
+      <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-3">
+          <LessonBreadcrumb course={curriculum} location={location} lessonTitle={lesson.title} />
+          <div className="flex shrink-0 items-center gap-1.5">
+            <MobileCourseNavTrigger
+              courseId={courseId}
+              curriculum={curriculum}
+              currentLessonId={lessonId}
+            />
+            {navCollapsed ? <CollapsedNavToggle onExpand={() => setNavCollapsed(false)} /> : null}
+            <LessonNavButtons
+              variant="compact"
+              courseId={courseId}
+              previousLesson={previousLesson}
+              nextLesson={nextLesson}
+            />
           </div>
-        ) : lesson.contentUrl ? (
-          <a
-            href={lesson.contentUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="text-primary-600 hover:underline"
-          >
-            Open {lesson.contentType.toLowerCase()} resource ↗
-          </a>
-        ) : (
-          <p className="text-neutral-500">No content available.</p>
-        )}
-      </article>
+        </div>
 
-      <div className="mt-6 flex items-center gap-3">
-        {completed ? (
-          <span className="text-sm font-medium text-success-600">✓ Completed</span>
-        ) : (
-          <Button disabled={saving} onClick={() => void markComplete()}>
-            {saving ? "Saving…" : "Mark as complete"}
-          </Button>
-        )}
-        <Button variant="ghost" onClick={() => router.push(`/courses/${courseId}`)}>
-          Back to course
-        </Button>
+        <div className="flex items-start gap-8">
+          <div className="min-w-0 flex-1">
+            <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
+              {lesson.title}
+            </h1>
+
+            {location ? (
+              <div className="mt-3 max-w-xs">
+                <div className="flex items-center justify-between text-xs text-neutral-500">
+                  <span>{location.moduleTitle}</span>
+                  <span className="tabular-nums">
+                    {moduleCompleted}/{moduleTotal}
+                  </span>
+                </div>
+                <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-neutral-200">
+                  <div
+                    className="h-full rounded-full bg-primary-600"
+                    style={{ width: `${modulePercent}%` }}
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            <div className="mt-8">
+              <LessonContent lesson={lesson} />
+            </div>
+
+            <div className="mt-10 border-t border-neutral-100 pt-6">
+              <LessonCompleteBar
+                courseId={courseId}
+                completed={lesson.completed}
+                completing={completing}
+                nextLesson={nextLesson}
+                onMarkComplete={() => void markComplete()}
+              />
+            </div>
+
+            <div className="mt-8">
+              <LessonNavButtons
+                variant="full"
+                courseId={courseId}
+                previousLesson={previousLesson}
+                nextLesson={nextLesson}
+              />
+            </div>
+
+            <p className="mt-6 hidden text-xs text-neutral-400 sm:block">
+              Use <kbd className="rounded border border-neutral-200 px-1 py-0.5">←</kbd>{" "}
+              <kbd className="rounded border border-neutral-200 px-1 py-0.5">→</kbd> to navigate
+              between lessons
+            </p>
+          </div>
+
+          <DesktopCourseNav
+            courseId={courseId}
+            curriculum={curriculum}
+            currentLessonId={lessonId}
+            collapsed={navCollapsed}
+            onToggleCollapse={() => setNavCollapsed(true)}
+          />
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
 
-export default function LessonPage() {
+export default function LessonViewerPage() {
   return (
     <RequireAuth>
-      <LessonContent />
+      <LessonViewerContent />
     </RequireAuth>
   );
 }
