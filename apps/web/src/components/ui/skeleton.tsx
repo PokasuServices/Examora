@@ -17,6 +17,20 @@ export function CourseCardSkeleton() {
   );
 }
 
+/** A skeleton matching CatalogCourseCard's shape — full-width grid tile, not the rail's fixed w-64. */
+export function CatalogCourseCardSkeleton() {
+  return (
+    <div className="flex flex-col rounded-card border border-neutral-900/[0.06] bg-white p-4 shadow-soft">
+      <Skeleton className="h-28 w-full rounded-md" />
+      <Skeleton className="mt-3 h-4 w-20 rounded-full" />
+      <Skeleton className="mt-3 h-4 w-4/5" />
+      <Skeleton className="mt-2 h-3 w-full" />
+      <Skeleton className="mt-1.5 h-3 w-2/3" />
+      <Skeleton className="mt-4 h-9 w-full rounded-md" />
+    </div>
+  );
+}
+
 export function StatCardSkeleton() {
   return (
     <div className="rounded-card border border-neutral-900/[0.06] bg-white p-6 shadow-soft">

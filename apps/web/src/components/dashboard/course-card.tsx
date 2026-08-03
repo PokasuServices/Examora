@@ -1,23 +1,7 @@
 import Link from "next/link";
 import { cn } from "@examora/ui";
 import { ReasonChip } from "@/components/ui/chip";
-
-// No cover-image field exists on Course anywhere in the schema — a
-// deterministic color wash per the design spec, not a stock photo.
-const COVER_WASHES = [
-  "from-primary-500 to-primary-700",
-  "from-accent-400 to-accent-600",
-  "from-success-400 to-success-600",
-  "from-warning-400 to-warning-600",
-  "from-purple-400 to-purple-600",
-  "from-pink-400 to-pink-600",
-];
-
-function washFor(seed: string): string {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-  return COVER_WASHES[hash % COVER_WASHES.length]!;
-}
+import { courseCoverWash } from "@/components/courses/course-cover";
 
 export function CourseCard({
   href,
@@ -38,7 +22,7 @@ export function CourseCard({
       className="group block w-64 shrink-0 rounded-card border border-neutral-900/[0.06] bg-white p-4 shadow-soft transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-soft-hover motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       <div
-        className={cn("h-24 w-full rounded-md bg-gradient-to-br", washFor(title))}
+        className={cn("h-24 w-full rounded-md bg-gradient-to-br", courseCoverWash(title))}
         aria-hidden="true"
       />
       <h3 className="mt-3 truncate font-heading text-base font-semibold text-neutral-900">
