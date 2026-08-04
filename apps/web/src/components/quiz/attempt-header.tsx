@@ -2,8 +2,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import { cn } from "@examora/ui";
 import { formatClock } from "@/lib/format";
-import { AutosaveIndicator } from "./autosave-indicator";
-import type { AutosaveStatus } from "./types";
+import { AutosaveIndicator, type AutosaveStatus } from "@/components/ui/autosave-indicator";
 
 /**
  * The Attempt screen's own minimal header — deliberately not the app's

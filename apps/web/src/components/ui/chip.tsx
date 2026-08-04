@@ -3,6 +3,7 @@ import { cn } from "@examora/ui";
 
 const CHIP_TONES = {
   neutral: "bg-neutral-100 text-neutral-600",
+  primary: "bg-primary-50 text-primary-700",
   warning: "bg-warning-50 text-warning-700",
   danger: "bg-danger-50 text-danger-700",
   success: "bg-success-50 text-success-700",

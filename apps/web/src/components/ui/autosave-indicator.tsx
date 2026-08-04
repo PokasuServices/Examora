@@ -1,8 +1,15 @@
 import { AlertCircle, Check, Loader2 } from "lucide-react";
-import type { AutosaveStatus } from "./types";
 
-/** Reflects the real state of the last autosaveAnswer request — never a fabricated "always saved" claim. */
-export function AutosaveIndicator({ status }: { status: AutosaveStatus }) {
+export type AutosaveStatus = "idle" | "saving" | "saved" | "error";
+
+/** Reflects the real state of the last save request — never a fabricated "always saved" claim. Shared by the Quiz autosave-per-answer flow and the Assignment notes/file autosave flow. */
+export function AutosaveIndicator({
+  status,
+  errorLabel = "Couldn't save — try again",
+}: {
+  status: AutosaveStatus;
+  errorLabel?: string;
+}) {
   if (status === "idle") return null;
 
   if (status === "saving") {
@@ -22,7 +29,7 @@ export function AutosaveIndicator({ status }: { status: AutosaveStatus }) {
     return (
       <span className="inline-flex items-center gap-1.5 text-xs text-error-600">
         <AlertCircle size={13} strokeWidth={2} aria-hidden="true" />
-        Couldn&rsquo;t save — try reselecting
+        {errorLabel}
       </span>
     );
   }

@@ -69,7 +69,12 @@ export function useCourseExtras(courseId: string, curriculum: Curriculum | null)
     return () => {
       cancelled = true;
     };
-  }, [curriculum, quizApi, assignmentApi]);
+    // useQuizApi()/useAssignmentApi() return a fresh object every render (no
+    // memoization) — including them here caused this effect to re-fire on
+    // every render, which set state, which re-rendered, forever. Same fixed
+    // shape as the two effects below: depend only on the real trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [curriculum]);
 
   React.useEffect(() => {
     let cancelled = false;

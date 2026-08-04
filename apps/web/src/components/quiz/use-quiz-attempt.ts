@@ -4,7 +4,8 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { AttemptQuestion, AttemptState } from "@examora/types";
 import { useQuizApi } from "@/lib/quiz-api";
-import type { AnswersMap, AutosaveStatus } from "./types";
+import type { AutosaveStatus } from "@/components/ui/autosave-indicator";
+import type { AnswersMap } from "./types";
 
 type LoadState = "loading" | "ready" | "not-found";
 
