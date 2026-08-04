@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@examora/auth-client";
 import {
   BarChart3,
   BookOpen,
@@ -15,6 +16,7 @@ import {
   Settings,
   ShoppingBag,
   Sparkles,
+  Users,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -42,6 +44,14 @@ const NAV_ITEMS: NavItemConfig[] = [
 const FOOTER_ITEMS: NavItemConfig[] = [
   { href: "/profile", label: "Settings", icon: Settings },
   { href: "/faq", label: "Help", icon: HelpCircle },
+];
+
+// Shown only to accounts holding mentor:workflow (MENTOR + ADMINISTRATOR —
+// same permission the backend itself requires on every mentor-workflow
+// endpoint). Invisible to plain students and REVIEWER-only accounts.
+const MENTOR_NAV_ITEMS: NavItemConfig[] = [
+  { href: "/mentor/dashboard", label: "Mentor Dashboard", icon: LayoutDashboard },
+  { href: "/mentor/students", label: "My Students", icon: Users },
 ];
 
 function NavItem({
@@ -87,6 +97,8 @@ function SidebarContent({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const isMentor = user?.permissions.includes("mentor:workflow") ?? false;
 
   return (
     <nav aria-label="Main" className="flex h-full flex-col bg-white">
@@ -120,6 +132,32 @@ function SidebarContent({
             </li>
           ))}
         </ul>
+
+        {isMentor ? (
+          <>
+            <div className={cn("mt-4 mb-1 px-3", collapsed && "px-0 text-center")}>
+              {!collapsed ? (
+                <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+                  Mentor
+                </p>
+              ) : (
+                <div className="h-px bg-neutral-100" aria-hidden="true" />
+              )}
+            </div>
+            <ul className="flex flex-col gap-1">
+              {MENTOR_NAV_ITEMS.map((item) => (
+                <li key={item.href}>
+                  <NavItem
+                    item={item}
+                    active={pathname?.startsWith(item.href) ?? false}
+                    collapsed={collapsed}
+                    onNavigate={onNavigate}
+                  />
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
       </div>
 
       <div className="shrink-0 border-t border-neutral-900/[0.06] px-3 py-4">
