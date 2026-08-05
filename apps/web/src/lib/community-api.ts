@@ -4,14 +4,19 @@ import { useAuth } from "@examora/auth-client";
 import type {
   BookmarkToggleResult,
   CommunityActivityItem,
+  CommunityAttachment,
   CommunityProfileSummary,
+  CommunityTargetType,
   FollowToggleResult,
   ForumBoard,
   ForumCategory,
   LikeToggleResult,
   PaginatedData,
+  PresignedUpload,
   Reply,
+  ReputationEventItem,
   ThreadDetail,
+  ThreadStatus,
   ThreadSummary,
   ThreadType,
 } from "@examora/types";
@@ -32,14 +37,31 @@ export function useCommunityApi() {
       ),
     getBoard: (boardId: string) =>
       request<ForumBoard>(`/community/boards/${boardId}`, { method: "GET" }),
+    getCategory: (categoryId: string) =>
+      request<ForumCategory>(`/community/categories/${categoryId}`, { method: "GET" }),
 
-    listThreads: (params: { boardId?: string; page?: number; pageSize?: number }) =>
-      request<PaginatedData<ThreadSummary>>(
-        `/community/threads?pageSize=${params.pageSize ?? 20}&page=${params.page ?? 1}${
-          params.boardId ? `&boardId=${params.boardId}` : ""
-        }`,
-        { method: "GET" },
-      ),
+    listThreads: (params: {
+      boardId?: string;
+      type?: ThreadType;
+      status?: ThreadStatus;
+      solved?: boolean;
+      authorId?: string;
+      page?: number;
+      pageSize?: number;
+    }) => {
+      const qs = new URLSearchParams({
+        pageSize: String(params.pageSize ?? 20),
+        page: String(params.page ?? 1),
+      });
+      if (params.boardId) qs.set("boardId", params.boardId);
+      if (params.type) qs.set("type", params.type);
+      if (params.status) qs.set("status", params.status);
+      if (params.solved !== undefined) qs.set("solved", String(params.solved));
+      if (params.authorId) qs.set("authorId", params.authorId);
+      return request<PaginatedData<ThreadSummary>>(`/community/threads?${qs.toString()}`, {
+        method: "GET",
+      });
+    },
     getThread: (id: string) => request<ThreadDetail>(`/community/threads/${id}`, { method: "GET" }),
     createThread: (body: { boardId: string; type?: ThreadType; title: string; body: string }) =>
       request<ThreadDetail>("/community/threads", { method: "POST", body }),
@@ -85,21 +107,80 @@ export function useCommunityApi() {
 
     getReputation: (userId: string) =>
       request<CommunityProfileSummary>(`/community/reputation/${userId}`, { method: "GET" }),
+    getReputationEvents: (userId: string) =>
+      request<PaginatedData<ReputationEventItem>>(`/community/reputation/${userId}/events`, {
+        method: "GET",
+      }),
     getActivity: (userId: string) =>
       request<CommunityActivityItem[]>(`/community/activity/${userId}`, { method: "GET" }),
 
-    search: (q: string, params?: { boardId?: string; type?: ThreadType }) =>
-      request<PaginatedData<ThreadSummary>>(
-        `/community/search?q=${encodeURIComponent(q)}&pageSize=50${
-          params?.boardId ? `&boardId=${params.boardId}` : ""
-        }${params?.type ? `&type=${params.type}` : ""}`,
-        { method: "GET" },
-      ),
+    search: (
+      q: string,
+      params?: { boardId?: string; type?: ThreadType; page?: number; pageSize?: number },
+    ) => {
+      const qs = new URLSearchParams({
+        q,
+        pageSize: String(params?.pageSize ?? 20),
+        page: String(params?.page ?? 1),
+      });
+      if (params?.boardId) qs.set("boardId", params.boardId);
+      if (params?.type) qs.set("type", params.type);
+      return request<PaginatedData<ThreadSummary>>(`/community/search?${qs.toString()}`, {
+        method: "GET",
+      });
+    },
 
     reportContent: (targetType: "THREAD" | "REPLY", targetId: string, reason: string) =>
       request<void>("/community/reports", {
         method: "POST",
         body: { targetType, targetId, reason },
       }),
+
+    presignAttachment: (body: {
+      targetType: CommunityTargetType;
+      targetId: string;
+      fileName: string;
+      mimeType: string;
+      sizeBytes: number;
+    }) => request<PresignedUpload>("/community/attachments/presign", { method: "POST", body }),
+    /** Same direct-to-storage XHR PUT with progress used by the Assignment Workspace uploader. */
+    uploadToPresignedUrlWithProgress: (
+      url: string,
+      file: File,
+      onProgress: (percent: number) => void,
+    ): Promise<void> =>
+      new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", url);
+        xhr.setRequestHeader("Content-Type", file.type);
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error(`Upload failed (${xhr.status})`));
+        };
+        xhr.onerror = () => reject(new Error("Upload failed"));
+        xhr.send(file);
+      }),
+    confirmAttachment: (body: {
+      targetType: CommunityTargetType;
+      targetId: string;
+      storageKey: string;
+      fileName: string;
+      mimeType: string;
+      sizeBytes: number;
+    }) => request<CommunityAttachment>("/community/attachments/confirm", { method: "POST", body }),
+    listAttachments: (targetType: CommunityTargetType, targetId: string) =>
+      request<CommunityAttachment[]>(
+        `/community/attachments?targetType=${targetType}&targetId=${targetId}`,
+        { method: "GET" },
+      ),
+    getAttachmentDownloadUrl: (attachmentId: string) =>
+      request<{ url: string }>(`/community/attachments/${attachmentId}/download-url`, {
+        method: "GET",
+      }),
+    deleteAttachment: (attachmentId: string) =>
+      request<void>(`/community/attachments/${attachmentId}`, { method: "DELETE" }),
   };
 }

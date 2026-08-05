@@ -3,89 +3,198 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import type { ForumBoard, ThreadSummary } from "@examora/types";
+import { Filter, MessagesSquare, PenSquare, Search } from "lucide-react";
 import { RequireAuth } from "@/components/require-auth";
-import { useCommunityApi } from "@/lib/community-api";
+import { Pagination } from "@/components/ui/pagination";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RetryInline } from "@/components/ui/retry-inline";
+import { SelectField, type SelectFieldOption } from "@/components/ui/select-field";
+import { FiltersSheet } from "@/components/courses/filters-sheet";
+import { ThreadCard } from "@/components/community/thread-card";
+import { ThreadCardSkeletonList } from "@/components/community/skeletons";
+import {
+  useBoardThreads,
+  type BoardThreadFilters,
+  type SortOption,
+} from "@/components/community/use-board-threads";
 
-function ThreadBadge({ thread }: { thread: ThreadSummary }): React.ReactElement {
+const TYPE_OPTIONS: SelectFieldOption[] = [
+  { value: "all", label: "All types" },
+  { value: "DISCUSSION", label: "Discussions" },
+  { value: "QUESTION", label: "Questions" },
+];
+const SOLVED_OPTIONS: SelectFieldOption[] = [
+  { value: "all", label: "Any status" },
+  { value: "solved", label: "Solved" },
+  { value: "unsolved", label: "Unsolved" },
+];
+const SORT_OPTIONS: SelectFieldOption[] = [
+  { value: "recent", label: "Most recent" },
+  { value: "most-liked", label: "Most liked" },
+  { value: "most-replies", label: "Most replies" },
+];
+
+function FilterControls({
+  filters,
+  onChange,
+}: {
+  filters: BoardThreadFilters;
+  onChange: <K extends keyof BoardThreadFilters>(key: K, value: BoardThreadFilters[K]) => void;
+}) {
   return (
-    <div className="flex flex-wrap gap-2 text-xs text-neutral-500">
-      <span className="rounded-full bg-neutral-100 px-2 py-0.5">{thread.type}</span>
-      {thread.isPinned ? (
-        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-700">Pinned</span>
-      ) : null}
-      {thread.isLocked ? (
-        <span className="rounded-full bg-neutral-200 px-2 py-0.5">Locked</span>
-      ) : null}
-      {thread.status === "CLOSED" ? (
-        <span className="rounded-full bg-neutral-200 px-2 py-0.5">Closed</span>
-      ) : null}
-      {thread.type === "QUESTION" && thread.isSolved ? (
-        <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-700">Solved</span>
-      ) : null}
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <SelectField
+        id="board-type-filter"
+        label="Type"
+        value={filters.type}
+        options={TYPE_OPTIONS}
+        onChange={(v) => onChange("type", v as BoardThreadFilters["type"])}
+      />
+      <SelectField
+        id="board-solved-filter"
+        label="Status"
+        value={filters.solved}
+        options={SOLVED_OPTIONS}
+        onChange={(v) => onChange("solved", v as BoardThreadFilters["solved"])}
+      />
+      <SelectField
+        id="board-sort"
+        label="Sort by"
+        value={filters.sort}
+        options={SORT_OPTIONS}
+        onChange={(v) => onChange("sort", v as SortOption)}
+      />
     </div>
   );
 }
 
 function BoardThreadsContent() {
   const { boardId } = useParams<{ boardId: string }>();
-  const api = useCommunityApi();
-  const [board, setBoard] = React.useState<ForumBoard | null>(null);
-  const [threads, setThreads] = React.useState<ThreadSummary[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const data = useBoardThreads(boardId);
+  const [sheetOpen, setSheetOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    api
-      .getBoard(boardId)
-      .then(setBoard)
-      .catch(() => undefined);
-    api
-      .listThreads({ boardId, pageSize: 50 })
-      .then((res) => setThreads(res.items))
-      .catch(() => undefined)
-      .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [boardId]);
+  function handleFilterChange<K extends keyof BoardThreadFilters>(
+    key: K,
+    value: BoardThreadFilters[K],
+  ) {
+    data.setFilters((f) => ({ ...f, [key]: value }));
+  }
+
+  const activeFilterCount = [data.filters.type !== "all", data.filters.solved !== "all"].filter(
+    Boolean,
+  ).length;
+
+  if (data.status === "not-found") {
+    return (
+      <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+        <EmptyState
+          heading="Board not found"
+          body="This board may have been removed."
+          actionLabel="Back to community"
+          actionHref="/community"
+        />
+      </main>
+    );
+  }
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12">
-      <nav className="mb-4 text-sm text-neutral-500">
-        <Link href="/community" className="hover:underline">
+    <main className="mx-auto flex max-w-[1100px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
+        <Link href="/community" className="hover:text-primary-600 hover:underline">
           Community
-        </Link>{" "}
-        · <span className="text-neutral-800">{board?.title ?? "…"}</span>
+        </Link>
+        {data.board ? <span> / {data.board.categoryTitle}</span> : null}
       </nav>
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-heading">{board?.title ?? "Board"}</h1>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
+            {data.board?.title ?? "Board"}
+          </h1>
+          {data.board?.description ? (
+            <p className="mt-1 max-w-2xl text-sm text-neutral-500">{data.board.description}</p>
+          ) : null}
+        </div>
         <Link
           href={`/community/boards/${boardId}/new`}
-          className="rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+          className="flex h-11 shrink-0 items-center gap-2 rounded-md bg-primary-600 px-4 text-sm font-medium text-white hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
+          <PenSquare size={16} strokeWidth={1.75} aria-hidden="true" />
           New thread
         </Link>
       </div>
 
-      {loading ? <p className="mt-6 text-sm text-neutral-500">Loading…</p> : null}
-      {!loading && threads.length === 0 ? (
-        <p className="mt-6 text-sm text-neutral-500">No threads yet — start the discussion.</p>
-      ) : null}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search
+            size={16}
+            strokeWidth={1.75}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+            aria-hidden="true"
+          />
+          <label htmlFor="board-search" className="sr-only">
+            Search this board
+          </label>
+          <input
+            id="board-search"
+            value={data.filters.search}
+            onChange={(e) => handleFilterChange("search", e.target.value)}
+            placeholder="Search this board by title…"
+            className="h-11 w-full rounded-md border border-neutral-200 bg-white pl-9 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          aria-haspopup="dialog"
+          className="relative flex h-11 shrink-0 items-center gap-2 rounded-md border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 lg:hidden"
+        >
+          <Filter size={16} strokeWidth={1.75} aria-hidden="true" />
+          Filters
+          {activeFilterCount > 0 ? (
+            <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary-600 px-1 text-[10px] font-semibold text-white">
+              {activeFilterCount}
+            </span>
+          ) : null}
+        </button>
+      </div>
 
-      <ul className="mt-6 divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
-        {threads.map((thread) => (
-          <li key={thread.id} className="px-4 py-4">
-            <Link href={`/community/threads/${thread.id}`} className="hover:underline">
-              <h2 className="font-medium">{thread.title}</h2>
-            </Link>
-            <ThreadBadge thread={thread} />
-            <p className="mt-2 text-xs text-neutral-500">
-              by {thread.author.firstName ?? thread.author.email} · {thread.replyCount} repl
-              {thread.replyCount === 1 ? "y" : "ies"} · {thread.likeCount} like
-              {thread.likeCount === 1 ? "" : "s"} · {thread.viewCount} views
-            </p>
-          </li>
-        ))}
-      </ul>
+      <div className="hidden lg:block">
+        <FilterControls filters={data.filters} onChange={handleFilterChange} />
+      </div>
+      <FiltersSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        footerLabel="Show discussions"
+      >
+        <FilterControls filters={data.filters} onChange={handleFilterChange} />
+      </FiltersSheet>
+
+      {data.status === "loading" ? (
+        <ThreadCardSkeletonList count={6} />
+      ) : data.status === "error" ? (
+        <RetryInline message="Couldn't load this board" onRetry={data.retry} />
+      ) : data.threads.length === 0 ? (
+        <EmptyState
+          icon={MessagesSquare}
+          heading="No discussions match"
+          body="Try a different search or filter, or start the first thread."
+          actionLabel="New thread"
+          actionHref={`/community/boards/${boardId}/new`}
+        />
+      ) : (
+        <>
+          <p className="text-sm text-neutral-500" aria-live="polite">
+            {data.threads.length} {data.threads.length === 1 ? "discussion" : "discussions"}
+          </p>
+          <div className="flex flex-col gap-3">
+            {data.pageItems.map((thread) => (
+              <ThreadCard key={thread.id} thread={thread} showBoard={false} />
+            ))}
+          </div>
+          <Pagination page={data.page} pageCount={data.pageCount} onChange={data.setPage} />
+        </>
+      )}
     </main>
   );
 }
