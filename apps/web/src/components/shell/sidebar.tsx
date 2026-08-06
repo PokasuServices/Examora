@@ -9,6 +9,7 @@ import {
   BookOpen,
   ChevronsLeft,
   ClipboardList,
+  FileBarChart,
   HelpCircle,
   LayoutDashboard,
   ListChecks,
@@ -52,6 +53,16 @@ const FOOTER_ITEMS: NavItemConfig[] = [
 const MENTOR_NAV_ITEMS: NavItemConfig[] = [
   { href: "/mentor/dashboard", label: "Mentor Dashboard", icon: LayoutDashboard },
   { href: "/mentor/students", label: "My Students", icon: Users },
+  { href: "/mentor/analytics", label: "Mentor Analytics", icon: BarChart3 },
+];
+
+// Shown only to accounts holding analytics:admin (ADMINISTRATOR-only, per
+// packages/types/src/permission.ts) — the cross-platform dashboards and
+// Report Builder, both of which already exist as their own workspace in
+// apps/admin; this is the same read data in this app's design system.
+const ADMIN_NAV_ITEMS: NavItemConfig[] = [
+  { href: "/admin/analytics", label: "Admin Analytics", icon: BarChart3 },
+  { href: "/admin/reports", label: "Reports", icon: FileBarChart },
 ];
 
 function NavItem({
@@ -99,6 +110,7 @@ function SidebarContent({
   const pathname = usePathname();
   const { user } = useAuth();
   const isMentor = user?.permissions.includes("mentor:workflow") ?? false;
+  const isAdmin = user?.permissions.includes("analytics:admin") ?? false;
 
   return (
     <nav aria-label="Main" className="flex h-full flex-col bg-white">
@@ -146,6 +158,32 @@ function SidebarContent({
             </div>
             <ul className="flex flex-col gap-1">
               {MENTOR_NAV_ITEMS.map((item) => (
+                <li key={item.href}>
+                  <NavItem
+                    item={item}
+                    active={pathname?.startsWith(item.href) ?? false}
+                    collapsed={collapsed}
+                    onNavigate={onNavigate}
+                  />
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+
+        {isAdmin ? (
+          <>
+            <div className={cn("mt-4 mb-1 px-3", collapsed && "px-0 text-center")}>
+              {!collapsed ? (
+                <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+                  Admin
+                </p>
+              ) : (
+                <div className="h-px bg-neutral-100" aria-hidden="true" />
+              )}
+            </div>
+            <ul className="flex flex-col gap-1">
+              {ADMIN_NAV_ITEMS.map((item) => (
                 <li key={item.href}>
                   <NavItem
                     item={item}
