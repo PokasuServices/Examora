@@ -2,110 +2,178 @@
 
 import * as React from "react";
 import Link from "next/link";
-import type { NotificationSummary } from "@examora/types";
+import { useAuth } from "@examora/auth-client";
+import { Bell, Megaphone, Search, Settings } from "lucide-react";
 import { RequireAuth } from "@/components/require-auth";
-import { useNotificationsApi } from "@/lib/notifications-api";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RetryInline } from "@/components/ui/retry-inline";
+import { Pagination } from "@/components/ui/pagination";
+import { SegmentedControl } from "@/components/ui/segmented-control";
+import { SelectField, type SelectFieldOption } from "@/components/ui/select-field";
+import { NotificationCard } from "@/components/notifications/notification-card";
+import { NotificationDetailPanel } from "@/components/notifications/notification-detail-panel";
+import { NotificationCardSkeletonList } from "@/components/notifications/skeletons";
+import { categoryMeta } from "@/components/notifications/types";
+import {
+  DEFAULT_NOTIFICATION_FILTERS,
+  useNotificationCenter,
+  type DateFilter,
+  type ReadFilter,
+} from "@/components/notifications/use-notification-center";
+
+const READ_OPTIONS: { value: ReadFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "unread", label: "Unread" },
+  { value: "read", label: "Read" },
+];
+const DATE_OPTIONS: SelectFieldOption[] = [
+  { value: "all", label: "All time" },
+  { value: "today", label: "Today" },
+  { value: "week", label: "This week" },
+  { value: "month", label: "This month" },
+];
 
 function NotificationCenterContent() {
-  const api = useNotificationsApi();
-  const [items, setItems] = React.useState<NotificationSummary[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [unreadOnly, setUnreadOnly] = React.useState(false);
+  const { user } = useAuth();
+  const data = useNotificationCenter();
+  const canViewBroadcasts = user?.permissions.includes("notification:manage") ?? false;
 
-  const load = React.useCallback(() => {
-    setLoading(true);
-    api
-      .listMine({ pageSize: 50, unreadOnly })
-      .then((res) => setItems(res.items))
-      .catch(() => undefined)
-      .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unreadOnly]);
+  const categoryOptions: SelectFieldOption[] = [
+    { value: "all", label: "All categories" },
+    ...data.categories.map((c) => ({ value: c, label: categoryMeta(c).label })),
+  ];
 
-  React.useEffect(() => {
-    load();
-  }, [load]);
-
-  async function markRead(id: string): Promise<void> {
-    setItems((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
-    await api.markRead(id).catch(() => undefined);
+  function handleFilterChange<K extends keyof typeof data.filters>(
+    key: K,
+    value: (typeof data.filters)[K],
+  ) {
+    data.setFilters((f) => ({ ...f, [key]: value }));
   }
-
-  async function markAllRead(): Promise<void> {
-    setItems((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    await api.markAllRead().catch(() => undefined);
-  }
-
-  const unreadCount = items.filter((n) => !n.isRead).length;
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <div className="flex items-center justify-between">
-        <h1 className="text-heading">Notifications</h1>
-        <Link
-          href="/notifications/preferences"
-          className="text-sm text-primary-600 hover:underline"
-        >
-          Preferences →
-        </Link>
-      </div>
-
-      <div className="mt-6 flex items-center justify-between">
-        <label className="flex items-center gap-2 text-sm text-neutral-700">
-          <input
-            type="checkbox"
-            checked={unreadOnly}
-            onChange={(e) => setUnreadOnly(e.target.checked)}
-          />
-          Unread only
-        </label>
-        {unreadCount > 0 ? (
-          <button
-            type="button"
-            onClick={() => void markAllRead()}
-            className="text-sm text-primary-600 hover:underline"
+    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
+            Notifications
+          </h1>
+          <p className="mt-1 text-sm text-neutral-500">
+            {data.unreadCount > 0
+              ? `${data.unreadCount} unread notification${data.unreadCount === 1 ? "" : "s"}`
+              : "You're all caught up."}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          {data.unreadCount > 0 ? (
+            <button
+              type="button"
+              onClick={() => void data.markAllRead()}
+              className="text-sm font-medium text-primary-600 hover:underline"
+            >
+              Mark all read
+            </button>
+          ) : null}
+          {canViewBroadcasts ? (
+            <Link
+              href="/notifications/broadcasts"
+              className="flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-primary-600"
+            >
+              <Megaphone size={15} strokeWidth={1.75} aria-hidden="true" />
+              Broadcasts
+            </Link>
+          ) : null}
+          <Link
+            href="/notifications/preferences"
+            className="flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-primary-600"
           >
-            Mark all read
-          </button>
-        ) : null}
+            <Settings size={15} strokeWidth={1.75} aria-hidden="true" />
+            Preferences
+          </Link>
+        </div>
       </div>
 
-      {loading ? <p className="mt-6 text-sm text-neutral-500">Loading…</p> : null}
-      {!loading && items.length === 0 ? (
-        <p className="mt-6 text-sm text-neutral-500">
-          {unreadOnly ? "No unread notifications." : "No notifications yet."}
-        </p>
-      ) : null}
+      <div className="flex flex-col gap-3">
+        <div className="relative">
+          <Search
+            size={16}
+            strokeWidth={1.75}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+            aria-hidden="true"
+          />
+          <label htmlFor="notif-search" className="sr-only">
+            Search notifications
+          </label>
+          <input
+            id="notif-search"
+            value={data.filters.q}
+            onChange={(e) => handleFilterChange("q", e.target.value)}
+            placeholder="Search notifications…"
+            className="h-11 w-full rounded-md border border-neutral-200 bg-white pl-9 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          />
+        </div>
 
-      {items.length > 0 ? (
-        <ul className="mt-6 flex flex-col divide-y divide-neutral-100 rounded-lg border border-neutral-200 bg-white">
-          {items.map((notification) => (
-            <li key={notification.id}>
-              <button
-                type="button"
-                onClick={() => (notification.isRead ? undefined : void markRead(notification.id))}
-                className={`flex w-full flex-col items-start gap-1 px-4 py-4 text-left text-sm hover:bg-neutral-50 ${
-                  notification.isRead ? "" : "bg-primary-50/40"
-                }`}
-              >
-                <div className="flex w-full items-center justify-between">
-                  <span className="font-medium text-neutral-900">{notification.title}</span>
-                  {!notification.isRead ? (
-                    <span
-                      className="h-2 w-2 shrink-0 rounded-full bg-primary-600"
-                      aria-label="unread"
-                    />
-                  ) : null}
-                </div>
-                <p className="text-neutral-600">{notification.body}</p>
-                <p className="text-xs text-neutral-400">
-                  {new Date(notification.createdAt).toLocaleString()} · {notification.category}
-                </p>
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+        <div className="flex flex-wrap items-end gap-3">
+          <SegmentedControl
+            aria-label="Filter by read status"
+            value={data.filters.read}
+            onChange={(v) => handleFilterChange("read", v)}
+            options={READ_OPTIONS}
+          />
+          <div className="min-w-[160px]">
+            <SelectField
+              id="notif-category"
+              label="Category"
+              value={data.filters.category}
+              options={categoryOptions}
+              onChange={(v) => handleFilterChange("category", v)}
+            />
+          </div>
+          <div className="min-w-[140px]">
+            <SelectField
+              id="notif-date"
+              label="Date"
+              value={data.filters.date}
+              options={DATE_OPTIONS}
+              onChange={(v) => handleFilterChange("date", v as DateFilter)}
+            />
+          </div>
+        </div>
+      </div>
+
+      {data.status === "loading" ? (
+        <NotificationCardSkeletonList />
+      ) : data.status === "error" ? (
+        <RetryInline message="Couldn't load your notifications" onRetry={data.retry} />
+      ) : data.totalCount === 0 ? (
+        <EmptyState
+          icon={Bell}
+          heading="No notifications yet"
+          body="Updates about your courses, assignments, community activity, and account will show up here."
+        />
+      ) : data.filteredCount === 0 ? (
+        <EmptyState
+          icon={Search}
+          heading="No notifications match"
+          body="Try a different search or filter."
+          actionLabel="Clear filters"
+          onAction={() => data.setFilters(DEFAULT_NOTIFICATION_FILTERS)}
+        />
+      ) : (
+        <>
+          <div className="flex flex-col gap-3">
+            {data.pageItems.map((notification) => (
+              <NotificationCard
+                key={notification.id}
+                notification={notification}
+                onOpen={data.openDetail}
+              />
+            ))}
+          </div>
+          <Pagination page={data.page} pageCount={data.pageCount} onChange={data.setPage} />
+        </>
+      )}
+
+      <NotificationDetailPanel notification={data.selected} onClose={data.closeDetail} />
     </main>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useAuth } from "@examora/auth-client";
 import type {
+  NotificationDetail,
   NotificationPreferenceDto,
   NotificationSummary,
   NotificationUnreadCount,
@@ -58,6 +59,13 @@ export function useNotificationsApi() {
         {
           method: "DELETE",
         },
+      ),
+
+    /** notification:manage only (ADMINISTRATOR) — read-only reuse of the admin delivery-tracking list, filtered to broadcast fan-out rows. */
+    listBroadcastHistory: () =>
+      request<PaginatedData<NotificationDetail>>(
+        "/admin/notifications?eventType=platform.broadcast_announcement&pageSize=100",
+        { method: "GET" },
       ),
   };
 }

@@ -25,12 +25,20 @@ export async function subscribeToWebPush(): Promise<{
   p256dh: string;
   auth: string;
 }> {
-  const registration = await navigator.serviceWorker.register("/sw.js");
+  await navigator.serviceWorker.register("/sw.js");
   const permission = await Notification.requestPermission();
   if (permission !== "granted") {
     throw new Error("Notification permission was not granted");
   }
 
+  // pushManager.subscribe() requires an ACTIVE worker — the registration
+  // returned by .register() above isn't necessarily active yet (it may still
+  // be installing). `.ready` resolves once activation completes, whereas
+  // subscribing directly off the fresh registration races activation: it
+  // reliably fails with "no active Service Worker" whenever the permission
+  // prompt (usually the only delay) resolves near-instantly, e.g. on a
+  // browser that already remembers a prior grant.
+  const registration = await navigator.serviceWorker.ready;
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
