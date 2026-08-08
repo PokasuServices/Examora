@@ -1,265 +1,270 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import { ApiError, useAuth } from "@examora/auth-client";
-import { CURRENT_TERMS_VERSION } from "@examora/shared";
+import Link from "next/link";
+import { Bell, Lock, Pencil, ShieldCheck } from "lucide-react";
 import { Button, FieldError, Input, Label } from "@examora/ui";
-import type { UserProfile } from "@examora/types";
+import { RequireAuth } from "@/components/require-auth";
+import { Card } from "@/components/ui/card";
+import { Chip } from "@/components/ui/chip";
+import { Skeleton } from "@/components/ui/skeleton";
+import { RetryInline } from "@/components/ui/retry-inline";
+import { AutosaveIndicator } from "@/components/ui/autosave-indicator";
+import { SettingsShell } from "@/components/settings/settings-shell";
+import { ProfileAvatar } from "@/components/settings/profile-avatar";
+import { profileCompletion, roleLabel } from "@/components/settings/format";
+import { authorDisplayName } from "@/lib/format";
+import { useProfile } from "@/components/settings/use-profile";
 
-interface Session {
-  id: string;
-  userAgent: string | null;
-  ipAddress: string | null;
-  createdAt: string;
-  expiresAt: string;
-  isCurrent: boolean;
+const GUARDIAN_EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function QuickActionLink({
+  href,
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  href?: string;
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number; "aria-hidden"?: boolean }>;
+  label: string;
+  onClick?: () => void;
+}) {
+  const className =
+    "flex flex-col items-start gap-2 rounded-md border border-neutral-900/[0.06] bg-white p-3 text-sm font-medium text-neutral-700 transition-colors hover:border-primary-200 hover:bg-primary-50/50 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500";
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        <Icon size={18} strokeWidth={1.75} aria-hidden />
+        {label}
+      </Link>
+    );
+  }
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      <Icon size={18} strokeWidth={1.75} aria-hidden />
+      {label}
+    </button>
+  );
 }
 
-export default function ProfilePage() {
-  const router = useRouter();
-  const { status, user, logout } = useAuth();
+function ProfileContent() {
+  const { status, profile, form, patch, dirty, saveStatus, saveError, save, retry } = useProfile();
+  const firstNameRef = React.useRef<HTMLInputElement>(null);
+  const guardianEmailValid = !form.guardianEmail || GUARDIAN_EMAIL_PATTERN.test(form.guardianEmail);
 
-  React.useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/login");
-    }
-  }, [status, router]);
+  function focusForm(): void {
+    document.getElementById("personal-information")?.scrollIntoView({ behavior: "smooth" });
+    firstNameRef.current?.focus();
+  }
 
-  if (status !== "authenticated" || !user) {
+  if (status === "loading") {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-12">
-        <p className="text-sm text-neutral-500">Loading…</p>
-      </main>
+      <div className="flex flex-col gap-6">
+        <Card>
+          <Skeleton className="h-16 w-16 rounded-full" />
+          <Skeleton className="mt-4 h-5 w-40" />
+          <Skeleton className="mt-2 h-4 w-56" />
+        </Card>
+        <Card>
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="mt-4 h-10 w-full" />
+          <Skeleton className="mt-3 h-10 w-full" />
+        </Card>
+      </div>
     );
   }
 
-  return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-12">
-      <header className="flex items-center justify-between">
-        <h1 className="text-heading">Your profile</h1>
-        <Button variant="ghost" onClick={() => void logout().then(() => router.push("/login"))}>
-          Log out
-        </Button>
-      </header>
-
-      <ProfileForm />
-      <ConsentSection />
-      <SessionsSection />
-    </main>
-  );
-}
-
-function ProfileForm() {
-  const { request, refetchUser } = useAuth();
-  const [profile, setProfile] = React.useState<UserProfile | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
-  const [success, setSuccess] = React.useState(false);
-  const [submitting, setSubmitting] = React.useState(false);
-
-  React.useEffect(() => {
-    request<UserProfile>("/users/me", { method: "GET" })
-      .then(setProfile)
-      .catch(() => undefined);
-  }, [request]);
-
-  async function onSubmit(event: React.FormEvent): Promise<void> {
-    event.preventDefault();
-    if (!profile) return;
-    setError(null);
-    setSuccess(false);
-    setSubmitting(true);
-    try {
-      const updated = await request<UserProfile>("/users/me", {
-        method: "PUT",
-        body: {
-          firstName: profile.firstName ?? undefined,
-          lastName: profile.lastName ?? undefined,
-          phone: profile.phone ?? undefined,
-          dateOfBirth: profile.dateOfBirth ?? undefined,
-          guardianName: profile.guardianName ?? undefined,
-          guardianEmail: profile.guardianEmail ?? undefined,
-        },
-      });
-      setProfile(updated);
-      setSuccess(true);
-      await refetchUser();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not save your profile.");
-    } finally {
-      setSubmitting(false);
-    }
+  if (status === "error" || !profile) {
+    return <RetryInline message="Couldn't load your profile" onRetry={retry} />;
   }
 
-  if (!profile) {
-    return <p className="text-sm text-neutral-500">Loading profile…</p>;
-  }
+  const completion = profileCompletion([
+    { label: "First name", complete: Boolean(profile.firstName) },
+    { label: "Last name", complete: Boolean(profile.lastName) },
+    { label: "Phone", complete: Boolean(profile.phone) },
+    { label: "Date of birth", complete: Boolean(profile.dateOfBirth) },
+    { label: "Email verified", complete: profile.emailVerified },
+  ]);
+
+  const memberSince = new Date(profile.createdAt).toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
 
   return (
-    <section className="rounded-lg border border-neutral-200 bg-white p-6">
-      <h2 className="text-lg font-semibold">Basic information</h2>
-      <p className="mt-1 text-sm text-neutral-500">
-        {profile.email} · {profile.emailVerified ? "Verified" : "Not verified yet"}
-      </p>
-
-      <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-4" noValidate>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="firstName">First name</Label>
-            <Input
-              id="firstName"
-              value={profile.firstName ?? ""}
-              onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="lastName">Last name</Label>
-            <Input
-              id="lastName"
-              value={profile.lastName ?? ""}
-              onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
-            />
-          </div>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="phone">Phone</Label>
-          <Input
-            id="phone"
-            value={profile.phone ?? ""}
-            onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="dateOfBirth">Date of birth</Label>
-          <Input
-            id="dateOfBirth"
-            type="date"
-            value={profile.dateOfBirth ?? ""}
-            onChange={(e) => setProfile({ ...profile, dateOfBirth: e.target.value })}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="guardianName">Guardian name</Label>
-            <Input
-              id="guardianName"
-              value={profile.guardianName ?? ""}
-              onChange={(e) => setProfile({ ...profile, guardianName: e.target.value })}
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="guardianEmail">Guardian email</Label>
-            <Input
-              id="guardianEmail"
-              type="email"
-              value={profile.guardianEmail ?? ""}
-              onChange={(e) => setProfile({ ...profile, guardianEmail: e.target.value })}
-            />
-          </div>
-        </div>
-        <FieldError>{error}</FieldError>
-        {success ? <p className="text-sm text-success-600">Profile saved.</p> : null}
-        <div>
-          <Button type="submit" disabled={submitting}>
-            {submitting ? "Saving…" : "Save changes"}
-          </Button>
-        </div>
-      </form>
-    </section>
-  );
-}
-
-function ConsentSection() {
-  const { request } = useAuth();
-  const [marketingGranted, setMarketingGranted] = React.useState<boolean | null>(null);
-  const [saving, setSaving] = React.useState(false);
-
-  async function toggleMarketing(): Promise<void> {
-    const next = !(marketingGranted ?? false);
-    setSaving(true);
-    try {
-      await request("/users/me/consent", {
-        method: "POST",
-        body: { type: "MARKETING", version: CURRENT_TERMS_VERSION, channel: "web", granted: next },
-      });
-      setMarketingGranted(next);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <section className="rounded-lg border border-neutral-200 bg-white p-6">
-      <h2 className="text-lg font-semibold">Communication preferences</h2>
-      <label className="mt-4 flex items-center gap-2 text-sm text-neutral-700">
-        <input
-          type="checkbox"
-          checked={marketingGranted ?? false}
-          disabled={saving}
-          onChange={() => void toggleMarketing()}
-        />
-        Send me product updates and marketing emails
-      </label>
-    </section>
-  );
-}
-
-function SessionsSection() {
-  const { request } = useAuth();
-  const [sessions, setSessions] = React.useState<Session[] | null>(null);
-
-  const load = React.useCallback(() => {
-    request<Session[]>("/auth/sessions", { method: "GET" })
-      .then(setSessions)
-      .catch(() => undefined);
-  }, [request]);
-
-  React.useEffect(() => {
-    load();
-  }, [load]);
-
-  async function revoke(id: string): Promise<void> {
-    await request(`/auth/sessions/${id}`, { method: "DELETE" });
-    load();
-  }
-
-  async function revokeAll(): Promise<void> {
-    await request("/auth/sessions", { method: "DELETE" });
-    load();
-  }
-
-  return (
-    <section className="rounded-lg border border-neutral-200 bg-white p-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Active sessions</h2>
-        {sessions && sessions.length > 1 ? (
-          <Button variant="ghost" onClick={() => void revokeAll()}>
-            Log out other sessions
-          </Button>
-        ) : null}
-      </div>
-      <ul className="mt-4 flex flex-col gap-3">
-        {(sessions ?? []).map((session) => (
-          <li
-            key={session.id}
-            className="flex items-center justify-between rounded-md border border-neutral-100 p-3 text-sm"
-          >
-            <div>
-              <p className="font-medium">
-                {session.userAgent ?? "Unknown device"} {session.isCurrent ? "(this device)" : ""}
-              </p>
-              <p className="text-neutral-500">
-                {session.ipAddress} · started {new Date(session.createdAt).toLocaleString()}
-              </p>
+    <div className="flex flex-col gap-6">
+      {/* ---------- Profile Overview ---------- */}
+      <Card>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-4">
+            <ProfileAvatar user={profile} size="xl" />
+            <div className="min-w-0">
+              <h2 className="font-heading text-xl font-semibold text-neutral-900">
+                {authorDisplayName(profile)}
+              </h2>
+              <p className="mt-0.5 truncate text-sm text-neutral-500">{profile.email}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {profile.roles.map((role) => (
+                  <Chip key={role} tone="primary">
+                    {roleLabel(role)}
+                  </Chip>
+                ))}
+                <Chip tone={profile.emailVerified ? "success" : "warning"}>
+                  {profile.emailVerified ? "Verified" : "Not verified"}
+                </Chip>
+              </div>
             </div>
-            {!session.isCurrent ? (
-              <Button variant="ghost" onClick={() => void revoke(session.id)}>
-                Revoke
-              </Button>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-    </section>
+          </div>
+          <p className="shrink-0 text-sm text-neutral-500">Member since {memberSince}</p>
+        </div>
+
+        <div className="mt-5 border-t border-neutral-100 pt-4">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium text-neutral-700">Profile completion</span>
+            <span className="text-neutral-500">
+              {completion.completed} of {completion.total} complete
+            </span>
+          </div>
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+            <div
+              className="h-full rounded-full bg-primary-600 transition-all"
+              style={{ width: `${completion.percent}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <QuickActionLink icon={Pencil} label="Edit profile" onClick={focusForm} />
+          <QuickActionLink icon={ShieldCheck} label="Manage security" href="/profile/security" />
+          <QuickActionLink
+            icon={Bell}
+            label="Notification settings"
+            href="/notifications/preferences"
+          />
+          <QuickActionLink icon={Lock} label="Privacy & consent" href="/profile/privacy" />
+        </div>
+      </Card>
+
+      {/* ---------- Personal Information ---------- */}
+      <Card id="personal-information">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-heading text-lg font-semibold text-neutral-900">
+            Personal information
+          </h2>
+          {dirty ? <Chip tone="warning">Unsaved changes</Chip> : null}
+        </div>
+
+        <div className="mt-4 flex items-center gap-3">
+          <ProfileAvatar user={profile} size="md" />
+          <p className="text-xs text-neutral-500">
+            Photo uploads aren&rsquo;t available yet — your initials stand in for a profile photo
+            everywhere in Examora.
+          </p>
+        </div>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (guardianEmailValid) void save();
+          }}
+          className="mt-5 flex flex-col gap-4"
+          noValidate
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="firstName">First name</Label>
+              <Input
+                id="firstName"
+                ref={firstNameRef}
+                value={form.firstName ?? ""}
+                maxLength={100}
+                onChange={(e) => patch({ firstName: e.target.value })}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="lastName">Last name</Label>
+              <Input
+                id="lastName"
+                value={form.lastName ?? ""}
+                maxLength={100}
+                onChange={(e) => patch({ lastName: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={form.phone ?? ""}
+              maxLength={20}
+              onChange={(e) => patch({ phone: e.target.value })}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="dateOfBirth">Date of birth</Label>
+            <Input
+              id="dateOfBirth"
+              type="date"
+              value={form.dateOfBirth ?? ""}
+              onChange={(e) => patch({ dateOfBirth: e.target.value })}
+            />
+          </div>
+
+          <div className="border-t border-neutral-100 pt-4">
+            <p className="text-sm font-medium text-neutral-700">Guardian (optional)</p>
+            <p className="mt-0.5 text-xs text-neutral-500">
+              For students who want a guardian kept in the loop.
+            </p>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="guardianName">Guardian name</Label>
+                <Input
+                  id="guardianName"
+                  value={form.guardianName ?? ""}
+                  maxLength={100}
+                  onChange={(e) => patch({ guardianName: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="guardianEmail">Guardian email</Label>
+                <Input
+                  id="guardianEmail"
+                  type="email"
+                  invalid={!guardianEmailValid}
+                  value={form.guardianEmail ?? ""}
+                  onChange={(e) => patch({ guardianEmail: e.target.value })}
+                />
+                {!guardianEmailValid ? <FieldError>Enter a valid email address.</FieldError> : null}
+              </div>
+            </div>
+          </div>
+
+          {saveStatus === "error" ? <FieldError>{saveError}</FieldError> : null}
+
+          <div className="flex items-center gap-3 border-t border-neutral-100 pt-4">
+            <Button
+              type="submit"
+              disabled={!dirty || saveStatus === "saving" || !guardianEmailValid}
+            >
+              {saveStatus === "saving" ? "Saving…" : "Save changes"}
+            </Button>
+            <AutosaveIndicator status={saveStatus} />
+          </div>
+        </form>
+      </Card>
+    </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <RequireAuth>
+      <SettingsShell>
+        <ProfileContent />
+      </SettingsShell>
+    </RequireAuth>
   );
 }
