@@ -61,9 +61,17 @@ const MENTOR_NAV_ITEMS: NavItemConfig[] = [
 // Report Builder, both of which already exist as their own workspace in
 // apps/admin; this is the same read data in this app's design system.
 const ADMIN_NAV_ITEMS: NavItemConfig[] = [
+  { href: "/admin", label: "Admin Dashboard", icon: LayoutDashboard },
   { href: "/admin/analytics", label: "Admin Analytics", icon: BarChart3 },
   { href: "/admin/reports", label: "Reports", icon: FileBarChart },
 ];
+
+// "/admin" itself would otherwise startsWith-match every other /admin/* item
+// too — same route-prefix collision fixed for Settings/Orders — so it needs
+// an exact match instead.
+function isAdminNavItemActive(pathname: string | null, href: string): boolean {
+  return href === "/admin" ? pathname === "/admin" : (pathname?.startsWith(href) ?? false);
+}
 
 function NavItem({
   item,
@@ -187,7 +195,7 @@ function SidebarContent({
                 <li key={item.href}>
                   <NavItem
                     item={item}
-                    active={pathname?.startsWith(item.href) ?? false}
+                    active={isAdminNavItemActive(pathname, item.href)}
                     collapsed={collapsed}
                     onNavigate={onNavigate}
                   />
