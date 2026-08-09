@@ -62,6 +62,7 @@ const MENTOR_NAV_ITEMS: NavItemConfig[] = [
 // apps/admin; this is the same read data in this app's design system.
 const ADMIN_NAV_ITEMS: NavItemConfig[] = [
   { href: "/admin", label: "Admin Dashboard", icon: LayoutDashboard },
+  { href: "/admin/users", label: "User Management", icon: Users },
   { href: "/admin/analytics", label: "Admin Analytics", icon: BarChart3 },
   { href: "/admin/reports", label: "Reports", icon: FileBarChart },
 ];
