@@ -5,7 +5,7 @@ import { ROLE_NAMES, type RoleName } from "@examora/types";
 import { Chip } from "@/components/ui/chip";
 import { AutosaveIndicator } from "@/components/ui/autosave-indicator";
 import { roleLabel } from "@/components/settings/format";
-import { ConfirmDialog } from "./confirm-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 /** AssignRolesDto replaces the full role set in one call — this stages the desired full set, then confirms before submitting. */
 export function RoleManager({

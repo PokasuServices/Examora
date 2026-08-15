@@ -10,8 +10,10 @@ import {
   ChevronsLeft,
   ClipboardList,
   FileBarChart,
+  FolderTree,
   HelpCircle,
   LayoutDashboard,
+  LayoutTemplate,
   ListChecks,
   MessageSquare,
   Settings,
@@ -63,6 +65,8 @@ const MENTOR_NAV_ITEMS: NavItemConfig[] = [
 const ADMIN_NAV_ITEMS: NavItemConfig[] = [
   { href: "/admin", label: "Admin Dashboard", icon: LayoutDashboard },
   { href: "/admin/users", label: "User Management", icon: Users },
+  { href: "/admin/content", label: "Content", icon: FolderTree },
+  { href: "/admin/cms", label: "CMS", icon: LayoutTemplate },
   { href: "/admin/analytics", label: "Admin Analytics", icon: BarChart3 },
   { href: "/admin/reports", label: "Reports", icon: FileBarChart },
 ];

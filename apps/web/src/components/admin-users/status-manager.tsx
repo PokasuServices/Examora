@@ -7,7 +7,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { AutosaveIndicator } from "@/components/ui/autosave-indicator";
 import { statusLabel } from "@/components/orders/format";
 import { userStatusTone } from "./format";
-import { ConfirmDialog } from "./confirm-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const STATUS_OPTIONS = USER_STATUSES.map((s) => ({ value: s, label: statusLabel(s) }));
 

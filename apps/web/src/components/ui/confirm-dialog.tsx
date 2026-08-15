@@ -3,7 +3,7 @@
 import * as React from "react";
 import { cn } from "@examora/ui";
 
-/** Generic yes/no confirmation — same overlay/focus/Escape pattern as quiz/assignment SubmitConfirmDialog. */
+/** Generic yes/no confirmation — same overlay/focus/Escape pattern as quiz/assignment SubmitConfirmDialog. Shared across every admin module. */
 export function ConfirmDialog({
   open,
   title,
