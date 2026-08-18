@@ -182,23 +182,58 @@ screens/      Competitor reference screenshots — functional reference ONLY, se
 
 - Node.js >= 20 (see `.nvmrc`)
 - pnpm >= 9 (`corepack enable` will pick up the pinned version from `package.json#packageManager`)
-- Docker + Docker Compose (for local Postgres/Redis/MinIO)
+- Infrastructure (Postgres required; Redis/MinIO/ClamAV strongly recommended) — **either**:
+  - Docker + Docker Compose (easiest — docker-compose.yml provisions all four), **or**
+  - Postgres, Redis, MinIO (or any S3-compatible store), and optionally ClamAV installed natively.
+    Docker is infrastructure convenience only — it is never required for the app code itself to
+    compile or run; `apps/web`/`apps/api`/`apps/admin` always run on the host via `pnpm dev` either
+    way (docker-compose only ever provisions infra, never the apps).
+
+Which infra services are actually required depends on what you're doing:
+
+| Service    | Required to boot apps/api?           | What breaks without it                                                    |
+| ---------- | ------------------------------------ | ------------------------------------------------------------------------- |
+| PostgreSQL | **Yes** — Prisma connects at startup | App won't start                                                           |
+| Redis      | No — connects lazily                 | BullMQ background jobs, rate limiting, sessions/cache degrade             |
+| MinIO / S3 | No                                   | Any upload feature (assignments, CMS assets, community attachments) fails |
+| ClamAV     | No — fully optional                  | Uploaded files never clear malware scanning (see ADR-0015)                |
 
 ## Getting Started
 
+### Mode A — Docker infra (recommended if you have Docker)
+
 ```bash
 pnpm install
-cp .env.example .env          # fill in local values
+cp .env.example .env          # fill in local values; the defaults already match docker-compose
 docker compose up -d          # starts Postgres, Redis, MinIO (add `clamav` too for real malware scanning — optional, see TD-027)
 pnpm db:migrate                # applies Prisma migrations
 pnpm dev                       # runs api (3001), web (3000), admin (3002) in parallel
 ```
 
+### Mode B — Native/local infra (no Docker)
+
+```bash
+pnpm install
+cp .env.example .env          # then edit values to match your native services — see the comments
+                               # in .env.example, especially POSTGRES_PORT/DATABASE_URL (Docker
+                               # defaults to 5433 specifically to avoid clashing with a native
+                               # Postgres install's standard 5432)
+# install/start Postgres yourself; Redis/MinIO/ClamAV as needed per the table above
+pnpm db:migrate
+pnpm dev
+```
+
+Both modes use the exact same application code and workspace packages — Docker Compose never runs
+`apps/web`/`apps/api`/`apps/admin` itself, only infrastructure. `pnpm dev` builds every workspace
+package's `dist/` output once before starting the apps (Turborepo's `dev` task depends on `^build`),
+so the same `pnpm dev` command works identically on a completely fresh clone regardless of which
+mode you chose above.
+
 - API: http://localhost:3001/api/v1, Swagger at http://localhost:3001/api/docs, health at
   http://localhost:3001/health
 - Web: http://localhost:3000
 - Admin: http://localhost:3002
-- MinIO console: http://localhost:9001
+- MinIO console (Docker mode only): http://localhost:9001
 
 ## Common Commands
 
