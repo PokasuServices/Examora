@@ -20,9 +20,15 @@ Ordered so each section's prerequisites are satisfied by the ones above it. Cros
       production** (Sprint 13, ADR-0023 §2) — the API refuses to boot with `NODE_ENV=production` and
       an empty `CORS_ORIGINS`, rather than silently falling back to an open CORS policy.
 - [ ] Configure real credentials for every vendor integration you intend to use: AWS SES (email),
-      Twilio (SMS/WhatsApp), VAPID keys (Web Push), Cloudflare Stream (video), Razorpay (payments),
-      Google OAuth. Every one of these is optional — the app boots and logs-instead-of-sends when
-      unconfigured — but decide deliberately which you need live for launch.
+      Twilio (SMS/WhatsApp), VAPID keys (Web Push), Razorpay (payments), Google OAuth. Every one of
+      these is optional — the app boots and logs-instead-of-sends when unconfigured — but decide
+      deliberately which you need live for launch.
+- [ ] **Cloudflare Stream (video) is NOT implemented** — despite `CLOUDFLARE_STREAM_ACCOUNT_ID`/
+      `CLOUDFLARE_STREAM_API_TOKEN` existing in `.env.example`, there is no backend service, adapter,
+      or `configured` flag for it anywhere in `apps/api`. It is not a configurable optional
+      integration like the others above; setting these env vars has no effect. VIDEO-type lessons
+      currently just store an arbitrary `contentUrl` string. Do not plan a launch assuming video
+      streaming works out of the box.
 - [ ] Point `DATABASE_URL`, `REDIS_URL`, `S3_*`, `CLAMAV_HOST`/`CLAMAV_PORT` at your real
       infrastructure, not the docker-compose local defaults.
 - [ ] Never commit the real `.env` — confirmed already excluded via `.gitignore` and `.dockerignore`.
@@ -63,10 +69,19 @@ Ordered so each section's prerequisites are satisfied by the ones above it. Cros
 - [ ] Build all three images: `docker build -f apps/api/Dockerfile -t examora-api .`,
       `apps/web/Dockerfile`, `apps/admin/Dockerfile` (build context must be the monorepo root — see
       the comment at the top of each Dockerfile). Verified working end-to-end in Sprint 13.
-- [ ] **Before deploying web/admin**: close TD-049 — wire real `NEXT_PUBLIC_API_URL`,
-      `NEXT_PUBLIC_ADMIN_API_URL`, `NEXT_PUBLIC_API_ORIGIN`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY` in as
-      Docker build args, since Next.js inlines these into the client bundle at build time, not
-      runtime. Building with today's Dockerfiles as-is produces a working-but-misconfigured image.
+- [ ] **TD-049 closed**: `apps/web/Dockerfile` and `apps/admin/Dockerfile` now accept `NEXT_PUBLIC_*`
+      values as `--build-arg` (see the comment above the `ARG`/`ENV` block in each Dockerfile for the
+      full `docker build` example). Pass real values for
+      `NEXT_PUBLIC_API_URL`/`NEXT_PUBLIC_API_ORIGIN`/`NEXT_PUBLIC_ADMIN_ORIGIN`/`NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+      (apps/web) and `NEXT_PUBLIC_ADMIN_API_URL`/`NEXT_PUBLIC_API_ORIGIN`/`NEXT_PUBLIC_WEB_ORIGIN`
+      (apps/admin) at image-build time — Next.js still inlines these into the client bundle at build
+      time, not runtime, so `docker run -e` remains ineffective for them; only server-only (non-
+      `NEXT_PUBLIC_`) env vars can be supplied at container run time. Omitted build args fall back to
+      the local-dev localhost values, so an unconfigured build still produces a working local-network
+      image rather than a broken one.
+- [ ] `NEXT_PUBLIC_ADMIN_ORIGIN` must be the real origin apps/admin is reachable at from the browser
+      (e.g. `https://admin.example.com`) — previously hardcoded to `http://localhost:` with only the
+      port templated, which no build-arg could have fixed. Now a proper full-origin build arg.
 - [ ] Add a vulnerability scan (Trivy, Snyk, or your registry's built-in scanner) to whatever
       pipeline builds these images — not present today.
 - [ ] Wire an image build/push step into CI (TD-007) so this stops being a manual, easy-to-forget
@@ -74,6 +89,16 @@ Ordered so each section's prerequisites are satisfied by the ones above it. Cros
 
 ## 7. Health checks & process management
 
+- [ ] **Your readiness probe MUST be `GET /health/ready`, not just `GET /health/live`.** This is not
+      optional. `RedisModule` connects lazily and never awaits the connection or attaches an error
+      listener (`apps/api/src/redis/redis.module.ts`) — if Redis is unreachable at boot, the process
+      starts and serves HTTP traffic anyway (BullMQ jobs and rate limiting degrade per-request instead
+      of the process failing to start). `/health/live` will report healthy the whole time; only
+      `/health/ready` (which actually pings Postgres + Redis) reflects the outage. This repo ships no
+      orchestrator config of its own (no k8s manifests, no PM2 ecosystem file, no docker-compose
+      service for `apps/api` itself — `docker-compose.yml` only provisions the infrastructure
+      dependencies) — wiring the readiness probe correctly in your own orchestrator is entirely on
+      you, and skipping it means a Redis outage can go undetected by your liveness checks.
 - [ ] Point your orchestrator's liveness probe at `GET /health/live` (no dependencies, always 200 if
       the process is up) and readiness probe at `GET /health/ready` (checks Postgres + Redis).
       `GET /health` additionally checks heap memory — suitable for a manual/dashboard check, not
@@ -106,6 +131,6 @@ Ordered so each section's prerequisites are satisfied by the ones above it. Cros
 ## 10. Final sign-off
 
 - [ ] Full automated suite green in your CI environment: `pnpm lint && pnpm typecheck && pnpm build
-    && pnpm test && pnpm --filter @examora/api test:e2e` (676 tests as of v1.0.0).
+  && pnpm test && pnpm --filter @examora/api test:e2e` (676 tests as of v1.0.0).
 - [ ] Every item above either checked off or consciously accepted as a known gap — cross-reference
       `docs/release/v1.0.0/KNOWN_LIMITATIONS.md` one more time before declaring launch-ready.
