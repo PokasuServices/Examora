@@ -43,7 +43,11 @@ export class CommunityAttachmentsService {
     this.assertFileRules(dto.mimeType, dto.sizeBytes);
 
     const key = `community/${dto.targetType.toLowerCase()}/${dto.targetId}/${randomUUID()}-${dto.fileName}`;
-    return this.storage.createPresignedUploadUrl({ key, contentType: dto.mimeType });
+    return this.storage.createPresignedUploadUrl({
+      key,
+      contentType: dto.mimeType,
+      contentLength: dto.sizeBytes,
+    });
   }
 
   async confirmUpload(actor: RequestUser, dto: ConfirmAttachmentDto) {

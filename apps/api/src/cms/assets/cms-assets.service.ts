@@ -29,7 +29,11 @@ export class CmsAssetsService {
   async createPresignedUpload(dto: PresignAssetUploadDto) {
     this.assertFileRules(dto.mimeType, dto.sizeBytes);
     const key = `cms/assets/${randomUUID()}-${dto.fileName}`;
-    return this.storage.createPresignedUploadUrl({ key, contentType: dto.mimeType });
+    return this.storage.createPresignedUploadUrl({
+      key,
+      contentType: dto.mimeType,
+      contentLength: dto.sizeBytes,
+    });
   }
 
   async confirmUpload(uploaderId: string, dto: ConfirmAssetUploadDto) {

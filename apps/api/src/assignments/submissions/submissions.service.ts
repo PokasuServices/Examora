@@ -166,7 +166,11 @@ export class SubmissionsService {
     }
 
     const key = `assignments/${submission.assignmentId}/${submissionId}/${randomUUID()}-${dto.fileName}`;
-    return this.storage.createPresignedUploadUrl({ key, contentType: dto.mimeType });
+    return this.storage.createPresignedUploadUrl({
+      key,
+      contentType: dto.mimeType,
+      contentLength: dto.sizeBytes,
+    });
   }
 
   /** Creates the SubmissionFile row (scanStatus=PENDING) and enqueues the malware scan. */

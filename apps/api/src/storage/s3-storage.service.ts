@@ -40,11 +40,13 @@ export class S3StorageService implements StoragePort {
   async createPresignedUploadUrl(params: {
     key: string;
     contentType: string;
+    contentLength: number;
   }): Promise<PresignedUpload> {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: params.key,
       ContentType: params.contentType,
+      ContentLength: params.contentLength,
     });
     const url = await getSignedUrl(this.client, command, { expiresIn: PRESIGNED_URL_TTL_SECONDS });
     return { url, key: params.key };
