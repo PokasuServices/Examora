@@ -11,6 +11,7 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "build": "turbo run build",
+    "predev": "turbo run build --filter=\"./packages/*\" --filter=@examora/database",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
