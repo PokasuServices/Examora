@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Inbox } from "lucide-react";
 import { useAuth } from "@examora/auth-client";
 import type {
   AdminSubmissionSummary,
@@ -12,7 +13,17 @@ import type {
   UserProfile,
 } from "@examora/types";
 import { ASSIGNMENT_SUBMISSION_STATUSES } from "@examora/types";
+import { Button, FieldError } from "@examora/ui";
 import { RequirePermission } from "@/components/require-permission";
+import { Card } from "@/components/ui/card";
+import { Chip, type ChipTone } from "@/components/ui/chip";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { RetryInline } from "@/components/ui/retry-inline";
+import { SelectField } from "@/components/ui/select-field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { statusLabel } from "@/lib/format";
 import { useAssignmentAdminApi } from "@/lib/assignment-api";
 
 const STATUS_FILTERS: (AssignmentSubmissionStatus | "ALL")[] = [
@@ -20,28 +31,43 @@ const STATUS_FILTERS: (AssignmentSubmissionStatus | "ALL")[] = [
   ...ASSIGNMENT_SUBMISSION_STATUSES,
 ];
 
+const STATUS_TONE: Record<AssignmentSubmissionStatus, ChipTone> = {
+  DRAFT: "neutral",
+  SUBMITTED: "primary",
+  UNDER_REVIEW: "warning",
+  REVISION_REQUESTED: "danger",
+  APPROVED: "success",
+};
+
 function SubmissionsContent() {
   const api = useAssignmentAdminApi();
   const { request } = useAuth();
   const assignmentIdParam = useSearchParams().get("assignmentId") ?? "";
+  const [status, setStatus] = React.useState<"loading" | "ready" | "error">("loading");
   const [submissions, setSubmissions] = React.useState<AdminSubmissionSummary[]>([]);
   const [assignments, setAssignments] = React.useState<Assignment[]>([]);
   const [reviewers, setReviewers] = React.useState<UserProfile[]>([]);
   const [assignmentId, setAssignmentId] = React.useState(assignmentIdParam);
-  const [status, setStatus] = React.useState<AssignmentSubmissionStatus | "ALL">("ALL");
+  const [filter, setFilter] = React.useState<AssignmentSubmissionStatus | "ALL">("ALL");
   const [pendingReviewerId, setPendingReviewerId] = React.useState<Record<string, string>>({});
+  const [reassignTarget, setReassignTarget] = React.useState<AdminSubmissionSummary | null>(null);
+  const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   const load = React.useCallback(() => {
+    setStatus("loading");
     api
       .listSubmissions({
         assignmentId: assignmentId || undefined,
-        status: status === "ALL" ? undefined : status,
+        status: filter === "ALL" ? undefined : filter,
       })
-      .then((res) => setSubmissions(res.items))
-      .catch(() => undefined);
+      .then((res) => {
+        setSubmissions(res.items);
+        setStatus("ready");
+      })
+      .catch(() => setStatus("error"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assignmentId, status]);
+  }, [assignmentId, filter]);
 
   React.useEffect(() => {
     load();
@@ -62,137 +88,188 @@ function SubmissionsContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function assignReviewer(submissionId: string): Promise<void> {
-    const reviewerId = pendingReviewerId[submissionId];
+  async function confirmReassign(): Promise<void> {
+    if (!reassignTarget) return;
+    const reviewerId = pendingReviewerId[reassignTarget.id];
     if (!reviewerId) return;
     setError(null);
+    setSubmitting(true);
     try {
-      await api.assignReviewer(submissionId, reviewerId);
+      await api.assignReviewer(reassignTarget.id, reviewerId);
+      setReassignTarget(null);
       load();
     } catch {
       setError("Could not assign reviewer — must hold the MENTOR or REVIEWER role");
+    } finally {
+      setSubmitting(false);
     }
   }
 
+  const reassignReviewerEmail = reassignTarget
+    ? reviewers.find((r) => r.id === pendingReviewerId[reassignTarget.id])?.email
+    : undefined;
+
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12">
-      <div className="flex items-center justify-between">
-        <h1 className="text-heading">Submission monitoring</h1>
-        <Link href="/assignments" className="text-sm text-primary-600 hover:underline">
-          Assignments →
-        </Link>
-      </div>
+    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <PageHeader
+        title="Submission monitoring"
+        subtitle="Track assignment submissions and assign or reassign reviewers."
+        actions={
+          <Link href="/assignments">
+            <Button variant="secondary">Assignments</Button>
+          </Link>
+        }
+      />
 
-      <div className="mt-6 flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="assignmentFilter" className="text-sm font-medium text-neutral-800">
-            Assignment
-          </label>
-          <select
-            id="assignmentFilter"
-            className="h-10 w-64 rounded-md border border-neutral-300 px-3 text-sm"
-            value={assignmentId}
-            onChange={(e) => setAssignmentId(e.target.value)}
-          >
-            <option value="">All assignments</option>
-            {assignments.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.title}
-              </option>
-            ))}
-          </select>
+      <Card density="compact">
+        <div className="flex flex-wrap gap-4">
+          <div className="max-w-xs flex-1">
+            <SelectField
+              id="assignment-filter"
+              label="Assignment"
+              value={assignmentId}
+              options={[
+                { value: "", label: "All assignments" },
+                ...assignments.map((a) => ({ value: a.id, label: a.title })),
+              ]}
+              onChange={setAssignmentId}
+            />
+          </div>
+          <div className="max-w-xs flex-1">
+            <SelectField
+              id="submission-status-filter"
+              label="Status"
+              value={filter}
+              options={STATUS_FILTERS.map((s) => ({
+                value: s,
+                label: s === "ALL" ? "All statuses" : statusLabel(s),
+              }))}
+              onChange={(v) => setFilter(v as AssignmentSubmissionStatus | "ALL")}
+            />
+          </div>
         </div>
-      </div>
+      </Card>
+      <FieldError>{error}</FieldError>
 
-      <div className="mt-4 flex gap-2">
-        {STATUS_FILTERS.map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => setStatus(s)}
-            className={`rounded-md px-3 py-1 text-sm ${
-              status === s ? "bg-primary-600 text-white" : "bg-neutral-100 text-neutral-700"
-            }`}
-          >
-            {s}
-          </button>
-        ))}
-      </div>
-      {error ? <p className="mt-3 text-sm text-error-600">{error}</p> : null}
+      <Card density="compact" className="min-w-0">
+        {status === "loading" ? (
+          <div className="flex flex-col gap-2 p-4">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+          </div>
+        ) : status === "error" ? (
+          <RetryInline message="Couldn't load submissions" onRetry={load} />
+        ) : submissions.length === 0 ? (
+          <EmptyState
+            icon={Inbox}
+            heading="No submissions found"
+            body="Try a different assignment or status filter."
+          />
+        ) : (
+          <div className="overflow-x-auto contain-layout">
+            <table className="w-full min-w-[1040px] text-left text-sm">
+              <thead className="bg-neutral-50">
+                <tr>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Assignment
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Student
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Reviewer
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Status
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Submitted
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Assign reviewer
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {submissions.map((s) => (
+                  <tr key={s.id} className="hover:bg-neutral-50">
+                    <td className="px-4 py-3 text-neutral-700">{s.assignmentTitle}</td>
+                    <td className="px-4 py-3 text-neutral-600">{s.studentEmail}</td>
+                    <td className="px-4 py-3 text-neutral-600">{s.reviewerEmail ?? "—"}</td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <Chip tone={STATUS_TONE[s.status]}>{statusLabel(s.status)}</Chip>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500">
+                      {s.submittedAt ? new Date(s.submittedAt).toLocaleString() : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap items-end gap-2">
+                        <div className="w-52">
+                          <SelectField
+                            id={`reviewer-${s.id}`}
+                            label="Reviewer"
+                            value={pendingReviewerId[s.id] ?? ""}
+                            options={[
+                              { value: "", label: "— choose —" },
+                              ...reviewers.map((r) => ({ value: r.id, label: r.email })),
+                            ]}
+                            onChange={(v) =>
+                              setPendingReviewerId((prev) => ({ ...prev, [s.id]: v }))
+                            }
+                          />
+                        </div>
+                        <Button
+                          variant="secondary"
+                          disabled={!pendingReviewerId[s.id]}
+                          onClick={() => setReassignTarget(s)}
+                        >
+                          {s.reviewerEmail ? "Reassign" : "Assign"}
+                        </Button>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/assignments/submissions/${s.id}`}
+                        className="font-medium text-primary-600 hover:underline"
+                      >
+                        View
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
 
-      <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
-            <tr>
-              <th className="px-4 py-3 font-medium">Assignment</th>
-              <th className="px-4 py-3 font-medium">Student</th>
-              <th className="px-4 py-3 font-medium">Reviewer</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Submitted</th>
-              <th className="px-4 py-3 font-medium">Assign reviewer</th>
-              <th className="px-4 py-3 font-medium" />
-            </tr>
-          </thead>
-          <tbody>
-            {submissions.map((s) => (
-              <tr key={s.id} className="border-b border-neutral-100 last:border-0">
-                <td className="px-4 py-3">{s.assignmentTitle}</td>
-                <td className="px-4 py-3">{s.studentEmail}</td>
-                <td className="px-4 py-3">{s.reviewerEmail ?? "—"}</td>
-                <td className="px-4 py-3">
-                  <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs">
-                    {s.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  {s.submittedAt ? new Date(s.submittedAt).toLocaleString() : "—"}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <select
-                      className="h-9 rounded-md border border-neutral-300 px-2 text-sm"
-                      value={pendingReviewerId[s.id] ?? ""}
-                      onChange={(e) =>
-                        setPendingReviewerId((prev) => ({ ...prev, [s.id]: e.target.value }))
-                      }
-                    >
-                      <option value="">— choose —</option>
-                      {reviewers.map((r) => (
-                        <option key={r.id} value={r.id}>
-                          {r.email}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      className="text-sm text-primary-600 hover:underline disabled:text-neutral-300"
-                      disabled={!pendingReviewerId[s.id]}
-                      onClick={() => void assignReviewer(s.id)}
-                    >
-                      Assign
-                    </button>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/assignments/submissions/${s.id}`}
-                    className="text-primary-600 hover:underline"
-                  >
-                    View
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {submissions.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-neutral-500">
-                  No submissions.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
-      </div>
+      <ConfirmDialog
+        open={reassignTarget !== null}
+        title={reassignTarget?.reviewerEmail ? "Reassign reviewer?" : "Assign reviewer?"}
+        message={
+          reassignTarget ? (
+            <>
+              Assign{" "}
+              <span className="font-medium text-neutral-800">
+                {reassignReviewerEmail ?? "the selected reviewer"}
+              </span>{" "}
+              to review{" "}
+              <span className="font-medium text-neutral-800">{reassignTarget.studentEmail}</span>
+              &rsquo;s submission for{" "}
+              <span className="font-medium text-neutral-800">{reassignTarget.assignmentTitle}</span>
+              ?
+            </>
+          ) : null
+        }
+        confirmLabel={reassignTarget?.reviewerEmail ? "Reassign" : "Assign"}
+        submitting={submitting}
+        error={error}
+        onConfirm={() => void confirmReassign()}
+        onCancel={() => setReassignTarget(null)}
+      />
     </main>
   );
 }

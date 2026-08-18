@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   LayoutTemplate,
   ListChecks,
+  Megaphone,
   MessageSquare,
   Settings,
   ShoppingBag,
@@ -69,6 +70,7 @@ const ADMIN_NAV_ITEMS: NavItemConfig[] = [
   { href: "/admin/cms", label: "CMS", icon: LayoutTemplate },
   { href: "/admin/analytics", label: "Admin Analytics", icon: BarChart3 },
   { href: "/admin/reports", label: "Reports", icon: FileBarChart },
+  { href: "/notifications/broadcasts", label: "Broadcasts", icon: Megaphone },
 ];
 
 // "/admin" itself would otherwise startsWith-match every other /admin/* item

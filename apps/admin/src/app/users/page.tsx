@@ -2,92 +2,125 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { Users as UsersIcon } from "lucide-react";
 import { useAuth } from "@examora/auth-client";
 import type { PaginatedData, UserProfile } from "@examora/types";
 import { RequirePermission } from "@/components/require-permission";
+import { Card } from "@/components/ui/card";
+import { Chip, type ChipTone } from "@/components/ui/chip";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Pagination } from "@/components/ui/pagination";
+import { PageHeader } from "@/components/ui/page-header";
+import { RetryInline } from "@/components/ui/retry-inline";
+import { Skeleton } from "@/components/ui/skeleton";
+import { statusLabel } from "@/lib/format";
+
+const PAGE_SIZE = 20;
+
+const STATUS_TONE: Record<UserProfile["status"], ChipTone> = {
+  ACTIVE: "success",
+  PENDING_VERIFICATION: "warning",
+  INACTIVE: "neutral",
+  SUSPENDED: "danger",
+  ARCHIVED: "neutral",
+};
 
 function UsersListContent() {
   const { request } = useAuth();
+  const [status, setStatus] = React.useState<"loading" | "ready" | "error">("loading");
   const [data, setData] = React.useState<PaginatedData<UserProfile> | null>(null);
   const [page, setPage] = React.useState(1);
 
+  const load = React.useCallback(() => {
+    setStatus("loading");
+    request<PaginatedData<UserProfile>>(`/admin/users?page=${page}&pageSize=${PAGE_SIZE}`, {
+      method: "GET",
+    })
+      .then((res) => {
+        setData(res);
+        setStatus("ready");
+      })
+      .catch(() => setStatus("error"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
   React.useEffect(() => {
-    request<PaginatedData<UserProfile>>(`/admin/users?page=${page}&pageSize=20`, { method: "GET" })
-      .then(setData)
-      .catch(() => undefined);
-  }, [request, page]);
+    load();
+  }, [load]);
+
+  const pageCount = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1;
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
-      <h1 className="text-heading">Users</h1>
-      <p className="mt-1 text-sm text-neutral-600">{data?.total ?? 0} total</p>
+    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <PageHeader
+        title="Users"
+        subtitle={data ? `${data.total.toLocaleString()} total` : undefined}
+      />
 
-      <div className="mt-6 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
-            <tr>
-              <th className="px-4 py-3 font-medium">Email</th>
-              <th className="px-4 py-3 font-medium">Name</th>
-              <th className="px-4 py-3 font-medium">Roles</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(data?.items ?? []).map((user) => (
-              <tr key={user.id} className="border-b border-neutral-100 last:border-0">
-                <td className="px-4 py-3">
-                  <Link href={`/users/${user.id}`} className="text-primary-600 hover:underline">
-                    {user.email}
-                  </Link>
-                </td>
-                <td className="px-4 py-3">
-                  {[user.firstName, user.lastName].filter(Boolean).join(" ") || "—"}
-                </td>
-                <td className="px-4 py-3">{user.roles.join(", ")}</td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={user.status} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="mt-4 flex items-center gap-3">
-        <button
-          type="button"
-          className="text-sm text-primary-600 hover:underline disabled:text-neutral-300"
-          disabled={page <= 1}
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-        >
-          Previous
-        </button>
-        <span className="text-sm text-neutral-500">Page {page}</span>
-        <button
-          type="button"
-          className="text-sm text-primary-600 hover:underline disabled:text-neutral-300"
-          disabled={!data || page * 20 >= data.total}
-          onClick={() => setPage((p) => p + 1)}
-        >
-          Next
-        </button>
-      </div>
+      <Card density="compact" className="min-w-0">
+        {status === "loading" ? (
+          <div className="flex flex-col gap-2 p-4">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : status === "error" ? (
+          <RetryInline message="Couldn't load users" onRetry={load} />
+        ) : (data?.items.length ?? 0) === 0 ? (
+          <EmptyState icon={UsersIcon} heading="No users found" />
+        ) : (
+          <>
+            <div className="overflow-x-auto contain-layout">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead className="bg-neutral-50">
+                  <tr>
+                    <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                      Email
+                    </th>
+                    <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                      Name
+                    </th>
+                    <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                      Roles
+                    </th>
+                    <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {(data?.items ?? []).map((user) => (
+                    <tr key={user.id} className="hover:bg-neutral-50">
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/users/${user.id}`}
+                          className="font-medium text-primary-600 hover:underline"
+                        >
+                          {user.email}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-neutral-700">
+                        {[user.firstName, user.lastName].filter(Boolean).join(" ") || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600">{user.roles.join(", ")}</td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <Chip tone={STATUS_TONE[user.status]}>{statusLabel(user.status)}</Chip>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex items-center justify-between gap-3 p-4">
+              <p className="text-xs text-neutral-500">
+                Page {page} of {pageCount}
+              </p>
+              <Pagination page={page} pageCount={pageCount} onChange={setPage} />
+            </div>
+          </>
+        )}
+      </Card>
     </main>
-  );
-}
-
-function StatusBadge({ status }: { status: UserProfile["status"] }) {
-  const colors: Record<UserProfile["status"], string> = {
-    ACTIVE: "bg-success-500/10 text-success-600",
-    PENDING_VERIFICATION: "bg-warning-500/10 text-warning-600",
-    INACTIVE: "bg-neutral-200 text-neutral-600",
-    SUSPENDED: "bg-error-500/10 text-error-600",
-    ARCHIVED: "bg-neutral-200 text-neutral-600",
-  };
-  return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${colors[status]}`}>
-      {status}
-    </span>
   );
 }
 

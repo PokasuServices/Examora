@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { ApiError, useAuth } from "@examora/auth-client";
 import {
   ROLE_NAMES,
@@ -12,28 +14,47 @@ import {
 } from "@examora/types";
 import { Button, FieldError } from "@examora/ui";
 import { RequirePermission } from "@/components/require-permission";
+import { Card } from "@/components/ui/card";
+import { Chip, type ChipTone } from "@/components/ui/chip";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { RetryInline } from "@/components/ui/retry-inline";
+import { SelectField } from "@/components/ui/select-field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { statusLabel } from "@/lib/format";
+
+const STATUS_TONE: Record<UserStatus, ChipTone> = {
+  ACTIVE: "success",
+  PENDING_VERIFICATION: "warning",
+  INACTIVE: "neutral",
+  SUSPENDED: "danger",
+  ARCHIVED: "neutral",
+};
 
 function UserDetailContent() {
   const { id } = useParams<{ id: string }>();
   const { request } = useAuth();
+  const [loadStatus, setLoadStatus] = React.useState<"loading" | "ready" | "error">("loading");
   const [user, setUser] = React.useState<UserProfile | null>(null);
   const [selectedRoles, setSelectedRoles] = React.useState<RoleName[]>([]);
   const [selectedStatus, setSelectedStatus] = React.useState<UserStatus | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [savingRoles, setSavingRoles] = React.useState(false);
   const [savingStatus, setSavingStatus] = React.useState(false);
+  const [confirmRoles, setConfirmRoles] = React.useState(false);
+  const [confirmStatus, setConfirmStatus] = React.useState(false);
 
   const load = React.useCallback(() => {
+    setLoadStatus("loading");
     request<UserProfile>(`/users/${id}`, { method: "GET" })
       .then((data) => {
         setUser(data);
         setSelectedRoles(data.roles);
         setSelectedStatus(data.status);
+        setLoadStatus("ready");
       })
-      .catch((err: unknown) =>
-        setError(err instanceof ApiError ? err.message : "Failed to load user"),
-      );
-  }, [request, id]);
+      .catch(() => setLoadStatus("error"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   React.useEffect(() => {
     load();
@@ -54,6 +75,7 @@ function UserDetailContent() {
         body: { roles: selectedRoles },
       });
       setUser(updated);
+      setConfirmRoles(false);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to update roles");
     } finally {
@@ -71,6 +93,7 @@ function UserDetailContent() {
         body: { status: selectedStatus },
       });
       setUser(updated);
+      setConfirmStatus(false);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to update status");
     } finally {
@@ -78,67 +101,135 @@ function UserDetailContent() {
     }
   }
 
-  if (!user) {
+  if (loadStatus === "loading") {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-12">
-        <p className="text-sm text-neutral-500">Loading…</p>
+      <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+        <Skeleton className="h-6 w-32" />
+        <Card>
+          <Skeleton className="h-6 w-64" />
+          <Skeleton className="mt-4 h-24 w-full" />
+        </Card>
       </main>
     );
   }
 
+  if (loadStatus === "error" || !user) {
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
+        <Card>
+          <RetryInline message="Couldn't load this user" onRetry={load} />
+        </Card>
+      </main>
+    );
+  }
+
+  const rolesChanged =
+    JSON.stringify([...selectedRoles].sort()) !== JSON.stringify([...user.roles].sort());
+  const statusChanged = selectedStatus !== user.status;
+
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-12">
-      <header>
-        <h1 className="text-heading">{user.email}</h1>
-        <p className="mt-1 text-sm text-neutral-600">
-          {[user.firstName, user.lastName].filter(Boolean).join(" ") || "No name on file"} ·{" "}
-          {user.emailVerified ? "Verified" : "Not verified"}
-        </p>
-      </header>
+    <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <div>
+        <Link
+          href="/users"
+          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+        >
+          <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
+          Users
+        </Link>
+        <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900">{user.email}</h1>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="text-sm text-neutral-600">
+            {[user.firstName, user.lastName].filter(Boolean).join(" ") || "No name on file"}
+          </span>
+          <Chip tone={user.emailVerified ? "success" : "warning"}>
+            {user.emailVerified ? "Verified" : "Not verified"}
+          </Chip>
+          <Chip tone={STATUS_TONE[user.status]}>{statusLabel(user.status)}</Chip>
+        </div>
+      </div>
 
       <FieldError>{error}</FieldError>
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-6">
-        <h2 className="text-lg font-semibold">Roles</h2>
+      <Card>
+        <h2 className="font-heading text-base font-semibold text-neutral-900">Roles</h2>
         <div className="mt-4 flex flex-col gap-2">
           {ROLE_NAMES.map((role) => (
-            <label key={role} className="flex items-center gap-2 text-sm">
+            <label key={role} className="flex items-center gap-2 text-sm text-neutral-700">
               <input
                 type="checkbox"
                 checked={selectedRoles.includes(role)}
                 onChange={() => toggleRole(role)}
+                className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               />
               {role}
             </label>
           ))}
         </div>
-        <Button className="mt-4" disabled={savingRoles} onClick={() => void saveRoles()}>
-          {savingRoles ? "Saving…" : "Save roles"}
+        <Button className="mt-4" disabled={!rolesChanged} onClick={() => setConfirmRoles(true)}>
+          Save roles
         </Button>
-      </section>
+      </Card>
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-6">
-        <h2 className="text-lg font-semibold">Account status</h2>
-        <select
-          className="mt-4 h-10 w-full rounded-md border border-neutral-300 px-3 text-sm"
-          value={selectedStatus ?? ""}
-          onChange={(e) => setSelectedStatus(e.target.value as UserStatus)}
-        >
-          {USER_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
+      <Card>
+        <h2 className="font-heading text-base font-semibold text-neutral-900">Account status</h2>
+        <div className="mt-4 max-w-xs">
+          <SelectField
+            id="user-status-select"
+            label="Status"
+            value={selectedStatus ?? user.status}
+            options={USER_STATUSES.map((s) => ({ value: s, label: statusLabel(s) }))}
+            onChange={(v) => setSelectedStatus(v as UserStatus)}
+          />
+        </div>
         <Button
           className="mt-4"
           variant="secondary"
-          disabled={savingStatus}
-          onClick={() => void saveStatus()}
+          disabled={!statusChanged}
+          onClick={() => setConfirmStatus(true)}
         >
-          {savingStatus ? "Saving…" : "Update status"}
+          Update status
         </Button>
-      </section>
+      </Card>
+
+      <ConfirmDialog
+        open={confirmRoles}
+        title="Update roles?"
+        message={
+          <>
+            Change this user&rsquo;s roles to{" "}
+            <span className="font-medium text-neutral-800">
+              {selectedRoles.join(", ") || "none"}
+            </span>
+            ?
+          </>
+        }
+        confirmLabel="Update roles"
+        submitting={savingRoles}
+        error={error}
+        onConfirm={() => void saveRoles()}
+        onCancel={() => setConfirmRoles(false)}
+      />
+
+      <ConfirmDialog
+        open={confirmStatus}
+        title="Change account status?"
+        message={
+          <>
+            Change status from{" "}
+            <span className="font-medium text-neutral-800">{statusLabel(user.status)}</span> to{" "}
+            <span className="font-medium text-neutral-800">
+              {statusLabel(selectedStatus ?? user.status)}
+            </span>
+            ?
+          </>
+        }
+        confirmLabel="Update status"
+        submitting={savingStatus}
+        error={error}
+        onConfirm={() => void saveStatus()}
+        onCancel={() => setConfirmStatus(false)}
+      />
     </main>
   );
 }

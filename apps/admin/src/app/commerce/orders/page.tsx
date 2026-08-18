@@ -2,9 +2,17 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { ShoppingBag } from "lucide-react";
 import type { OrderDetail, OrderStatus } from "@examora/types";
-import { CommerceNav } from "@/components/commerce-nav";
 import { RequirePermission } from "@/components/require-permission";
+import { Card } from "@/components/ui/card";
+import { Chip, type ChipTone } from "@/components/ui/chip";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { RetryInline } from "@/components/ui/retry-inline";
+import { SelectField } from "@/components/ui/select-field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { statusLabel } from "@/lib/format";
 import { formatMoney, useCommerceAdminApi } from "@/lib/commerce-api";
 
 const STATUS_FILTERS: (OrderStatus | "ALL")[] = [
@@ -17,79 +25,121 @@ const STATUS_FILTERS: (OrderStatus | "ALL")[] = [
   "PARTIALLY_REFUNDED",
 ];
 
+const STATUS_TONE: Record<OrderStatus, ChipTone> = {
+  PENDING: "warning",
+  PAID: "success",
+  FAILED: "danger",
+  CANCELLED: "neutral",
+  REFUNDED: "neutral",
+  PARTIALLY_REFUNDED: "warning",
+};
+
 function OrdersContent() {
   const api = useCommerceAdminApi();
+  const [status, setStatus] = React.useState<"loading" | "ready" | "error">("loading");
   const [orders, setOrders] = React.useState<OrderDetail[]>([]);
   const [filter, setFilter] = React.useState<OrderStatus | "ALL">("ALL");
 
-  React.useEffect(() => {
+  const load = React.useCallback(() => {
+    setStatus("loading");
     api
       .listOrders(filter === "ALL" ? undefined : { status: filter })
-      .then((res) => setOrders(res.items))
-      .catch(() => undefined);
+      .then((res) => {
+        setOrders(res.items);
+        setStatus("ready");
+      })
+      .catch(() => setStatus("error"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
+  React.useEffect(() => {
+    load();
+  }, [load]);
+
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
-      <CommerceNav />
-      <h1 className="text-heading">Orders</h1>
+    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <PageHeader title="Orders" subtitle="All course purchase orders across the platform." />
 
-      <div className="mt-6 flex flex-wrap gap-2">
-        {STATUS_FILTERS.map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => setFilter(s)}
-            className={`rounded-md px-3 py-1 text-sm ${
-              filter === s ? "bg-primary-600 text-white" : "bg-neutral-100 text-neutral-700"
-            }`}
-          >
-            {s.replace("_", " ")}
-          </button>
-        ))}
-      </div>
+      <Card density="compact">
+        <div className="max-w-xs">
+          <SelectField
+            id="order-status-filter"
+            label="Status"
+            value={filter}
+            options={STATUS_FILTERS.map((s) => ({
+              value: s,
+              label: s === "ALL" ? "All statuses" : statusLabel(s),
+            }))}
+            onChange={(v) => setFilter(v as OrderStatus | "ALL")}
+          />
+        </div>
+      </Card>
 
-      <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
-            <tr>
-              <th className="px-4 py-3 font-medium">Course</th>
-              <th className="px-4 py-3 font-medium">Student</th>
-              <th className="px-4 py-3 font-medium">Amount</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.id} className="border-b border-neutral-100 last:border-0">
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/commerce/orders/${order.id}`}
-                    className="text-primary-600 hover:underline"
-                  >
-                    {order.courseTitle}
-                  </Link>
-                </td>
-                <td className="px-4 py-3">{order.userEmail}</td>
-                <td className="px-4 py-3">{formatMoney(order.totalAmount, order.currency)}</td>
-                <td className="px-4 py-3">{order.status.replace("_", " ")}</td>
-                <td className="px-4 py-3 text-neutral-500">
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
-            {orders.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
-                  No orders.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
-      </div>
+      <Card density="compact" className="min-w-0">
+        {status === "loading" ? (
+          <div className="flex flex-col gap-2 p-4">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : status === "error" ? (
+          <RetryInline message="Couldn't load orders" onRetry={load} />
+        ) : orders.length === 0 ? (
+          <EmptyState
+            icon={ShoppingBag}
+            heading="No orders found"
+            body="Try a different status filter."
+          />
+        ) : (
+          <div className="overflow-x-auto contain-layout">
+            <table className="w-full min-w-[720px] text-left text-sm">
+              <thead className="bg-neutral-50">
+                <tr>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Course
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Student
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Amount
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Status
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Date
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {orders.map((order) => (
+                  <tr key={order.id} className="hover:bg-neutral-50">
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/commerce/orders/${order.id}`}
+                        className="font-medium text-primary-600 hover:underline"
+                      >
+                        {order.courseTitle}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600">{order.userEmail}</td>
+                    <td className="px-4 py-3 text-neutral-700">
+                      {formatMoney(order.totalAmount, order.currency)}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <Chip tone={STATUS_TONE[order.status]}>{statusLabel(order.status)}</Chip>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
     </main>
   );
 }

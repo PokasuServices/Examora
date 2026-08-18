@@ -2,20 +2,18 @@ const basePreset = require("@examora/ui/tailwind-preset");
 const colors = require("tailwindcss/colors");
 
 /**
- * apps/web-only token overrides, layered on top of the shared @examora/ui
- * preset (which apps/admin still consumes unmodified). Values below come
- * directly from the Student Dashboard design spec (docs artifact,
- * 2026-08-01) — Primary #4F46E5, Accent #06B6D4, Success #10B981,
- * Warning #F59E0B, Danger #EF4444, Background #F8FAFC, Text Primary
- * #0F172A, Text Secondary #64748B all happen to be exact matches for
- * Tailwind's own indigo-600 / cyan-500 / emerald-500 / amber-500 / red-500 /
- * slate-50 / slate-900 / slate-500, so those scales are aliased directly
- * rather than hand-rolled, keeping full 50-900 ramps for existing
+ * apps/web token overrides, layered on top of the shared @examora/ui
+ * preset. Values below come directly from the Student Dashboard design spec
+ * (docs artifact, 2026-08-01) — Primary #4F46E5, Accent #06B6D4, Success
+ * #10B981, Warning #F59E0B, Danger #EF4444, Background #F8FAFC, Text
+ * Primary #0F172A, Text Secondary #64748B all happen to be exact matches
+ * for Tailwind's own indigo-600 / cyan-500 / emerald-500 / amber-500 /
+ * red-500 / slate-50 / slate-900 / slate-500, so those scales are aliased
+ * directly rather than hand-rolled, keeping full 50-900 ramps for existing
  * `*-50` … `*-900` usage across the app.
  *
- * Scoped to apps/web deliberately, not the shared preset — apps/admin was
- * not part of this task and keeps its current (Sprint-0 placeholder)
- * palette until it's explicitly redesigned too.
+ * apps/admin mirrors this same override set (see
+ * apps/admin/tailwind.config.js) — both apps render one design language.
  */
 module.exports = {
   presets: [basePreset],

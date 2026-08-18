@@ -1,11 +1,13 @@
 import Link from "next/link";
 import {
-  BookOpen,
   ClipboardList,
   FileText,
+  FlaskConical,
+  FolderTree,
   HelpCircle,
   LayoutTemplate,
   ListChecks,
+  MessageSquare,
   ShoppingBag,
   Users,
 } from "lucide-react";
@@ -20,22 +22,25 @@ interface QuickAction {
 }
 
 const ACTIONS: QuickAction[] = [
-  { label: "Users", href: ADMIN_LINKS.users, icon: Users, external: true },
-  { label: "Courses", href: ADMIN_LINKS.courses, icon: BookOpen, external: true },
+  { label: "Users", href: "/admin/users", icon: Users, external: false },
+  { label: "Content", href: "/admin/content", icon: FolderTree, external: false },
+  { label: "CMS", href: "/admin/cms", icon: LayoutTemplate, external: false },
+  { label: "Reports", href: "/admin/reports", icon: FileText, external: false },
   { label: "Assignments", href: ADMIN_LINKS.assignments, icon: ClipboardList, external: true },
   { label: "Quizzes", href: ADMIN_LINKS.quizzes, icon: ListChecks, external: true },
-  { label: "CMS", href: ADMIN_LINKS.cms, icon: LayoutTemplate, external: true },
   { label: "Commerce", href: ADMIN_LINKS.commerce, icon: ShoppingBag, external: true },
   { label: "Notifications", href: ADMIN_LINKS.notifications, icon: HelpCircle, external: true },
-  { label: "Reports", href: "/admin/reports", icon: FileText, external: false },
+  { label: "Mentors", href: ADMIN_LINKS.mentors, icon: Users, external: true },
+  { label: "Forums", href: ADMIN_LINKS.forums, icon: MessageSquare, external: true },
+  { label: "Feature flags", href: ADMIN_LINKS.featureFlags, icon: FlaskConical, external: true },
 ];
 
 /**
- * Users/Courses/Assignments/Quizzes/CMS/Commerce/Notifications management
- * already lives in apps/admin — this redesign doesn't rebuild that CRUD
- * surface, so those six link out to the real, working pages there. Reports
- * already has a premium apps/web equivalent (built in the Analytics phase)
- * and links internally.
+ * Users/Content/CMS/Reports now have native, more complete apps/web
+ * equivalents (search/filters/audit trail) — those link internally.
+ * Assignments/Quizzes/Commerce/Notifications/Mentors/Forums/Feature-flags
+ * management still lives only in apps/admin, so those link out to the real,
+ * working pages there.
  */
 export function QuickActions() {
   return (

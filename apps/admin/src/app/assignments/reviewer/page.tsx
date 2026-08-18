@@ -2,9 +2,19 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { ClipboardCheck } from "lucide-react";
 import type { AssignmentSubmissionStatus, ReviewerQueueItem } from "@examora/types";
 import { ASSIGNMENT_SUBMISSION_STATUSES } from "@examora/types";
+import { Button } from "@examora/ui";
 import { RequirePermission } from "@/components/require-permission";
+import { Card } from "@/components/ui/card";
+import { Chip, type ChipTone } from "@/components/ui/chip";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { RetryInline } from "@/components/ui/retry-inline";
+import { SelectField } from "@/components/ui/select-field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { statusLabel } from "@/lib/format";
 import { useAssignmentAdminApi } from "@/lib/assignment-api";
 
 const STATUS_FILTERS: (AssignmentSubmissionStatus | "ALL")[] = [
@@ -12,90 +22,129 @@ const STATUS_FILTERS: (AssignmentSubmissionStatus | "ALL")[] = [
   ...ASSIGNMENT_SUBMISSION_STATUSES,
 ];
 
+const STATUS_TONE: Record<AssignmentSubmissionStatus, ChipTone> = {
+  DRAFT: "neutral",
+  SUBMITTED: "primary",
+  UNDER_REVIEW: "warning",
+  REVISION_REQUESTED: "danger",
+  APPROVED: "success",
+};
+
 function ReviewerQueueContent() {
   const api = useAssignmentAdminApi();
+  const [status, setStatus] = React.useState<"loading" | "ready" | "error">("loading");
   const [items, setItems] = React.useState<ReviewerQueueItem[]>([]);
-  const [status, setStatus] = React.useState<AssignmentSubmissionStatus | "ALL">("ALL");
+  const [filter, setFilter] = React.useState<AssignmentSubmissionStatus | "ALL">("ALL");
+
+  const load = React.useCallback(() => {
+    setStatus("loading");
+    api
+      .reviewerQueue(filter === "ALL" ? undefined : filter)
+      .then((res) => {
+        setItems(res.items);
+        setStatus("ready");
+      })
+      .catch(() => setStatus("error"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   React.useEffect(() => {
-    api
-      .reviewerQueue(status === "ALL" ? undefined : status)
-      .then((res) => setItems(res.items))
-      .catch(() => undefined);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status]);
+    load();
+  }, [load]);
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
-      <div className="flex items-center justify-between">
-        <h1 className="text-heading">Reviewer queue</h1>
-        <Link href="/assignments" className="text-sm text-primary-600 hover:underline">
-          Assignments →
-        </Link>
-      </div>
-      <p className="mt-1 text-sm text-neutral-600">Submissions assigned to you for review.</p>
+    <main className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <PageHeader
+        title="Reviewer queue"
+        subtitle="Submissions assigned to you for review."
+        actions={
+          <Link href="/assignments">
+            <Button variant="secondary">Assignments</Button>
+          </Link>
+        }
+      />
 
-      <div className="mt-6 flex gap-2">
-        {STATUS_FILTERS.map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => setStatus(s)}
-            className={`rounded-md px-3 py-1 text-sm ${
-              status === s ? "bg-primary-600 text-white" : "bg-neutral-100 text-neutral-700"
-            }`}
-          >
-            {s}
-          </button>
-        ))}
-      </div>
+      <Card density="compact">
+        <div className="max-w-xs">
+          <SelectField
+            id="reviewer-status-filter"
+            label="Status"
+            value={filter}
+            options={STATUS_FILTERS.map((s) => ({
+              value: s,
+              label: s === "ALL" ? "All statuses" : statusLabel(s),
+            }))}
+            onChange={(v) => setFilter(v as AssignmentSubmissionStatus | "ALL")}
+          />
+        </div>
+      </Card>
 
-      <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
-            <tr>
-              <th className="px-4 py-3 font-medium">Assignment</th>
-              <th className="px-4 py-3 font-medium">Student</th>
-              <th className="px-4 py-3 font-medium">Version</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Submitted</th>
-              <th className="px-4 py-3 font-medium" />
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-b border-neutral-100 last:border-0">
-                <td className="px-4 py-3">{item.assignmentTitle}</td>
-                <td className="px-4 py-3">{item.studentEmail}</td>
-                <td className="px-4 py-3">{item.version}</td>
-                <td className="px-4 py-3">
-                  <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs">
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  {item.submittedAt ? new Date(item.submittedAt).toLocaleString() : "—"}
-                </td>
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/assignments/reviewer/${item.id}`}
-                    className="text-primary-600 hover:underline"
-                  >
-                    Review
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-neutral-500">
-                  Nothing assigned to you right now.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
-      </div>
+      <Card density="compact" className="min-w-0">
+        {status === "loading" ? (
+          <div className="flex flex-col gap-2 p-4">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : status === "error" ? (
+          <RetryInline message="Couldn't load your reviewer queue" onRetry={load} />
+        ) : items.length === 0 ? (
+          <EmptyState
+            icon={ClipboardCheck}
+            heading="Nothing assigned to you right now"
+            body="Try a different status filter."
+          />
+        ) : (
+          <div className="overflow-x-auto contain-layout">
+            <table className="w-full min-w-[720px] text-left text-sm">
+              <thead className="bg-neutral-50">
+                <tr>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Assignment
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Student
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Version
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Status
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Submitted
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {items.map((item) => (
+                  <tr key={item.id} className="hover:bg-neutral-50">
+                    <td className="px-4 py-3 text-neutral-700">{item.assignmentTitle}</td>
+                    <td className="px-4 py-3 text-neutral-600">{item.studentEmail}</td>
+                    <td className="px-4 py-3 text-neutral-600">{item.version}</td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <Chip tone={STATUS_TONE[item.status]}>{statusLabel(item.status)}</Chip>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500">
+                      {item.submittedAt ? new Date(item.submittedAt).toLocaleString() : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/assignments/reviewer/${item.id}`}
+                        className="font-medium text-primary-600 hover:underline"
+                      >
+                        Review
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
     </main>
   );
 }

@@ -2,15 +2,29 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { HelpCircle } from "lucide-react";
 import { ApiError } from "@examora/auth-client";
 import type { ContentStatus, Question, QuestionType } from "@examora/types";
 import { QUESTION_TYPES } from "@examora/types";
 import { Button, FieldError, Input, Label } from "@examora/ui";
 import { RequirePermission } from "@/components/require-permission";
-import { StatusBadge } from "@/components/status-badge";
+import { Card } from "@/components/ui/card";
+import { Chip, type ChipTone } from "@/components/ui/chip";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { RetryInline } from "@/components/ui/retry-inline";
+import { SelectField } from "@/components/ui/select-field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { statusLabel } from "@/lib/format";
 import { useAssessmentApi } from "@/lib/assessment-api";
 
 const STATUS_FILTERS: (ContentStatus | "ALL")[] = ["ALL", "DRAFT", "PUBLISHED", "ARCHIVED"];
+
+const STATUS_TONE: Record<ContentStatus, ChipTone> = {
+  DRAFT: "neutral",
+  PUBLISHED: "success",
+  ARCHIVED: "warning",
+};
 
 interface OptionDraft {
   text: string;
@@ -67,105 +81,108 @@ function CreateQuestionForm({ onCreated }: { onCreated: () => void }) {
   }
 
   return (
-    <form
-      onSubmit={create}
-      className="mt-6 flex flex-col gap-4 rounded-lg border border-neutral-200 bg-white p-6"
-    >
-      <h2 className="text-lg font-semibold">New question</h2>
-      <div className="flex flex-wrap gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="q-type">Type</Label>
-          <select
+    <Card>
+      <h2 className="font-heading text-base font-semibold text-neutral-900">New question</h2>
+      <form onSubmit={create} className="mt-4 flex flex-col gap-4">
+        <div className="w-full sm:w-56">
+          <SelectField
             id="q-type"
-            className="h-10 rounded-md border border-neutral-300 px-3 text-sm"
+            label="Type"
             value={type}
-            onChange={(e) => setType(e.target.value as QuestionType)}
-          >
-            {QUESTION_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
+            options={QUESTION_TYPES.map((t) => ({ value: t, label: statusLabel(t) }))}
+            onChange={(v) => setType(v as QuestionType)}
+          />
         </div>
-      </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="q-text">Question text</Label>
-        <textarea
-          id="q-text"
-          className="min-h-16 rounded-md border border-neutral-300 p-3 text-sm"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          required
-        />
-      </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="q-text">Question text</Label>
+          <textarea
+            id="q-text"
+            className="min-h-16 rounded-md border border-neutral-300 bg-white p-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            required
+          />
+        </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="q-explanation">Explanation (shown in post-submit review)</Label>
-        <textarea
-          id="q-explanation"
-          className="min-h-12 rounded-md border border-neutral-300 p-3 text-sm"
-          value={explanation}
-          onChange={(e) => setExplanation(e.target.value)}
-        />
-      </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="q-explanation">Explanation (shown in post-submit review)</Label>
+          <textarea
+            id="q-explanation"
+            className="min-h-12 rounded-md border border-neutral-300 bg-white p-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+            value={explanation}
+            onChange={(e) => setExplanation(e.target.value)}
+          />
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <Label>Options (mark the correct one{type === "MULTIPLE_CHOICE" ? "s" : ""})</Label>
-        {options.map((option, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <input
-              type={type === "MULTIPLE_CHOICE" ? "checkbox" : "radio"}
-              name="correct-option"
-              checked={option.isCorrect}
-              onChange={(e) => setOptionCorrect(i, e.target.checked)}
-            />
-            <Input
-              value={option.text}
-              onChange={(e) => setOptionText(i, e.target.value)}
-              placeholder={`Option ${i + 1}`}
-            />
-            {options.length > 2 ? (
+        <div className="flex flex-col gap-2">
+          <Label>Options (mark the correct one{type === "MULTIPLE_CHOICE" ? "s" : ""})</Label>
+          {options.map((option, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <input
+                type={type === "MULTIPLE_CHOICE" ? "checkbox" : "radio"}
+                name="correct-option"
+                checked={option.isCorrect}
+                onChange={(e) => setOptionCorrect(i, e.target.checked)}
+                className={`h-4 w-4 border-neutral-300 text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                  type === "MULTIPLE_CHOICE" ? "rounded" : "rounded-full"
+                }`}
+              />
+              <Input
+                value={option.text}
+                onChange={(e) => setOptionText(i, e.target.value)}
+                placeholder={`Option ${i + 1}`}
+              />
+              {options.length > 2 ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setOptions((prev) => prev.filter((_, idx) => idx !== i))}
+                >
+                  Remove
+                </Button>
+              ) : null}
+            </div>
+          ))}
+          {options.length < 10 ? (
+            <div>
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => setOptions((prev) => prev.filter((_, idx) => idx !== i))}
+                size="sm"
+                onClick={() => setOptions((prev) => [...prev, { text: "", isCorrect: false }])}
               >
-                Remove
+                + Add option
               </Button>
-            ) : null}
-          </div>
-        ))}
-        {options.length < 10 ? (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => setOptions((prev) => [...prev, { text: "", isCorrect: false }])}
-          >
-            + Add option
-          </Button>
-        ) : null}
-      </div>
+            </div>
+          ) : null}
+        </div>
 
-      <FieldError>{error}</FieldError>
-      <div>
-        <Button type="submit">Create question</Button>
-      </div>
-    </form>
+        <FieldError>{error}</FieldError>
+        <div>
+          <Button type="submit">Create question</Button>
+        </div>
+      </form>
+    </Card>
   );
 }
 
 function QuestionsContent() {
   const api = useAssessmentApi();
+  const [status, setStatus] = React.useState<"loading" | "ready" | "error">("loading");
   const [questions, setQuestions] = React.useState<Question[]>([]);
   const [filter, setFilter] = React.useState<ContentStatus | "ALL">("ALL");
 
   const load = React.useCallback(() => {
+    setStatus("loading");
     api
       .listQuestions(filter === "ALL" ? undefined : { status: filter })
-      .then((res) => setQuestions(res.items))
-      .catch(() => undefined);
+      .then((res) => {
+        setQuestions(res.items);
+        setStatus("ready");
+      })
+      .catch(() => setStatus("error"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
@@ -174,71 +191,93 @@ function QuestionsContent() {
   }, [load]);
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
-      <div className="flex items-center justify-between">
-        <h1 className="text-heading">Question bank</h1>
-        <Link href="/assessment/quizzes">
-          <Button variant="secondary">Manage quizzes</Button>
-        </Link>
-      </div>
+    <main className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <PageHeader
+        title="Question bank"
+        subtitle="Author reusable questions and publish them for use in quizzes."
+        actions={
+          <Link href="/assessment/quizzes">
+            <Button variant="secondary">Manage quizzes</Button>
+          </Link>
+        }
+      />
 
       <CreateQuestionForm onCreated={load} />
 
-      <div className="mt-6 flex gap-2">
-        {STATUS_FILTERS.map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => setFilter(s)}
-            className={`rounded-md px-3 py-1 text-sm ${
-              filter === s ? "bg-primary-600 text-white" : "bg-neutral-100 text-neutral-700"
-            }`}
-          >
-            {s}
-          </button>
-        ))}
-      </div>
+      <Card density="compact">
+        <div className="max-w-xs">
+          <SelectField
+            id="question-status-filter"
+            label="Status"
+            value={filter}
+            options={STATUS_FILTERS.map((s) => ({
+              value: s,
+              label: s === "ALL" ? "All statuses" : statusLabel(s),
+            }))}
+            onChange={(v) => setFilter(v as ContentStatus | "ALL")}
+          />
+        </div>
+      </Card>
 
-      <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
-            <tr>
-              <th className="px-4 py-3 font-medium">Text</th>
-              <th className="px-4 py-3 font-medium">Type</th>
-              <th className="px-4 py-3 font-medium">Difficulty</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium" />
-            </tr>
-          </thead>
-          <tbody>
-            {questions.map((q) => (
-              <tr key={q.id} className="border-b border-neutral-100 last:border-0">
-                <td className="max-w-md truncate px-4 py-3">{q.text}</td>
-                <td className="px-4 py-3">{q.type}</td>
-                <td className="px-4 py-3">{q.difficulty}</td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={q.status} />
-                </td>
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/assessment/questions/${q.id}`}
-                    className="text-primary-600 hover:underline"
-                  >
-                    Manage
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {questions.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
-                  No questions.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
-      </div>
+      <Card density="compact" className="min-w-0">
+        {status === "loading" ? (
+          <div className="flex flex-col gap-2 p-4">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : status === "error" ? (
+          <RetryInline message="Couldn't load questions" onRetry={load} />
+        ) : questions.length === 0 ? (
+          <EmptyState
+            icon={HelpCircle}
+            heading="No questions found"
+            body="Try a different status filter, or create one above."
+          />
+        ) : (
+          <div className="overflow-x-auto contain-layout">
+            <table className="w-full min-w-[680px] text-left text-sm">
+              <thead className="bg-neutral-50">
+                <tr>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Text
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Type
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Difficulty
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Status
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {questions.map((q) => (
+                  <tr key={q.id} className="hover:bg-neutral-50">
+                    <td className="max-w-md truncate px-4 py-3 text-neutral-800">{q.text}</td>
+                    <td className="px-4 py-3 text-neutral-600">{statusLabel(q.type)}</td>
+                    <td className="px-4 py-3 text-neutral-600">{statusLabel(q.difficulty)}</td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <Chip tone={STATUS_TONE[q.status]}>{statusLabel(q.status)}</Chip>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <Link
+                        href={`/assessment/questions/${q.id}`}
+                        className="font-medium text-primary-600 hover:underline"
+                      >
+                        Manage
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
     </main>
   );
 }

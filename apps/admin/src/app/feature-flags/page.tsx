@@ -1,9 +1,17 @@
 "use client";
 
 import * as React from "react";
+import { Sparkles } from "lucide-react";
 import { ApiError } from "@examora/auth-client";
+import { FieldError } from "@examora/ui";
 import type { RecommendationFeatureFlagDto } from "@examora/types";
 import { RequirePermission } from "@/components/require-permission";
+import { Card } from "@/components/ui/card";
+import { Chip } from "@/components/ui/chip";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { RetryInline } from "@/components/ui/retry-inline";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useRecommendationFeatureFlagsApi } from "@/lib/recommendations-api";
 
 const TYPE_LABELS: Record<RecommendationFeatureFlagDto["type"], string> = {
@@ -18,17 +26,19 @@ const TYPE_LABELS: Record<RecommendationFeatureFlagDto["type"], string> = {
 
 function FeatureFlagsContent() {
   const api = useRecommendationFeatureFlagsApi();
+  const [status, setStatus] = React.useState<"loading" | "ready" | "error">("loading");
   const [flags, setFlags] = React.useState<RecommendationFeatureFlagDto[]>([]);
-  const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
   const load = React.useCallback(() => {
-    setLoading(true);
+    setStatus("loading");
     api
       .list()
-      .then(setFlags)
-      .catch(() => undefined)
-      .finally(() => setLoading(false));
+      .then((res) => {
+        setFlags(res);
+        setStatus("ready");
+      })
+      .catch(() => setStatus("error"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -47,61 +57,76 @@ function FeatureFlagsContent() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12">
-      <h1 className="text-heading">Recommendation feature flags</h1>
-      <p className="mt-1 text-sm text-neutral-500">
-        Disable a recommendation type platform-wide without a deploy (ADR-0021).
-      </p>
+    <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <PageHeader
+        title="Recommendation feature flags"
+        subtitle="Disable a recommendation type platform-wide without a deploy."
+      />
 
-      {error ? <p className="mt-3 text-sm text-error-600">{error}</p> : null}
-      {loading ? <p className="mt-6 text-sm text-neutral-500">Loading…</p> : null}
+      <FieldError>{error}</FieldError>
 
-      {!loading ? (
-        <div className="mt-6 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
-              <tr>
-                <th className="px-4 py-3 font-medium">Recommendation type</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Last updated by</th>
-                <th className="px-4 py-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {flags.map((flag) => (
-                <tr key={flag.type} className="border-b border-neutral-100 last:border-0">
-                  <td className="px-4 py-3 text-neutral-800">{TYPE_LABELS[flag.type]}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        flag.isEnabled
-                          ? "bg-success-50 text-success-700"
-                          : "bg-neutral-100 text-neutral-500"
-                      }`}
-                    >
-                      {flag.isEnabled ? "Enabled" : "Disabled"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-neutral-500">
-                    {flag.updatedByEmail
-                      ? `${flag.updatedByEmail} · ${new Date(flag.updatedAt!).toLocaleString()}`
-                      : "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      type="button"
-                      onClick={() => void toggle(flag)}
-                      className="text-primary-600 hover:underline"
-                    >
-                      {flag.isEnabled ? "Disable" : "Enable"}
-                    </button>
-                  </td>
+      <Card density="compact" className="min-w-0">
+        {status === "loading" ? (
+          <div className="flex flex-col gap-2 p-4">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : status === "error" ? (
+          <RetryInline message="Couldn't load feature flags" onRetry={load} />
+        ) : flags.length === 0 ? (
+          <EmptyState icon={Sparkles} heading="No feature flags found" />
+        ) : (
+          <div className="overflow-x-auto contain-layout">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead className="bg-neutral-50">
+                <tr>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Recommendation type
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Status
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    Last updated by
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : null}
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {flags.map((flag) => (
+                  <tr key={flag.type} className="hover:bg-neutral-50">
+                    <td className="px-4 py-3 font-medium text-neutral-800">
+                      {TYPE_LABELS[flag.type]}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <Chip tone={flag.isEnabled ? "success" : "neutral"}>
+                        {flag.isEnabled ? "Enabled" : "Disabled"}
+                      </Chip>
+                    </td>
+                    <td className="px-4 py-3 text-neutral-500">
+                      {flag.updatedByEmail
+                        ? `${flag.updatedByEmail} · ${new Date(flag.updatedAt!).toLocaleString()}`
+                        : "—"}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        type="button"
+                        onClick={() => void toggle(flag)}
+                        className="text-sm font-medium text-primary-600 hover:underline"
+                      >
+                        {flag.isEnabled ? "Disable" : "Enable"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
     </main>
   );
 }

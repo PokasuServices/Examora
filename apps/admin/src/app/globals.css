@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* Design system: headings set in Plus Jakarta Sans everywhere, including
+     the shared preset's .text-heading utility — mirrors apps/web/globals.css
+     (UI unification pass) so both apps share one typographic voice. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .text-heading {
+    font-family: var(--font-heading), var(--font-body), ui-sans-serif, sans-serif;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background-color: theme("colors.primary.100");
+    color: theme("colors.primary.900");
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse {
+    animation: none;
+    opacity: 0.6;
+  }
+}

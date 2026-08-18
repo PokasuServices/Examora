@@ -1,26 +1,32 @@
-import { Suspense } from "react";
-import { ApiStatus } from "@/components/api-status";
-import { AuthNav } from "@/components/auth-nav";
+"use client";
 
-export default function AdminHomePage() {
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@examora/auth-client";
+
+/**
+ * apps/admin has no public/unauthenticated content (staff-only tool) — "/"
+ * is a pure gate: authenticated users go straight to /dashboard, everyone
+ * else goes to /login. This is also what makes logout behave correctly:
+ * without this gate, "/" had no auth-status watcher at all, so logging out
+ * while on it left the (now permission-empty) dashboard content on screen
+ * instead of navigating anywhere.
+ */
+export default function AdminRootPage() {
+  const router = useRouter();
+  const { status } = useAuth();
+
+  React.useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    } else if (status === "unauthenticated") {
+      router.replace("/login");
+    }
+  }, [status, router]);
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-start justify-center gap-6 px-6">
-      <div className="flex items-center gap-3">
-        <h1 className="text-heading">Examora Admin</h1>
-        <Suspense fallback={<span className="text-sm text-neutral-500">Checking API…</span>}>
-          <ApiStatus />
-        </Suspense>
-      </div>
-      <p className="text-body text-neutral-600">
-        Sprint 2 — content management: categories, courses, and the Subject → Topic → Module →
-        Lesson hierarchy with draft/publish/archive workflow. Enrollment, quizzes and later modules
-        are still to come. See{" "}
-        <code className="rounded bg-neutral-100 px-1.5 py-0.5 text-caption">
-          docs/roadmap/SPRINT_BACKLOG.md
-        </code>{" "}
-        for what&apos;s next.
-      </p>
-      <AuthNav />
+    <main className="flex min-h-screen items-center justify-center">
+      <p className="text-sm text-neutral-500">Loading…</p>
     </main>
   );
 }
