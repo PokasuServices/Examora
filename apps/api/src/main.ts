@@ -7,6 +7,37 @@ import { AppModule } from "./app.module";
 import type { AppConfig } from "./config/configuration";
 import { configureApp } from "./setup-app";
 
+// Local/native dev without Redis running: ioredis flushes its offline command
+// queue on every connection drop, individually rejecting each in-flight
+// command (mainly BullMQ's own internal polling/heartbeat commands) — none
+// of those rejections are caught anywhere in application code, since they
+// originate deep inside ioredis/BullMQ, not our own call sites. Left
+// unhandled, Node prints each one as its own raw, un-throttled stack trace;
+// redis.module.ts's connection logging only covers the client's own 'error'
+// event, a different code path from per-command rejections. Throttle exactly
+// these. Attaching this listener also suppresses Node's default
+// crash-on-unhandled-rejection behavior for every other case, so a genuine
+// (non-Redis) unhandled rejection is deliberately still logged in full —
+// never silently swallowed — but intentionally does NOT force-exit: under
+// `nest start --watch`, a transient EADDRINUSE while the old process is
+// still releasing the port during hot-reload is a normal, self-resolving
+// unhandled rejection too, and would otherwise kill the watcher outright.
+let loggedRedisRejection = false;
+process.on("unhandledRejection", (reason: unknown) => {
+  const stack = reason instanceof Error ? (reason.stack ?? "") : "";
+  if (stack.includes("ioredis")) {
+    if (!loggedRedisRejection) {
+      loggedRedisRejection = true;
+      console.warn(
+        "[Redis] a queued command was rejected because the connection is down " +
+          "(further occurrences suppressed until it reconnects).",
+      );
+    }
+    return;
+  }
+  console.error("Unhandled promise rejection:", reason);
+});
+
 async function bootstrap(): Promise<void> {
   // NODE_ENV=test disables rate limiting entirely (common/rate-limit.config.ts
   // shouldSkipThrottling) — that's correct for the automated test suite, which

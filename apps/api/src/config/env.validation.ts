@@ -1,5 +1,13 @@
 import { Type, plainToInstance } from "class-transformer";
-import { IsIn, IsInt, IsOptional, IsString, MinLength, validateSync } from "class-validator";
+import {
+  IsIn,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+  validateSync,
+} from "class-validator";
 
 enum NodeEnv {
   Development = "development",
@@ -25,7 +33,13 @@ class EnvironmentVariables {
   @IsString()
   DATABASE_URL!: string;
 
+  // @IsString() alone accepts an empty string, which would silently reach
+  // `new Redis("")` (redis.module.ts) — ioredis then falls back to its own
+  // undocumented default of 127.0.0.1:6379, masking a real config problem as
+  // "Redis is just down." Fail the boot loudly instead (matches this file's
+  // own stated philosophy above).
   @IsString()
+  @IsNotEmpty({ message: "REDIS_URL must not be empty — check the root .env" })
   REDIS_URL!: string;
 
   @IsString()

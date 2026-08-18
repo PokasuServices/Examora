@@ -44,7 +44,14 @@ import { CmsModule } from "./cms/cms.module";
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [".env", "../../.env"],
+      // The monorepo has exactly one source of truth for local config — the
+      // root .env (see README "Getting Started", both Docker and native
+      // modes). Previously also checked apps/api/.env first: since .env is
+      // gitignored with no path prefix, a stray local file there (created by
+      // hand, or left over from anything that ever wrote one) would silently
+      // shadow the root .env with no error and no obvious symptom beyond
+      // "the app doesn't seem to be using the values I just set."
+      envFilePath: "../../.env",
       load: [configuration],
       validate: validateEnv,
     }),
