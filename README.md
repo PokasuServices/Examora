@@ -271,6 +271,26 @@ above.
 - Admin: http://localhost:3002
 - MinIO console (Docker mode only): http://localhost:9001
 
+### Lightweight dev workflow (recommended if you're only touching one app)
+
+`pnpm dev` starts all 3 apps **plus** persistent watch-mode builds for all 5 shared packages
+(`ui`/`shared`/`types`/`utils`/`auth-client`) — 8 concurrent processes even though a typical session
+only needs one app and its actual dependencies. If you're only working on `apps/web` or
+`apps/admin`, use the scoped variant instead:
+
+```bash
+pnpm dev:web      # API + Web only — no Admin, no package watchers
+pnpm dev:admin    # API + Admin only — no Web, no package watchers
+pnpm dev:api      # API only — no Web, no Admin, no package watchers
+```
+
+Each of these builds _only_ the workspace packages that app genuinely depends on (via Turborepo's
+`--filter=<pkg>^...` — "this package's dependencies, not the package itself") once, then starts just
+the app(s) you asked for — it does not require running `pnpm build` first, and works identically from
+a completely fresh clone in both Docker and native infra modes, same as plain `pnpm dev`. Switch
+which app you're running any time by stopping the command and starting a different one; the package
+builds are cached by Turborepo, so switching is near-instant after the first run.
+
 ## Common Commands
 
 ```bash
