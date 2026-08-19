@@ -21,8 +21,10 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1091.0",
     "@examora/types": "workspace:*",
-    "@prisma/client": "^6.2.1"
+    "@prisma/client": "^6.2.1",
+    "argon2": "^0.41.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

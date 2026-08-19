@@ -136,10 +136,44 @@ generation/grading/moderation, and further CMS enhancements are not started. See
 > code paths against unconfigured (stub) adapters rather than fakes, since a "not configured" branch
 > is itself part of the contract.
 
-### First administrator
+### Local development demo accounts
 
-Self-registration only ever grants the STUDENT role. To create the first administrator, promote a
-registered user directly in the database:
+`pnpm db:migrate` runs `prisma migrate dev` and then `database/prisma/seed.ts` (explicitly chained
+in the root `db:migrate` script — Prisma's own `package.json#prisma.seed` auto-seed hook exists but
+isn't reliably triggered by every `migrate dev` invocation, so this doesn't depend on it). The seed
+creates three demo accounts **plus realistic, interconnected demo content** across every major
+module, so a fresh clone is immediately usable end-to-end — not just logged-in-with-nothing-to-see.
+**Identical** whether you're running Docker or native Postgres infra; both run the exact same seed
+script against the schema, there is no Docker-specific setup.
+
+| Role                        | Email                  | Password                                              |
+| --------------------------- | ---------------------- | ----------------------------------------------------- |
+| ADMINISTRATOR               | `admin@examora.test`   | `DEV_SEED_PASSWORD` (default `a-strong-password-123`) |
+| MENTOR (with MentorProfile) | `mentor@examora.test`  | `DEV_SEED_PASSWORD`                                   |
+| STUDENT                     | `student@examora.test` | `DEV_SEED_PASSWORD`                                   |
+
+Override the password by setting `DEV_SEED_PASSWORD` before running `pnpm db:migrate`. The seed is
+idempotent (`upsert`, keyed by deterministic ids for rows with no natural unique field) and safe to
+re-run — it will not duplicate accounts or content, and re-running it resets the demo accounts'
+password to whatever `DEV_SEED_PASSWORD` (or the default) currently says.
+
+Demo content seeded alongside the accounts (see `seedCourseContent`/`seedAssessments`/etc. in
+`seed.ts` for exact details): a 4-course content hierarchy (3 published + 1 draft, spanning two
+categories) with the demo student enrolled and partway through several lessons; a scored quiz
+attempt; a fully reviewed creative-assignment submission with rubric scores; a mentor↔student
+assignment with notes/tasks/feedback/a logged meeting; forum categories/boards/threads/replies/a
+moderation report; a handful of notifications; a few published CMS pages/FAQ/announcement/banner;
+and a real paid-course purchase (Order → Payment → Invoice → Enrollment) plus a second pending
+order. Recommendations need no seed data of their own — they're computed live from this same
+Course/Enrollment/Progress data (`CourseRecommendationService`), not stored.
+
+**None of this is ever created in production.** The entire demo-user-and-content block in
+`seed.ts` is skipped whenever `NODE_ENV=production` — only the Role/Permission/RolePermission
+seeding (unrelated to user accounts or mock data) still runs there, and a clear log line explains
+what was skipped and why.
+
+To create an _additional_ administrator beyond the seeded ones, self-register normally (always
+grants STUDENT) and promote directly in the database:
 
 ```sql
 UPDATE user_roles SET role_id = (SELECT id FROM roles WHERE name = 'ADMINISTRATOR')
@@ -224,10 +258,12 @@ pnpm dev
 ```
 
 Both modes use the exact same application code and workspace packages — Docker Compose never runs
-`apps/web`/`apps/api`/`apps/admin` itself, only infrastructure. `pnpm dev` builds every workspace
-package's `dist/` output once before starting the apps (Turborepo's `dev` task depends on `^build`),
-so the same `pnpm dev` command works identically on a completely fresh clone regardless of which
-mode you chose above.
+`apps/web`/`apps/api`/`apps/admin` itself, only infrastructure. A root `predev` script builds every
+workspace package's `dist/` output once before `pnpm dev` starts the apps (kept as a plain npm
+lifecycle script rather than a Turborepo `dependsOn` on the `dev` task itself — mixing a persistent
+task with dependency-graph resolution in one `turbo run` proved unreliable on Windows), so the same
+`pnpm dev` command works identically on a completely fresh clone regardless of which mode you chose
+above.
 
 - API: http://localhost:3001/api/v1, Swagger at http://localhost:3001/api/docs, health at
   http://localhost:3001/health

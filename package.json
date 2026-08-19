@@ -9,6 +9,11 @@
     "pnpm": ">=9.0.0"
   },
   "packageManager": "pnpm@9.15.0",
+  "pnpm": {
+    "overrides": {
+      "@smithy/core": "3.31.1"
+    }
+  },
   "scripts": {
     "build": "turbo run build",
     "predev": "turbo run build --filter=\"./packages/*\" --filter=@examora/database",
@@ -25,7 +30,7 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "db:generate": "pnpm --filter @examora/database generate",
-    "db:migrate": "pnpm --filter @examora/database migrate:dev",
+    "db:migrate": "pnpm --filter @examora/database migrate:dev && pnpm --filter @examora/database seed",
     "db:seed": "pnpm --filter @examora/database seed",
     "db:studio": "pnpm --filter @examora/database studio"
   },
