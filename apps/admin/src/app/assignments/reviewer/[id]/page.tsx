@@ -184,40 +184,46 @@ function ReviewWorkspaceContent() {
       <div>
         <Link
           href="/assignments/reviewer"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Reviewer queue
         </Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="text-xl font-semibold text-neutral-800">{submission.assignmentTitle}</h1>
+          <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+            {submission.assignmentTitle}
+          </h1>
           <Chip tone={STATUS_TONE[submission.status]}>{statusLabel(submission.status)}</Chip>
         </div>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Version {submission.version}
           {submission.submittedAt
             ? ` · Submitted ${new Date(submission.submittedAt).toLocaleString()}`
             : ""}
         </p>
         {submission.notes ? (
-          <p className="mt-2 text-sm text-neutral-700">Notes: {submission.notes}</p>
+          <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-300">
+            Notes: {submission.notes}
+          </p>
         ) : null}
       </div>
 
       <FieldError>{error}</FieldError>
 
       <Card density="compact">
-        <h2 className="text-lg font-medium text-neutral-800">Files</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Files</h2>
         {submission.files.length > 0 ? (
-          <ul className="mt-3 flex flex-col divide-y divide-neutral-100">
+          <ul className="mt-3 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {submission.files.map((f) => (
               <li
                 key={f.id}
                 className="flex flex-wrap items-center justify-between gap-3 py-2.5 text-sm"
               >
-                <span className="flex items-center gap-2 text-neutral-700">
+                <span className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300">
                   {f.fileName}
-                  <span className="text-neutral-400">({(f.sizeBytes / 1024).toFixed(0)} KB)</span>
+                  <span className="text-neutral-400 dark:text-neutral-500">
+                    ({(f.sizeBytes / 1024).toFixed(0)} KB)
+                  </span>
                   <Chip tone={SCAN_TONE[f.scanStatus] ?? "neutral"}>
                     {statusLabel(f.scanStatus)}
                   </Chip>
@@ -233,31 +239,36 @@ function ReviewWorkspaceContent() {
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-neutral-400">No files uploaded.</p>
+          <p className="mt-3 text-sm text-neutral-400 dark:text-neutral-500">No files uploaded.</p>
         )}
       </Card>
 
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-medium text-neutral-800">Rubric scoring</h2>
-          <span className="text-sm text-neutral-500">
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+            Rubric scoring
+          </h2>
+          <span className="text-sm text-neutral-500 dark:text-neutral-400">
             {totalAwarded} / {totalPossible} marks
           </span>
         </div>
 
         {isPublished ? (
-          <p className="mt-2 text-sm text-warning-600">
+          <p className="mt-2 text-sm text-warning-600 dark:text-warning-400">
             This review is already published. Scores are read-only.
           </p>
         ) : null}
 
         <div className="mt-4 flex flex-col gap-4">
           {submission.criteria.map((criterion) => (
-            <div key={criterion.id} className="rounded-md border border-neutral-100 p-3">
+            <div
+              key={criterion.id}
+              className="rounded-md border border-neutral-100 dark:border-neutral-800 p-3"
+            >
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm font-medium text-neutral-800">
+                <p className="text-sm font-medium text-neutral-800 dark:text-white/90">
                   {criterion.title}{" "}
-                  <span className="font-normal text-neutral-400">
+                  <span className="font-normal text-neutral-400 dark:text-neutral-500">
                     (max {criterion.maxMarks} marks)
                   </span>
                 </p>
@@ -278,12 +289,14 @@ function ReviewWorkspaceContent() {
                 />
               </div>
               {criterion.description ? (
-                <p className="mt-1 text-xs text-neutral-500">{criterion.description}</p>
+                <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                  {criterion.description}
+                </p>
               ) : null}
               <textarea
                 placeholder="Feedback for this criterion (optional)"
                 disabled={isPublished}
-                className="mt-2 min-h-16 w-full rounded-md border border-neutral-300 p-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-2 min-h-16 w-full rounded-md border border-neutral-300 dark:border-neutral-700 p-2 text-sm text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-60"
                 value={scores[criterion.id]?.comment ?? ""}
                 onChange={(e) =>
                   setScores((prev) => ({
@@ -297,13 +310,16 @@ function ReviewWorkspaceContent() {
         </div>
 
         <div className="mt-4 flex flex-col gap-1.5">
-          <label htmlFor="overallComment" className="text-sm font-medium text-neutral-800">
+          <label
+            htmlFor="overallComment"
+            className="text-sm font-medium text-neutral-800 dark:text-white/90"
+          >
             Overall comment
           </label>
           <textarea
             id="overallComment"
             disabled={isPublished}
-            className="min-h-20 w-full rounded-md border border-neutral-300 p-3 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="min-h-20 w-full rounded-md border border-neutral-300 dark:border-neutral-700 p-3 text-sm text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-60"
             value={overallComment}
             onChange={(e) => setOverallComment(e.target.value)}
           />
@@ -331,19 +347,23 @@ function ReviewWorkspaceContent() {
       </Card>
 
       <Card density="compact">
-        <h2 className="text-lg font-medium text-neutral-800">Comments</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Comments</h2>
         {submission.comments.length > 0 ? (
           <ul className="mt-3 flex flex-col gap-3">
             {submission.comments.map((c) => (
               <li key={c.id} className="text-sm">
-                <p className="font-medium text-neutral-700">{c.authorEmail}</p>
-                <p className="text-neutral-600">{c.body}</p>
-                <p className="text-xs text-neutral-400">{new Date(c.createdAt).toLocaleString()}</p>
+                <p className="font-medium text-neutral-700 dark:text-neutral-300">
+                  {c.authorEmail}
+                </p>
+                <p className="text-neutral-600 dark:text-neutral-400">{c.body}</p>
+                <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                  {new Date(c.createdAt).toLocaleString()}
+                </p>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-neutral-400">No comments yet.</p>
+          <p className="mt-3 text-sm text-neutral-400 dark:text-neutral-500">No comments yet.</p>
         )}
         <form onSubmit={(e) => void addComment(e)} className="mt-4 flex items-end gap-3">
           <Input
@@ -364,8 +384,10 @@ function ReviewWorkspaceContent() {
         message={
           <>
             Publishing records a{" "}
-            <span className="font-medium text-neutral-800">{statusLabel(decision)}</span> decision
-            and makes the scores visible to the student. Scores become read-only afterward.
+            <span className="font-medium text-neutral-800 dark:text-white/90">
+              {statusLabel(decision)}
+            </span>{" "}
+            decision and makes the scores visible to the student. Scores become read-only afterward.
           </>
         }
         confirmLabel="Publish"

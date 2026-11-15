@@ -30,7 +30,10 @@ export function BreadcrumbTrail({
             className="inline-flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400"
           >
             {crumb.href ? (
-              <Link href={crumb.href} className="hover:text-neutral-700">
+              <Link
+                href={crumb.href}
+                className="hover:text-neutral-700 dark:hover:text-neutral-300"
+              >
                 {crumb.label}
               </Link>
             ) : (

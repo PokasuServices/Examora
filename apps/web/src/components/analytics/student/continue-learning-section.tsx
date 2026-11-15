@@ -9,7 +9,10 @@ import { timeAgo } from "@/lib/format";
 export function ContinueLearningSection({ items }: { items: ContinueLearningItem[] }) {
   return (
     <section aria-labelledby="continue-learning-heading">
-      <h2 id="continue-learning-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="continue-learning-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Continue Learning Insights
       </h2>
       <div className="mt-3">

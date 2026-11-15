@@ -16,7 +16,7 @@ export function RevenueSection({
 
   return (
     <section aria-labelledby="revenue-heading">
-      <h2 id="revenue-heading" className="text-lg font-medium text-neutral-800">
+      <h2 id="revenue-heading" className="text-lg font-medium text-neutral-800 dark:text-white/90">
         Revenue overview
       </h2>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -32,20 +32,20 @@ export function RevenueSection({
         </div>
         <div className="flex flex-col gap-4">
           <Card>
-            <p className="text-xs font-medium text-neutral-500">Orders</p>
-            <p className="mt-1 text-xl font-semibold text-neutral-800">
+            <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Orders</p>
+            <p className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
               {revenue.ordersPaid.toLocaleString()}
             </p>
-            <p className="mt-1 text-xs text-neutral-500">
+            <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
               Avg. order value {formatMoney(revenue.averageOrderValue, revenue.currency)}
             </p>
           </Card>
           <Card>
-            <p className="text-xs font-medium text-neutral-500">Refunds</p>
-            <p className="mt-1 text-xl font-semibold text-neutral-800">
+            <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Refunds</p>
+            <p className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
               {formatMoney(revenue.totalRefunded, revenue.currency)}
             </p>
-            <p className="mt-1 text-xs text-neutral-500">
+            <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
               {revenue.couponRedemptions.toLocaleString()} coupon redemptions
             </p>
           </Card>

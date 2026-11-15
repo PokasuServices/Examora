@@ -112,7 +112,9 @@ function MentorsContent() {
       />
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Create mentor profile</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+          Create mentor profile
+        </h2>
         <form onSubmit={create} className="mt-4 flex flex-wrap items-end gap-3">
           <div className="w-64">
             <SelectField
@@ -174,35 +176,37 @@ function MentorsContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[560px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Mentor
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Specialization
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Workload
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {mentors.map((m) => (
-                  <tr key={m.id} className="hover:bg-neutral-50">
+                  <tr key={m.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
                     <td className="px-4 py-3">
                       <Link
                         href={`/mentors/${m.id}`}
-                        className="font-medium text-primary-600 hover:underline"
+                        className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                       >
                         {m.email}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-neutral-600">{m.specialization ?? "—"}</td>
-                    <td className="px-4 py-3 text-neutral-600">
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {m.specialization ?? "—"}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                       {m.activeStudentCount} / {m.maxStudents}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -224,8 +228,10 @@ function MentorsContent() {
         message={
           <>
             Remove the mentor profile for{" "}
-            <span className="font-medium text-neutral-800">{pendingDelete?.email}</span>? This
-            can&rsquo;t be undone.
+            <span className="font-medium text-neutral-800 dark:text-white/90">
+              {pendingDelete?.email}
+            </span>
+            ? This can&rsquo;t be undone.
           </>
         }
         confirmLabel="Delete"

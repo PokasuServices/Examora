@@ -57,10 +57,16 @@ export function CommunityActivity() {
   return (
     <section aria-labelledby="community-activity-heading">
       <div className="flex items-center justify-between">
-        <h2 id="community-activity-heading" className="text-lg font-medium text-neutral-800">
+        <h2
+          id="community-activity-heading"
+          className="text-lg font-medium text-neutral-800 dark:text-white/90"
+        >
           Community
         </h2>
-        <Link href="/community" className="text-xs font-medium text-primary-600 hover:underline">
+        <Link
+          href="/community"
+          className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline"
+        >
           View all →
         </Link>
       </div>
@@ -84,17 +90,21 @@ export function CommunityActivity() {
             actionHref="/community"
           />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {state.data.map((n) => (
               <li key={n.id}>
                 <Link
                   href="/community"
-                  className="flex items-start gap-3 rounded-md py-2 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  className="flex items-start gap-3 rounded-md py-2 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                 >
                   <IconBadge icon={MessageCircle} tone="accent" size={24} />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm text-neutral-800">{n.title}</span>
-                    <span className="text-xs text-neutral-400">{timeAgo(n.createdAt)}</span>
+                    <span className="block truncate text-sm text-neutral-800 dark:text-white/90">
+                      {n.title}
+                    </span>
+                    <span className="text-xs text-neutral-400 dark:text-neutral-500">
+                      {timeAgo(n.createdAt)}
+                    </span>
                   </span>
                 </Link>
               </li>

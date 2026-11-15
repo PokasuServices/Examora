@@ -16,7 +16,7 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div>
-      <nav className="border-b border-neutral-200 bg-white px-6">
+      <nav className="border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6">
         <div className="mx-auto flex max-w-6xl gap-1">
           {TABS.map((tab) => {
             const active = pathname?.startsWith(tab.href);
@@ -26,8 +26,8 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
                 href={tab.href}
                 className={`border-b-2 px-3 py-3 text-sm font-medium ${
                   active
-                    ? "border-primary-600 text-primary-700"
-                    : "border-transparent text-neutral-500 hover:text-neutral-800"
+                    ? "border-primary-600 text-primary-700 dark:text-primary-300"
+                    : "border-transparent text-neutral-500 hover:text-neutral-800 dark:hover:text-white/90"
                 }`}
               >
                 {tab.label}

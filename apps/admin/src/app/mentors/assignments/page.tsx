@@ -98,7 +98,7 @@ function MentorAssignmentsContent() {
       />
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">New assignment</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">New assignment</h2>
         <form onSubmit={assign} className="mt-4 flex flex-wrap items-end gap-3">
           <div className="w-64">
             <SelectField
@@ -147,38 +147,40 @@ function MentorAssignmentsContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[720px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Student
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Mentor
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Assigned
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {assignments.map((a) => (
-                  <tr key={a.id} className="hover:bg-neutral-50">
+                  <tr key={a.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
                     <td className="px-4 py-3">
                       <Link
                         href={`/students/${a.studentId}`}
-                        className="font-medium text-primary-600 hover:underline"
+                        className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                       >
                         {a.studentEmail}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-neutral-600">{a.mentorEmail}</td>
-                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500">
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {a.mentorEmail}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500 dark:text-neutral-400">
                       {new Date(a.assignedAt).toLocaleString()}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
@@ -208,10 +210,14 @@ function MentorAssignmentsContent() {
           pendingUnassign ? (
             <>
               Unassign{" "}
-              <span className="font-medium text-neutral-800">{pendingUnassign.mentorEmail}</span>{" "}
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {pendingUnassign.mentorEmail}
+              </span>{" "}
               from{" "}
-              <span className="font-medium text-neutral-800">{pendingUnassign.studentEmail}</span>?
-              This ends the assignment; it remains in history.
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {pendingUnassign.studentEmail}
+              </span>
+              ? This ends the assignment; it remains in history.
             </>
           ) : null
         }

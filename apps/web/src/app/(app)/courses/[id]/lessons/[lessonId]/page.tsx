@@ -97,17 +97,19 @@ function LessonViewerContent() {
 
         <div className="flex items-start gap-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-semibold text-neutral-800">{lesson.title}</h1>
+            <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+              {lesson.title}
+            </h1>
 
             {location ? (
               <div className="mt-3 max-w-xs">
-                <div className="flex items-center justify-between text-xs text-neutral-500">
+                <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
                   <span>{location.moduleTitle}</span>
                   <span className="tabular-nums">
                     {moduleCompleted}/{moduleTotal}
                   </span>
                 </div>
-                <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-neutral-200">
+                <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-white/10">
                   <div
                     className="h-full rounded-full bg-primary-600"
                     style={{ width: `${modulePercent}%` }}
@@ -120,7 +122,7 @@ function LessonViewerContent() {
               <LessonContent lesson={lesson} />
             </div>
 
-            <div className="mt-10 border-t border-neutral-100 pt-6">
+            <div className="mt-10 border-t border-neutral-100 dark:border-neutral-800 pt-6">
               <LessonCompleteBar
                 courseId={courseId}
                 completed={lesson.completed}
@@ -139,10 +141,15 @@ function LessonViewerContent() {
               />
             </div>
 
-            <p className="mt-6 hidden text-xs text-neutral-400 sm:block">
-              Use <kbd className="rounded border border-neutral-200 px-1 py-0.5">←</kbd>{" "}
-              <kbd className="rounded border border-neutral-200 px-1 py-0.5">→</kbd> to navigate
-              between lessons
+            <p className="mt-6 hidden text-xs text-neutral-400 dark:text-neutral-500 sm:block">
+              Use{" "}
+              <kbd className="rounded border border-neutral-200 dark:border-neutral-800 px-1 py-0.5">
+                ←
+              </kbd>{" "}
+              <kbd className="rounded border border-neutral-200 dark:border-neutral-800 px-1 py-0.5">
+                →
+              </kbd>{" "}
+              to navigate between lessons
             </p>
           </div>
 

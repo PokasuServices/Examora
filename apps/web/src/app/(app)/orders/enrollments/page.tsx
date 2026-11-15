@@ -20,7 +20,7 @@ function EnrollmentRow({ course }: { course: EnrolledCourse }) {
     : `/courses/${course.courseId}`;
 
   return (
-    <li className="flex flex-col gap-3 rounded-md border border-neutral-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <li className="flex flex-col gap-3 rounded-md border border-neutral-100 dark:border-neutral-800 p-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 items-center gap-3">
         <div
           className={cn(
@@ -30,8 +30,10 @@ function EnrollmentRow({ course }: { course: EnrolledCourse }) {
           aria-hidden="true"
         />
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-neutral-800">{course.courseTitle}</p>
-          <p className="mt-0.5 text-xs text-neutral-500">
+          <p className="truncate text-sm font-medium text-neutral-800 dark:text-white/90">
+            {course.courseTitle}
+          </p>
+          <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
             Enrolled{" "}
             {new Date(course.enrolledAt).toLocaleDateString(undefined, {
               month: "short",
@@ -45,13 +47,13 @@ function EnrollmentRow({ course }: { course: EnrolledCourse }) {
       <div className="flex items-center gap-4 sm:shrink-0">
         {typeof course.completionPercent === "number" ? (
           <div className="hidden w-28 items-center gap-2 sm:flex">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-200">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-200 dark:bg-white/10">
               <div
                 className="h-full rounded-full bg-primary-600"
                 style={{ width: `${course.completionPercent}%` }}
               />
             </div>
-            <span className="shrink-0 text-xs font-medium tabular-nums text-neutral-500">
+            <span className="shrink-0 text-xs font-medium tabular-nums text-neutral-500 dark:text-neutral-400">
               {course.completionPercent}%
             </span>
           </div>
@@ -60,7 +62,7 @@ function EnrollmentRow({ course }: { course: EnrolledCourse }) {
         {course.status === "ACTIVE" ? (
           <Link
             href={continueHref}
-            className="shrink-0 text-sm font-medium text-primary-600 hover:underline"
+            className="shrink-0 text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
           >
             Continue →
           </Link>
@@ -109,7 +111,7 @@ function EnrollmentsContent() {
 
   return (
     <Card>
-      <h2 className="text-lg font-medium text-neutral-800">Your courses</h2>
+      <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Your courses</h2>
       <ul className="mt-4 flex flex-col gap-3">
         {courses.map((course) => (
           <EnrollmentRow key={course.id} course={course} />

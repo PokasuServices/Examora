@@ -33,7 +33,7 @@ function MentorDashboardContent() {
     <main className="flex flex-col gap-8">
       <div>
         <PageTitle>Mentor Dashboard</PageTitle>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           {dashboard.profile.firstName
             ? `Welcome back, ${dashboard.profile.firstName}.`
             : "Welcome back."}{" "}
@@ -55,7 +55,7 @@ function MentorDashboardContent() {
       </div>
 
       {engagement.studentsInactive14Days > 0 ? (
-        <div className="flex items-start gap-2 rounded-md border border-danger-500/20 bg-danger-50 px-4 py-3 text-sm text-danger-700">
+        <div className="flex items-start gap-2 rounded-md border border-danger-500/20 bg-danger-50 dark:bg-danger-500/15 px-4 py-3 text-sm text-danger-700 dark:text-danger-300">
           <AlertTriangle
             size={16}
             strokeWidth={1.75}

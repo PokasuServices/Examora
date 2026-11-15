@@ -95,9 +95,11 @@ function TemplatesContent() {
       {formOpen ? (
         <form
           onSubmit={(e) => void create(e)}
-          className="flex flex-col gap-4 rounded-md border border-neutral-100 bg-neutral-50/50 p-4"
+          className="flex flex-col gap-4 rounded-md border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 p-4"
         >
-          <h3 className="font-heading text-sm font-semibold text-neutral-900">New template</h3>
+          <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+            New template
+          </h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="eventType">Event type</Label>
@@ -129,7 +131,7 @@ function TemplatesContent() {
               onChange={(e) => setBodyTemplate(e.target.value)}
               rows={3}
               required
-              className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+              className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900"
             />
           </div>
           <FieldError>{error}</FieldError>
@@ -143,7 +145,7 @@ function TemplatesContent() {
             <button
               type="button"
               onClick={() => setFormOpen(false)}
-              className="text-sm font-medium text-neutral-600 hover:underline"
+              className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:underline"
             >
               Cancel
             </button>
@@ -168,34 +170,36 @@ function TemplatesContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[560px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Event type
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Channel
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {templates.map((template) => (
-                  <tr key={template.id} className="hover:bg-neutral-50">
+                  <tr key={template.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
                     <td className="px-4 py-3">
                       <Link
                         href={`/notifications/templates/${template.id}`}
-                        className="font-medium text-primary-600 hover:underline"
+                        className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                       >
                         {template.eventType}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-neutral-600">{template.channel}</td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {template.channel}
+                    </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <Chip tone={template.isActive ? "success" : "neutral"}>
                         {template.isActive ? "Active" : "Inactive"}
@@ -205,7 +209,7 @@ function TemplatesContent() {
                       <button
                         type="button"
                         onClick={() => void toggleActive(template)}
-                        className="text-sm font-medium text-primary-600 hover:underline"
+                        className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
                       >
                         {template.isActive ? "Deactivate" : "Activate"}
                       </button>

@@ -8,8 +8,10 @@ import type { CommunityReport } from "@examora/types";
 function StatBlock({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      <p className="text-xs font-medium text-neutral-500">{label}</p>
-      <p className="mt-1 text-xl font-semibold text-neutral-800">{value.toLocaleString()}</p>
+      <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{label}</p>
+      <p className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+        {value.toLocaleString()}
+      </p>
     </div>
   );
 }
@@ -25,7 +27,10 @@ export function CommunitySection({
 
   return (
     <section aria-labelledby="community-heading">
-      <h2 id="community-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="community-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Community overview
       </h2>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -37,7 +42,7 @@ export function CommunitySection({
             <StatBlock label="Moderation actions" value={community.moderationActionsCount} />
           </div>
           {community.acceptedAnswerRate !== null ? (
-            <p className="mt-4 text-xs text-neutral-500">
+            <p className="mt-4 text-xs text-neutral-500 dark:text-neutral-400">
               {Math.round(community.acceptedAnswerRate)}% of threads have an accepted answer.
             </p>
           ) : null}
@@ -49,10 +54,10 @@ export function CommunitySection({
               <AlertCircle
                 size={16}
                 strokeWidth={1.75}
-                className="text-warning-600"
+                className="text-warning-600 dark:text-warning-400"
                 aria-hidden="true"
               />
-              <h3 className="font-heading text-sm font-semibold text-neutral-900">
+              <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
                 Moderation queue
               </h3>
             </div>
@@ -60,7 +65,7 @@ export function CommunitySection({
               href={ADMIN_LINKS.moderation}
               target="_blank"
               rel="noreferrer"
-              className="text-sm font-medium text-primary-600 hover:underline"
+              className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
             >
               Open moderation →
             </a>
@@ -72,13 +77,15 @@ export function CommunitySection({
               body="No pending reports right now."
             />
           ) : (
-            <ul className="mt-3 flex flex-col divide-y divide-neutral-100">
+            <ul className="mt-3 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
               {moderationQueue.map((report) => (
                 <li key={report.id} className="py-2.5 text-sm">
-                  <p className="font-medium text-neutral-800">
+                  <p className="font-medium text-neutral-800 dark:text-white/90">
                     {report.targetType} reported by {report.reporterEmail}
                   </p>
-                  <p className="mt-0.5 text-xs text-neutral-500">{report.reason}</p>
+                  <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
+                    {report.reason}
+                  </p>
                 </li>
               ))}
             </ul>

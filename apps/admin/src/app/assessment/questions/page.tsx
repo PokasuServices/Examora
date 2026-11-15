@@ -82,7 +82,7 @@ function CreateQuestionForm({ onCreated }: { onCreated: () => void }) {
 
   return (
     <Card>
-      <h2 className="text-lg font-medium text-neutral-800">New question</h2>
+      <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">New question</h2>
       <form onSubmit={create} className="mt-4 flex flex-col gap-4">
         <div className="w-full sm:w-56">
           <SelectField
@@ -98,7 +98,7 @@ function CreateQuestionForm({ onCreated }: { onCreated: () => void }) {
           <Label htmlFor="q-text">Question text</Label>
           <textarea
             id="q-text"
-            className="min-h-16 rounded-md border border-neutral-300 bg-white p-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+            className="min-h-16 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900"
             value={text}
             onChange={(e) => setText(e.target.value)}
             required
@@ -109,7 +109,7 @@ function CreateQuestionForm({ onCreated }: { onCreated: () => void }) {
           <Label htmlFor="q-explanation">Explanation (shown in post-submit review)</Label>
           <textarea
             id="q-explanation"
-            className="min-h-12 rounded-md border border-neutral-300 bg-white p-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+            className="min-h-12 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900"
             value={explanation}
             onChange={(e) => setExplanation(e.target.value)}
           />
@@ -124,7 +124,7 @@ function CreateQuestionForm({ onCreated }: { onCreated: () => void }) {
                 name="correct-option"
                 checked={option.isCorrect}
                 onChange={(e) => setOptionCorrect(i, e.target.checked)}
-                className={`h-4 w-4 border-neutral-300 text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                className={`h-4 w-4 border-neutral-300 dark:border-neutral-700 text-primary-600 dark:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
                   type === "MULTIPLE_CHOICE" ? "rounded" : "rounded-full"
                 }`}
               />
@@ -237,36 +237,42 @@ function QuestionsContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[680px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Text
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Type
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Difficulty
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700" />
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {questions.map((q) => (
-                  <tr key={q.id} className="hover:bg-neutral-50">
-                    <td className="max-w-md truncate px-4 py-3 text-neutral-800">{q.text}</td>
-                    <td className="px-4 py-3 text-neutral-600">{statusLabel(q.type)}</td>
-                    <td className="px-4 py-3 text-neutral-600">{statusLabel(q.difficulty)}</td>
+                  <tr key={q.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
+                    <td className="max-w-md truncate px-4 py-3 text-neutral-800 dark:text-white/90">
+                      {q.text}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {statusLabel(q.type)}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {statusLabel(q.difficulty)}
+                    </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <Chip tone={STATUS_TONE[q.status]}>{statusLabel(q.status)}</Chip>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <Link
                         href={`/assessment/questions/${q.id}`}
-                        className="font-medium text-primary-600 hover:underline"
+                        className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                       >
                         Manage
                       </Link>

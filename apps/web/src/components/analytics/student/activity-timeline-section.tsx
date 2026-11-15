@@ -31,7 +31,7 @@ export function ActivityTimelineSection({
 }) {
   return (
     <section aria-labelledby="activity-heading">
-      <h2 id="activity-heading" className="text-lg font-medium text-neutral-800">
+      <h2 id="activity-heading" className="text-lg font-medium text-neutral-800 dark:text-white/90">
         Activity Timeline
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -69,7 +69,7 @@ export function ActivityTimelineSection({
         {timeline.length === 0 ? (
           <EmptyState heading="No activity recorded yet" />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {timeline.map((entry, i) => {
               const meta = TIMELINE_META[entry.type];
               return (
@@ -77,10 +77,10 @@ export function ActivityTimelineSection({
                   <IconBadge icon={meta.icon} tone="primary" size={24} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="truncate text-sm text-neutral-800">
+                      <p className="truncate text-sm text-neutral-800 dark:text-white/90">
                         {meta.label} — {entry.title}
                       </p>
-                      <span className="shrink-0 text-xs text-neutral-400">
+                      <span className="shrink-0 text-xs text-neutral-400 dark:text-neutral-500">
                         {new Date(entry.occurredAt).toLocaleDateString(undefined, {
                           month: "short",
                           day: "numeric",

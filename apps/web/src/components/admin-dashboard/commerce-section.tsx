@@ -27,7 +27,7 @@ export function CommerceSection({
 
   return (
     <section aria-labelledby="commerce-heading">
-      <h2 id="commerce-heading" className="text-lg font-medium text-neutral-800">
+      <h2 id="commerce-heading" className="text-lg font-medium text-neutral-800 dark:text-white/90">
         Commerce overview
       </h2>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -37,16 +37,18 @@ export function CommerceSection({
               <ShoppingBag
                 size={16}
                 strokeWidth={1.75}
-                className="text-primary-600"
+                className="text-primary-600 dark:text-primary-400"
                 aria-hidden="true"
               />
-              <h3 className="font-heading text-sm font-semibold text-neutral-900">Recent orders</h3>
+              <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+                Recent orders
+              </h3>
             </div>
             <a
               href={ADMIN_LINKS.commerce}
               target="_blank"
               rel="noreferrer"
-              className="text-sm font-medium text-primary-600 hover:underline"
+              className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
             >
               View all →
             </a>
@@ -54,20 +56,22 @@ export function CommerceSection({
           {recentOrders.length === 0 ? (
             <EmptyState heading="No orders yet" />
           ) : (
-            <ul className="mt-3 flex flex-col divide-y divide-neutral-100">
+            <ul className="mt-3 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
               {recentOrders.map((order) => (
                 <li
                   key={order.id}
                   className="flex items-center justify-between gap-3 py-2.5 text-sm"
                 >
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-neutral-800">{order.courseTitle}</p>
-                    <p className="text-xs text-neutral-500">
+                    <p className="truncate font-medium text-neutral-800 dark:text-white/90">
+                      {order.courseTitle}
+                    </p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
                       {shortOrderId(order.id)} · {order.userEmail}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    <span className="font-medium text-neutral-700">
+                    <span className="font-medium text-neutral-700 dark:text-neutral-300">
                       {formatMoney(order.totalAmount, order.currency)}
                     </span>
                     <Chip tone={orderStatusTone(order.status)}>{statusLabel(order.status)}</Chip>
@@ -84,16 +88,18 @@ export function CommerceSection({
               <RotateCcw
                 size={16}
                 strokeWidth={1.75}
-                className="text-warning-600"
+                className="text-warning-600 dark:text-warning-400"
                 aria-hidden="true"
               />
-              <h3 className="font-heading text-sm font-semibold text-neutral-900">Refund queue</h3>
+              <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+                Refund queue
+              </h3>
             </div>
             <a
               href={ADMIN_LINKS.refunds}
               target="_blank"
               rel="noreferrer"
-              className="text-sm font-medium text-primary-600 hover:underline"
+              className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
             >
               Review →
             </a>
@@ -101,16 +107,18 @@ export function CommerceSection({
           {refundQueue.length === 0 ? (
             <EmptyState heading="Nothing pending" body="No refund requests awaiting review." />
           ) : (
-            <ul className="mt-3 flex flex-col divide-y divide-neutral-100">
+            <ul className="mt-3 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
               {refundQueue.map((refund) => (
                 <li key={refund.id} className="py-2.5 text-sm">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="truncate font-medium text-neutral-800">
+                    <p className="truncate font-medium text-neutral-800 dark:text-white/90">
                       {refund.requestedByEmail}
                     </p>
                     <Chip tone={refundStatusTone(refund.status)}>{statusLabel(refund.status)}</Chip>
                   </div>
-                  <p className="mt-0.5 truncate text-xs text-neutral-500">{refund.reason}</p>
+                  <p className="mt-0.5 truncate text-xs text-neutral-500 dark:text-neutral-400">
+                    {refund.reason}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -119,20 +127,29 @@ export function CommerceSection({
 
         <Card>
           <div className="flex items-center gap-2">
-            <Trophy size={16} strokeWidth={1.75} className="text-accent-600" aria-hidden="true" />
-            <h3 className="font-heading text-sm font-semibold text-neutral-900">Top courses</h3>
+            <Trophy
+              size={16}
+              strokeWidth={1.75}
+              className="text-accent-600 dark:text-accent-400"
+              aria-hidden="true"
+            />
+            <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+              Top courses
+            </h3>
           </div>
           {topCourses.length === 0 ? (
             <EmptyState heading="No revenue yet" />
           ) : (
-            <ul className="mt-3 flex flex-col divide-y divide-neutral-100">
+            <ul className="mt-3 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
               {topCourses.map((course) => (
                 <li
                   key={course.courseId}
                   className="flex items-center justify-between gap-3 py-2.5 text-sm"
                 >
-                  <span className="min-w-0 truncate text-neutral-800">{course.courseTitle}</span>
-                  <span className="shrink-0 font-medium text-neutral-700">
+                  <span className="min-w-0 truncate text-neutral-800 dark:text-white/90">
+                    {course.courseTitle}
+                  </span>
+                  <span className="shrink-0 font-medium text-neutral-700 dark:text-neutral-300">
                     {formatMoney(course.revenue, revenueCurrency)}
                   </span>
                 </li>

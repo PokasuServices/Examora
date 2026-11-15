@@ -15,11 +15,11 @@ export function LessonBreadcrumb({
   return (
     <nav
       aria-label="Breadcrumb"
-      className="flex min-w-0 items-center gap-1.5 text-sm text-neutral-500"
+      className="flex min-w-0 items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400"
     >
       <Link
         href={`/courses/${course.id}`}
-        className="shrink-0 hover:text-neutral-700 hover:underline"
+        className="shrink-0 hover:text-neutral-700 dark:hover:text-neutral-300 hover:underline"
       >
         {course.title}
       </Link>
@@ -47,7 +47,10 @@ export function LessonBreadcrumb({
           aria-hidden="true"
         />
       )}
-      <span className="truncate font-medium text-neutral-800" aria-current="page">
+      <span
+        className="truncate font-medium text-neutral-800 dark:text-white/90"
+        aria-current="page"
+      >
         {lessonTitle}
       </span>
     </nav>

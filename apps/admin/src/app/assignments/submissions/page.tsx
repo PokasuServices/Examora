@@ -168,41 +168,47 @@ function SubmissionsContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[1040px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Assignment
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Student
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Reviewer
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Submitted
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Assign reviewer
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {submissions.map((s) => (
-                  <tr key={s.id} className="hover:bg-neutral-50">
-                    <td className="px-4 py-3 text-neutral-700">{s.assignmentTitle}</td>
-                    <td className="px-4 py-3 text-neutral-600">{s.studentEmail}</td>
-                    <td className="px-4 py-3 text-neutral-600">{s.reviewerEmail ?? "—"}</td>
+                  <tr key={s.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
+                    <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">
+                      {s.assignmentTitle}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {s.studentEmail}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {s.reviewerEmail ?? "—"}
+                    </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <Chip tone={STATUS_TONE[s.status]}>{statusLabel(s.status)}</Chip>
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500">
+                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500 dark:text-neutral-400">
                       {s.submittedAt ? new Date(s.submittedAt).toLocaleString() : "—"}
                     </td>
                     <td className="px-4 py-3">
@@ -233,7 +239,7 @@ function SubmissionsContent() {
                     <td className="px-4 py-3">
                       <Link
                         href={`/assignments/submissions/${s.id}`}
-                        className="font-medium text-primary-600 hover:underline"
+                        className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                       >
                         View
                       </Link>
@@ -253,13 +259,17 @@ function SubmissionsContent() {
           reassignTarget ? (
             <>
               Assign{" "}
-              <span className="font-medium text-neutral-800">
+              <span className="font-medium text-neutral-800 dark:text-white/90">
                 {reassignReviewerEmail ?? "the selected reviewer"}
               </span>{" "}
               to review{" "}
-              <span className="font-medium text-neutral-800">{reassignTarget.studentEmail}</span>
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {reassignTarget.studentEmail}
+              </span>
               &rsquo;s submission for{" "}
-              <span className="font-medium text-neutral-800">{reassignTarget.assignmentTitle}</span>
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {reassignTarget.assignmentTitle}
+              </span>
               ?
             </>
           ) : null

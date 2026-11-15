@@ -67,14 +67,18 @@ function AdminMentorDashboardContent() {
             ) : (
               <>
                 <Card>
-                  <p className="text-xs font-medium text-neutral-500">Total mentors</p>
-                  <p className="mt-2 text-2xl font-semibold text-neutral-900">
+                  <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                    Total mentors
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-white/90">
                     {summary?.totalMentors ?? 0}
                   </p>
                 </Card>
                 <Card>
-                  <p className="text-xs font-medium text-neutral-500">Total active assignments</p>
-                  <p className="mt-2 text-2xl font-semibold text-neutral-900">
+                  <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                    Total active assignments
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-white/90">
                     {summary?.totalActiveAssignments ?? 0}
                   </p>
                 </Card>
@@ -97,29 +101,38 @@ function AdminMentorDashboardContent() {
             ) : (
               <div className="overflow-x-auto contain-layout">
                 <table className="w-full min-w-[560px] text-left text-sm">
-                  <thead className="bg-neutral-50">
+                  <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                     <tr>
-                      <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                      <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                         Mentor
                       </th>
-                      <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                      <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                         Active students
                       </th>
-                      <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                      <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                         Capacity
                       </th>
-                      <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                      <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                         Utilization
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-neutral-200">
+                  <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                     {(summary?.mentors ?? []).map((m) => (
-                      <tr key={m.mentorId} className="hover:bg-neutral-50">
-                        <td className="px-4 py-3 text-neutral-800">{m.mentorEmail}</td>
-                        <td className="px-4 py-3 text-neutral-600">{m.activeStudentCount}</td>
-                        <td className="px-4 py-3 text-neutral-600">{m.maxStudents}</td>
-                        <td className="px-4 py-3 text-neutral-600">
+                      <tr
+                        key={m.mentorId}
+                        className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]"
+                      >
+                        <td className="px-4 py-3 text-neutral-800 dark:text-white/90">
+                          {m.mentorEmail}
+                        </td>
+                        <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                          {m.activeStudentCount}
+                        </td>
+                        <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                          {m.maxStudents}
+                        </td>
+                        <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                           {m.maxStudents > 0
                             ? `${Math.round((m.activeStudentCount / m.maxStudents) * 100)}%`
                             : "—"}

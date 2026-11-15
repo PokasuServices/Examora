@@ -93,44 +93,46 @@ function OrdersContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[720px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Course
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Student
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Amount
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Date
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-neutral-50">
+                  <tr key={order.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
                     <td className="px-4 py-3">
                       <Link
                         href={`/commerce/orders/${order.id}`}
-                        className="font-medium text-primary-600 hover:underline"
+                        className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                       >
                         {order.courseTitle}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-neutral-600">{order.userEmail}</td>
-                    <td className="px-4 py-3 text-neutral-700">
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {order.userEmail}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">
                       {formatMoney(order.totalAmount, order.currency)}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <Chip tone={STATUS_TONE[order.status]}>{statusLabel(order.status)}</Chip>
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500">
+                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500 dark:text-neutral-400">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
                   </tr>

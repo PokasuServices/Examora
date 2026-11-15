@@ -8,7 +8,7 @@ export function AuthNav() {
   const { status, user, logout } = useAuth();
 
   if (status === "loading") {
-    return <span className="text-sm text-neutral-500">Loading…</span>;
+    return <span className="text-sm text-neutral-500 dark:text-neutral-400">Loading…</span>;
   }
 
   if (status === "authenticated" && user) {
@@ -31,7 +31,7 @@ export function AuthNav() {
     const canManageCms = user.permissions.includes("cms:manage");
     return (
       <div className="flex items-center gap-3">
-        <span className="text-sm text-neutral-600">{user.email}</span>
+        <span className="text-sm text-neutral-600 dark:text-neutral-400">{user.email}</span>
         {canManageContent ? (
           <Link href="/content/courses">
             <Button variant="secondary">Content</Button>

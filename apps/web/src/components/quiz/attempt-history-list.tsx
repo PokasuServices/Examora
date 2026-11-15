@@ -8,17 +8,20 @@ export function AttemptHistoryList({ history }: { history: AttemptHistoryItem[] 
 
   return (
     <section aria-labelledby="attempt-history-heading">
-      <h2 id="attempt-history-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="attempt-history-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Your attempts
       </h2>
-      <ul className="mt-3 flex flex-col divide-y divide-neutral-100 overflow-hidden rounded-card border border-neutral-200 bg-white shadow-soft">
+      <ul className="mt-3 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800 overflow-hidden rounded-card border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-soft">
         {finished.map((h) => (
           <li key={h.id}>
             <Link
               href={`/quizzes/attempts/${h.id}/result`}
-              className="flex items-center justify-between gap-3 px-5 py-3.5 text-sm hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500"
+              className="flex items-center justify-between gap-3 px-5 py-3.5 text-sm hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500"
             >
-              <span className="text-neutral-600">
+              <span className="text-neutral-600 dark:text-neutral-400">
                 {new Date(h.startedAt).toLocaleDateString(undefined, {
                   month: "short",
                   day: "numeric",
@@ -26,7 +29,9 @@ export function AttemptHistoryList({ history }: { history: AttemptHistoryItem[] 
                 })}
               </span>
               <span className="flex items-center gap-2">
-                <span className="font-medium tabular-nums text-neutral-800">{h.percentage}%</span>
+                <span className="font-medium tabular-nums text-neutral-800 dark:text-white/90">
+                  {h.percentage}%
+                </span>
                 <Chip tone={h.passed ? "success" : "danger"}>
                   {h.passed ? "Passed" : "Not passed"}
                 </Chip>

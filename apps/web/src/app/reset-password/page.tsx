@@ -32,12 +32,12 @@ function ResetPasswordForm() {
   if (!token) {
     return (
       <AuthLayout title="Invalid link">
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">
           This password reset link is missing its token. Request a new one below.
         </p>
         <Link
           href="/forgot-password"
-          className="mt-6 inline-block text-sm text-primary-600 hover:underline"
+          className="mt-6 inline-block text-sm text-primary-600 dark:text-primary-400 hover:underline"
         >
           Request a new link
         </Link>

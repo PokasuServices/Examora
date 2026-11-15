@@ -36,7 +36,10 @@ export function AppLogo({
         >
           Examora{" "}
           <span
-            className={cn("font-normal", tone === "light" ? "text-white/60" : "text-neutral-400")}
+            className={cn(
+              "font-normal",
+              tone === "light" ? "text-white/60" : "text-neutral-400 dark:text-neutral-500",
+            )}
           >
             Admin
           </span>

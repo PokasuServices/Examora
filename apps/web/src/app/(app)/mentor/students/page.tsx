@@ -98,7 +98,7 @@ function MentorStudentsContent() {
     <main className="flex flex-col gap-6">
       <div>
         <PageTitle>My Students</PageTitle>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           {students.length} assigned {students.length === 1 ? "student" : "students"}
         </p>
       </div>

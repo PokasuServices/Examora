@@ -60,9 +60,12 @@ export default function AdminLoginPage() {
           {submitting ? "Signing in…" : "Sign in"}
         </Button>
       </form>
-      <p className="mt-6 text-center text-sm text-neutral-600">
+      <p className="mt-6 text-center text-sm text-neutral-600 dark:text-neutral-400">
         Forgot your password?{" "}
-        <a href={`${WEB_ORIGIN}/forgot-password`} className="text-primary-600 hover:underline">
+        <a
+          href={`${WEB_ORIGIN}/forgot-password`}
+          className="text-primary-600 dark:text-primary-400 hover:underline"
+        >
           Reset it on the student site
         </a>
       </p>

@@ -64,7 +64,7 @@ function UsersDirectoryContent() {
     <main className="flex flex-col gap-6">
       <div>
         <PageTitle>Users</PageTitle>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Manage students, mentors, reviewers and administrators.
         </p>
       </div>
@@ -78,7 +78,7 @@ function UsersDirectoryContent() {
               <Search
                 size={16}
                 strokeWidth={1.75}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
                 aria-hidden="true"
               />
               <input
@@ -86,7 +86,7 @@ function UsersDirectoryContent() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by name or email…"
-                className="h-10 w-full rounded-md border border-neutral-200 bg-neutral-50 pl-9 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-white/[0.03] pl-9 pr-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               />
             </div>
           </div>
@@ -96,7 +96,7 @@ function UsersDirectoryContent() {
             statusFilter={statusFilter}
             onStatusChange={setStatusFilter}
           />
-          <p className="text-xs text-neutral-400">
+          <p className="text-xs text-neutral-400 dark:text-neutral-500">
             Search and status filter the {loadedCount.toLocaleString()} most recently loaded users
             {serverTotal > loadedCount ? ` of ${serverTotal.toLocaleString()} total` : ""} — role
             filtering queries the full directory.
@@ -108,7 +108,7 @@ function UsersDirectoryContent() {
             <Search
               size={16}
               strokeWidth={1.75}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
               aria-hidden="true"
             />
             <input
@@ -116,7 +116,7 @@ function UsersDirectoryContent() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name or email…"
-              className="h-10 w-full rounded-md border border-neutral-200 bg-neutral-50 pl-9 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-white/[0.03] pl-9 pr-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             />
           </div>
           <button
@@ -124,7 +124,7 @@ function UsersDirectoryContent() {
             onClick={() => setSheetOpen(true)}
             aria-haspopup="dialog"
             aria-expanded={sheetOpen}
-            className="relative flex h-10 shrink-0 items-center gap-2 rounded-md border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="relative flex h-10 shrink-0 items-center gap-2 rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             <Filter size={16} strokeWidth={1.75} aria-hidden="true" />
             Filters
@@ -165,7 +165,7 @@ function UsersDirectoryContent() {
           <>
             <UserTable users={pageItems} />
             <div className="flex items-center justify-between gap-3 p-4">
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
                 {filteredCount} {filteredCount === 1 ? "user" : "users"}
               </p>
               <Pagination page={page} pageCount={pageCount} onChange={setPage} />

@@ -121,14 +121,16 @@ function QuestionDetailContent() {
       <div>
         <Link
           href="/assessment/questions"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Question bank
         </Link>
         <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-neutral-800">{statusLabel(question.type)}</h1>
+            <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+              {statusLabel(question.type)}
+            </h1>
             <Chip tone={STATUS_TONE[question.status]}>{statusLabel(question.status)}</Chip>
           </div>
           <StatusActions
@@ -140,13 +142,13 @@ function QuestionDetailContent() {
       <FieldError>{error}</FieldError>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Details</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Details</h2>
         <form onSubmit={saveDetails} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="text">Question text</Label>
             <textarea
               id="text"
-              className="min-h-16 rounded-md border border-neutral-300 bg-white p-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+              className="min-h-16 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900"
               value={text}
               onChange={(e) => setText(e.target.value)}
               required
@@ -156,12 +158,12 @@ function QuestionDetailContent() {
             <Label htmlFor="explanation">Explanation</Label>
             <textarea
               id="explanation"
-              className="min-h-12 rounded-md border border-neutral-300 bg-white p-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+              className="min-h-12 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900"
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
             />
           </div>
-          {saved ? <p className="text-sm text-success-600">Saved.</p> : null}
+          {saved ? <p className="text-sm text-success-600 dark:text-success-400">Saved.</p> : null}
           <div>
             <Button type="submit">Save details</Button>
           </div>
@@ -169,21 +171,23 @@ function QuestionDetailContent() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Options</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Options</h2>
         <ul className="mt-4 flex flex-col gap-2">
           {question.options.map((o) => (
             <li
               key={o.id}
               className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm ${
-                o.isCorrect ? "border-success-500/30 bg-success-50" : "border-neutral-200"
+                o.isCorrect
+                  ? "border-success-500/30 bg-success-50 dark:bg-success-500/15"
+                  : "border-neutral-200 dark:border-neutral-800"
               }`}
             >
-              <span className="text-neutral-800">{o.text}</span>
+              <span className="text-neutral-800 dark:text-white/90">{o.text}</span>
               {o.isCorrect ? <Chip tone="success">Correct</Chip> : null}
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-xs text-neutral-500">
+        <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
           To change options, edit via the question bank list — options are not editable inline here
           this sprint.
         </p>
@@ -208,7 +212,10 @@ function QuestionDetailContent() {
           !pending ? null : pending.kind === "STATUS" ? (
             <>
               Change status to{" "}
-              <span className="font-medium text-neutral-800">{statusLabel(pending.status)}</span>?
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {statusLabel(pending.status)}
+              </span>
+              ?
             </>
           ) : (
             "This permanently removes the question and its options. This can't be undone."

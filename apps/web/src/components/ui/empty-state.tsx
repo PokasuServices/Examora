@@ -23,12 +23,14 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center gap-2 py-8 text-center">
       {icon ? <IconBadge icon={icon} tone={tone} /> : null}
-      <p className="text-sm font-medium text-neutral-800">{heading}</p>
-      {body ? <p className="max-w-xs text-sm text-neutral-500">{body}</p> : null}
+      <p className="text-sm font-medium text-neutral-800 dark:text-white/90">{heading}</p>
+      {body ? (
+        <p className="max-w-xs text-sm text-neutral-500 dark:text-neutral-400">{body}</p>
+      ) : null}
       {actionLabel && actionHref ? (
         <Link
           href={actionHref}
-          className="mt-1 text-sm font-medium text-primary-600 hover:underline"
+          className="mt-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
         >
           {actionLabel}
         </Link>
@@ -37,7 +39,7 @@ export function EmptyState({
         <button
           type="button"
           onClick={onAction}
-          className="mt-1 text-sm font-medium text-primary-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
+          className="mt-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
         >
           {actionLabel}
         </button>

@@ -54,14 +54,16 @@ export function RecommendationSection({
           <Icon size={18} strokeWidth={1.75} className="text-accent-500" aria-hidden="true" />
           <h2
             id={`rec-${title.replace(/\s+/g, "-").toLowerCase()}`}
-            className="text-xl font-semibold text-neutral-800"
+            className="text-xl font-semibold text-neutral-800 dark:text-white/90"
           >
             {title}
           </h2>
         </div>
         {action ?? null}
       </div>
-      {subtitle ? <p className="mt-0.5 text-sm text-neutral-500">{subtitle}</p> : null}
+      {subtitle ? (
+        <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">{subtitle}</p>
+      ) : null}
 
       <div className="mt-4">
         {status === "loading" ? (

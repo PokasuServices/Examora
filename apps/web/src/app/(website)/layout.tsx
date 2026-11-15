@@ -9,7 +9,7 @@ import { SiteHeader } from "@/components/website/SiteHeader";
  */
 export default function WebsiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-neutral-950">
       <SiteHeader />
       <div className="flex-1">{children}</div>
       <SiteFooter />

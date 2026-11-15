@@ -30,9 +30,9 @@ import { useAdminAnalyticsApi } from "@/lib/analytics-api";
 
 function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-4">
-      <p className="text-xs font-medium text-neutral-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold text-neutral-900">{value}</p>
+    <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4">
+      <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{label}</p>
+      <p className="mt-1 text-2xl font-semibold text-neutral-900 dark:text-white/90">{value}</p>
     </div>
   );
 }
@@ -40,7 +40,7 @@ function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-8">
-      <h2 className="text-sm font-semibold text-neutral-800">{title}</h2>
+      <h2 className="text-sm font-semibold text-neutral-800 dark:text-white/90">{title}</h2>
       <div className="mt-3">{children}</div>
     </section>
   );
@@ -95,12 +95,16 @@ function AdminAnalyticsContent() {
   return (
     <main>
       <AnalyticsNav />
-      <h1 className="text-xl font-semibold text-neutral-800">Platform analytics</h1>
-      <p className="mt-1 text-sm text-neutral-500">
+      <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+        Platform analytics
+      </h1>
+      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
         Cross-platform KPIs, growth, revenue, and performance across every module.
       </p>
 
-      {loading ? <p className="mt-6 text-sm text-neutral-500">Loading…</p> : null}
+      {loading ? (
+        <p className="mt-6 text-sm text-neutral-500 dark:text-neutral-400">Loading…</p>
+      ) : null}
 
       {!loading && platform ? (
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -120,10 +124,10 @@ function AdminAnalyticsContent() {
 
       {!loading && userGrowth && userGrowth.newUsersByDay.length > 0 ? (
         <Section title="New users (last 30 days)">
-          <div className="h-56 rounded-lg border border-neutral-200 bg-white p-4">
+          <div className="h-56 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={userGrowth.newUsersByDay}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.25)" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} minTickGap={20} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip />
@@ -141,7 +145,7 @@ function AdminAnalyticsContent() {
             {userGrowth.usersByRole.map((r) => (
               <span
                 key={r.role}
-                className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700"
+                className="rounded-full bg-neutral-100 dark:bg-white/5 px-3 py-1 text-xs font-medium text-neutral-700 dark:text-neutral-300"
               >
                 {r.role}: {r.count}
               </span>
@@ -165,10 +169,10 @@ function AdminAnalyticsContent() {
             <StatCard label="Coupon redemptions" value={revenue.couponRedemptions} />
           </div>
           {revenue.revenueByDay.length > 0 ? (
-            <div className="mt-3 h-56 rounded-lg border border-neutral-200 bg-white p-4">
+            <div className="mt-3 h-56 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={revenue.revenueByDay}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.25)" />
                   <XAxis dataKey="date" tick={{ fontSize: 10 }} minTickGap={20} />
                   <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip />
@@ -193,9 +197,9 @@ function AdminAnalyticsContent() {
 
       {!loading && courses.length > 0 ? (
         <Section title="Course performance">
-          <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+          <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
+              <thead className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-white/[0.03] text-neutral-700 dark:text-neutral-300">
                 <tr>
                   <th className="px-4 py-3 font-medium">Course</th>
                   <th className="px-4 py-3 font-medium">Enrollments</th>
@@ -206,14 +210,25 @@ function AdminAnalyticsContent() {
               </thead>
               <tbody>
                 {courses.map((c) => (
-                  <tr key={c.courseId} className="border-b border-neutral-100 last:border-0">
-                    <td className="px-4 py-3 text-neutral-800">{c.courseTitle}</td>
-                    <td className="px-4 py-3 text-neutral-600">{c.enrollmentCount}</td>
-                    <td className="px-4 py-3 text-neutral-600">{c.averageCompletionPercent}%</td>
-                    <td className="px-4 py-3 text-neutral-600">
+                  <tr
+                    key={c.courseId}
+                    className="border-b border-neutral-100 dark:border-neutral-800 last:border-0"
+                  >
+                    <td className="px-4 py-3 text-neutral-800 dark:text-white/90">
+                      {c.courseTitle}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {c.enrollmentCount}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {c.averageCompletionPercent}%
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                       {c.averageQuizPercentage !== null ? `${c.averageQuizPercentage}%` : "—"}
                     </td>
-                    <td className="px-4 py-3 text-neutral-600">{c.revenue.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {c.revenue.toLocaleString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -224,9 +239,9 @@ function AdminAnalyticsContent() {
 
       {!loading && mentors.length > 0 ? (
         <Section title="Mentor performance">
-          <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+          <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
+              <thead className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-white/[0.03] text-neutral-700 dark:text-neutral-300">
                 <tr>
                   <th className="px-4 py-3 font-medium">Mentor</th>
                   <th className="px-4 py-3 font-medium">Active students</th>
@@ -237,14 +252,23 @@ function AdminAnalyticsContent() {
               </thead>
               <tbody>
                 {mentors.map((m) => (
-                  <tr key={m.mentorId} className="border-b border-neutral-100 last:border-0">
-                    <td className="px-4 py-3 text-neutral-800">{m.mentorEmail}</td>
-                    <td className="px-4 py-3 text-neutral-600">{m.activeStudentCount}</td>
-                    <td className="px-4 py-3 text-neutral-600">
+                  <tr
+                    key={m.mentorId}
+                    className="border-b border-neutral-100 dark:border-neutral-800 last:border-0"
+                  >
+                    <td className="px-4 py-3 text-neutral-800 dark:text-white/90">
+                      {m.mentorEmail}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {m.activeStudentCount}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                       {m.averageStudentCompletionPercent}%
                     </td>
-                    <td className="px-4 py-3 text-neutral-600">{m.pendingReviewCount}</td>
-                    <td className="px-4 py-3 text-neutral-600">
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {m.pendingReviewCount}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                       {m.averageReviewTurnaroundHours !== null
                         ? `${m.averageReviewTurnaroundHours}h`
                         : "—"}
@@ -307,9 +331,9 @@ function AdminAnalyticsContent() {
 
       {!loading && notifications ? (
         <Section title="Notification delivery">
-          <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+          <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
+              <thead className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-white/[0.03] text-neutral-700 dark:text-neutral-300">
                 <tr>
                   <th className="px-4 py-3 font-medium">Channel</th>
                   <th className="px-4 py-3 font-medium">Queued</th>
@@ -321,13 +345,20 @@ function AdminAnalyticsContent() {
               </thead>
               <tbody>
                 {notifications.deliveryByChannel.map((c) => (
-                  <tr key={c.channel} className="border-b border-neutral-100 last:border-0">
-                    <td className="px-4 py-3 text-neutral-800">{c.channel}</td>
-                    <td className="px-4 py-3 text-neutral-600">{c.queued}</td>
-                    <td className="px-4 py-3 text-neutral-600">{c.delivered}</td>
-                    <td className="px-4 py-3 text-neutral-600">{c.failed}</td>
-                    <td className="px-4 py-3 text-neutral-600">{c.suppressed}</td>
-                    <td className="px-4 py-3 text-neutral-600">
+                  <tr
+                    key={c.channel}
+                    className="border-b border-neutral-100 dark:border-neutral-800 last:border-0"
+                  >
+                    <td className="px-4 py-3 text-neutral-800 dark:text-white/90">{c.channel}</td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">{c.queued}</td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {c.delivered}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">{c.failed}</td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {c.suppressed}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                       {c.successRate !== null ? `${c.successRate}%` : "—"}
                     </td>
                   </tr>

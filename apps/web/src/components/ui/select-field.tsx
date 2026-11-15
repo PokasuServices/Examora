@@ -22,7 +22,10 @@ export function SelectField({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-xs font-medium text-neutral-500">
+      <label
+        htmlFor={id}
+        className="mb-1 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
+      >
         {label}
       </label>
       <div className="relative">
@@ -30,7 +33,7 @@ export function SelectField({
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="h-10 w-full appearance-none rounded-md border border-neutral-200 bg-white pl-3 pr-9 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="h-10 w-full appearance-none rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 pl-3 pr-9 text-sm text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           {options.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -41,7 +44,7 @@ export function SelectField({
         <ChevronDown
           size={16}
           strokeWidth={1.75}
-          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400"
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
           aria-hidden="true"
         />
       </div>

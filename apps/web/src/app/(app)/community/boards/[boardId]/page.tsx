@@ -99,8 +99,11 @@ function BoardThreadsContent() {
 
   return (
     <main className="flex flex-col gap-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
-        <Link href="/community" className="hover:text-primary-600 hover:underline">
+      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 dark:text-neutral-400">
+        <Link
+          href="/community"
+          className="hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
+        >
           Community
         </Link>
         {data.board ? <span> / {data.board.categoryTitle}</span> : null}
@@ -108,9 +111,13 @@ function BoardThreadsContent() {
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-neutral-800">{data.board?.title ?? "Board"}</h1>
+          <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+            {data.board?.title ?? "Board"}
+          </h1>
           {data.board?.description ? (
-            <p className="mt-1 max-w-2xl text-sm text-neutral-500">{data.board.description}</p>
+            <p className="mt-1 max-w-2xl text-sm text-neutral-500 dark:text-neutral-400">
+              {data.board.description}
+            </p>
           ) : null}
         </div>
         <Link
@@ -127,7 +134,7 @@ function BoardThreadsContent() {
           <Search
             size={16}
             strokeWidth={1.75}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
             aria-hidden="true"
           />
           <label htmlFor="board-search" className="sr-only">
@@ -138,14 +145,14 @@ function BoardThreadsContent() {
             value={data.filters.search}
             onChange={(e) => handleFilterChange("search", e.target.value)}
             placeholder="Search this board by title…"
-            className="h-11 w-full rounded-md border border-neutral-200 bg-white pl-9 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="h-11 w-full rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 pl-9 pr-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           />
         </div>
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
           aria-haspopup="dialog"
-          className="relative flex h-11 shrink-0 items-center gap-2 rounded-md border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 lg:hidden"
+          className="relative flex h-11 shrink-0 items-center gap-2 rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 lg:hidden"
         >
           <Filter size={16} strokeWidth={1.75} aria-hidden="true" />
           Filters
@@ -182,7 +189,7 @@ function BoardThreadsContent() {
         />
       ) : (
         <>
-          <p className="text-sm text-neutral-500" aria-live="polite">
+          <p className="text-sm text-neutral-500 dark:text-neutral-400" aria-live="polite">
             {data.threads.length} {data.threads.length === 1 ? "discussion" : "discussions"}
           </p>
           <div className="flex flex-col gap-3">

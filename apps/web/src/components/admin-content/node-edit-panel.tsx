@@ -75,7 +75,7 @@ export function NodeEditPanel({
             aria-label="Move up"
             disabled={siblingIndex === 0}
             onClick={() => onMove("up")}
-            className="rounded p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 disabled:pointer-events-none disabled:opacity-30"
+            className="rounded p-1.5 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-700 dark:hover:text-neutral-300 disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowUp size={15} strokeWidth={2} aria-hidden="true" />
           </button>
@@ -84,7 +84,7 @@ export function NodeEditPanel({
             aria-label="Move down"
             disabled={siblingIndex === siblingCount - 1}
             onClick={() => onMove("down")}
-            className="rounded p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 disabled:pointer-events-none disabled:opacity-30"
+            className="rounded p-1.5 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-700 dark:hover:text-neutral-300 disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowDown size={15} strokeWidth={2} aria-hidden="true" />
           </button>
@@ -92,7 +92,7 @@ export function NodeEditPanel({
             type="button"
             aria-label={`Delete ${COLLECTION_LABEL[collection].toLowerCase()}`}
             onClick={() => setConfirmDelete(true)}
-            className="rounded p-1.5 text-danger-500 hover:bg-danger-50"
+            className="rounded p-1.5 text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-500/15"
           >
             <Trash2 size={15} strokeWidth={2} aria-hidden="true" />
           </button>
@@ -147,7 +147,7 @@ export function NodeEditPanel({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+            className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
           />
         </div>
         <FieldError>{mutationError}</FieldError>
@@ -163,8 +163,9 @@ export function NodeEditPanel({
         title={`Delete this ${COLLECTION_LABEL[collection].toLowerCase()}?`}
         message={
           <>
-            Delete <span className="font-medium text-neutral-800">{node.title}</span>? This
-            can&rsquo;t be undone.
+            Delete{" "}
+            <span className="font-medium text-neutral-800 dark:text-white/90">{node.title}</span>?
+            This can&rsquo;t be undone.
           </>
         }
         confirmLabel="Delete"
@@ -207,7 +208,9 @@ export function NodeCreatePanel({
       }}
       className="flex flex-col gap-4"
     >
-      <h3 className="text-lg font-medium text-neutral-800">New {singular[collection]}</h3>
+      <h3 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+        New {singular[collection]}
+      </h3>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="new-node-title">Title</Label>
         <Input
@@ -228,7 +231,7 @@ export function NodeCreatePanel({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm font-medium text-neutral-600 hover:underline"
+          className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:underline"
         >
           Cancel
         </button>

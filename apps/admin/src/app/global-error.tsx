@@ -14,7 +14,7 @@ export default function GlobalError({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-white text-neutral-900 antialiased">
+      <body className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white/90 antialiased">
         <ErrorPage
           code="500"
           message="Something went wrong on our end. Please try again."

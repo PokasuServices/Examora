@@ -62,17 +62,21 @@ function ChannelsCard({
 }) {
   return (
     <Card>
-      <h2 className="text-lg font-medium text-neutral-800">Channels</h2>
-      <p className="mt-1 text-sm text-neutral-500">
+      <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Channels</h2>
+      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
         Choose where non-critical updates reach you. Security and account alerts always go through
         by email, regardless of these settings.
       </p>
-      <ul className="mt-4 flex flex-col divide-y divide-neutral-100">
+      <ul className="mt-4 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
         {CHANNELS.map((channel) => (
           <li key={channel.key} className="flex items-center justify-between gap-4 py-3">
             <div className="min-w-0">
-              <p className="text-sm font-medium text-neutral-800">{channel.label}</p>
-              <p className="text-xs text-neutral-500">{channel.description}</p>
+              <p className="text-sm font-medium text-neutral-800 dark:text-white/90">
+                {channel.label}
+              </p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                {channel.description}
+              </p>
             </div>
             <Switch
               label={channel.label}
@@ -95,8 +99,10 @@ function DigestCard({
 }) {
   return (
     <Card>
-      <h2 className="text-lg font-medium text-neutral-800">Digest</h2>
-      <p className="mt-1 text-sm text-neutral-500">How often batched updates should arrive.</p>
+      <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Digest</h2>
+      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+        How often batched updates should arrive.
+      </p>
       <div className="mt-4">
         <SegmentedControl
           aria-label="Digest mode"
@@ -134,16 +140,20 @@ function MutedCategoriesCard({
 
   return (
     <Card>
-      <h2 className="text-lg font-medium text-neutral-800">Muted categories</h2>
-      <p className="mt-1 text-sm text-neutral-500">
+      <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Muted categories</h2>
+      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
         Non-critical notifications in these categories won&rsquo;t be sent by email, SMS, WhatsApp,
         or browser push — they still appear in your Notification Center. Try{" "}
-        <code className="rounded bg-neutral-100 px-1 py-0.5 text-xs">community</code> or{" "}
-        <code className="rounded bg-neutral-100 px-1 py-0.5 text-xs">learning</code>.
+        <code className="rounded bg-neutral-100 dark:bg-white/5 px-1 py-0.5 text-xs">
+          community
+        </code>{" "}
+        or{" "}
+        <code className="rounded bg-neutral-100 dark:bg-white/5 px-1 py-0.5 text-xs">learning</code>
+        .
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         {prefs.mutedCategories.length === 0 ? (
-          <p className="text-xs text-neutral-400">Nothing muted.</p>
+          <p className="text-xs text-neutral-400 dark:text-neutral-500">Nothing muted.</p>
         ) : (
           prefs.mutedCategories.map((category) => (
             <Chip key={category} tone="neutral" className="gap-1.5">
@@ -152,7 +162,7 @@ function MutedCategoriesCard({
                 type="button"
                 onClick={() => removeMuted(category)}
                 aria-label={`Unmute ${category}`}
-                className="text-neutral-400 hover:text-neutral-700"
+                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
               >
                 <X size={11} strokeWidth={2.5} aria-hidden="true" />
               </button>
@@ -175,12 +185,12 @@ function MutedCategoriesCard({
             }
           }}
           placeholder="e.g. community"
-          className="h-10 flex-1 rounded-md border border-neutral-200 px-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="h-10 flex-1 rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         />
         <button
           type="button"
           onClick={addMuted}
-          className="flex h-10 items-center rounded-md border border-neutral-200 px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="flex h-10 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-4 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           Add
         </button>
@@ -199,16 +209,24 @@ function QuietHoursCard({
   return (
     <Card>
       <div className="flex items-center gap-2">
-        <Moon size={16} strokeWidth={1.75} className="text-primary-600" aria-hidden="true" />
-        <h2 className="text-lg font-medium text-neutral-800">Quiet hours</h2>
+        <Moon
+          size={16}
+          strokeWidth={1.75}
+          className="text-primary-600 dark:text-primary-400"
+          aria-hidden="true"
+        />
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Quiet hours</h2>
       </div>
-      <p className="mt-1 text-sm text-neutral-500">
+      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
         Non-critical channel sends are held during this window; security and account alerts always
         go through.
       </p>
       <div className="mt-4 grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="dnd-start" className="mb-1.5 block text-xs font-medium text-neutral-500">
+          <label
+            htmlFor="dnd-start"
+            className="mb-1.5 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
+          >
             Starts
           </label>
           <input
@@ -216,11 +234,14 @@ function QuietHoursCard({
             type="time"
             value={minuteToTime(prefs.dndStartMinute)}
             onChange={(e) => onChange({ dndStartMinute: timeToMinute(e.target.value) })}
-            className="h-10 w-full rounded-md border border-neutral-200 px-3 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           />
         </div>
         <div>
-          <label htmlFor="dnd-end" className="mb-1.5 block text-xs font-medium text-neutral-500">
+          <label
+            htmlFor="dnd-end"
+            className="mb-1.5 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
+          >
             Ends
           </label>
           <input
@@ -228,7 +249,7 @@ function QuietHoursCard({
             type="time"
             value={minuteToTime(prefs.dndEndMinute)}
             onChange={(e) => onChange({ dndEndMinute: timeToMinute(e.target.value) })}
-            className="h-10 w-full rounded-md border border-neutral-200 px-3 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           />
         </div>
       </div>
@@ -245,12 +266,14 @@ function LocaleCard({
 }) {
   return (
     <Card>
-      <h2 className="text-lg font-medium text-neutral-800">Language &amp; time zone</h2>
+      <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+        Language &amp; time zone
+      </h2>
       <div className="mt-4 grid grid-cols-2 gap-3">
         <div>
           <label
             htmlFor="pref-language"
-            className="mb-1.5 block text-xs font-medium text-neutral-500"
+            className="mb-1.5 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
           >
             Language
           </label>
@@ -258,13 +281,13 @@ function LocaleCard({
             id="pref-language"
             value={prefs.language}
             onChange={(e) => onChange({ language: e.target.value })}
-            className="h-10 w-full rounded-md border border-neutral-200 px-3 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           />
         </div>
         <div>
           <label
             htmlFor="pref-timezone"
-            className="mb-1.5 block text-xs font-medium text-neutral-500"
+            className="mb-1.5 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
           >
             Time zone
           </label>
@@ -273,7 +296,7 @@ function LocaleCard({
             value={prefs.timezone}
             placeholder="e.g. Asia/Kolkata"
             onChange={(e) => onChange({ timezone: e.target.value })}
-            className="h-10 w-full rounded-md border border-neutral-200 px-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           />
         </div>
       </div>
@@ -330,28 +353,35 @@ function WebPushCard() {
   return (
     <Card>
       <div className="flex items-center gap-2">
-        <Smartphone size={16} strokeWidth={1.75} className="text-primary-600" aria-hidden="true" />
-        <h2 className="text-lg font-medium text-neutral-800">Devices</h2>
+        <Smartphone
+          size={16}
+          strokeWidth={1.75}
+          className="text-primary-600 dark:text-primary-400"
+          aria-hidden="true"
+        />
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Devices</h2>
       </div>
       {!supported ? (
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
           Browser push isn&rsquo;t available — your browser doesn&rsquo;t support it, or it
           hasn&rsquo;t been configured on this deployment.
         </p>
       ) : (
         <>
-          <p className="mt-2 text-sm text-neutral-600">
+          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
             Register this browser to receive push notifications even when Examora isn&rsquo;t open.
           </p>
           <button
             type="button"
             disabled={busy}
             onClick={() => void enable()}
-            className="mt-3 flex h-10 items-center rounded-md border border-neutral-200 px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-60"
+            className="mt-3 flex h-10 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-4 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-60"
           >
             {busy ? "Working…" : "Enable on this device"}
           </button>
-          {error ? <p className="mt-2 text-sm text-danger-600">{error}</p> : null}
+          {error ? (
+            <p className="mt-2 text-sm text-danger-600 dark:text-danger-400">{error}</p>
+          ) : null}
         </>
       )}
 
@@ -360,16 +390,16 @@ function WebPushCard() {
           {subscriptions.map((sub) => (
             <li
               key={sub.id}
-              className="flex items-center justify-between rounded-md border border-neutral-100 p-3 text-sm"
+              className="flex items-center justify-between rounded-md border border-neutral-100 dark:border-neutral-800 p-3 text-sm"
             >
-              <span className="truncate text-neutral-600">
+              <span className="truncate text-neutral-600 dark:text-neutral-400">
                 Registered {new Date(sub.createdAt).toLocaleDateString()}
               </span>
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => void disable(sub.endpoint)}
-                className="text-danger-600 hover:underline disabled:pointer-events-none disabled:opacity-60"
+                className="text-danger-600 dark:text-danger-400 hover:underline disabled:pointer-events-none disabled:opacity-60"
               >
                 Remove
               </button>
@@ -425,17 +455,21 @@ function PreferencesContent() {
         <div>
           <Link
             href="/notifications"
-            className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+            className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
           >
             <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
             Notifications
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-neutral-800">Preferences</h1>
+          <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+            Preferences
+          </h1>
         </div>
       </div>
 
       {!prefs ? (
-        <p className="text-sm text-neutral-500">{error ?? "Loading preferences…"}</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+          {error ?? "Loading preferences…"}
+        </p>
       ) : (
         <>
           <ChannelsCard prefs={prefs} onChange={patch} />
@@ -445,10 +479,12 @@ function PreferencesContent() {
           <LocaleCard prefs={prefs} onChange={patch} />
           <WebPushCard />
 
-          <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-card border border-neutral-200 bg-white/95 p-4 shadow-soft-hover backdrop-blur">
-            {error ? <p className="mr-auto text-sm text-danger-600">{error}</p> : null}
+          <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-card border border-neutral-200 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 p-4 shadow-soft-hover backdrop-blur">
+            {error ? (
+              <p className="mr-auto text-sm text-danger-600 dark:text-danger-400">{error}</p>
+            ) : null}
             {saved && !dirty ? (
-              <p className="mr-auto flex items-center gap-1 text-sm text-success-700">
+              <p className="mr-auto flex items-center gap-1 text-sm text-success-700 dark:text-success-300">
                 <Check size={14} strokeWidth={2.5} aria-hidden="true" />
                 Saved
               </p>

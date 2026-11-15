@@ -28,11 +28,22 @@ function TypeCard({
     <Link href={href} className="block">
       <Card interactive>
         <div className="flex items-center gap-2">
-          <Icon size={18} strokeWidth={1.75} className="text-primary-600" aria-hidden={true} />
-          <h3 className="font-heading text-sm font-semibold text-neutral-900">{label}</h3>
+          <Icon
+            size={18}
+            strokeWidth={1.75}
+            className="text-primary-600 dark:text-primary-400"
+            aria-hidden={true}
+          />
+          <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+            {label}
+          </h3>
         </div>
-        <p className="mt-3 text-xl font-semibold text-neutral-800">{counts.total}</p>
-        <p className="mt-1 text-xs text-neutral-500">{counts.published} published</p>
+        <p className="mt-3 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          {counts.total}
+        </p>
+        <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+          {counts.published} published
+        </p>
       </Card>
     </Link>
   );
@@ -51,7 +62,7 @@ function CmsOverviewContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm text-neutral-500 dark:text-neutral-400">
         A snapshot of every content-workflow surface — click through to manage each one.
       </p>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -70,13 +81,17 @@ function CmsOverviewContent() {
               <ImageIcon
                 size={18}
                 strokeWidth={1.75}
-                className="text-primary-600"
+                className="text-primary-600 dark:text-primary-400"
                 aria-hidden={true}
               />
-              <h3 className="font-heading text-sm font-semibold text-neutral-900">Media</h3>
+              <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+                Media
+              </h3>
             </div>
-            <p className="mt-3 text-xl font-semibold text-neutral-800">{mediaTotal}</p>
-            <p className="mt-1 text-xs text-neutral-500">assets uploaded</p>
+            <p className="mt-3 text-xl font-semibold text-neutral-800 dark:text-white/90">
+              {mediaTotal}
+            </p>
+            <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">assets uploaded</p>
           </Card>
         </Link>
       </div>

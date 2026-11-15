@@ -5,7 +5,10 @@ import { StatCard } from "@/components/dashboard/stat-card";
 export function AchievementsSection({ achievements }: { achievements: AchievementSummary }) {
   return (
     <section aria-labelledby="achievements-heading">
-      <h2 id="achievements-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="achievements-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Achievements
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-5">

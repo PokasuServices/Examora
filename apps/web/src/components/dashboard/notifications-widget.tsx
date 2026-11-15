@@ -47,7 +47,10 @@ export function NotificationsWidget() {
   return (
     <section aria-labelledby="notifications-heading">
       <div className="flex items-center justify-between">
-        <h2 id="notifications-heading" className="text-lg font-medium text-neutral-800">
+        <h2
+          id="notifications-heading"
+          className="text-lg font-medium text-neutral-800 dark:text-white/90"
+        >
           Notifications
         </h2>
         <div className="flex items-center gap-3">
@@ -57,13 +60,13 @@ export function NotificationsWidget() {
             disabled={!hasUnread}
             aria-disabled={!hasUnread}
             title={hasUnread ? undefined : "Nothing to mark as read"}
-            className="text-xs font-medium text-primary-600 hover:underline disabled:pointer-events-none disabled:text-neutral-300"
+            className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline disabled:pointer-events-none disabled:text-neutral-300"
           >
             Mark all read
           </button>
           <Link
             href="/notifications"
-            className="text-xs font-medium text-primary-600 hover:underline"
+            className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline"
           >
             View all →
           </Link>
@@ -84,13 +87,13 @@ export function NotificationsWidget() {
         ) : state.data.length === 0 ? (
           <EmptyState heading="No new notifications" />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {state.data.map((n) => (
               <li key={n.id}>
                 <Link
                   href="/notifications"
                   aria-label={`${n.isRead ? "" : "Unread: "}${n.title}`}
-                  className="flex items-start gap-2 rounded-md py-2 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  className="flex items-start gap-2 rounded-md py-2 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                 >
                   {!n.isRead ? (
                     <span
@@ -101,8 +104,12 @@ export function NotificationsWidget() {
                     <span className="mt-1.5 h-2 w-2 shrink-0" aria-hidden="true" />
                   )}
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm text-neutral-800">{n.title}</span>
-                    <span className="text-xs text-neutral-400">{timeAgo(n.createdAt)}</span>
+                    <span className="block truncate text-sm text-neutral-800 dark:text-white/90">
+                      {n.title}
+                    </span>
+                    <span className="text-xs text-neutral-400 dark:text-neutral-500">
+                      {timeAgo(n.createdAt)}
+                    </span>
                   </span>
                 </Link>
               </li>

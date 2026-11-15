@@ -56,7 +56,7 @@ function NotificationCenterContent() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <PageTitle>Notifications</PageTitle>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             {data.unreadCount > 0
               ? `${data.unreadCount} unread notification${data.unreadCount === 1 ? "" : "s"}`
               : "You're all caught up."}
@@ -67,7 +67,7 @@ function NotificationCenterContent() {
             <button
               type="button"
               onClick={() => void data.markAllRead()}
-              className="text-sm font-medium text-primary-600 hover:underline"
+              className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
             >
               Mark all read
             </button>
@@ -75,7 +75,7 @@ function NotificationCenterContent() {
           {canViewBroadcasts ? (
             <Link
               href="/notifications/broadcasts"
-              className="flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-primary-600"
+              className="flex items-center gap-1.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
             >
               <Megaphone size={15} strokeWidth={1.75} aria-hidden="true" />
               Broadcasts
@@ -83,7 +83,7 @@ function NotificationCenterContent() {
           ) : null}
           <Link
             href="/notifications/preferences"
-            className="flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-primary-600"
+            className="flex items-center gap-1.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
           >
             <Settings size={15} strokeWidth={1.75} aria-hidden="true" />
             Preferences
@@ -96,7 +96,7 @@ function NotificationCenterContent() {
           <Search
             size={16}
             strokeWidth={1.75}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
             aria-hidden="true"
           />
           <label htmlFor="notif-search" className="sr-only">
@@ -107,7 +107,7 @@ function NotificationCenterContent() {
             value={data.filters.q}
             onChange={(e) => handleFilterChange("q", e.target.value)}
             placeholder="Search notifications…"
-            className="h-11 w-full rounded-md border border-neutral-200 bg-white pl-9 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="h-11 w-full rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 pl-9 pr-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           />
         </div>
 

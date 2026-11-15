@@ -116,9 +116,11 @@ function AssignmentsContent() {
 
       <form
         onSubmit={(e) => void create(e)}
-        className="flex flex-col gap-4 rounded-md border border-neutral-100 bg-neutral-50/50 p-4"
+        className="flex flex-col gap-4 rounded-md border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 p-4"
       >
-        <h3 className="font-heading text-sm font-semibold text-neutral-900">New assignment</h3>
+        <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+          New assignment
+        </h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="title">Title</Label>
@@ -204,35 +206,37 @@ function AssignmentsContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Title
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Marks
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Deadline
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {assignments.map((a) => (
-                  <tr key={a.id} className="hover:bg-neutral-50">
+                  <tr key={a.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
                     <td className="px-4 py-3">
                       <Link
                         href={`/assignments/${a.id}`}
-                        className="font-medium text-primary-600 hover:underline"
+                        className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                       >
                         {a.title}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-neutral-700">{a.marksTotal}</td>
-                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500">
+                    <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">
+                      {a.marksTotal}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500 dark:text-neutral-400">
                       {a.deadline ? new Date(a.deadline).toLocaleDateString() : "—"}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">

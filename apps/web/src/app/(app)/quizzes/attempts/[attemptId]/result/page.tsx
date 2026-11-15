@@ -53,12 +53,12 @@ function ResultContent() {
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
+      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 dark:text-neutral-400">
         <Link href="/quizzes" className="hover:underline">
           Quizzes
         </Link>{" "}
         <span aria-hidden="true">·</span>{" "}
-        <span className="text-neutral-800">{result.quizTitle}</span>
+        <span className="text-neutral-800 dark:text-white/90">{result.quizTitle}</span>
       </nav>
 
       <QuizResultSummary result={result} />
@@ -73,7 +73,7 @@ function ResultContent() {
         </Link>
         <Link
           href="/dashboard"
-          className="flex h-11 items-center justify-center rounded-md border border-neutral-200 px-6 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="flex h-11 items-center justify-center rounded-md border border-neutral-200 dark:border-neutral-800 px-6 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           Continue learning
         </Link>

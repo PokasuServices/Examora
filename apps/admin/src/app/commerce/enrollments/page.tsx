@@ -92,9 +92,11 @@ function EnrollmentsContent() {
       {formOpen ? (
         <form
           onSubmit={(e) => void grant(e)}
-          className="flex flex-col gap-4 rounded-md border border-neutral-100 bg-neutral-50/50 p-4"
+          className="flex flex-col gap-4 rounded-md border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 p-4"
         >
-          <h3 className="font-heading text-sm font-semibold text-neutral-900">Grant enrollment</h3>
+          <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+            Grant enrollment
+          </h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="userId">User id</Label>
@@ -123,7 +125,7 @@ function EnrollmentsContent() {
             <button
               type="button"
               onClick={() => setFormOpen(false)}
-              className="text-sm font-medium text-neutral-600 hover:underline"
+              className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:underline"
             >
               Cancel
             </button>
@@ -163,40 +165,44 @@ function EnrollmentsContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[680px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Student
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Course
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Source
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Enrolled
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {enrollments.map((e) => (
-                  <tr key={e.id} className="hover:bg-neutral-50">
-                    <td className="px-4 py-3 text-neutral-700">{e.userEmail}</td>
-                    <td className="px-4 py-3 text-neutral-700">{e.courseTitle}</td>
-                    <td className="px-4 py-3 text-neutral-600">{e.source}</td>
+                  <tr key={e.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
+                    <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">
+                      {e.userEmail}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">
+                      {e.courseTitle}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">{e.source}</td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <Chip tone={e.status === "ACTIVE" ? "success" : "neutral"}>
                         {statusLabel(e.status)}
                       </Chip>
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500">
+                    <td className="whitespace-nowrap px-4 py-3 text-neutral-500 dark:text-neutral-400">
                       {new Date(e.enrolledAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -204,7 +210,7 @@ function EnrollmentsContent() {
                         <button
                           type="button"
                           onClick={() => setRevokeTarget(e)}
-                          className="text-sm font-medium text-danger-600 hover:underline"
+                          className="text-sm font-medium text-danger-600 dark:text-danger-400 hover:underline"
                         >
                           Revoke
                         </button>
@@ -224,9 +230,15 @@ function EnrollmentsContent() {
         message={
           revokeTarget ? (
             <>
-              Revoke <span className="font-medium text-neutral-800">{revokeTarget.userEmail}</span>
+              Revoke{" "}
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {revokeTarget.userEmail}
+              </span>
               &rsquo;s access to{" "}
-              <span className="font-medium text-neutral-800">{revokeTarget.courseTitle}</span>?
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {revokeTarget.courseTitle}
+              </span>
+              ?
             </>
           ) : null
         }

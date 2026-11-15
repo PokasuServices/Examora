@@ -65,23 +65,28 @@ function MyDiscussionsContent() {
 
   return (
     <main className="flex flex-col gap-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
-        <Link href="/community" className="hover:text-primary-600 hover:underline">
+      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 dark:text-neutral-400">
+        <Link
+          href="/community"
+          className="hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
+        >
           Community
         </Link>
       </nav>
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-neutral-800">My discussions</h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+            My discussions
+          </h1>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             Everything you&rsquo;ve started, bookmarked, or gotten solved.
           </p>
         </div>
         {user ? (
           <Link
             href={`/community/profile/${user.id}`}
-            className="text-sm font-medium text-primary-600 hover:underline"
+            className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
           >
             View my profile →
           </Link>
@@ -95,7 +100,7 @@ function MyDiscussionsContent() {
         options={TABS}
       />
 
-      <div className="flex items-start gap-2 rounded-md bg-neutral-100 px-3 py-2.5 text-xs text-neutral-500">
+      <div className="flex items-start gap-2 rounded-md bg-neutral-100 dark:bg-white/5 px-3 py-2.5 text-xs text-neutral-500 dark:text-neutral-400">
         <Info size={14} strokeWidth={1.75} className="mt-0.5 shrink-0" aria-hidden="true" />
         <p>
           Threads you follow aren&rsquo;t listed here — the API can toggle following on a thread but

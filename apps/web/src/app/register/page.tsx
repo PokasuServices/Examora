@@ -86,7 +86,7 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <label className="flex items-start gap-2 text-sm text-neutral-700">
+        <label className="flex items-start gap-2 text-sm text-neutral-700 dark:text-neutral-300">
           <input
             type="checkbox"
             className="mt-0.5"
@@ -101,9 +101,9 @@ export default function RegisterPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-neutral-600">
+      <p className="mt-6 text-center text-sm text-neutral-600 dark:text-neutral-400">
         Already have an account?{" "}
-        <Link href="/login" className="text-primary-600 hover:underline">
+        <Link href="/login" className="text-primary-600 dark:text-primary-400 hover:underline">
           Log in
         </Link>
       </p>

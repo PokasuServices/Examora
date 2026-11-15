@@ -146,13 +146,15 @@ function AssignmentDetailContent() {
       <div>
         <Link
           href="/assignments"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Assignments
         </Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="text-xl font-semibold text-neutral-800">{assignment.title}</h1>
+          <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+            {assignment.title}
+          </h1>
           <Chip tone={STATUS_TONE[assignment.status]}>{statusLabel(assignment.status)}</Chip>
         </div>
       </div>
@@ -170,7 +172,7 @@ function AssignmentDetailContent() {
       <FieldError>{error}</FieldError>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Details</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Details</h2>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -199,7 +201,7 @@ function AssignmentDetailContent() {
             <Label htmlFor="brief">Brief</Label>
             <textarea
               id="brief"
-              className="min-h-24 w-full rounded-md border border-neutral-300 p-3 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="min-h-24 w-full rounded-md border border-neutral-300 dark:border-neutral-700 p-3 text-sm text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               value={brief}
               onChange={(e) => setBrief(e.target.value)}
               onBlur={() => void saveDetails()}
@@ -214,7 +216,7 @@ function AssignmentDetailContent() {
       </Card>
 
       <Card density="compact">
-        <h2 className="text-lg font-medium text-neutral-800">Rubric criteria</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Rubric criteria</h2>
         <form
           onSubmit={(e) => void addCriterion(e)}
           className="mt-3 flex flex-wrap items-end gap-3"
@@ -246,11 +248,14 @@ function AssignmentDetailContent() {
         </form>
 
         {assignment.criteria.length > 0 ? (
-          <ul className="mt-4 flex flex-col divide-y divide-neutral-100">
+          <ul className="mt-4 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {assignment.criteria.map((c) => (
               <li key={c.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-                <span className="text-neutral-700">
-                  {c.title} <span className="text-neutral-400">({c.maxMarks} marks)</span>
+                <span className="text-neutral-700 dark:text-neutral-300">
+                  {c.title}{" "}
+                  <span className="text-neutral-400 dark:text-neutral-500">
+                    ({c.maxMarks} marks)
+                  </span>
                 </span>
                 <Button
                   variant="ghost"
@@ -264,7 +269,7 @@ function AssignmentDetailContent() {
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-neutral-500">
+          <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
             No criteria yet — at least one is required before publishing.
           </p>
         )}
@@ -289,15 +294,24 @@ function AssignmentDetailContent() {
           pending?.kind === "status" ? (
             <>
               Change status from{" "}
-              <span className="font-medium text-neutral-800">{statusLabel(assignment.status)}</span>{" "}
-              to <span className="font-medium text-neutral-800">{statusLabel(pending.next)}</span>?
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {statusLabel(assignment.status)}
+              </span>{" "}
+              to{" "}
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {statusLabel(pending.next)}
+              </span>
+              ?
             </>
           ) : pending?.kind === "delete" ? (
             "This permanently deletes the assignment, its rubric criteria, and cannot be undone."
           ) : pending?.kind === "removeCriterion" ? (
             <>
-              Remove <span className="font-medium text-neutral-800">{pending.title}</span> from the
-              rubric?
+              Remove{" "}
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {pending.title}
+              </span>{" "}
+              from the rubric?
             </>
           ) : null
         }

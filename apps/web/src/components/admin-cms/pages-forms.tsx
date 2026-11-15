@@ -27,9 +27,11 @@ export function PageCreateForm({
         e.preventDefault();
         onSubmit({ pageType, slug, title, body });
       }}
-      className="flex flex-col gap-4 rounded-md border border-neutral-100 bg-neutral-50/50 p-4"
+      className="flex flex-col gap-4 rounded-md border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 p-4"
     >
-      <h3 className="font-heading text-sm font-semibold text-neutral-900">New page</h3>
+      <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+        New page
+      </h3>
       <div className="grid gap-4 sm:grid-cols-3">
         <SelectField
           id="page-type"
@@ -67,7 +69,7 @@ export function PageCreateForm({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={4}
-          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+          className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
         />
       </div>
       <FieldError>{error}</FieldError>
@@ -81,7 +83,7 @@ export function PageCreateForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm font-medium text-neutral-600 hover:underline"
+          className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:underline"
         >
           Cancel
         </button>
@@ -129,7 +131,7 @@ export function PageFieldsForm({
       className="flex flex-col gap-4"
     >
       {!editable ? (
-        <p className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-500">
+        <p className="rounded-md bg-neutral-100 dark:bg-white/5 px-3 py-2 text-xs text-neutral-500 dark:text-neutral-400">
           Only content in Draft can be edited — send it back to draft first.
         </p>
       ) : null}
@@ -151,7 +153,7 @@ export function PageFieldsForm({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={10}
-          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 disabled:bg-neutral-50 disabled:text-neutral-500"
+          className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 disabled:bg-neutral-50 dark:disabled:bg-white/[0.03] disabled:text-neutral-500 dark:disabled:text-neutral-400"
         />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">

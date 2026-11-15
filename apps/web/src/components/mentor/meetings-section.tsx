@@ -43,7 +43,7 @@ export function MeetingsSection({
 
   return (
     <section aria-labelledby="meetings-heading">
-      <h2 id="meetings-heading" className="text-lg font-medium text-neutral-800">
+      <h2 id="meetings-heading" className="text-lg font-medium text-neutral-800 dark:text-white/90">
         Meetings
       </h2>
       <Card className="mt-3">
@@ -52,7 +52,7 @@ export function MeetingsSection({
             <div>
               <label
                 htmlFor="meeting-when"
-                className="mb-1 block text-xs font-medium text-neutral-500"
+                className="mb-1 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
               >
                 Date &amp; time
               </label>
@@ -61,13 +61,13 @@ export function MeetingsSection({
                 type="datetime-local"
                 value={occurredAt}
                 onChange={(e) => setOccurredAt(e.target.value)}
-                className="h-10 w-full rounded-md border border-neutral-200 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               />
             </div>
             <div>
               <label
                 htmlFor="meeting-duration"
-                className="mb-1 block text-xs font-medium text-neutral-500"
+                className="mb-1 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
               >
                 Duration (minutes, optional)
               </label>
@@ -78,7 +78,7 @@ export function MeetingsSection({
                 max={480}
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                className="h-10 w-full rounded-md border border-neutral-200 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               />
             </div>
           </div>
@@ -90,7 +90,7 @@ export function MeetingsSection({
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             placeholder="What did you discuss? (optional)"
-            className="min-h-16 w-full rounded-md border border-neutral-200 p-3 text-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="min-h-16 w-full rounded-md border border-neutral-200 dark:border-neutral-800 p-3 text-sm placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           />
           <button
             type="submit"
@@ -101,15 +101,15 @@ export function MeetingsSection({
           </button>
         </form>
 
-        <div className="mt-4 border-t border-neutral-100 pt-4">
+        <div className="mt-4 border-t border-neutral-100 dark:border-neutral-800 pt-4">
           {sorted.length === 0 ? (
             <EmptyState icon={Users} heading="No meetings logged yet" />
           ) : (
-            <ul className="flex flex-col divide-y divide-neutral-100">
+            <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
               {sorted.map((m) => (
                 <li key={m.id} className="py-2.5 text-sm">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="font-medium text-neutral-800">
+                    <span className="font-medium text-neutral-800 dark:text-white/90">
                       {new Date(m.occurredAt).toLocaleDateString(undefined, {
                         month: "short",
                         day: "numeric",
@@ -117,12 +117,14 @@ export function MeetingsSection({
                       })}
                     </span>
                     {m.durationMinutes ? (
-                      <span className="shrink-0 text-xs text-neutral-400">
+                      <span className="shrink-0 text-xs text-neutral-400 dark:text-neutral-500">
                         {m.durationMinutes} min
                       </span>
                     ) : null}
                   </div>
-                  {m.summary ? <p className="mt-1 text-neutral-600">{m.summary}</p> : null}
+                  {m.summary ? (
+                    <p className="mt-1 text-neutral-600 dark:text-neutral-400">{m.summary}</p>
+                  ) : null}
                 </li>
               ))}
             </ul>

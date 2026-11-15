@@ -69,10 +69,12 @@ function CourseEditorContent({ courseId }: { courseId: string }) {
   if (status === "not-found" || !course) {
     return (
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-xl font-semibold text-neutral-800">Course not found</h1>
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+          Course not found
+        </h1>
         <Link
           href="/admin/content/courses"
-          className="text-sm font-medium text-primary-600 hover:underline"
+          className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
         >
           ← Back to courses
         </Link>
@@ -149,18 +151,20 @@ function CourseEditorContent({ courseId }: { courseId: string }) {
       <div>
         <Link
           href="/admin/content/courses"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Courses
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{course.title}</h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          {course.title}
+        </h1>
       </div>
 
       <button
         type="button"
         onClick={() => setTreeSheetOpen(true)}
-        className="flex h-10 items-center gap-2 self-start rounded-md border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 lg:hidden"
+        className="flex h-10 items-center gap-2 self-start rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 lg:hidden"
       >
         <ListTree size={16} strokeWidth={1.75} aria-hidden="true" />
         Course structure
@@ -241,7 +245,7 @@ function CourseEditorContent({ courseId }: { courseId: string }) {
               />
             )
           ) : (
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
               This item could not be found — it may have just been deleted.
             </p>
           )}

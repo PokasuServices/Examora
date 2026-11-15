@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 
 export function CourseHeroSkeleton() {
   return (
-    <div className="overflow-hidden rounded-card border border-neutral-200 bg-white shadow-soft">
+    <div className="overflow-hidden rounded-card border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-soft">
       <Skeleton className="h-40 w-full rounded-none sm:h-52" />
       <div className="flex flex-col gap-4 p-6 sm:p-8">
         <Skeleton className="h-5 w-24 rounded-full" />

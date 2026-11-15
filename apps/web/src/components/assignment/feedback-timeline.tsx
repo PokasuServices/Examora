@@ -68,33 +68,38 @@ export function FeedbackTimeline({
 
   return (
     <section aria-labelledby="feedback-timeline-heading">
-      <h2 id="feedback-timeline-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="feedback-timeline-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Feedback
       </h2>
 
       {entries.length === 0 ? (
-        <p className="mt-3 text-sm text-neutral-400">No feedback yet.</p>
+        <p className="mt-3 text-sm text-neutral-400 dark:text-neutral-500">No feedback yet.</p>
       ) : (
         <ul className="mt-4 flex flex-col gap-4">
           {entries.map((entry) => (
             <li key={entry.id} className="flex gap-3">
               <span
                 aria-hidden="true"
-                className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-500/10 text-primary-600"
+                className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-500/10 text-primary-600 dark:text-primary-400"
               >
                 <MessageSquare size={14} strokeWidth={1.75} aria-hidden="true" />
               </span>
-              <div className="min-w-0 flex-1 rounded-md bg-neutral-50 px-4 py-2.5">
+              <div className="min-w-0 flex-1 rounded-md bg-neutral-50 dark:bg-white/[0.03] px-4 py-2.5">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium text-neutral-800">{entry.authorLabel}</span>
-                  <span className="shrink-0 text-xs text-neutral-400">
+                  <span className="text-sm font-medium text-neutral-800 dark:text-white/90">
+                    {entry.authorLabel}
+                  </span>
+                  <span className="shrink-0 text-xs text-neutral-400 dark:text-neutral-500">
                     {new Date(entry.at).toLocaleDateString(undefined, {
                       month: "short",
                       day: "numeric",
                     })}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-neutral-700">{entry.body}</p>
+                <p className="mt-1 text-sm text-neutral-700 dark:text-neutral-300">{entry.body}</p>
               </div>
             </li>
           ))}
@@ -110,7 +115,7 @@ export function FeedbackTimeline({
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Add a comment…"
-          className="h-10 flex-1 rounded-md border border-neutral-200 px-3 text-sm text-neutral-800 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="h-10 flex-1 rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm text-neutral-800 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         />
         <button
           type="submit"

@@ -5,25 +5,29 @@ import { Card } from "@/components/ui/card";
 export function RubricBreakdown({ scores }: { scores: RubricScoreEntry[] }) {
   return (
     <Card>
-      <h3 className="text-lg font-medium text-neutral-800">Rubric breakdown</h3>
+      <h3 className="text-lg font-medium text-neutral-800 dark:text-white/90">Rubric breakdown</h3>
       <ul className="mt-4 flex flex-col gap-4">
         {scores.map((s) => {
           const percent = s.maxMarks > 0 ? Math.round((s.marksAwarded / s.maxMarks) * 100) : 0;
           return (
             <li key={s.criterionId}>
               <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-neutral-800">{s.criterionTitle}</span>
-                <span className="tabular-nums text-neutral-500">
+                <span className="font-medium text-neutral-800 dark:text-white/90">
+                  {s.criterionTitle}
+                </span>
+                <span className="tabular-nums text-neutral-500 dark:text-neutral-400">
                   {s.marksAwarded} / {s.maxMarks}
                 </span>
               </div>
-              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-neutral-200">
+              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-white/10">
                 <div
                   className="h-full rounded-full bg-primary-600"
                   style={{ width: `${percent}%` }}
                 />
               </div>
-              {s.comment ? <p className="mt-1.5 text-sm text-neutral-600">{s.comment}</p> : null}
+              {s.comment ? (
+                <p className="mt-1.5 text-sm text-neutral-600 dark:text-neutral-400">{s.comment}</p>
+              ) : null}
             </li>
           );
         })}

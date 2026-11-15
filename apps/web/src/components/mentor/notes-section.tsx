@@ -51,7 +51,7 @@ export function NotesSection({
 
   return (
     <section aria-labelledby="notes-heading">
-      <h2 id="notes-heading" className="text-lg font-medium text-neutral-800">
+      <h2 id="notes-heading" className="text-lg font-medium text-neutral-800 dark:text-white/90">
         Mentor Notes
       </h2>
       <Card className="mt-3">
@@ -64,7 +64,7 @@ export function NotesSection({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Private note — only you can see this"
-            className="min-h-20 w-full rounded-md border border-neutral-200 p-3 text-sm text-neutral-800 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="min-h-20 w-full rounded-md border border-neutral-200 dark:border-neutral-800 p-3 text-sm text-neutral-800 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           />
           <button
             type="submit"
@@ -75,32 +75,32 @@ export function NotesSection({
           </button>
         </form>
 
-        <div className="mt-4 border-t border-neutral-100 pt-4">
+        <div className="mt-4 border-t border-neutral-100 dark:border-neutral-800 pt-4">
           {sorted.length === 0 ? (
             <EmptyState icon={FileText} heading="No notes yet" />
           ) : (
             <ul className="flex flex-col gap-3">
               {sorted.map((note) => (
-                <li key={note.id} className="rounded-md bg-neutral-50 p-3">
+                <li key={note.id} className="rounded-md bg-neutral-50 dark:bg-white/[0.03] p-3">
                   {editingId === note.id ? (
                     <div className="flex flex-col gap-2">
                       <textarea
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
-                        className="min-h-20 w-full rounded-md border border-neutral-200 bg-white p-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                        className="min-h-20 w-full rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                       />
                       <div className="flex gap-2">
                         <button
                           type="button"
                           onClick={() => void handleSaveEdit(note.id)}
-                          className="text-xs font-medium text-primary-600 hover:underline"
+                          className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline"
                         >
                           Save
                         </button>
                         <button
                           type="button"
                           onClick={() => setEditingId(null)}
-                          className="text-xs font-medium text-neutral-500 hover:underline"
+                          className="text-xs font-medium text-neutral-500 dark:text-neutral-400 hover:underline"
                         >
                           Cancel
                         </button>
@@ -109,7 +109,9 @@ export function NotesSection({
                   ) : (
                     <>
                       <div className="flex items-start justify-between gap-2">
-                        <p className="whitespace-pre-wrap text-sm text-neutral-700">{note.body}</p>
+                        <p className="whitespace-pre-wrap text-sm text-neutral-700 dark:text-neutral-300">
+                          {note.body}
+                        </p>
                         <div className="flex shrink-0 gap-1">
                           <button
                             type="button"
@@ -118,7 +120,7 @@ export function NotesSection({
                               setEditValue(note.body);
                             }}
                             aria-label="Edit note"
-                            className="rounded p-1 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
+                            className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-200 dark:hover:bg-white/10 hover:text-neutral-700 dark:hover:text-neutral-300"
                           >
                             <Pencil size={14} strokeWidth={1.75} aria-hidden="true" />
                           </button>
@@ -126,13 +128,13 @@ export function NotesSection({
                             type="button"
                             onClick={() => void onDelete(note.id)}
                             aria-label="Delete note"
-                            className="rounded p-1 text-neutral-400 hover:bg-danger-50 hover:text-danger-600"
+                            className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-danger-50 dark:hover:bg-danger-500/15 hover:text-danger-600 dark:hover:text-danger-400"
                           >
                             <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
                           </button>
                         </div>
                       </div>
-                      <p className="mt-1 text-xs text-neutral-400">
+                      <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
                         {new Date(note.createdAt).toLocaleDateString(undefined, {
                           month: "short",
                           day: "numeric",

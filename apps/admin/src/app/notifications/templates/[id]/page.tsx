@@ -69,10 +69,12 @@ function TemplateDetailContent() {
   if (status === "not-found" || !template) {
     return (
       <main className="flex flex-col gap-4">
-        <h1 className="text-xl font-semibold text-neutral-800">Template not found</h1>
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+          Template not found
+        </h1>
         <Link
           href="/notifications/templates"
-          className="text-sm font-medium text-primary-600 hover:underline"
+          className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
         >
           ← Back to templates
         </Link>
@@ -85,14 +87,16 @@ function TemplateDetailContent() {
       <div>
         <Link
           href="/notifications/templates"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Templates
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
           {template.eventType}{" "}
-          <span className="font-normal text-neutral-400">· {template.channel}</span>
+          <span className="font-normal text-neutral-400 dark:text-neutral-500">
+            · {template.channel}
+          </span>
         </h1>
       </div>
 
@@ -114,20 +118,22 @@ function TemplateDetailContent() {
               onChange={(e) => setTemplate({ ...template, bodyTemplate: e.target.value })}
               rows={6}
               required
-              className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+              className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900"
             />
           </div>
-          <label className="flex items-center gap-2 text-sm text-neutral-700">
+          <label className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
             <input
               type="checkbox"
               checked={template.isActive}
               onChange={(e) => setTemplate({ ...template, isActive: e.target.checked })}
-              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-primary-600 dark:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             />
             Active
           </label>
           <FieldError>{error}</FieldError>
-          {success ? <p className="text-sm text-success-600">Template saved.</p> : null}
+          {success ? (
+            <p className="text-sm text-success-600 dark:text-success-400">Template saved.</p>
+          ) : null}
           <div>
             <Button type="submit" disabled={submitting}>
               {submitting ? "Saving…" : "Save changes"}

@@ -72,10 +72,16 @@ export function StatusManager({
         message={
           <>
             Change status from{" "}
-            <span className="font-medium text-neutral-800">{statusLabel(currentStatus)}</span> to{" "}
-            <span className="font-medium text-neutral-800">{statusLabel(draft)}</span>?
+            <span className="font-medium text-neutral-800 dark:text-white/90">
+              {statusLabel(currentStatus)}
+            </span>{" "}
+            to{" "}
+            <span className="font-medium text-neutral-800 dark:text-white/90">
+              {statusLabel(draft)}
+            </span>
+            ?
             {draft === "SUSPENDED" || draft === "ARCHIVED" ? (
-              <span className="mt-2 block text-danger-600">
+              <span className="mt-2 block text-danger-600 dark:text-danger-400">
                 This will immediately revoke the user&rsquo;s active sessions.
               </span>
             ) : null}

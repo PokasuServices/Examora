@@ -24,7 +24,7 @@ export function CardRail({
       </div>
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-neutral-50 to-transparent"
+        className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-neutral-50 to-transparent dark:from-neutral-950"
       />
     </div>
   );

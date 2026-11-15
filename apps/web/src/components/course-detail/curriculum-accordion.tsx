@@ -36,7 +36,10 @@ export function CurriculumAccordion({
   return (
     <section aria-labelledby={showHeading ? "curriculum-heading" : undefined}>
       {showHeading ? (
-        <h2 id="curriculum-heading" className="text-xl font-semibold text-neutral-800">
+        <h2
+          id="curriculum-heading"
+          className="text-xl font-semibold text-neutral-800 dark:text-white/90"
+        >
           Curriculum
         </h2>
       ) : null}
@@ -57,12 +60,14 @@ export function CurriculumAccordion({
             <details
               key={subject.id}
               open={currentLessonId ? containsCurrent : index === 0}
-              className="group rounded-card border border-neutral-200 bg-white shadow-soft [&_summary::-webkit-details-marker]:hidden"
+              className="group rounded-card border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-soft [&_summary::-webkit-details-marker]:hidden"
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
                 <div className="min-w-0">
-                  <p className="truncate text-lg font-medium text-neutral-800">{subject.title}</p>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                  <p className="truncate text-lg font-medium text-neutral-800 dark:text-white/90">
+                    {subject.title}
+                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
                     <span>
                       {lessonCount} {lessonCount === 1 ? "lesson" : "lessons"}
                     </span>
@@ -79,7 +84,7 @@ export function CurriculumAccordion({
                     ) : null}
                   </div>
                 </div>
-                <span className="shrink-0 text-neutral-400 transition-transform group-open:rotate-180">
+                <span className="shrink-0 text-neutral-400 dark:text-neutral-500 transition-transform group-open:rotate-180">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path
                       d="M6 9l6 6 6-6"
@@ -92,16 +97,18 @@ export function CurriculumAccordion({
                 </span>
               </summary>
 
-              <div className="border-t border-neutral-100 px-5 py-3">
+              <div className="border-t border-neutral-100 dark:border-neutral-800 px-5 py-3">
                 {subject.topics.map((topic) => (
                   <div key={topic.id} className="mt-3 first:mt-0">
-                    <p className="text-sm font-medium text-neutral-700">{topic.title}</p>
+                    <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      {topic.title}
+                    </p>
                     {topic.modules.map((mod) => (
                       <div key={mod.id} className="mt-2">
-                        <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                        <p className="text-xs font-medium uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
                           {mod.title}
                         </p>
-                        <ul className="mt-1 flex flex-col divide-y divide-neutral-100 overflow-hidden rounded-md border border-neutral-100">
+                        <ul className="mt-1 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800 overflow-hidden rounded-md border border-neutral-100 dark:border-neutral-800">
                           {mod.lessons.map((lesson) => {
                             const Icon = CONTENT_ICON[lesson.contentType];
                             const isCurrent = lesson.id === currentLessonId;
@@ -111,16 +118,16 @@ export function CurriculumAccordion({
                                   href={`/courses/${courseId}/lessons/${lesson.id}`}
                                   aria-current={isCurrent ? "page" : undefined}
                                   className={cn(
-                                    "flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500",
+                                    "flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500",
                                     isCurrent
-                                      ? "bg-primary-50 font-medium text-primary-700"
-                                      : "text-neutral-700",
+                                      ? "bg-primary-50 dark:bg-primary-500/15 font-medium text-primary-700 dark:text-primary-300"
+                                      : "text-neutral-700 dark:text-neutral-300",
                                   )}
                                 >
                                   <Icon
                                     size={16}
                                     strokeWidth={1.75}
-                                    className="shrink-0 text-neutral-400"
+                                    className="shrink-0 text-neutral-400 dark:text-neutral-500"
                                     aria-hidden="true"
                                   />
                                   <span className="min-w-0 flex-1 truncate">{lesson.title}</span>
@@ -128,7 +135,7 @@ export function CurriculumAccordion({
                                     <CheckCircle2
                                       size={16}
                                       strokeWidth={2}
-                                      className="shrink-0 text-success-600"
+                                      className="shrink-0 text-success-600 dark:text-success-400"
                                       aria-label="Completed"
                                     />
                                   ) : (
@@ -144,7 +151,7 @@ export function CurriculumAccordion({
                             );
                           })}
                           {mod.lessons.length === 0 ? (
-                            <li className="px-3 py-2.5 text-sm text-neutral-400">
+                            <li className="px-3 py-2.5 text-sm text-neutral-400 dark:text-neutral-500">
                               No lessons yet.
                             </li>
                           ) : null}

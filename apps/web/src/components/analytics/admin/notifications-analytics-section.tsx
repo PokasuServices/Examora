@@ -11,7 +11,10 @@ export function NotificationsAnalyticsSection({
 }) {
   return (
     <section aria-labelledby="admin-notifications-heading">
-      <h2 id="admin-notifications-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="admin-notifications-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Notifications
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-2">
@@ -39,7 +42,7 @@ export function NotificationsAnalyticsSection({
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] text-left text-sm">
               <thead>
-                <tr className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                <tr className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                   <th className="px-3 py-2">Channel</th>
                   <th className="px-3 py-2">Queued</th>
                   <th className="px-3 py-2">Delivered</th>
@@ -48,15 +51,25 @@ export function NotificationsAnalyticsSection({
                   <th className="px-3 py-2">Success Rate</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {notifications.deliveryByChannel.map((c) => (
-                  <tr key={c.channel} className="hover:bg-neutral-50">
-                    <td className="px-3 py-2.5 font-medium text-neutral-800">{c.channel}</td>
-                    <td className="px-3 py-2.5 tabular-nums text-neutral-600">{c.queued}</td>
-                    <td className="px-3 py-2.5 tabular-nums text-neutral-600">{c.delivered}</td>
-                    <td className="px-3 py-2.5 tabular-nums text-neutral-600">{c.failed}</td>
-                    <td className="px-3 py-2.5 tabular-nums text-neutral-600">{c.suppressed}</td>
-                    <td className="px-3 py-2.5 tabular-nums text-neutral-600">
+                  <tr key={c.channel} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
+                    <td className="px-3 py-2.5 font-medium text-neutral-800 dark:text-white/90">
+                      {c.channel}
+                    </td>
+                    <td className="px-3 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
+                      {c.queued}
+                    </td>
+                    <td className="px-3 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
+                      {c.delivered}
+                    </td>
+                    <td className="px-3 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
+                      {c.failed}
+                    </td>
+                    <td className="px-3 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
+                      {c.suppressed}
+                    </td>
+                    <td className="px-3 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
                       {c.successRate !== null ? `${c.successRate}%` : "—"}
                     </td>
                   </tr>

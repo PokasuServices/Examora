@@ -7,19 +7,26 @@ import { HelpCircle } from "lucide-react";
 export function QuizHistorySection({ attempts }: { attempts: AdminAttemptSummary[] }) {
   return (
     <section aria-labelledby="quiz-history-heading">
-      <h2 id="quiz-history-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="quiz-history-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Quiz Performance
       </h2>
       <Card className="mt-3">
         {attempts.length === 0 ? (
           <EmptyState icon={HelpCircle} heading="No quiz attempts yet" />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {attempts.slice(0, 10).map((a) => (
               <li key={a.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-                <span className="min-w-0 flex-1 truncate text-neutral-700">{a.quizTitle}</span>
+                <span className="min-w-0 flex-1 truncate text-neutral-700 dark:text-neutral-300">
+                  {a.quizTitle}
+                </span>
                 {a.percentage !== null ? (
-                  <span className="shrink-0 tabular-nums text-neutral-500">{a.percentage}%</span>
+                  <span className="shrink-0 tabular-nums text-neutral-500 dark:text-neutral-400">
+                    {a.percentage}%
+                  </span>
                 ) : null}
                 <Chip
                   tone={a.passed === true ? "success" : a.passed === false ? "danger" : "neutral"}

@@ -41,10 +41,10 @@ export function TopNavigation({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h2 className="text-lg font-medium text-neutral-800">
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
           {greeting()}, {name}
         </h2>
-        <p className="text-sm text-neutral-500">{today}</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">{today}</p>
       </div>
       <SegmentedControl
         aria-label="Dashboard time scope"

@@ -23,22 +23,24 @@ export function NotificationCard({
       >
         <span
           aria-hidden="true"
-          className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-500/10 text-primary-600"
+          className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-500/10 text-primary-600 dark:text-primary-400"
         >
           <Icon size={17} strokeWidth={1.75} aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <p
-              className={`min-w-0 flex-1 truncate text-sm ${notification.isRead ? "font-medium text-neutral-700" : "font-semibold text-neutral-900"}`}
+              className={`min-w-0 flex-1 truncate text-sm ${notification.isRead ? "font-medium text-neutral-700 dark:text-neutral-300" : "font-semibold text-neutral-900"}`}
             >
               {notification.title}
             </p>
-            <span className="shrink-0 text-xs text-neutral-400">
+            <span className="shrink-0 text-xs text-neutral-400 dark:text-neutral-500">
               {timeAgo(notification.createdAt)}
             </span>
           </div>
-          <p className="mt-0.5 line-clamp-2 text-sm text-neutral-500">{notification.body}</p>
+          <p className="mt-0.5 line-clamp-2 text-sm text-neutral-500 dark:text-neutral-400">
+            {notification.body}
+          </p>
           <div className="mt-2 flex items-center gap-2">
             <Chip tone={meta.tone}>{meta.label}</Chip>
             {notification.isTransactional ? <Chip tone="neutral">Account</Chip> : null}

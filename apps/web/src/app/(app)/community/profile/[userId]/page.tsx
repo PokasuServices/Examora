@@ -106,8 +106,11 @@ function CommunityProfileContent() {
 
   return (
     <main className="flex flex-col gap-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
-        <Link href="/community" className="hover:text-primary-600 hover:underline">
+      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 dark:text-neutral-400">
+        <Link
+          href="/community"
+          className="hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
+        >
           Community
         </Link>
       </nav>
@@ -115,7 +118,7 @@ function CommunityProfileContent() {
       <Card className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:text-left">
         <Avatar author={displayAuthor} size="lg" />
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-semibold text-neutral-800">
+          <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
             {status === "loading"
               ? "Loading…"
               : displayAuthor.email
@@ -123,20 +126,20 @@ function CommunityProfileContent() {
                 : "Community member"}
           </h1>
           {displayAuthor.email ? (
-            <p className="text-sm text-neutral-500">{displayAuthor.email}</p>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">{displayAuthor.email}</p>
           ) : null}
           <div className="mt-3 flex flex-wrap justify-center gap-4 sm:justify-start">
             <div>
-              <p className="font-heading text-lg font-bold text-neutral-900">
+              <p className="font-heading text-lg font-bold text-neutral-900 dark:text-white/90">
                 {data ? data.reputationPoints : "–"}
               </p>
-              <p className="text-xs text-neutral-500">Reputation</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Reputation</p>
             </div>
             <div>
-              <p className="font-heading text-lg font-bold text-neutral-900">
+              <p className="font-heading text-lg font-bold text-neutral-900 dark:text-white/90">
                 {data ? data.threadCount : "–"}
               </p>
-              <p className="text-xs text-neutral-500">Discussions started</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Discussions started</p>
             </div>
           </div>
         </div>
@@ -144,12 +147,15 @@ function CommunityProfileContent() {
 
       {/* Recent threads */}
       <section aria-labelledby="profile-threads-heading">
-        <h2 id="profile-threads-heading" className="text-lg font-medium text-neutral-800">
+        <h2
+          id="profile-threads-heading"
+          className="text-lg font-medium text-neutral-800 dark:text-white/90"
+        >
           Recent discussions
         </h2>
         <div className="mt-3">
           {status === "loading" ? (
-            <p className="text-sm text-neutral-400">Loading…</p>
+            <p className="text-sm text-neutral-400 dark:text-neutral-500">Loading…</p>
           ) : !data || data.threads.length === 0 ? (
             <EmptyState icon={MessagesSquare} heading="No discussions yet" />
           ) : (
@@ -164,35 +170,40 @@ function CommunityProfileContent() {
 
       {/* Activity */}
       <section aria-labelledby="profile-activity-heading">
-        <h2 id="profile-activity-heading" className="text-lg font-medium text-neutral-800">
+        <h2
+          id="profile-activity-heading"
+          className="text-lg font-medium text-neutral-800 dark:text-white/90"
+        >
           Recent activity
         </h2>
         <Card className="mt-3">
           {status === "loading" ? (
-            <p className="text-sm text-neutral-400">Loading…</p>
+            <p className="text-sm text-neutral-400 dark:text-neutral-500">Loading…</p>
           ) : !data || data.activity.length === 0 ? (
             <EmptyState heading="No activity yet" />
           ) : (
-            <ul className="flex flex-col divide-y divide-neutral-100">
+            <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
               {data.activity.slice(0, 12).map((item, i) => {
                 const Icon = ACTIVITY_ICON[item.type];
                 return (
                   <li key={i} className="flex items-start gap-3 py-2.5">
                     <span
                       aria-hidden="true"
-                      className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-500/10 text-primary-600"
+                      className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-500/10 text-primary-600 dark:text-primary-400"
                     >
                       <Icon size={14} strokeWidth={1.75} aria-hidden="true" />
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="truncate text-sm text-neutral-800">{item.title}</p>
-                        <span className="shrink-0 text-xs text-neutral-400">
+                        <p className="truncate text-sm text-neutral-800 dark:text-white/90">
+                          {item.title}
+                        </p>
+                        <span className="shrink-0 text-xs text-neutral-400 dark:text-neutral-500">
                           {timeAgo(item.occurredAt)}
                         </span>
                       </div>
                       {item.description ? (
-                        <p className="mt-0.5 truncate text-xs text-neutral-500">
+                        <p className="mt-0.5 truncate text-xs text-neutral-500 dark:text-neutral-400">
                           {item.description}
                         </p>
                       ) : null}
@@ -207,23 +218,30 @@ function CommunityProfileContent() {
 
       {/* Reputation ledger */}
       <section aria-labelledby="profile-reputation-heading">
-        <h2 id="profile-reputation-heading" className="text-lg font-medium text-neutral-800">
+        <h2
+          id="profile-reputation-heading"
+          className="text-lg font-medium text-neutral-800 dark:text-white/90"
+        >
           Reputation history
         </h2>
         <Card className="mt-3">
           {status === "loading" ? (
-            <p className="text-sm text-neutral-400">Loading…</p>
+            <p className="text-sm text-neutral-400 dark:text-neutral-500">Loading…</p>
           ) : !data || data.events.length === 0 ? (
             <EmptyState icon={Award} heading="No reputation events yet" />
           ) : (
-            <ul className="flex flex-col divide-y divide-neutral-100">
+            <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
               {data.events.map((event) => (
                 <li key={event.id} className="flex items-center justify-between gap-3 py-2.5">
                   <div className="min-w-0">
-                    <p className="truncate text-sm text-neutral-800">{event.reason}</p>
-                    <p className="text-xs text-neutral-400">{timeAgo(event.createdAt)}</p>
+                    <p className="truncate text-sm text-neutral-800 dark:text-white/90">
+                      {event.reason}
+                    </p>
+                    <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                      {timeAgo(event.createdAt)}
+                    </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-success-50 px-2 py-0.5 text-xs font-semibold text-success-700">
+                  <span className="shrink-0 rounded-full bg-success-50 dark:bg-success-500/15 px-2 py-0.5 text-xs font-semibold text-success-700 dark:text-success-300">
                     +{event.points}
                   </span>
                 </li>
@@ -237,19 +255,22 @@ function CommunityProfileContent() {
       {isSelf ? (
         <section aria-labelledby="profile-bookmarks-heading">
           <div className="flex items-center justify-between">
-            <h2 id="profile-bookmarks-heading" className="text-lg font-medium text-neutral-800">
+            <h2
+              id="profile-bookmarks-heading"
+              className="text-lg font-medium text-neutral-800 dark:text-white/90"
+            >
               Your bookmarks
             </h2>
             <Link
               href="/community/me"
-              className="text-xs font-medium text-primary-600 hover:underline"
+              className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline"
             >
               View all →
             </Link>
           </div>
           <div className="mt-3">
             {status === "loading" ? (
-              <p className="text-sm text-neutral-400">Loading…</p>
+              <p className="text-sm text-neutral-400 dark:text-neutral-500">Loading…</p>
             ) : !data || data.bookmarks.length === 0 ? (
               <EmptyState icon={Bookmark} heading="No bookmarks yet" />
             ) : (

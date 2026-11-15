@@ -62,10 +62,12 @@ function NotificationDetailContent() {
   if (status === "not-found" || !notification) {
     return (
       <main className="flex flex-col gap-4">
-        <h1 className="text-xl font-semibold text-neutral-800">Notification not found</h1>
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+          Notification not found
+        </h1>
         <Link
           href="/notifications"
-          className="text-sm font-medium text-primary-600 hover:underline"
+          className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
         >
           ← Back to deliveries
         </Link>
@@ -78,20 +80,22 @@ function NotificationDetailContent() {
       <div>
         <Link
           href="/notifications"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Deliveries
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{notification.title}</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          {notification.title}
+        </h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           {notification.userEmail} · {notification.eventType} · {notification.category}
         </p>
       </div>
 
       <Card>
-        <p className="text-sm text-neutral-700">{notification.body}</p>
-        <p className="mt-3 text-xs text-neutral-400">
+        <p className="text-sm text-neutral-700 dark:text-neutral-300">{notification.body}</p>
+        <p className="mt-3 text-xs text-neutral-400 dark:text-neutral-500">
           {notification.isTransactional
             ? "Transactional (bypasses preferences)"
             : "Preference-gated"}
@@ -103,23 +107,27 @@ function NotificationDetailContent() {
       </Card>
 
       <div>
-        <h2 className="text-lg font-medium text-neutral-800">Deliveries</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Deliveries</h2>
         <div className="mt-3 flex flex-col gap-3">
           {notification.deliveries.map((delivery) => (
             <Card key={delivery.id} density="compact">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-neutral-800">{delivery.channel}</span>
+                <span className="text-sm font-medium text-neutral-800 dark:text-white/90">
+                  {delivery.channel}
+                </span>
                 <Chip tone={STATUS_TONE[delivery.status]}>{statusLabel(delivery.status)}</Chip>
               </div>
-              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-neutral-500">
+              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
                 <div>
                   <dt className="inline">Attempts: </dt>
-                  <dd className="inline text-neutral-700">{delivery.attempts}</dd>
+                  <dd className="inline text-neutral-700 dark:text-neutral-300">
+                    {delivery.attempts}
+                  </dd>
                 </div>
                 {delivery.sentAt ? (
                   <div>
                     <dt className="inline">Sent: </dt>
-                    <dd className="inline text-neutral-700">
+                    <dd className="inline text-neutral-700 dark:text-neutral-300">
                       {new Date(delivery.sentAt).toLocaleString()}
                     </dd>
                   </div>
@@ -127,7 +135,7 @@ function NotificationDetailContent() {
                 {delivery.deliveredAt ? (
                   <div>
                     <dt className="inline">Delivered: </dt>
-                    <dd className="inline text-neutral-700">
+                    <dd className="inline text-neutral-700 dark:text-neutral-300">
                       {new Date(delivery.deliveredAt).toLocaleString()}
                     </dd>
                   </div>
@@ -135,7 +143,7 @@ function NotificationDetailContent() {
                 {delivery.failedAt ? (
                   <div>
                     <dt className="inline">Failed: </dt>
-                    <dd className="inline text-neutral-700">
+                    <dd className="inline text-neutral-700 dark:text-neutral-300">
                       {new Date(delivery.failedAt).toLocaleString()}
                     </dd>
                   </div>
@@ -143,19 +151,23 @@ function NotificationDetailContent() {
                 {delivery.lastError ? (
                   <div className="col-span-2">
                     <dt className="inline">Last error: </dt>
-                    <dd className="inline text-danger-600">{delivery.lastError}</dd>
+                    <dd className="inline text-danger-600 dark:text-danger-400">
+                      {delivery.lastError}
+                    </dd>
                   </div>
                 ) : null}
                 {delivery.suppressedReason ? (
                   <div className="col-span-2">
                     <dt className="inline">Suppressed: </dt>
-                    <dd className="inline text-neutral-700">{delivery.suppressedReason}</dd>
+                    <dd className="inline text-neutral-700 dark:text-neutral-300">
+                      {delivery.suppressedReason}
+                    </dd>
                   </div>
                 ) : null}
                 {delivery.fallbackFromId ? (
                   <div className="col-span-2">
                     <dt className="inline">Fallback from: </dt>
-                    <dd className="inline text-neutral-700">
+                    <dd className="inline text-neutral-700 dark:text-neutral-300">
                       {fallbackTarget(delivery.fallbackFromId)}
                     </dd>
                   </div>

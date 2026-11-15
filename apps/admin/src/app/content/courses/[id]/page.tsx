@@ -69,7 +69,7 @@ function CourseDetailContent() {
   if (!course) {
     return (
       <main>
-        <p className="text-sm text-neutral-500">Loading…</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">Loading…</p>
         <FieldError>{error}</FieldError>
       </main>
     );
@@ -77,16 +77,18 @@ function CourseDetailContent() {
 
   return (
     <main>
-      <nav className="mb-6 text-sm text-neutral-500">
+      <nav className="mb-6 text-sm text-neutral-500 dark:text-neutral-400">
         <Link href="/content/courses" className="hover:underline">
           Courses
         </Link>{" "}
-        · <span className="text-neutral-800">{course.title}</span>
+        · <span className="text-neutral-800 dark:text-white/90">{course.title}</span>
       </nav>
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold text-neutral-800">{course.title}</h1>
+          <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+            {course.title}
+          </h1>
           <StatusBadge status={course.status} />
         </div>
         <StatusActions status={course.status} onChange={(s) => void changeStatus(s)} />
@@ -94,7 +96,7 @@ function CourseDetailContent() {
 
       <form
         onSubmit={saveDetails}
-        className="mt-6 flex flex-col gap-4 rounded-lg border border-neutral-200 bg-white p-6"
+        className="mt-6 flex flex-col gap-4 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6"
       >
         <h2 className="text-lg font-semibold">Course details</h2>
         <div className="flex flex-col gap-1.5">
@@ -105,7 +107,7 @@ function CourseDetailContent() {
           <Label htmlFor="description">Description</Label>
           <textarea
             id="description"
-            className="min-h-24 rounded-md border border-neutral-300 p-3 text-sm"
+            className="min-h-24 rounded-md border border-neutral-300 dark:border-neutral-700 p-3 text-sm"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -123,7 +125,7 @@ function CourseDetailContent() {
           />
         </div>
         <FieldError>{error}</FieldError>
-        {saved ? <p className="text-sm text-success-600">Saved.</p> : null}
+        {saved ? <p className="text-sm text-success-600 dark:text-success-400">Saved.</p> : null}
         <div>
           <Button type="submit">Save details</Button>
         </div>
@@ -131,7 +133,7 @@ function CourseDetailContent() {
 
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Curriculum</h2>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Subjects → Topics → Modules → Lessons. Expand a node to manage its children.
         </p>
         <div className="mt-4">

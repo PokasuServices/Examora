@@ -31,7 +31,7 @@ export function LessonCompleteBar({
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <span className="inline-flex items-center gap-2 text-sm font-medium text-success-700">
+      <span className="inline-flex items-center gap-2 text-sm font-medium text-success-700 dark:text-success-300">
         <CheckCircle2 size={18} strokeWidth={2} aria-hidden="true" />
         Completed
       </span>
@@ -45,7 +45,7 @@ export function LessonCompleteBar({
       ) : (
         <Link
           href={`/courses/${courseId}`}
-          className="flex h-11 items-center justify-center rounded-md bg-success-50 px-6 text-sm font-medium text-success-700 hover:bg-success-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="flex h-11 items-center justify-center rounded-md bg-success-50 dark:bg-success-500/15 px-6 text-sm font-medium text-success-700 dark:text-success-300 hover:bg-success-100 dark:hover:bg-success-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           🎉 You&rsquo;ve finished this course — back to overview
         </Link>

@@ -41,12 +41,12 @@ function ReplyNode({
       className={cn(
         "rounded-card border p-4",
         reply.isAcceptedAnswer
-          ? "border-success-200 bg-success-50/60"
-          : "border-neutral-200 bg-white",
+          ? "border-success-200 dark:border-success-500/30 bg-success-50/60"
+          : "border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900",
       )}
     >
       {reply.isAcceptedAnswer ? (
-        <div className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-success-700">
+        <div className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-success-700 dark:text-success-300">
           <CheckCircle2 size={16} strokeWidth={2} aria-hidden="true" />
           Accepted answer
         </div>
@@ -58,22 +58,26 @@ function ReplyNode({
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
             <Link
               href={`/community/profile/${reply.author.id}`}
-              className="text-sm font-semibold text-neutral-900 hover:underline"
+              className="text-sm font-semibold text-neutral-900 dark:text-white/90 hover:underline"
             >
               {authorDisplayName(reply.author)}
             </Link>
-            <span className="text-xs text-neutral-400">{timeAgo(reply.createdAt)}</span>
+            <span className="text-xs text-neutral-400 dark:text-neutral-500">
+              {timeAgo(reply.createdAt)}
+            </span>
           </div>
-          <p className="mt-1.5 whitespace-pre-wrap text-sm text-neutral-800">{reply.body}</p>
+          <p className="mt-1.5 whitespace-pre-wrap text-sm text-neutral-800 dark:text-white/90">
+            {reply.body}
+          </p>
 
-          <div className="mt-2.5 flex flex-wrap items-center gap-4 text-xs font-medium text-neutral-500">
+          <div className="mt-2.5 flex flex-wrap items-center gap-4 text-xs font-medium text-neutral-500 dark:text-neutral-400">
             <button
               type="button"
               onClick={() => void actions.onToggleLike(reply.id)}
               aria-pressed={reply.isLikedByViewer}
               className={cn(
-                "flex items-center gap-1 hover:text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded",
-                reply.isLikedByViewer && "text-primary-600",
+                "flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded",
+                reply.isLikedByViewer && "text-primary-600 dark:text-primary-400",
               )}
             >
               <ThumbsUp size={13} strokeWidth={1.75} aria-hidden="true" />
@@ -83,7 +87,7 @@ function ReplyNode({
               <button
                 type="button"
                 onClick={() => setReplying((v) => !v)}
-                className="flex items-center gap-1 hover:text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
+                className="flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
               >
                 <MessageSquare size={13} strokeWidth={1.75} aria-hidden="true" />
                 Reply
@@ -94,7 +98,7 @@ function ReplyNode({
                 <button
                   type="button"
                   onClick={() => void actions.onUnaccept()}
-                  className="text-success-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
+                  className="text-success-700 dark:text-success-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
                 >
                   Unaccept answer
                 </button>
@@ -102,7 +106,7 @@ function ReplyNode({
                 <button
                   type="button"
                   onClick={() => void actions.onAccept(reply.id)}
-                  className="hover:text-success-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
+                  className="hover:text-success-700 dark:hover:text-success-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
                 >
                   Accept as answer
                 </button>
@@ -111,7 +115,7 @@ function ReplyNode({
             <button
               type="button"
               onClick={() => actions.onReport(reply.id)}
-              className="ml-auto flex items-center gap-1 text-neutral-400 hover:text-danger-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
+              className="ml-auto flex items-center gap-1 text-neutral-400 dark:text-neutral-500 hover:text-danger-600 dark:hover:text-danger-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
             >
               <Flag size={13} strokeWidth={1.75} aria-hidden="true" />
               <span className="sr-only">Report reply</span>
@@ -136,7 +140,7 @@ function ReplyNode({
             <div
               className={cn(
                 "mt-3 flex flex-col gap-3",
-                depth < 3 && "border-l border-neutral-200 pl-4",
+                depth < 3 && "border-l border-neutral-200 dark:border-neutral-800 pl-4",
               )}
             >
               {reply.children.map((child) => (

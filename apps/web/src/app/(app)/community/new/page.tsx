@@ -7,13 +7,18 @@ import { CreateThreadForm } from "@/components/community/create-thread-form";
 function NewThreadContent() {
   return (
     <main className="mx-auto max-w-2xl">
-      <nav aria-label="Breadcrumb" className="mb-4 text-sm text-neutral-500">
-        <Link href="/community" className="hover:text-primary-600 hover:underline">
+      <nav aria-label="Breadcrumb" className="mb-4 text-sm text-neutral-500 dark:text-neutral-400">
+        <Link
+          href="/community"
+          className="hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
+        >
           Community
         </Link>
       </nav>
-      <h1 className="text-xl font-semibold text-neutral-800">Start a discussion</h1>
-      <p className="mt-1 text-sm text-neutral-500">
+      <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+        Start a discussion
+      </h1>
+      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
         Pick a board, then share what&rsquo;s on your mind or ask a question.
       </p>
       <div className="mt-6">

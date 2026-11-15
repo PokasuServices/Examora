@@ -44,9 +44,11 @@ export function CourseCreateForm({
           description: description || undefined,
         });
       }}
-      className="flex flex-col gap-4 rounded-md border border-neutral-100 bg-neutral-50/50 p-4"
+      className="flex flex-col gap-4 rounded-md border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 p-4"
     >
-      <h3 className="font-heading text-sm font-semibold text-neutral-900">New course</h3>
+      <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+        New course
+      </h3>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="course-title">Title</Label>
@@ -85,7 +87,7 @@ export function CourseCreateForm({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+          className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
         />
       </div>
       <FieldError>{error}</FieldError>
@@ -96,7 +98,7 @@ export function CourseCreateForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm font-medium text-neutral-600 hover:underline"
+          className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:underline"
         >
           Cancel
         </button>

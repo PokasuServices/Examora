@@ -23,15 +23,22 @@ function AssignmentCatalogContent() {
   return (
     <main>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-neutral-800">Assignments</h1>
-        <Link href="/dashboard" className="text-sm text-primary-600 hover:underline">
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">Assignments</h1>
+        <Link
+          href="/dashboard"
+          className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+        >
           My learning →
         </Link>
       </div>
 
-      {loading ? <p className="mt-6 text-sm text-neutral-500">Loading…</p> : null}
+      {loading ? (
+        <p className="mt-6 text-sm text-neutral-500 dark:text-neutral-400">Loading…</p>
+      ) : null}
       {!loading && assignments.length === 0 ? (
-        <p className="mt-6 text-sm text-neutral-500">No published assignments yet.</p>
+        <p className="mt-6 text-sm text-neutral-500 dark:text-neutral-400">
+          No published assignments yet.
+        </p>
       ) : null}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -39,21 +46,25 @@ function AssignmentCatalogContent() {
           <Link
             key={a.id}
             href={`/assignments/${a.id}`}
-            className="rounded-lg border border-neutral-200 bg-white p-5 transition-colors hover:border-primary-400"
+            className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 transition-colors hover:border-primary-400"
           >
             <h2 className="text-lg font-semibold">{a.title}</h2>
-            <div className="mt-2 flex flex-wrap gap-2 text-xs text-neutral-600">
-              <span className="rounded-full bg-neutral-100 px-2 py-0.5">{a.marksTotal} marks</span>
-              <span className="rounded-full bg-neutral-100 px-2 py-0.5">
+            <div className="mt-2 flex flex-wrap gap-2 text-xs text-neutral-600 dark:text-neutral-400">
+              <span className="rounded-full bg-neutral-100 dark:bg-white/5 px-2 py-0.5">
+                {a.marksTotal} marks
+              </span>
+              <span className="rounded-full bg-neutral-100 dark:bg-white/5 px-2 py-0.5">
                 {a.criteriaCount} rubric criteri{a.criteriaCount === 1 ? "on" : "a"}
               </span>
               {a.deadline ? (
-                <span className="rounded-full bg-neutral-100 px-2 py-0.5">
+                <span className="rounded-full bg-neutral-100 dark:bg-white/5 px-2 py-0.5">
                   Due {new Date(a.deadline).toLocaleDateString()}
                 </span>
               ) : null}
             </div>
-            <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{a.brief}</p>
+            <p className="mt-2 line-clamp-2 text-sm text-neutral-600 dark:text-neutral-400">
+              {a.brief}
+            </p>
           </Link>
         ))}
       </div>

@@ -51,7 +51,7 @@ export function CatalogSearchInput({
       <Search
         size={16}
         strokeWidth={1.75}
-        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
         aria-hidden="true"
       />
       <input
@@ -60,7 +60,7 @@ export function CatalogSearchInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search by course name, description, or exam type…"
-        className="h-11 w-full rounded-md border border-neutral-200 bg-neutral-50 pl-9 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+        className="h-11 w-full rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-white/[0.03] pl-9 pr-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
       />
     </div>
   );
@@ -117,7 +117,7 @@ export function CatalogFilterControls({
         <button
           type="button"
           onClick={onClear}
-          className="inline-flex w-fit items-center gap-1 text-sm font-medium text-primary-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
+          className="inline-flex w-fit items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
         >
           <X size={14} strokeWidth={2} aria-hidden="true" />
           Clear filters

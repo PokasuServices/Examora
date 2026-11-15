@@ -19,7 +19,10 @@ export function AssignmentPerformanceSection({
 }) {
   return (
     <section aria-labelledby="assignment-performance-heading">
-      <h2 id="assignment-performance-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="assignment-performance-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Assignment Performance
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3">
@@ -52,7 +55,7 @@ export function AssignmentPerformanceSection({
         {assignments.recentReviews.length === 0 ? (
           <EmptyState heading="No reviewed submissions yet" />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {assignments.recentReviews.map((r) => (
               <li
                 key={r.submissionId}
@@ -60,12 +63,12 @@ export function AssignmentPerformanceSection({
               >
                 <Link
                   href={`/assignments/submission/${r.submissionId}`}
-                  className="min-w-0 flex-1 truncate text-neutral-800 hover:text-primary-600 hover:underline"
+                  className="min-w-0 flex-1 truncate text-neutral-800 dark:text-white/90 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
                 >
                   {r.assignmentTitle}
                 </Link>
                 <span className="flex shrink-0 items-center gap-2">
-                  <span className="tabular-nums text-neutral-500">
+                  <span className="tabular-nums text-neutral-500 dark:text-neutral-400">
                     {r.obtainedMarks !== null ? `${r.obtainedMarks}/${r.marksTotal}` : "Pending"}
                   </span>
                   {r.decision ? (

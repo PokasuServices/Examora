@@ -22,9 +22,9 @@ export function StatCard({
   return (
     <Card aria-label={accessibleLabel}>
       <IconBadge icon={icon} tone={tone} />
-      <p className="mt-4 text-xs font-medium text-neutral-500">{label}</p>
+      <p className="mt-4 text-xs font-medium text-neutral-500 dark:text-neutral-400">{label}</p>
       <div className="mt-1 flex items-baseline gap-2">
-        <p className="font-heading text-3xl font-bold tabular-nums leading-none text-neutral-900">
+        <p className="font-heading text-3xl font-bold tabular-nums leading-none text-neutral-900 dark:text-white/90">
           {value}
         </p>
         {trend ? <TrendChip direction={trend.direction} label={trend.label} /> : null}
@@ -46,13 +46,13 @@ export function StatCardSkeletonTile() {
 export function StatCardErrorTile({ label, onRetry }: { label: string; onRetry: () => void }) {
   return (
     <Card className="group">
-      <p className="text-xs font-medium text-neutral-500">{label}</p>
+      <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{label}</p>
       <div className="mt-2 flex items-center justify-between">
         <p className="font-heading text-3xl font-bold text-neutral-300">—</p>
         <button
           type="button"
           onClick={onRetry}
-          className="text-xs font-medium text-primary-600 opacity-0 hover:underline focus-visible:opacity-100 group-hover:opacity-100"
+          className="text-xs font-medium text-primary-600 dark:text-primary-400 opacity-0 hover:underline focus-visible:opacity-100 group-hover:opacity-100"
         >
           Retry
         </button>

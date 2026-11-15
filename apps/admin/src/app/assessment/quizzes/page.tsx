@@ -90,7 +90,7 @@ function QuizzesContent() {
       />
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">New quiz</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">New quiz</h2>
         <form onSubmit={create} className="mt-4 flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="title">Quiz title</Label>
@@ -120,12 +120,12 @@ function QuizzesContent() {
               className="w-28"
             />
           </div>
-          <label className="flex h-10 items-center gap-2 text-sm text-neutral-700">
+          <label className="flex h-10 items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
             <input
               type="checkbox"
               checked={negativeMarkingEnabled}
               onChange={(e) => setNegativeMarkingEnabled(e.target.checked)}
-              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-primary-600 dark:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             />
             Negative marking
           </label>
@@ -182,37 +182,37 @@ function QuizzesContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Title
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Time limit
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Negative marking
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {quizzes.map((quiz) => (
-                  <tr key={quiz.id} className="hover:bg-neutral-50">
+                  <tr key={quiz.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
                     <td className="px-4 py-3">
                       <Link
                         href={`/assessment/quizzes/${quiz.id}`}
-                        className="font-medium text-primary-600 hover:underline"
+                        className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                       >
                         {quiz.title}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-neutral-600">
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                       {quiz.timeLimitMinutes ? `${quiz.timeLimitMinutes} min` : "Untimed"}
                     </td>
-                    <td className="px-4 py-3 text-neutral-600">
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                       {quiz.negativeMarkingEnabled
                         ? `${quiz.negativeMarksPerWrong}× per wrong`
                         : "No"}

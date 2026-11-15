@@ -10,9 +10,9 @@ import { cn } from "../lib/cn";
  */
 
 export const inputBaseClass =
-  "h-11 w-full rounded-md border bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-theme-xs " +
-  "placeholder:text-neutral-400 focus:outline-none focus:ring-4 " +
-  "disabled:cursor-not-allowed disabled:border-neutral-100 disabled:bg-neutral-50 disabled:placeholder:text-neutral-300 " +
+  "h-11 w-full rounded-md border bg-transparent px-4 py-2.5 text-sm text-neutral-800 dark:text-white/90 shadow-theme-xs " +
+  "placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-4 " +
+  "disabled:cursor-not-allowed disabled:border-neutral-100 dark:disabled:border-neutral-800 disabled:bg-neutral-50 dark:disabled:bg-white/[0.03] disabled:placeholder:text-neutral-300 " +
   "dark:bg-neutral-900 dark:text-white/90 dark:placeholder:text-white/30";
 
 export const inputStateClass = (invalid?: boolean) =>
@@ -67,16 +67,16 @@ export const FieldError = ({
 }): React.ReactElement | null => {
   if (!children) return null;
   return (
-    <p role="alert" className="text-sm text-danger-600">
+    <p role="alert" className="text-sm text-danger-600 dark:text-danger-400">
       {children}
     </p>
   );
 };
 
 const MESSAGE_TONE = {
-  error: "text-danger-600",
-  warning: "text-warning-600",
-  info: "text-neutral-500",
+  error: "text-danger-600 dark:text-danger-400",
+  warning: "text-warning-600 dark:text-warning-400",
+  info: "text-neutral-500 dark:text-neutral-400",
 } as const;
 
 /** TMS `ErrorMessage.vue` — one or many messages, tone-colored. */
@@ -187,7 +187,7 @@ export const TextInputDefault = React.forwardRef<HTMLInputElement, TextInputDefa
         type="button"
         onClick={() => setReveal((r) => !r)}
         aria-label={reveal ? "Hide password" : "Show password"}
-        className="flex h-full items-center px-4 text-neutral-500 hover:text-neutral-700 dark:text-neutral-400"
+        className="flex h-full items-center px-4 text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 dark:text-neutral-400"
       >
         <EyeIcon open={!reveal} />
       </button>
@@ -221,7 +221,7 @@ export const TextInputDefault = React.forwardRef<HTMLInputElement, TextInputDefa
             </span>
           ) : null}
         </div>
-        {note ? <p className="text-xs text-neutral-500">{note}</p> : null}
+        {note ? <p className="text-xs text-neutral-500 dark:text-neutral-400">{note}</p> : null}
         <div id={`${id}-error`}>
           <ErrorMessage message={errorMessage} type={errorType} />
         </div>

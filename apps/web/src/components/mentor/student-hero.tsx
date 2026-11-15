@@ -14,12 +14,12 @@ export function StudentHero({ student360 }: { student360: Student360 }) {
     <Card>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-4">
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary-100 font-heading text-xl font-semibold text-primary-700">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-500/20 font-heading text-xl font-semibold text-primary-700 dark:text-primary-300">
             {initials}
           </span>
           <div>
-            <h1 className="text-xl font-semibold text-neutral-800">{name}</h1>
-            <p className="mt-0.5 flex items-center gap-1.5 text-sm text-neutral-500">
+            <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">{name}</h1>
+            <p className="mt-0.5 flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400">
               <Mail size={14} strokeWidth={1.75} aria-hidden="true" />
               {profile.email}
             </p>

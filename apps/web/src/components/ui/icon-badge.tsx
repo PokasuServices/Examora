@@ -2,12 +2,12 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@examora/ui";
 
 const TONES = {
-  primary: "bg-primary-500/10 text-primary-600",
-  success: "bg-success-500/10 text-success-600",
-  warning: "bg-warning-500/10 text-warning-600",
-  danger: "bg-danger-500/10 text-danger-600",
-  accent: "bg-accent-500/10 text-accent-600",
-  neutral: "bg-neutral-100 text-neutral-500",
+  primary: "bg-primary-500/10 text-primary-600 dark:text-primary-400",
+  success: "bg-success-500/10 text-success-600 dark:text-success-400",
+  warning: "bg-warning-500/10 text-warning-600 dark:text-warning-400",
+  danger: "bg-danger-500/10 text-danger-600 dark:text-danger-400",
+  accent: "bg-accent-500/10 text-accent-600 dark:text-accent-400",
+  neutral: "bg-neutral-100 dark:bg-white/5 text-neutral-500 dark:text-neutral-400",
 } as const;
 
 /** Soft-tinted circular icon background — never a hard-filled icon, per the design spec's icon rules. */

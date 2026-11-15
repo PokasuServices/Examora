@@ -23,15 +23,22 @@ function QuizCatalogContent() {
   return (
     <main>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-neutral-800">Quizzes</h1>
-        <Link href="/dashboard" className="text-sm text-primary-600 hover:underline">
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">Quizzes</h1>
+        <Link
+          href="/dashboard"
+          className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+        >
           My learning →
         </Link>
       </div>
 
-      {loading ? <p className="mt-6 text-sm text-neutral-500">Loading…</p> : null}
+      {loading ? (
+        <p className="mt-6 text-sm text-neutral-500 dark:text-neutral-400">Loading…</p>
+      ) : null}
       {!loading && quizzes.length === 0 ? (
-        <p className="mt-6 text-sm text-neutral-500">No published quizzes yet.</p>
+        <p className="mt-6 text-sm text-neutral-500 dark:text-neutral-400">
+          No published quizzes yet.
+        </p>
       ) : null}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -39,26 +46,30 @@ function QuizCatalogContent() {
           <Link
             key={quiz.id}
             href={`/quizzes/${quiz.id}`}
-            className="rounded-lg border border-neutral-200 bg-white p-5 transition-colors hover:border-primary-400"
+            className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 transition-colors hover:border-primary-400"
           >
             <h2 className="text-lg font-semibold">{quiz.title}</h2>
-            <div className="mt-2 flex flex-wrap gap-2 text-xs text-neutral-600">
-              <span className="rounded-full bg-neutral-100 px-2 py-0.5">
+            <div className="mt-2 flex flex-wrap gap-2 text-xs text-neutral-600 dark:text-neutral-400">
+              <span className="rounded-full bg-neutral-100 dark:bg-white/5 px-2 py-0.5">
                 {quiz.totalQuestions} question{quiz.totalQuestions === 1 ? "" : "s"}
               </span>
-              <span className="rounded-full bg-neutral-100 px-2 py-0.5">
+              <span className="rounded-full bg-neutral-100 dark:bg-white/5 px-2 py-0.5">
                 {quiz.totalMarks} marks
               </span>
               {quiz.timeLimitMinutes ? (
-                <span className="rounded-full bg-neutral-100 px-2 py-0.5">
+                <span className="rounded-full bg-neutral-100 dark:bg-white/5 px-2 py-0.5">
                   {quiz.timeLimitMinutes} min
                 </span>
               ) : (
-                <span className="rounded-full bg-neutral-100 px-2 py-0.5">Untimed</span>
+                <span className="rounded-full bg-neutral-100 dark:bg-white/5 px-2 py-0.5">
+                  Untimed
+                </span>
               )}
             </div>
             {quiz.description ? (
-              <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{quiz.description}</p>
+              <p className="mt-2 line-clamp-2 text-sm text-neutral-600 dark:text-neutral-400">
+                {quiz.description}
+              </p>
             ) : null}
           </Link>
         ))}

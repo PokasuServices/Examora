@@ -28,8 +28,8 @@ function ReactionButton({
       className={cn(
         "flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
         pressed
-          ? "border-primary-200 bg-primary-50 text-primary-700"
-          : "border-neutral-200 text-neutral-600 hover:bg-neutral-50",
+          ? "border-primary-200 dark:border-primary-500/30 bg-primary-50 dark:bg-primary-500/15 text-primary-700 dark:text-primary-300"
+          : "border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.03]",
       )}
     >
       <Icon size={16} strokeWidth={1.75} aria-hidden />
@@ -90,7 +90,7 @@ export function ReactionBar({
       <button
         type="button"
         onClick={() => void handleShare()}
-        className="flex h-10 items-center gap-2 rounded-full border border-neutral-200 px-4 text-sm font-medium text-neutral-600 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+        className="flex h-10 items-center gap-2 rounded-full border border-neutral-200 dark:border-neutral-800 px-4 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
       >
         <Link2 size={16} strokeWidth={1.75} aria-hidden />
         {copied ? "Link copied!" : "Share"}

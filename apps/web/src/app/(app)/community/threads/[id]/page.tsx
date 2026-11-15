@@ -58,7 +58,7 @@ function ThreadDetailContent() {
   if (data.loadState === "loading" || !data.thread) {
     return (
       <main className="mx-auto max-w-3xl">
-        <p className="text-sm text-neutral-500">Loading…</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">Loading…</p>
       </main>
     );
   }
@@ -90,14 +90,17 @@ function ThreadDetailContent() {
 
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
-        <Link href="/community" className="hover:text-primary-600 hover:underline">
+      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 dark:text-neutral-400">
+        <Link
+          href="/community"
+          className="hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
+        >
           Community
         </Link>{" "}
         /{" "}
         <Link
           href={`/community/boards/${thread.boardId}`}
-          className="hover:text-primary-600 hover:underline"
+          className="hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
         >
           {thread.boardTitle}
         </Link>
@@ -113,20 +116,20 @@ function ThreadDetailContent() {
               onChange={(e) => setEditTitle(e.target.value)}
               maxLength={200}
               required
-              className="h-11 w-full rounded-md border border-neutral-200 px-3 font-heading text-xl font-bold text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="h-11 w-full rounded-md border border-neutral-200 dark:border-neutral-800 px-3 font-heading text-xl font-bold text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             />
             <textarea
               value={editBody}
               onChange={(e) => setEditBody(e.target.value)}
               maxLength={20000}
               required
-              className="min-h-40 w-full rounded-md border border-neutral-200 p-3 text-sm text-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="min-h-40 w-full rounded-md border border-neutral-200 dark:border-neutral-800 p-3 text-sm text-neutral-800 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             />
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setEditing(false)}
-                className="flex h-10 items-center rounded-md px-4 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
+                className="flex h-10 items-center rounded-md px-4 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
               >
                 Cancel
               </button>
@@ -141,17 +144,19 @@ function ThreadDetailContent() {
           </form>
         ) : (
           <>
-            <h1 className="mt-3 text-xl font-semibold text-neutral-800">{thread.title}</h1>
+            <h1 className="mt-3 text-xl font-semibold text-neutral-800 dark:text-white/90">
+              {thread.title}
+            </h1>
             <div className="mt-3 flex items-center gap-3">
               <Avatar author={thread.author} size="md" />
               <div className="min-w-0 text-sm">
                 <Link
                   href={`/community/profile/${thread.author.id}`}
-                  className="font-medium text-neutral-900 hover:underline"
+                  className="font-medium text-neutral-900 dark:text-white/90 hover:underline"
                 >
                   {authorDisplayName(thread.author)}
                 </Link>
-                <p className="text-xs text-neutral-400">
+                <p className="text-xs text-neutral-400 dark:text-neutral-500">
                   {timeAgo(thread.createdAt)} ·{" "}
                   <span className="inline-flex items-center gap-1 align-middle">
                     <Eye size={12} strokeWidth={1.75} aria-hidden="true" />
@@ -161,7 +166,7 @@ function ThreadDetailContent() {
               </div>
             </div>
 
-            <p className="mt-5 whitespace-pre-wrap text-base leading-relaxed text-neutral-800">
+            <p className="mt-5 whitespace-pre-wrap text-base leading-relaxed text-neutral-800 dark:text-white/90">
               {thread.body}
             </p>
 
@@ -191,12 +196,12 @@ function ThreadDetailContent() {
         onToggleFollow={() => void data.toggleFollow()}
       />
 
-      <div className="flex flex-wrap items-center gap-4 border-y border-neutral-100 py-3 text-xs font-medium text-neutral-500">
+      <div className="flex flex-wrap items-center gap-4 border-y border-neutral-100 dark:border-neutral-800 py-3 text-xs font-medium text-neutral-500 dark:text-neutral-400">
         {isAuthor && !editing ? (
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="flex items-center gap-1.5 hover:text-primary-600"
+            className="flex items-center gap-1.5 hover:text-primary-600 dark:hover:text-primary-400"
           >
             <Pencil size={13} strokeWidth={1.75} aria-hidden="true" />
             Edit
@@ -206,7 +211,7 @@ function ThreadDetailContent() {
           <button
             type="button"
             onClick={() => void data.toggleStatus()}
-            className="flex items-center gap-1.5 hover:text-primary-600"
+            className="flex items-center gap-1.5 hover:text-primary-600 dark:hover:text-primary-400"
           >
             {thread.status === "OPEN" ? (
               <>
@@ -225,7 +230,7 @@ function ThreadDetailContent() {
           <button
             type="button"
             onClick={() => void handleDelete()}
-            className="flex items-center gap-1.5 hover:text-danger-600"
+            className="flex items-center gap-1.5 hover:text-danger-600 dark:hover:text-danger-400"
           >
             <Trash2 size={13} strokeWidth={1.75} aria-hidden="true" />
             Delete
@@ -235,7 +240,7 @@ function ThreadDetailContent() {
           <button
             type="button"
             onClick={() => setReportTarget({ type: "THREAD" })}
-            className="ml-auto flex items-center gap-1.5 text-neutral-400 hover:text-danger-600"
+            className="ml-auto flex items-center gap-1.5 text-neutral-400 dark:text-neutral-500 hover:text-danger-600 dark:hover:text-danger-400"
           >
             <Flag size={13} strokeWidth={1.75} aria-hidden="true" />
             Report
@@ -244,14 +249,19 @@ function ThreadDetailContent() {
       </div>
 
       <section aria-labelledby="replies-heading">
-        <h2 id="replies-heading" className="text-lg font-medium text-neutral-800">
+        <h2
+          id="replies-heading"
+          className="text-lg font-medium text-neutral-800 dark:text-white/90"
+        >
           {replyCount} {replyCount === 1 ? "reply" : "replies"}
         </h2>
 
         <div className="mt-4">
           {data.replies.length === 0 ? (
             <Card density="compact">
-              <p className="text-sm text-neutral-500">No replies yet — be the first to respond.</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                No replies yet — be the first to respond.
+              </p>
             </Card>
           ) : (
             <ReplyTree
@@ -275,7 +285,7 @@ function ThreadDetailContent() {
             <ReplyComposer submitting={data.postingReply} onSubmit={data.postTopLevelReply} />
           </div>
         ) : (
-          <p className="mt-6 text-sm text-neutral-500">
+          <p className="mt-6 text-sm text-neutral-500 dark:text-neutral-400">
             {thread.status === "CLOSED"
               ? "This thread is closed to new replies."
               : "This thread is locked to new replies."}

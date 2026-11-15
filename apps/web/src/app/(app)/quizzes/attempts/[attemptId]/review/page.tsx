@@ -62,14 +62,17 @@ function ReviewContent() {
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
+      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 dark:text-neutral-400">
         <Link href={`/quizzes/attempts/${attemptId}/result`} className="hover:underline">
           Result
         </Link>{" "}
-        <span aria-hidden="true">·</span> <span className="text-neutral-800">Review</span>
+        <span aria-hidden="true">·</span>{" "}
+        <span className="text-neutral-800 dark:text-white/90">Review</span>
       </nav>
 
-      <h1 className="text-xl font-semibold text-neutral-800">Review — {review.quizTitle}</h1>
+      <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+        Review — {review.quizTitle}
+      </h1>
 
       <QuestionPalette
         count={review.questions.length}
@@ -85,7 +88,7 @@ function ReviewContent() {
           type="button"
           disabled={activeIndex === 0}
           onClick={() => setActiveIndex((i) => Math.max(0, i - 1))}
-          className="flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium text-neutral-600 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-40"
+          className="flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-40"
         >
           Previous
         </button>
@@ -93,7 +96,7 @@ function ReviewContent() {
           type="button"
           disabled={activeIndex === review.questions.length - 1}
           onClick={() => setActiveIndex((i) => Math.min(review.questions.length - 1, i + 1))}
-          className="flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium text-neutral-600 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-40"
+          className="flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-40"
         >
           Next
         </button>

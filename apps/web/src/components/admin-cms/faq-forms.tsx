@@ -25,9 +25,11 @@ export function FaqCreateForm({
         e.preventDefault();
         onSubmit({ question, answer, category: category || undefined });
       }}
-      className="flex flex-col gap-4 rounded-md border border-neutral-100 bg-neutral-50/50 p-4"
+      className="flex flex-col gap-4 rounded-md border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 p-4"
     >
-      <h3 className="font-heading text-sm font-semibold text-neutral-900">New FAQ item</h3>
+      <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+        New FAQ item
+      </h3>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="faq-question">Question</Label>
         <Input
@@ -45,7 +47,7 @@ export function FaqCreateForm({
           value={answer}
           onChange={(e) => setAnswer(e.target.value)}
           rows={3}
-          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+          className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
         />
       </div>
       <div className="flex flex-col gap-1.5">
@@ -60,7 +62,7 @@ export function FaqCreateForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm font-medium text-neutral-600 hover:underline"
+          className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:underline"
         >
           Cancel
         </button>
@@ -101,7 +103,7 @@ export function FaqFieldsForm({
       className="flex flex-col gap-4"
     >
       {!editable ? (
-        <p className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-500">
+        <p className="rounded-md bg-neutral-100 dark:bg-white/5 px-3 py-2 text-xs text-neutral-500 dark:text-neutral-400">
           Only content in Draft can be edited — send it back to draft first.
         </p>
       ) : null}
@@ -122,7 +124,7 @@ export function FaqFieldsForm({
           value={answer}
           onChange={(e) => setAnswer(e.target.value)}
           rows={4}
-          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 disabled:bg-neutral-50 disabled:text-neutral-500"
+          className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 disabled:bg-neutral-50 dark:disabled:bg-white/[0.03] disabled:text-neutral-500 dark:disabled:text-neutral-400"
         />
       </div>
       <div className="flex flex-col gap-1.5">

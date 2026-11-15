@@ -99,17 +99,20 @@ export function NodeManager({
           Add {label}
         </Button>
       </form>
-      {error ? <p className="text-sm text-error-600">{error}</p> : null}
+      {error ? <p className="text-sm text-error-600 dark:text-error-400">{error}</p> : null}
 
       <ul className="flex flex-col gap-2">
         {nodes.map((node) => (
-          <li key={node.id} className="rounded-md border border-neutral-200 bg-white p-3">
+          <li
+            key={node.id}
+            className="rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-3"
+          >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 {renderChildren ? (
                   <button
                     type="button"
-                    className="text-neutral-400 hover:text-neutral-700"
+                    className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
                     onClick={() => setExpanded((e) => ({ ...e, [node.id]: !e[node.id] }))}
                     aria-label="Toggle children"
                   >
@@ -130,11 +133,15 @@ export function NodeManager({
               </div>
             </div>
             {renderChildren && expanded[node.id] ? (
-              <div className="mt-3 border-l-2 border-neutral-100 pl-4">{renderChildren(node)}</div>
+              <div className="mt-3 border-l-2 border-neutral-100 dark:border-neutral-800 pl-4">
+                {renderChildren(node)}
+              </div>
             ) : null}
           </li>
         ))}
-        {nodes.length === 0 ? <li className="text-sm text-neutral-500">No {label}s yet.</li> : null}
+        {nodes.length === 0 ? (
+          <li className="text-sm text-neutral-500 dark:text-neutral-400">No {label}s yet.</li>
+        ) : null}
       </ul>
     </div>
   );

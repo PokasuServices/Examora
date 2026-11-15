@@ -2,7 +2,7 @@
 export function StickyProgressBar({ percent }: { percent: number }) {
   return (
     <div
-      className="sticky top-16 z-10 h-1 w-full bg-neutral-100"
+      className="sticky top-16 z-10 h-1 w-full bg-neutral-100 dark:bg-white/5"
       role="progressbar"
       aria-label="Course progress"
       aria-valuenow={percent}

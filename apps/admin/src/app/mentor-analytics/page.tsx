@@ -30,8 +30,8 @@ import { useMentorAnalyticsApi } from "@/lib/analytics-api";
 function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <Card density="compact">
-      <p className="text-xs font-medium text-neutral-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold text-neutral-900">{value}</p>
+      <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{label}</p>
+      <p className="mt-1 text-2xl font-semibold text-neutral-900 dark:text-white/90">{value}</p>
     </Card>
   );
 }
@@ -39,7 +39,7 @@ function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-lg font-medium text-neutral-800">{title}</h2>
+      <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">{title}</h2>
       {children}
     </section>
   );
@@ -155,7 +155,7 @@ function MentorAnalyticsContent() {
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={trendData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.25)" />
                       <XAxis dataKey="week" tick={{ fontSize: 11 }} />
                       <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
                       <Tooltip formatter={(value) => `${value}%`} />
@@ -187,41 +187,44 @@ function MentorAnalyticsContent() {
               ) : (
                 <div className="overflow-x-auto contain-layout">
                   <table className="w-full min-w-[640px] text-left text-sm">
-                    <thead className="bg-neutral-50">
+                    <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                       <tr>
-                        <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                        <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                           Student
                         </th>
-                        <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                        <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                           Completion
                         </th>
-                        <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                        <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                           Quiz avg
                         </th>
-                        <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                        <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                           Assignment avg
                         </th>
-                        <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                        <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                           Last active
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-neutral-200">
+                    <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                       {students.map((s) => (
-                        <tr key={s.studentId} className="hover:bg-neutral-50">
-                          <td className="px-4 py-3 text-neutral-800">
+                        <tr
+                          key={s.studentId}
+                          className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]"
+                        >
+                          <td className="px-4 py-3 text-neutral-800 dark:text-white/90">
                             {s.studentName ?? s.studentEmail}
                           </td>
-                          <td className="px-4 py-3 text-neutral-600">
+                          <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                             {s.overallCompletionPercent}%
                           </td>
-                          <td className="px-4 py-3 text-neutral-600">
+                          <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                             {s.quizAverage !== null ? `${s.quizAverage}%` : "—"}
                           </td>
-                          <td className="px-4 py-3 text-neutral-600">
+                          <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                             {s.assignmentAverage !== null ? `${s.assignmentAverage}%` : "—"}
                           </td>
-                          <td className="px-4 py-3 text-neutral-500">
+                          <td className="px-4 py-3 text-neutral-500 dark:text-neutral-400">
                             {s.lastActiveAt ? new Date(s.lastActiveAt).toLocaleDateString() : "—"}
                           </td>
                         </tr>

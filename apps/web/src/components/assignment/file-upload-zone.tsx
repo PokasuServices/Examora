@@ -92,10 +92,10 @@ export function FileUploadZone({
         className={cn(
           "flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed px-6 py-8 text-center transition-colors",
           disabled
-            ? "cursor-not-allowed border-neutral-200 text-neutral-300"
+            ? "cursor-not-allowed border-neutral-200 dark:border-neutral-800 text-neutral-300"
             : dragOver
-              ? "cursor-pointer border-primary-500 bg-primary-50"
-              : "cursor-pointer border-neutral-200 text-neutral-500 hover:border-primary-300 hover:bg-neutral-50",
+              ? "cursor-pointer border-primary-500 bg-primary-50 dark:bg-primary-500/15"
+              : "cursor-pointer border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:border-primary-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03]",
         )}
       >
         <UploadCloud size={24} strokeWidth={1.5} aria-hidden="true" />
@@ -103,7 +103,7 @@ export function FileUploadZone({
           {disabled ? "Uploads closed" : "Drag files here or click to browse"}
         </p>
         {!disabled ? (
-          <p className="text-xs text-neutral-400">
+          <p className="text-xs text-neutral-400 dark:text-neutral-500">
             {remainingSlots} of {fileRules.maxFiles} slots left · up to {fileRules.maxFileSizeMb}MB
             each
           </p>
@@ -124,7 +124,7 @@ export function FileUploadZone({
       {rejected.length > 0 ? (
         <ul className="mt-2 flex flex-col gap-1">
           {rejected.map((r, i) => (
-            <li key={i} className="text-xs text-error-600">
+            <li key={i} className="text-xs text-error-600 dark:text-error-400">
               {r.fileName}: {r.reason}
             </li>
           ))}

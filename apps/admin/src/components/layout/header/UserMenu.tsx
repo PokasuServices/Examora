@@ -56,7 +56,10 @@ export function UserMenu() {
         <ChevronDown
           size={18}
           aria-hidden="true"
-          className={cn("text-neutral-500 transition-transform duration-200", open && "rotate-180")}
+          className={cn(
+            "text-neutral-500 dark:text-neutral-400 transition-transform duration-200",
+            open && "rotate-180",
+          )}
         />
       </button>
 
@@ -73,7 +76,7 @@ export function UserMenu() {
               {user?.email}
             </span>
             {role ? (
-              <span className="mt-1 inline-block rounded-full bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-800">
+              <span className="mt-1 inline-block rounded-full bg-primary-100 dark:bg-primary-500/20 px-2 py-0.5 text-xs font-medium text-primary-800 dark:text-primary-300">
                 {role}
               </span>
             ) : null}
@@ -96,7 +99,7 @@ export function UserMenu() {
                       size={22}
                       strokeWidth={1.75}
                       aria-hidden="true"
-                      className="text-neutral-500 group-hover:text-neutral-700"
+                      className="text-neutral-500 dark:text-neutral-400 group-hover:text-neutral-700 dark:group-hover:text-neutral-300"
                     />
                     {item.text}
                   </a>
@@ -118,7 +121,7 @@ export function UserMenu() {
               size={22}
               strokeWidth={1.75}
               aria-hidden="true"
-              className="text-neutral-500 group-hover:text-neutral-700"
+              className="text-neutral-500 dark:text-neutral-400 group-hover:text-neutral-700 dark:group-hover:text-neutral-300"
             />
             Sign out
           </button>

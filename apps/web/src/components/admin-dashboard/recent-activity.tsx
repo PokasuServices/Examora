@@ -22,8 +22,16 @@ export function RecentActivity({ events }: { events: ActivityEvent[] }) {
   return (
     <section aria-labelledby="recent-activity-heading">
       <div className="flex items-center gap-2">
-        <Clock size={17} strokeWidth={1.75} className="text-neutral-500" aria-hidden="true" />
-        <h2 id="recent-activity-heading" className="text-lg font-medium text-neutral-800">
+        <Clock
+          size={17}
+          strokeWidth={1.75}
+          className="text-neutral-500 dark:text-neutral-400"
+          aria-hidden="true"
+        />
+        <h2
+          id="recent-activity-heading"
+          className="text-lg font-medium text-neutral-800 dark:text-white/90"
+        >
           Recent activity
         </h2>
       </div>
@@ -34,7 +42,7 @@ export function RecentActivity({ events }: { events: ActivityEvent[] }) {
             body="New orders, refunds, and reports will show up here."
           />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {events.map((event) => {
               const Icon = KIND_ICON[event.kind];
               return (
@@ -45,13 +53,17 @@ export function RecentActivity({ events }: { events: ActivityEvent[] }) {
                       href={event.href}
                       target="_blank"
                       rel="noreferrer"
-                      className="block truncate text-sm font-medium text-neutral-800 hover:text-primary-700 hover:underline"
+                      className="block truncate text-sm font-medium text-neutral-800 dark:text-white/90 hover:text-primary-700 dark:hover:text-primary-300 hover:underline"
                     >
                       {event.title}
                     </a>
-                    <p className="mt-0.5 truncate text-xs text-neutral-500">{event.detail}</p>
+                    <p className="mt-0.5 truncate text-xs text-neutral-500 dark:text-neutral-400">
+                      {event.detail}
+                    </p>
                   </div>
-                  <span className="shrink-0 text-xs text-neutral-400">{timeAgo(event.at)}</span>
+                  <span className="shrink-0 text-xs text-neutral-400 dark:text-neutral-500">
+                    {timeAgo(event.at)}
+                  </span>
                 </li>
               );
             })}

@@ -30,7 +30,7 @@ function QuickActionLink({
   onClick?: () => void;
 }) {
   const className =
-    "flex flex-col items-start gap-2 rounded-md border border-neutral-200 bg-white p-3 text-sm font-medium text-neutral-700 transition-colors hover:border-primary-200 hover:bg-primary-50/50 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500";
+    "flex flex-col items-start gap-2 rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-3 text-sm font-medium text-neutral-700 dark:text-neutral-300 transition-colors hover:border-primary-200 dark:hover:border-primary-500/30 hover:bg-primary-50/50 hover:text-primary-700 dark:hover:text-primary-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500";
   if (href) {
     return (
       <Link href={href} className={className}>
@@ -99,10 +99,12 @@ function ProfileContent() {
           <div className="flex items-start gap-4">
             <ProfileAvatar user={profile} size="xl" />
             <div className="min-w-0">
-              <h2 className="text-xl font-semibold text-neutral-800">
+              <h2 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
                 {authorDisplayName(profile)}
               </h2>
-              <p className="mt-0.5 truncate text-sm text-neutral-500">{profile.email}</p>
+              <p className="mt-0.5 truncate text-sm text-neutral-500 dark:text-neutral-400">
+                {profile.email}
+              </p>
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 {profile.roles.map((role) => (
                   <Chip key={role} tone="primary">
@@ -115,17 +117,21 @@ function ProfileContent() {
               </div>
             </div>
           </div>
-          <p className="shrink-0 text-sm text-neutral-500">Member since {memberSince}</p>
+          <p className="shrink-0 text-sm text-neutral-500 dark:text-neutral-400">
+            Member since {memberSince}
+          </p>
         </div>
 
-        <div className="mt-5 border-t border-neutral-100 pt-4">
+        <div className="mt-5 border-t border-neutral-100 dark:border-neutral-800 pt-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="font-medium text-neutral-700">Profile completion</span>
-            <span className="text-neutral-500">
+            <span className="font-medium text-neutral-700 dark:text-neutral-300">
+              Profile completion
+            </span>
+            <span className="text-neutral-500 dark:text-neutral-400">
               {completion.completed} of {completion.total} complete
             </span>
           </div>
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-white/5">
             <div
               className="h-full rounded-full bg-primary-600 transition-all"
               style={{ width: `${completion.percent}%` }}
@@ -148,13 +154,15 @@ function ProfileContent() {
       {/* ---------- Personal Information ---------- */}
       <Card id="personal-information">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-medium text-neutral-800">Personal information</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+            Personal information
+          </h2>
           {dirty ? <Chip tone="warning">Unsaved changes</Chip> : null}
         </div>
 
         <div className="mt-4 flex items-center gap-3">
           <ProfileAvatar user={profile} size="md" />
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
             Photo uploads aren&rsquo;t available yet — your initials stand in for a profile photo
             everywhere in Examora.
           </p>
@@ -211,9 +219,11 @@ function ProfileContent() {
             />
           </div>
 
-          <div className="border-t border-neutral-100 pt-4">
-            <p className="text-sm font-medium text-neutral-700">Guardian (optional)</p>
-            <p className="mt-0.5 text-xs text-neutral-500">
+          <div className="border-t border-neutral-100 dark:border-neutral-800 pt-4">
+            <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Guardian (optional)
+            </p>
+            <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
               For students who want a guardian kept in the loop.
             </p>
             <div className="mt-3 grid gap-4 sm:grid-cols-2">
@@ -242,7 +252,7 @@ function ProfileContent() {
 
           {saveStatus === "error" ? <FieldError>{saveError}</FieldError> : null}
 
-          <div className="flex items-center gap-3 border-t border-neutral-100 pt-4">
+          <div className="flex items-center gap-3 border-t border-neutral-100 dark:border-neutral-800 pt-4">
             <Button
               type="submit"
               disabled={!dirty || saveStatus === "saving" || !guardianEmailValid}

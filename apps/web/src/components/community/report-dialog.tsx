@@ -53,17 +53,20 @@ export function ReportDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="report-dialog-title"
-        className="relative w-full max-w-md rounded-card bg-white p-6 shadow-soft-hover"
+        className="relative w-full max-w-md rounded-card bg-white dark:bg-neutral-900 p-6 shadow-soft-hover"
       >
         <div className="flex items-start justify-between gap-4">
-          <h2 id="report-dialog-title" className="text-lg font-medium text-neutral-800">
+          <h2
+            id="report-dialog-title"
+            className="text-lg font-medium text-neutral-800 dark:text-white/90"
+          >
             Report this {targetLabel}
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-md p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="rounded-md p-1.5 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-600 dark:hover:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             <X size={18} aria-hidden="true" />
           </button>
@@ -71,7 +74,7 @@ export function ReportDialog({
 
         {done ? (
           <div className="mt-4">
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">
               Thanks — this has been sent to the moderation team for review.
             </p>
             <button
@@ -86,7 +89,7 @@ export function ReportDialog({
           <form onSubmit={(e) => void handleSubmit(e)} className="mt-4">
             <label
               htmlFor="report-reason"
-              className="mb-1.5 block text-xs font-medium text-neutral-500"
+              className="mb-1.5 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
             >
               Why are you reporting this {targetLabel}?
             </label>
@@ -99,13 +102,13 @@ export function ReportDialog({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Tell the moderation team what's wrong…"
-              className="min-h-24 w-full rounded-md border border-neutral-200 p-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="min-h-24 w-full rounded-md border border-neutral-200 dark:border-neutral-800 p-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             />
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium text-neutral-600 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                className="flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               >
                 Cancel
               </button>

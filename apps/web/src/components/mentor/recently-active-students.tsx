@@ -24,25 +24,28 @@ export function RecentlyActiveStudents({ entries }: { entries: MentorStudentProg
 
   return (
     <section aria-labelledby="recently-active-heading">
-      <h2 id="recently-active-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="recently-active-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Recently Active Students
       </h2>
       <Card className="mt-3">
         {sorted.length === 0 ? (
           <EmptyState icon={Activity} heading="No activity recorded yet" />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {sorted.map((entry) => (
               <li key={entry.studentId}>
                 <Link
                   href={`/mentor/students/${entry.studentId}`}
-                  className="flex items-center justify-between gap-3 rounded-md py-2.5 text-sm hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  className="flex items-center justify-between gap-3 rounded-md py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                 >
-                  <span className="min-w-0 truncate font-medium text-neutral-800">
+                  <span className="min-w-0 truncate font-medium text-neutral-800 dark:text-white/90">
                     {entry.studentName ?? entry.studentEmail}
                   </span>
                   <span className="flex shrink-0 items-center gap-2">
-                    <span className="text-xs text-neutral-400">
+                    <span className="text-xs text-neutral-400 dark:text-neutral-500">
                       {new Date(entry.lastActiveAt!).toLocaleDateString(undefined, {
                         month: "short",
                         day: "numeric",

@@ -89,9 +89,11 @@ function CouponsContent() {
       {formOpen ? (
         <form
           onSubmit={(e) => void create(e)}
-          className="flex flex-col gap-4 rounded-md border border-neutral-100 bg-neutral-50/50 p-4"
+          className="flex flex-col gap-4 rounded-md border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 p-4"
         >
-          <h3 className="font-heading text-sm font-semibold text-neutral-900">New coupon</h3>
+          <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+            New coupon
+          </h3>
           <div className="grid gap-4 sm:grid-cols-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="code">Code</Label>
@@ -148,7 +150,7 @@ function CouponsContent() {
             <button
               type="button"
               onClick={() => setFormOpen(false)}
-              className="text-sm font-medium text-neutral-600 hover:underline"
+              className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:underline"
             >
               Cancel
             </button>
@@ -173,35 +175,37 @@ function CouponsContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[560px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Code
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Discount
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Redemptions
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {coupons.map((coupon) => (
-                  <tr key={coupon.id} className="hover:bg-neutral-50">
-                    <td className="px-4 py-3 font-mono text-xs text-neutral-700">{coupon.code}</td>
-                    <td className="px-4 py-3 text-neutral-700">
+                  <tr key={coupon.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
+                    <td className="px-4 py-3 font-mono text-xs text-neutral-700 dark:text-neutral-300">
+                      {coupon.code}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">
                       {coupon.discountType === "PERCENTAGE"
                         ? `${coupon.discountValue}%`
                         : coupon.discountValue}
                     </td>
-                    <td className="px-4 py-3 text-neutral-600">
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                       {coupon.redemptionCount}
                       {coupon.maxRedemptions !== null ? ` / ${coupon.maxRedemptions}` : ""}
                     </td>
@@ -214,7 +218,7 @@ function CouponsContent() {
                       <button
                         type="button"
                         onClick={() => void toggleActive(coupon)}
-                        className="text-sm font-medium text-primary-600 hover:underline"
+                        className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
                       >
                         {coupon.isActive ? "Deactivate" : "Activate"}
                       </button>

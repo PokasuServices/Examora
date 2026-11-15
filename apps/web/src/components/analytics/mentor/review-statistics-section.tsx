@@ -9,7 +9,10 @@ export function ReviewStatisticsSection({
 }) {
   return (
     <section aria-labelledby="mentor-review-stats-heading">
-      <h2 id="mentor-review-stats-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="mentor-review-stats-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Review Statistics
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3">

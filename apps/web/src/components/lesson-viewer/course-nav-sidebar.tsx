@@ -30,14 +30,16 @@ export function DesktopCourseNav({
 }) {
   return (
     <aside className={collapsed ? "hidden" : "hidden shrink-0 basis-[300px] lg:block"}>
-      <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-card border border-neutral-200 bg-white p-4 shadow-soft">
+      <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-card border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 shadow-soft">
         <div className="mb-1 flex items-center justify-between">
-          <p className="font-heading text-sm font-semibold text-neutral-900">Course content</p>
+          <p className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+            Course content
+          </p>
           <button
             type="button"
             onClick={onToggleCollapse}
             aria-label="Collapse course navigation"
-            className="rounded-md p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="rounded-md p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-600 dark:hover:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             <PanelRightClose size={16} strokeWidth={1.75} aria-hidden="true" />
           </button>
@@ -60,7 +62,7 @@ export function CollapsedNavToggle({ onExpand }: { onExpand: () => void }) {
       type="button"
       onClick={onExpand}
       aria-label="Show course navigation"
-      className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-md border border-neutral-200 text-neutral-500 hover:bg-neutral-100 lg:flex"
+      className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-md border border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 lg:flex"
     >
       <PanelRightOpen size={18} strokeWidth={1.75} aria-hidden="true" />
     </button>
@@ -83,7 +85,7 @@ export function MobileCourseNavTrigger({
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Course content"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-neutral-200 text-neutral-500 hover:bg-neutral-100 lg:hidden"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 lg:hidden"
       >
         <Menu size={18} strokeWidth={1.75} aria-hidden="true" />
       </button>

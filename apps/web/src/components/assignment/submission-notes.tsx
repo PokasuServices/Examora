@@ -41,7 +41,10 @@ export function SubmissionNotes({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <label htmlFor="submission-notes" className="text-sm font-medium text-neutral-800">
+        <label
+          htmlFor="submission-notes"
+          className="text-sm font-medium text-neutral-800 dark:text-white/90"
+        >
           Notes for your reviewer
         </label>
         <AutosaveIndicator status={status} />
@@ -53,7 +56,7 @@ export function SubmissionNotes({
         onBlur={handleBlur}
         disabled={disabled}
         placeholder="Add context for your reviewer — optional"
-        className="mt-2 min-h-28 w-full rounded-md border border-neutral-200 p-3 text-sm text-neutral-800 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:bg-neutral-50 disabled:text-neutral-400"
+        className="mt-2 min-h-28 w-full rounded-md border border-neutral-200 dark:border-neutral-800 p-3 text-sm text-neutral-800 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:bg-neutral-50 dark:disabled:bg-white/[0.03] disabled:text-neutral-400 dark:disabled:text-neutral-500"
       />
     </div>
   );

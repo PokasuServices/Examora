@@ -69,40 +69,42 @@ function AttemptDetailContent() {
       <div>
         <Link
           href="/assessment/attempts"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Attempt monitoring
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{attempt.quizTitle}</h1>
-        <p className="mt-1 text-sm text-neutral-500">{attempt.userEmail}</p>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          {attempt.quizTitle}
+        </h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{attempt.userEmail}</p>
       </div>
 
       <Card>
         <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
           <div>
-            <dt className="text-neutral-500">Status</dt>
+            <dt className="text-neutral-500 dark:text-neutral-400">Status</dt>
             <dd className="mt-1">
               <Chip tone={STATUS_TONE[attempt.status]}>{statusLabel(attempt.status)}</Chip>
             </dd>
           </div>
           <div>
-            <dt className="text-neutral-500">Marks</dt>
-            <dd className="mt-1 font-medium text-neutral-900">
+            <dt className="text-neutral-500 dark:text-neutral-400">Marks</dt>
+            <dd className="mt-1 font-medium text-neutral-900 dark:text-white/90">
               {attempt.obtainedMarks ?? "—"} / {attempt.totalMarks}
             </dd>
           </div>
           <div>
-            <dt className="text-neutral-500">Percentage</dt>
-            <dd className="mt-1 font-medium text-neutral-900">
+            <dt className="text-neutral-500 dark:text-neutral-400">Percentage</dt>
+            <dd className="mt-1 font-medium text-neutral-900 dark:text-white/90">
               {attempt.percentage !== null ? `${attempt.percentage}%` : "—"}
             </dd>
           </div>
           <div>
-            <dt className="text-neutral-500">Passed</dt>
+            <dt className="text-neutral-500 dark:text-neutral-400">Passed</dt>
             <dd className="mt-1">
               {attempt.passed === null ? (
-                <span className="font-medium text-neutral-900">—</span>
+                <span className="font-medium text-neutral-900 dark:text-white/90">—</span>
               ) : (
                 <Chip tone={attempt.passed ? "success" : "danger"}>
                   {attempt.passed ? "Yes" : "No"}
@@ -114,17 +116,19 @@ function AttemptDetailContent() {
       </Card>
 
       <Card density="compact" className="min-w-0">
-        <h2 className="px-2 pt-2 text-lg font-medium text-neutral-800">Answers</h2>
+        <h2 className="px-2 pt-2 text-lg font-medium text-neutral-800 dark:text-white/90">
+          Answers
+        </h2>
         {attempt.answers.length === 0 ? (
           <EmptyState icon={ClipboardCheck} heading="No answers recorded" />
         ) : (
-          <ul className="mt-2 divide-y divide-neutral-100">
+          <ul className="mt-2 divide-y divide-neutral-100 dark:divide-neutral-800">
             {attempt.answers.map((a) => (
               <li
                 key={a.questionId}
                 className="flex flex-wrap items-center justify-between gap-3 px-2 py-3"
               >
-                <span className="min-w-0 max-w-md truncate text-sm text-neutral-800">
+                <span className="min-w-0 max-w-md truncate text-sm text-neutral-800 dark:text-white/90">
                   {a.questionText}
                 </span>
                 <div className="flex shrink-0 items-center gap-2">
@@ -144,7 +148,9 @@ function AttemptDetailContent() {
                         : "Unanswered"}
                   </Chip>
                   {a.marksAwarded !== null ? (
-                    <span className="text-xs text-neutral-500">{a.marksAwarded} marks</span>
+                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                      {a.marksAwarded} marks
+                    </span>
                   ) : null}
                 </div>
               </li>

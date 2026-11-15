@@ -73,9 +73,9 @@ function MentorDashboardContent() {
       />
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">My students</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">My students</h2>
         {dashboard.assignedStudents.length > 0 ? (
-          <ul className="mt-4 divide-y divide-neutral-100">
+          <ul className="mt-4 divide-y divide-neutral-100 dark:divide-neutral-800">
             {dashboard.assignedStudents.map((s) => (
               <li
                 key={s.studentId}
@@ -83,11 +83,11 @@ function MentorDashboardContent() {
               >
                 <Link
                   href={`/students/${s.studentId}`}
-                  className="font-medium text-primary-600 hover:underline"
+                  className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                 >
                   {s.studentEmail}
                 </Link>
-                <span className="text-neutral-400">
+                <span className="text-neutral-400 dark:text-neutral-500">
                   since {new Date(s.assignedAt).toLocaleDateString()}
                 </span>
               </li>
@@ -99,18 +99,18 @@ function MentorDashboardContent() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Upcoming tasks</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Upcoming tasks</h2>
         {dashboard.upcomingTasks.length > 0 ? (
-          <ul className="mt-4 divide-y divide-neutral-100">
+          <ul className="mt-4 divide-y divide-neutral-100 dark:divide-neutral-800">
             {dashboard.upcomingTasks.map((t) => (
               <li
                 key={t.id}
                 className="flex flex-wrap items-center justify-between gap-3 py-2.5 text-sm"
               >
-                <span className="text-neutral-700">
+                <span className="text-neutral-700 dark:text-neutral-300">
                   {t.title}{" "}
                   {t.dueDate ? (
-                    <span className="text-neutral-400">
+                    <span className="text-neutral-400 dark:text-neutral-500">
                       (due {new Date(t.dueDate).toLocaleDateString()})
                     </span>
                   ) : null}
@@ -125,13 +125,17 @@ function MentorDashboardContent() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Recent meetings</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Recent meetings</h2>
         {dashboard.recentMeetings.length > 0 ? (
-          <ul className="mt-4 divide-y divide-neutral-100">
+          <ul className="mt-4 divide-y divide-neutral-100 dark:divide-neutral-800">
             {dashboard.recentMeetings.map((m) => (
               <li key={m.id} className="py-2.5 text-sm">
-                <p className="text-neutral-700">{new Date(m.occurredAt).toLocaleString()}</p>
-                {m.summary ? <p className="mt-0.5 text-neutral-500">{m.summary}</p> : null}
+                <p className="text-neutral-700 dark:text-neutral-300">
+                  {new Date(m.occurredAt).toLocaleString()}
+                </p>
+                {m.summary ? (
+                  <p className="mt-0.5 text-neutral-500 dark:text-neutral-400">{m.summary}</p>
+                ) : null}
               </li>
             ))}
           </ul>

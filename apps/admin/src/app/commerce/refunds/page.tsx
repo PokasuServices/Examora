@@ -117,7 +117,7 @@ function RefundsContent() {
             body="Try a different status filter."
           />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {refunds.map((refund) => (
               <li
                 key={refund.id}
@@ -126,12 +126,14 @@ function RefundsContent() {
                 <div className="min-w-0">
                   <Link
                     href={`/commerce/orders/${refund.orderId}`}
-                    className="font-medium text-primary-600 hover:underline"
+                    className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                   >
                     Order {refund.orderId.slice(0, 8)}…
                   </Link>
-                  <p className="mt-1 text-sm text-neutral-600">{refund.reason}</p>
-                  <p className="mt-1 text-xs text-neutral-400">
+                  <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                    {refund.reason}
+                  </p>
+                  <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
                     {refund.requestedByEmail} · {formatMoney(refund.amount, "INR")} ·{" "}
                     {new Date(refund.requestedAt).toLocaleString()}
                   </p>

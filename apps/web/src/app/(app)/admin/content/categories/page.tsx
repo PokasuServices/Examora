@@ -73,8 +73,10 @@ function CategoriesContent() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-neutral-800">Categories</h2>
-          <p className="mt-0.5 text-sm text-neutral-500">Group courses by subject area.</p>
+          <h2 className="text-xl font-semibold text-neutral-800 dark:text-white/90">Categories</h2>
+          <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
+            Group courses by subject area.
+          </p>
         </div>
         {!formOpen ? (
           <button
@@ -104,7 +106,7 @@ function CategoriesContent() {
             <Search
               size={16}
               strokeWidth={1.75}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
               aria-hidden="true"
             />
             <input
@@ -112,7 +114,7 @@ function CategoriesContent() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name or slug…"
-              className="h-10 w-full rounded-md border border-neutral-200 bg-neutral-50 pl-9 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-white/[0.03] pl-9 pr-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             />
           </div>
           <div className="w-full sm:w-48">
@@ -126,7 +128,7 @@ function CategoriesContent() {
           </div>
         </div>
         {loadedCount > 0 ? (
-          <p className="mt-2 text-xs text-neutral-400">
+          <p className="mt-2 text-xs text-neutral-400 dark:text-neutral-500">
             Search filters the {loadedCount} loaded categories — status filtering queries the
             backend directly.
           </p>
@@ -149,30 +151,32 @@ function CategoriesContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Name
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Slug
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Order
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {categories.map((category, i) => (
-                  <tr key={category.id} className="hover:bg-neutral-50">
-                    <td className="px-4 py-3 font-medium text-neutral-800">{category.name}</td>
-                    <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-neutral-500">
+                  <tr key={category.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
+                    <td className="px-4 py-3 font-medium text-neutral-800 dark:text-white/90">
+                      {category.name}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-neutral-500 dark:text-neutral-400">
                       {category.slug}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
@@ -189,7 +193,7 @@ function CategoriesContent() {
                           aria-label={`Move ${category.name} up`}
                           disabled={i === 0}
                           onClick={() => void move(category, "up")}
-                          className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 disabled:pointer-events-none disabled:opacity-30"
+                          className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-700 dark:hover:text-neutral-300 disabled:pointer-events-none disabled:opacity-30"
                         >
                           <ArrowUp size={14} strokeWidth={2} aria-hidden="true" />
                         </button>
@@ -198,7 +202,7 @@ function CategoriesContent() {
                           aria-label={`Move ${category.name} down`}
                           disabled={i === categories.length - 1}
                           onClick={() => void move(category, "down")}
-                          className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 disabled:pointer-events-none disabled:opacity-30"
+                          className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-700 dark:hover:text-neutral-300 disabled:pointer-events-none disabled:opacity-30"
                         >
                           <ArrowDown size={14} strokeWidth={2} aria-hidden="true" />
                         </button>
@@ -209,14 +213,14 @@ function CategoriesContent() {
                         <button
                           type="button"
                           onClick={() => openEdit(category)}
-                          className="text-sm font-medium text-primary-600 hover:underline"
+                          className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
                         >
                           Edit
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeleting(category)}
-                          className="text-sm font-medium text-danger-600 hover:underline"
+                          className="text-sm font-medium text-danger-600 dark:text-danger-400 hover:underline"
                         >
                           Delete
                         </button>
@@ -236,8 +240,11 @@ function CategoriesContent() {
         message={
           deleting ? (
             <>
-              Delete <span className="font-medium text-neutral-800">{deleting.name}</span>? This
-              can&rsquo;t be undone.
+              Delete{" "}
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {deleting.name}
+              </span>
+              ? This can&rsquo;t be undone.
             </>
           ) : null
         }

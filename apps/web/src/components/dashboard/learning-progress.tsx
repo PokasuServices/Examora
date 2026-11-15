@@ -40,8 +40,10 @@ function ActivityStrip({ activity }: { activity: ActivitySummary }) {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-neutral-700">This week</p>
-        <p className="text-sm tabular-nums text-neutral-500">{activeDots} of 7 days active</p>
+        <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">This week</p>
+        <p className="text-sm tabular-nums text-neutral-500 dark:text-neutral-400">
+          {activeDots} of 7 days active
+        </p>
       </div>
       <div
         className="mt-3 flex gap-2"
@@ -54,7 +56,7 @@ function ActivityStrip({ activity }: { activity: ActivitySummary }) {
             aria-hidden="true"
             className={cn(
               "h-8 flex-1 rounded-md",
-              i < activeDots ? "bg-primary-500" : "bg-neutral-100",
+              i < activeDots ? "bg-primary-500" : "bg-neutral-100 dark:bg-white/5",
             )}
           />
         ))}
@@ -66,14 +68,16 @@ function ActivityStrip({ activity }: { activity: ActivitySummary }) {
 function CourseProgressRow({ entry }: { entry: CourseCompletionEntry }) {
   return (
     <div className="flex items-center gap-3 py-2">
-      <p className="min-w-0 flex-1 truncate text-sm text-neutral-700">{entry.courseTitle}</p>
-      <div className="h-1.5 w-24 shrink-0 overflow-hidden rounded-full bg-neutral-200">
+      <p className="min-w-0 flex-1 truncate text-sm text-neutral-700 dark:text-neutral-300">
+        {entry.courseTitle}
+      </p>
+      <div className="h-1.5 w-24 shrink-0 overflow-hidden rounded-full bg-neutral-200 dark:bg-white/10">
         <div
           className="h-full rounded-full bg-primary-600"
           style={{ width: `${entry.completionPercent}%` }}
         />
       </div>
-      <span className="w-9 shrink-0 text-right text-xs font-medium tabular-nums text-neutral-500">
+      <span className="w-9 shrink-0 text-right text-xs font-medium tabular-nums text-neutral-500 dark:text-neutral-400">
         {entry.completionPercent}%
       </span>
     </div>
@@ -87,7 +91,9 @@ export function LearningProgress() {
 
   return (
     <section>
-      <h2 className="text-xl font-semibold text-neutral-800">Learning progress</h2>
+      <h2 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+        Learning progress
+      </h2>
       <Card className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
           {activity.status === "loading" ? (
@@ -106,9 +112,11 @@ export function LearningProgress() {
           )}
         </div>
 
-        <div className="border-t border-neutral-100 pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-0">
-          <p className="text-sm font-medium text-neutral-700">Active courses</p>
-          <div className="mt-2 divide-y divide-neutral-100">
+        <div className="border-t border-neutral-100 dark:border-neutral-800 pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-0">
+          <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            Active courses
+          </p>
+          <div className="mt-2 divide-y divide-neutral-100 dark:divide-neutral-800">
             {courses.status === "loading" ? (
               <>
                 <Skeleton className="my-2 h-5 w-full" />
@@ -117,7 +125,7 @@ export function LearningProgress() {
             ) : courses.status === "error" || !courses.data ? (
               <RetryInline message="Couldn't load your courses" onRetry={courses.retry} />
             ) : courses.data.length === 0 ? (
-              <p className="py-2 text-sm text-neutral-500">
+              <p className="py-2 text-sm text-neutral-500 dark:text-neutral-400">
                 Enroll in a course to see progress here.
               </p>
             ) : (

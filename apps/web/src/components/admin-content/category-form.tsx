@@ -33,9 +33,9 @@ export function CategoryForm({
         e.preventDefault();
         onSubmit({ name, slug: slug || undefined, description: description || undefined });
       }}
-      className="flex flex-col gap-4 rounded-md border border-neutral-100 bg-neutral-50/50 p-4"
+      className="flex flex-col gap-4 rounded-md border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 p-4"
     >
-      <h3 className="font-heading text-sm font-semibold text-neutral-900">
+      <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
         {editing ? "Edit category" : "New category"}
       </h3>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -68,7 +68,7 @@ export function CategoryForm({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
-          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+          className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
         />
       </div>
       <FieldError>{error}</FieldError>
@@ -79,7 +79,7 @@ export function CategoryForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm font-medium text-neutral-600 hover:underline"
+          className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:underline"
         >
           Cancel
         </button>

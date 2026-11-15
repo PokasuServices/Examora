@@ -79,26 +79,26 @@ function FeatureFlagsContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Recommendation type
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Last updated by
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {flags.map((flag) => (
-                  <tr key={flag.type} className="hover:bg-neutral-50">
-                    <td className="px-4 py-3 font-medium text-neutral-800">
+                  <tr key={flag.type} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
+                    <td className="px-4 py-3 font-medium text-neutral-800 dark:text-white/90">
                       {TYPE_LABELS[flag.type]}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
@@ -106,7 +106,7 @@ function FeatureFlagsContent() {
                         {flag.isEnabled ? "Enabled" : "Disabled"}
                       </Chip>
                     </td>
-                    <td className="px-4 py-3 text-neutral-500">
+                    <td className="px-4 py-3 text-neutral-500 dark:text-neutral-400">
                       {flag.updatedByEmail
                         ? `${flag.updatedByEmail} · ${new Date(flag.updatedAt!).toLocaleString()}`
                         : "—"}
@@ -115,7 +115,7 @@ function FeatureFlagsContent() {
                       <button
                         type="button"
                         onClick={() => void toggle(flag)}
-                        className="text-sm font-medium text-primary-600 hover:underline"
+                        className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
                       >
                         {flag.isEnabled ? "Disable" : "Enable"}
                       </button>

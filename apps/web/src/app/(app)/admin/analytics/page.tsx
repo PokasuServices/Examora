@@ -30,13 +30,15 @@ function AdminAnalyticsContent() {
         <div>
           <Link
             href="/dashboard"
-            className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+            className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
           >
             <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
             Dashboard
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-neutral-800">Admin Analytics</h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+            Admin Analytics
+          </h1>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             How the platform is performing, end to end.
           </p>
         </div>
@@ -52,7 +54,7 @@ function AdminAnalyticsContent() {
           </div>
           <Link
             href="/admin/reports"
-            className="flex h-10 items-center rounded-md border border-neutral-200 px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+            className="flex h-10 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-4 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03]"
           >
             Reports →
           </Link>
@@ -79,8 +81,8 @@ function AdminAnalyticsContent() {
         </>
       )}
 
-      <div className="border-t border-neutral-200 pt-8">
-        <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">
+      <div className="border-t border-neutral-200 dark:border-neutral-800 pt-8">
+        <p className="text-xs font-medium uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
           Scoped to the selected date range
         </p>
       </div>

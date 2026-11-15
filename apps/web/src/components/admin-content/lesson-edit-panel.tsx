@@ -73,7 +73,7 @@ export function LessonEditPanel({
             aria-label="Move up"
             disabled={siblingIndex === 0}
             onClick={() => onMove("up")}
-            className="rounded p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 disabled:pointer-events-none disabled:opacity-30"
+            className="rounded p-1.5 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-700 dark:hover:text-neutral-300 disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowUp size={15} strokeWidth={2} aria-hidden="true" />
           </button>
@@ -82,7 +82,7 @@ export function LessonEditPanel({
             aria-label="Move down"
             disabled={siblingIndex === siblingCount - 1}
             onClick={() => onMove("down")}
-            className="rounded p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 disabled:pointer-events-none disabled:opacity-30"
+            className="rounded p-1.5 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-700 dark:hover:text-neutral-300 disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowDown size={15} strokeWidth={2} aria-hidden="true" />
           </button>
@@ -90,7 +90,7 @@ export function LessonEditPanel({
             type="button"
             aria-label="Delete lesson"
             onClick={() => setConfirmDelete(true)}
-            className="rounded p-1.5 text-danger-500 hover:bg-danger-50"
+            className="rounded p-1.5 text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-500/15"
           >
             <Trash2 size={15} strokeWidth={2} aria-hidden="true" />
           </button>
@@ -157,7 +157,7 @@ export function LessonEditPanel({
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={10}
-              className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+              className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
             />
           </div>
         ) : (
@@ -171,7 +171,7 @@ export function LessonEditPanel({
               placeholder="https://…"
               onChange={(e) => setContentUrl(e.target.value)}
             />
-            <p className="text-xs text-neutral-400">
+            <p className="text-xs text-neutral-400 dark:text-neutral-500">
               Hosted media reference — there&rsquo;s no built-in upload for lesson media yet, only a
               URL field.
             </p>
@@ -191,8 +191,9 @@ export function LessonEditPanel({
         title="Delete this lesson?"
         message={
           <>
-            Delete <span className="font-medium text-neutral-800">{lesson.title}</span>? This
-            can&rsquo;t be undone.
+            Delete{" "}
+            <span className="font-medium text-neutral-800 dark:text-white/90">{lesson.title}</span>?
+            This can&rsquo;t be undone.
           </>
         }
         confirmLabel="Delete"

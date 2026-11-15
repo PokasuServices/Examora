@@ -249,20 +249,20 @@ function Student360Content() {
       <Card>
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
-            <p className="text-neutral-500">Courses started</p>
-            <p className="mt-1 text-lg font-semibold text-neutral-900">
+            <p className="text-neutral-500 dark:text-neutral-400">Courses started</p>
+            <p className="mt-1 text-lg font-semibold text-neutral-900 dark:text-white/90">
               {learningProgress.stats.coursesStarted}
             </p>
           </div>
           <div>
-            <p className="text-neutral-500">Courses completed</p>
-            <p className="mt-1 text-lg font-semibold text-neutral-900">
+            <p className="text-neutral-500 dark:text-neutral-400">Courses completed</p>
+            <p className="mt-1 text-lg font-semibold text-neutral-900 dark:text-white/90">
               {learningProgress.stats.coursesCompleted}
             </p>
           </div>
           <div>
-            <p className="text-neutral-500">Lessons completed</p>
-            <p className="mt-1 text-lg font-semibold text-neutral-900">
+            <p className="text-neutral-500 dark:text-neutral-400">Lessons completed</p>
+            <p className="mt-1 text-lg font-semibold text-neutral-900 dark:text-white/90">
               {learningProgress.stats.lessonsCompleted}
             </p>
           </div>
@@ -270,14 +270,16 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Quiz history</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Quiz history</h2>
         {quizHistory.length > 0 ? (
-          <ul className="mt-4 divide-y divide-neutral-100">
+          <ul className="mt-4 divide-y divide-neutral-100 dark:divide-neutral-800">
             {quizHistory.slice(0, 10).map((a) => (
               <li key={a.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-                <span className="text-neutral-700">{a.quizTitle}</span>
+                <span className="text-neutral-700 dark:text-neutral-300">{a.quizTitle}</span>
                 {a.percentage !== null ? (
-                  <span className="font-medium text-neutral-600">{a.percentage}%</span>
+                  <span className="font-medium text-neutral-600 dark:text-neutral-400">
+                    {a.percentage}%
+                  </span>
                 ) : (
                   <Chip tone={QUIZ_STATUS_TONE[a.status] ?? "neutral"}>
                     {statusLabel(a.status)}
@@ -292,13 +294,16 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Assignment history</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+          Assignment history
+        </h2>
         {assignmentHistory.length > 0 ? (
-          <ul className="mt-4 divide-y divide-neutral-100">
+          <ul className="mt-4 divide-y divide-neutral-100 dark:divide-neutral-800">
             {assignmentHistory.slice(0, 10).map((s) => (
               <li key={s.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-                <span className="text-neutral-700">
-                  {s.assignmentTitle} <span className="text-neutral-400">v{s.version}</span>
+                <span className="text-neutral-700 dark:text-neutral-300">
+                  {s.assignmentTitle}{" "}
+                  <span className="text-neutral-400 dark:text-neutral-500">v{s.version}</span>
                 </span>
                 <Chip tone={ASSIGNMENT_STATUS_TONE[s.decision ?? s.status] ?? "neutral"}>
                   {statusLabel(s.decision ?? s.status)}
@@ -312,13 +317,15 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Activity timeline</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+          Activity timeline
+        </h2>
         {activityTimeline.length > 0 ? (
-          <ul className="mt-4 divide-y divide-neutral-100">
+          <ul className="mt-4 divide-y divide-neutral-100 dark:divide-neutral-800">
             {activityTimeline.slice(0, 15).map((item, i) => (
               <li key={i} className="py-2.5 text-sm">
-                <p className="text-neutral-700">{item.title}</p>
-                <p className="mt-0.5 text-xs text-neutral-400">
+                <p className="text-neutral-700 dark:text-neutral-300">{item.title}</p>
+                <p className="mt-0.5 text-xs text-neutral-400 dark:text-neutral-500">
                   {new Date(item.occurredAt).toLocaleString()}
                   {item.description ? ` · ${item.description}` : ""}
                 </p>
@@ -331,13 +338,15 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Private notes</h2>
-        <p className="mt-1 text-xs text-neutral-400">Never visible to the student.</p>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Private notes</h2>
+        <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
+          Never visible to the student.
+        </p>
         {notes.length > 0 ? (
           <ul className="mt-4 flex flex-col gap-2">
             {notes.map((n) => (
               <li key={n.id} className="flex items-start justify-between gap-3 text-sm">
-                <span className="text-neutral-700">{n.body}</span>
+                <span className="text-neutral-700 dark:text-neutral-300">{n.body}</span>
                 <Button
                   variant="ghost"
                   onClick={() => setPendingAction({ kind: "delete-note", note: n })}
@@ -364,14 +373,16 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Tasks</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Tasks</h2>
         {tasks.length > 0 ? (
           <ul className="mt-4 flex flex-col gap-2">
             {tasks.map((t) => (
               <li key={t.id} className="flex flex-wrap items-center justify-between gap-3 text-sm">
                 <span
                   className={
-                    t.status === "COMPLETED" ? "text-neutral-400 line-through" : "text-neutral-700"
+                    t.status === "COMPLETED"
+                      ? "text-neutral-400 dark:text-neutral-500 line-through"
+                      : "text-neutral-700 dark:text-neutral-300"
                   }
                 >
                   {t.title}
@@ -411,13 +422,13 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Feedback</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Feedback</h2>
         {feedback.length > 0 ? (
           <ul className="mt-4 flex flex-col gap-3">
             {feedback.map((f) => (
               <li key={f.id} className="text-sm">
-                <p className="text-neutral-700">{f.body}</p>
-                <p className="mt-0.5 text-xs text-neutral-400">
+                <p className="text-neutral-700 dark:text-neutral-300">{f.body}</p>
+                <p className="mt-0.5 text-xs text-neutral-400 dark:text-neutral-500">
                   {new Date(f.createdAt).toLocaleString()}
                 </p>
               </li>
@@ -440,13 +451,17 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Meeting history</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Meeting history</h2>
         {meetings.length > 0 ? (
           <ul className="mt-4 flex flex-col gap-3">
             {meetings.map((m) => (
               <li key={m.id} className="text-sm">
-                <p className="text-neutral-700">{new Date(m.occurredAt).toLocaleString()}</p>
-                {m.summary ? <p className="mt-0.5 text-neutral-500">{m.summary}</p> : null}
+                <p className="text-neutral-700 dark:text-neutral-300">
+                  {new Date(m.occurredAt).toLocaleString()}
+                </p>
+                {m.summary ? (
+                  <p className="mt-0.5 text-neutral-500 dark:text-neutral-400">{m.summary}</p>
+                ) : null}
               </li>
             ))}
           </ul>

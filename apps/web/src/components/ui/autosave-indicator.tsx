@@ -14,7 +14,7 @@ export function AutosaveIndicator({
 
   if (status === "saving") {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-neutral-400">
+      <span className="inline-flex items-center gap-1.5 text-xs text-neutral-400 dark:text-neutral-500">
         <Loader2
           size={13}
           strokeWidth={2}
@@ -27,14 +27,14 @@ export function AutosaveIndicator({
   }
   if (status === "error") {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-error-600">
+      <span className="inline-flex items-center gap-1.5 text-xs text-error-600 dark:text-error-400">
         <AlertCircle size={13} strokeWidth={2} aria-hidden="true" />
         {errorLabel}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs text-neutral-400">
+    <span className="inline-flex items-center gap-1.5 text-xs text-neutral-400 dark:text-neutral-500">
       <Check size={13} strokeWidth={2} aria-hidden="true" />
       Saved
     </span>

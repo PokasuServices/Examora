@@ -100,12 +100,14 @@ function AdminThreadDetailContent() {
       <div>
         <Link
           href="/community/moderation"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Moderation queue
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{thread.title}</h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          {thread.title}
+        </h1>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           {thread.isHidden ? <Chip tone="danger">Hidden</Chip> : null}
           {thread.isLocked ? <Chip tone="neutral">Locked</Chip> : null}
@@ -117,13 +119,15 @@ function AdminThreadDetailContent() {
 
       <Card>
         {thread.hiddenReason ? (
-          <p className="text-sm text-danger-600">Hidden reason: {thread.hiddenReason}</p>
+          <p className="text-sm text-danger-600 dark:text-danger-400">
+            Hidden reason: {thread.hiddenReason}
+          </p>
         ) : null}
         <p
           className={
             thread.hiddenReason
-              ? "mt-3 whitespace-pre-wrap text-sm text-neutral-700"
-              : "whitespace-pre-wrap text-sm text-neutral-700"
+              ? "mt-3 whitespace-pre-wrap text-sm text-neutral-700 dark:text-neutral-300"
+              : "whitespace-pre-wrap text-sm text-neutral-700 dark:text-neutral-300"
           }
         >
           {thread.body}

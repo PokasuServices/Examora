@@ -20,13 +20,15 @@ function MentorAnalyticsContent() {
       <div>
         <Link
           href="/mentor/dashboard"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Mentor Dashboard
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">Mentor Analytics</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          Mentor Analytics
+        </h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           How your students are performing, and where your time is going.
         </p>
       </div>

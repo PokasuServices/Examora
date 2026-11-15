@@ -85,7 +85,9 @@ export function CreateThreadForm({ initialBoardId }: { initialBoardId?: string }
           disabled={loadingBoards}
         />
         <div>
-          <span className="mb-1.5 block text-xs font-medium text-neutral-500">Type</span>
+          <span className="mb-1.5 block text-xs font-medium text-neutral-500 dark:text-neutral-400">
+            Type
+          </span>
           <SegmentedControl
             aria-label="Thread type"
             value={type}
@@ -99,7 +101,10 @@ export function CreateThreadForm({ initialBoardId }: { initialBoardId?: string }
       </div>
 
       <div>
-        <label htmlFor="thread-title" className="mb-1.5 block text-xs font-medium text-neutral-500">
+        <label
+          htmlFor="thread-title"
+          className="mb-1.5 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
+        >
           Title
         </label>
         <input
@@ -113,27 +118,30 @@ export function CreateThreadForm({ initialBoardId }: { initialBoardId?: string }
               ? "What's your question, in one sentence?"
               : "Give your discussion a clear title"
           }
-          className="h-11 w-full rounded-md border border-neutral-200 px-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="h-11 w-full rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         />
       </div>
 
       <div>
         <div className="mb-1.5 flex items-center justify-between">
-          <label htmlFor="thread-body" className="text-xs font-medium text-neutral-500">
+          <label
+            htmlFor="thread-body"
+            className="text-xs font-medium text-neutral-500 dark:text-neutral-400"
+          >
             {type === "QUESTION" ? "Describe your question" : "What's on your mind?"}
           </label>
-          <div className="inline-flex rounded-full bg-neutral-100 p-0.5 text-xs">
+          <div className="inline-flex rounded-full bg-neutral-100 dark:bg-white/5 p-0.5 text-xs">
             <button
               type="button"
               onClick={() => setMode("write")}
-              className={`rounded-full px-2.5 py-1 font-medium ${mode === "write" ? "bg-white text-neutral-900 shadow-soft" : "text-neutral-500"}`}
+              className={`rounded-full px-2.5 py-1 font-medium ${mode === "write" ? "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white/90 shadow-soft" : "text-neutral-500"}`}
             >
               Write
             </button>
             <button
               type="button"
               onClick={() => setMode("preview")}
-              className={`rounded-full px-2.5 py-1 font-medium ${mode === "preview" ? "bg-white text-neutral-900 shadow-soft" : "text-neutral-500"}`}
+              className={`rounded-full px-2.5 py-1 font-medium ${mode === "preview" ? "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white/90 shadow-soft" : "text-neutral-500"}`}
             >
               Preview
             </button>
@@ -147,23 +155,27 @@ export function CreateThreadForm({ initialBoardId }: { initialBoardId?: string }
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder="Add details — the more context you give, the easier it is for others to help."
-            className="min-h-48 w-full rounded-md border border-neutral-200 p-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="min-h-48 w-full rounded-md border border-neutral-200 dark:border-neutral-800 p-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           />
         ) : (
           <Card className="min-h-48">
             {body.trim() ? (
-              <p className="whitespace-pre-wrap text-sm text-neutral-800">{body}</p>
+              <p className="whitespace-pre-wrap text-sm text-neutral-800 dark:text-white/90">
+                {body}
+              </p>
             ) : (
-              <p className="text-sm text-neutral-400">Nothing to preview yet.</p>
+              <p className="text-sm text-neutral-400 dark:text-neutral-500">
+                Nothing to preview yet.
+              </p>
             )}
           </Card>
         )}
       </div>
 
-      {error ? <p className="text-sm text-danger-600">{error}</p> : null}
+      {error ? <p className="text-sm text-danger-600 dark:text-danger-400">{error}</p> : null}
 
       <div className="flex items-center justify-end gap-3">
-        <p className="mr-auto text-xs text-neutral-400">
+        <p className="mr-auto text-xs text-neutral-400 dark:text-neutral-500">
           You can attach files once this is published.
         </p>
         <button

@@ -14,11 +14,14 @@ export function ProgressTracker({
 
   return (
     <section aria-labelledby="progress-tracker-heading">
-      <h2 id="progress-tracker-heading" className="text-xl font-semibold text-neutral-800">
+      <h2
+        id="progress-tracker-heading"
+        className="text-xl font-semibold text-neutral-800 dark:text-white/90"
+      >
         Progress tracker
       </h2>
       <Card className="mt-4">
-        <ul className="flex flex-col divide-y divide-neutral-100">
+        <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
           {curriculum.subjects.map((subject) => {
             const stats = subjectStats.get(subject.id);
             const percent =
@@ -27,14 +30,16 @@ export function ProgressTracker({
                 : 0;
             return (
               <li key={subject.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
-                <p className="min-w-0 flex-1 truncate text-sm text-neutral-700">{subject.title}</p>
-                <div className="h-1.5 w-28 shrink-0 overflow-hidden rounded-full bg-neutral-200">
+                <p className="min-w-0 flex-1 truncate text-sm text-neutral-700 dark:text-neutral-300">
+                  {subject.title}
+                </p>
+                <div className="h-1.5 w-28 shrink-0 overflow-hidden rounded-full bg-neutral-200 dark:bg-white/10">
                   <div
                     className="h-full rounded-full bg-primary-600"
                     style={{ width: `${percent}%` }}
                   />
                 </div>
-                <span className="w-9 shrink-0 text-right text-xs font-medium tabular-nums text-neutral-500">
+                <span className="w-9 shrink-0 text-right text-xs font-medium tabular-nums text-neutral-500 dark:text-neutral-400">
                   {percent}%
                 </span>
               </li>

@@ -27,10 +27,13 @@ export default function ForgotPasswordPage() {
   if (sent) {
     return (
       <AuthLayout title="Check your email">
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">
           If an account exists for <strong>{email}</strong>, we&apos;ve sent a password reset link.
         </p>
-        <Link href="/login" className="mt-6 inline-block text-sm text-primary-600 hover:underline">
+        <Link
+          href="/login"
+          className="mt-6 inline-block text-sm text-primary-600 dark:text-primary-400 hover:underline"
+        >
           Back to login
         </Link>
       </AuthLayout>
@@ -55,7 +58,10 @@ export default function ForgotPasswordPage() {
           {submitting ? "Sending…" : "Send reset link"}
         </Button>
       </form>
-      <Link href="/login" className="mt-6 inline-block text-sm text-primary-600 hover:underline">
+      <Link
+        href="/login"
+        className="mt-6 inline-block text-sm text-primary-600 dark:text-primary-400 hover:underline"
+      >
         Back to login
       </Link>
     </AuthLayout>

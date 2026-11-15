@@ -12,13 +12,13 @@ function ReportsContent() {
       <div>
         <Link
           href="/admin/analytics"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Admin Analytics
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">Reports</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">Reports</h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Run a report on demand, export it, or schedule it to run automatically.
         </p>
       </div>

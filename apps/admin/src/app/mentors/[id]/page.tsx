@@ -103,13 +103,15 @@ function MentorDetailContent() {
       <div>
         <Link
           href="/mentors"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Mentors
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{mentor.email}</h1>
-        <p className="mt-2 text-sm text-neutral-600">
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          {mentor.email}
+        </h1>
+        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
           Workload: {mentor.activeStudentCount} / {mentor.maxStudents} students
         </p>
       </div>
@@ -117,7 +119,7 @@ function MentorDetailContent() {
       <FieldError>{error}</FieldError>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Profile</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Profile</h2>
         <form onSubmit={save} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-wrap items-end gap-3">
             <div className="flex flex-col gap-1.5">
@@ -146,7 +148,7 @@ function MentorDetailContent() {
             <Label htmlFor="bio">Bio</Label>
             <textarea
               id="bio"
-              className="min-h-24 w-full rounded-md border border-neutral-300 bg-white p-3 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="min-h-24 w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-sm text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
             />
@@ -158,11 +160,13 @@ function MentorDetailContent() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Danger zone</h2>
-        <p className="mt-1 text-sm text-neutral-500">Permanently delete this mentor profile.</p>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Danger zone</h2>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+          Permanently delete this mentor profile.
+        </p>
         <Button
           variant="ghost"
-          className="mt-4 text-danger-600 hover:bg-danger-50"
+          className="mt-4 text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-500/15"
           onClick={() => setConfirmDelete(true)}
         >
           Delete mentor profile

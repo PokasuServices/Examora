@@ -30,7 +30,7 @@ function ContentOverviewContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm text-neutral-500 dark:text-neutral-400">
         A real-time snapshot of the course content hierarchy and its publishing state.
       </p>
 
@@ -88,12 +88,15 @@ function ContentOverviewContent() {
       )}
 
       <Card>
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
           Subjects, topics, modules and lessons aren&rsquo;t shown here — the backend has no
           platform-wide count for them (each list endpoint requires a specific parent course,
           subject, topic, or module), so a total would mean fetching every course&rsquo;s entire
           hierarchy just to render this page. Open a course from{" "}
-          <a href="/admin/content/courses" className="text-primary-600 hover:underline">
+          <a
+            href="/admin/content/courses"
+            className="text-primary-600 dark:text-primary-400 hover:underline"
+          >
             Courses
           </a>{" "}
           to see its full structure.

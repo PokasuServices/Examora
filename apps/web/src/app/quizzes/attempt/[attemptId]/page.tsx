@@ -64,7 +64,7 @@ function AttemptContent() {
   if (loadState === "loading" || !attempt || !question) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-        <p className="text-sm text-neutral-500">Loading…</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">Loading…</p>
       </main>
     );
   }
@@ -75,7 +75,7 @@ function AttemptContent() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 dark:bg-white/[0.03]">
       <AttemptHeader
         quizId={attempt.quizId}
         quizTitle={attempt.quizTitle}
@@ -106,7 +106,7 @@ function AttemptContent() {
               type="button"
               disabled={activeIndex === 0}
               onClick={() => navigate(-1)}
-              className="flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium text-neutral-600 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-40"
+              className="flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-40"
             >
               Previous
             </button>
@@ -114,7 +114,7 @@ function AttemptContent() {
               type="button"
               disabled={activeIndex === questions.length - 1}
               onClick={() => navigate(1)}
-              className="flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium text-neutral-600 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-40"
+              className="flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-40"
             >
               Next
             </button>
@@ -128,11 +128,23 @@ function AttemptContent() {
           </button>
         </div>
 
-        <p className="text-center text-xs text-neutral-400">
-          Use <kbd className="rounded border border-neutral-200 px-1 py-0.5">←</kbd>{" "}
-          <kbd className="rounded border border-neutral-200 px-1 py-0.5">→</kbd> to move between
-          questions, <kbd className="rounded border border-neutral-200 px-1 py-0.5">1</kbd>–
-          <kbd className="rounded border border-neutral-200 px-1 py-0.5">9</kbd> to select an option
+        <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">
+          Use{" "}
+          <kbd className="rounded border border-neutral-200 dark:border-neutral-800 px-1 py-0.5">
+            ←
+          </kbd>{" "}
+          <kbd className="rounded border border-neutral-200 dark:border-neutral-800 px-1 py-0.5">
+            →
+          </kbd>{" "}
+          to move between questions,{" "}
+          <kbd className="rounded border border-neutral-200 dark:border-neutral-800 px-1 py-0.5">
+            1
+          </kbd>
+          –
+          <kbd className="rounded border border-neutral-200 dark:border-neutral-800 px-1 py-0.5">
+            9
+          </kbd>{" "}
+          to select an option
         </p>
       </main>
 

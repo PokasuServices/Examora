@@ -114,13 +114,15 @@ function CmsMediaContent() {
       <Card>
         <label
           htmlFor="asset-upload"
-          className="flex h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-neutral-200 text-neutral-500 hover:border-primary-300 hover:bg-primary-50/30"
+          className="flex h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:border-primary-300 hover:bg-primary-50/30"
         >
           <Upload size={20} strokeWidth={1.75} aria-hidden="true" />
           <span className="text-sm font-medium">
             {uploading ? "Uploading…" : "Click to upload an asset"}
           </span>
-          <span className="text-xs text-neutral-400">PNG, JPEG, GIF, WEBP, SVG, or PDF</span>
+          <span className="text-xs text-neutral-400 dark:text-neutral-500">
+            PNG, JPEG, GIF, WEBP, SVG, or PDF
+          </span>
         </label>
         <input
           id="asset-upload"
@@ -131,7 +133,9 @@ function CmsMediaContent() {
           disabled={uploading}
           className="sr-only"
         />
-        {uploadError ? <p className="mt-2 text-sm text-danger-600">{uploadError}</p> : null}
+        {uploadError ? (
+          <p className="mt-2 text-sm text-danger-600 dark:text-danger-400">{uploadError}</p>
+        ) : null}
       </Card>
 
       {status === "loading" ? (
@@ -156,31 +160,36 @@ function CmsMediaContent() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {assets.map((asset) => (
             <Card key={asset.id} density="compact" className="flex flex-col gap-3">
-              <div className="flex h-20 items-center justify-center rounded-md bg-neutral-100">
+              <div className="flex h-20 items-center justify-center rounded-md bg-neutral-100 dark:bg-white/5">
                 <FileText
                   size={24}
                   strokeWidth={1.5}
-                  className="text-neutral-400"
+                  className="text-neutral-400 dark:text-neutral-500"
                   aria-hidden="true"
                 />
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-neutral-800" title={asset.fileName}>
+                <p
+                  className="truncate text-sm font-medium text-neutral-800 dark:text-white/90"
+                  title={asset.fileName}
+                >
                   {asset.fileName}
                 </p>
-                <p className="mt-0.5 text-xs text-neutral-500">
+                <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
                   {formatSize(asset.sizeBytes)} · used {asset.usageCount}×
                 </p>
-                <p className="mt-0.5 truncate text-xs text-neutral-400">{asset.uploadedByEmail}</p>
+                <p className="mt-0.5 truncate text-xs text-neutral-400 dark:text-neutral-500">
+                  {asset.uploadedByEmail}
+                </p>
               </div>
-              <div className="flex items-center justify-between gap-2 border-t border-neutral-100 pt-2">
+              <div className="flex items-center justify-between gap-2 border-t border-neutral-100 dark:border-neutral-800 pt-2">
                 <Chip tone={SCAN_TONE[asset.scanStatus]}>{statusLabel(asset.scanStatus)}</Chip>
                 <button
                   type="button"
                   disabled={asset.usageCount > 0}
                   onClick={() => setDeleteTarget(asset)}
                   title={asset.usageCount > 0 ? "Still referenced by content" : undefined}
-                  className="text-xs font-medium text-danger-600 hover:underline disabled:pointer-events-none disabled:opacity-40"
+                  className="text-xs font-medium text-danger-600 dark:text-danger-400 hover:underline disabled:pointer-events-none disabled:opacity-40"
                 >
                   Delete
                 </button>
@@ -196,8 +205,11 @@ function CmsMediaContent() {
         message={
           deleteTarget ? (
             <>
-              Delete <span className="font-medium text-neutral-800">{deleteTarget.fileName}</span>?
-              This can&rsquo;t be undone.
+              Delete{" "}
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {deleteTarget.fileName}
+              </span>
+              ? This can&rsquo;t be undone.
             </>
           ) : null
         }

@@ -24,9 +24,11 @@ export function AnnouncementCreateForm({
         e.preventDefault();
         onSubmit({ title, body });
       }}
-      className="flex flex-col gap-4 rounded-md border border-neutral-100 bg-neutral-50/50 p-4"
+      className="flex flex-col gap-4 rounded-md border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 p-4"
     >
-      <h3 className="font-heading text-sm font-semibold text-neutral-900">New announcement</h3>
+      <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+        New announcement
+      </h3>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="announcement-title">Title</Label>
         <Input
@@ -45,7 +47,7 @@ export function AnnouncementCreateForm({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={3}
-          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+          className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
         />
       </div>
       <FieldError>{error}</FieldError>
@@ -56,7 +58,7 @@ export function AnnouncementCreateForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm font-medium text-neutral-600 hover:underline"
+          className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:underline"
         >
           Cancel
         </button>
@@ -95,7 +97,7 @@ export function AnnouncementFieldsForm({
       className="flex flex-col gap-4"
     >
       {!editable ? (
-        <p className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-500">
+        <p className="rounded-md bg-neutral-100 dark:bg-white/5 px-3 py-2 text-xs text-neutral-500 dark:text-neutral-400">
           Only content in Draft can be edited — send it back to draft first.
         </p>
       ) : null}
@@ -117,7 +119,7 @@ export function AnnouncementFieldsForm({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={5}
-          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 disabled:bg-neutral-50 disabled:text-neutral-500"
+          className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 disabled:bg-neutral-50 dark:disabled:bg-white/[0.03] disabled:text-neutral-500 dark:disabled:text-neutral-400"
         />
       </div>
       <FieldError>{error}</FieldError>

@@ -23,7 +23,7 @@ function OAuthCallbackContent() {
 
   return (
     <main className="flex min-h-screen items-center justify-center">
-      <p className="text-sm text-neutral-600">Signing you in…</p>
+      <p className="text-sm text-neutral-600 dark:text-neutral-400">Signing you in…</p>
     </main>
   );
 }

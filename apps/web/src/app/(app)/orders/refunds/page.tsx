@@ -65,11 +65,11 @@ function RefundsContent() {
             <div className="min-w-0">
               <Link
                 href={`/orders/${refund.orderId}`}
-                className="font-medium text-primary-700 hover:underline"
+                className="font-medium text-primary-700 dark:text-primary-300 hover:underline"
               >
                 {refund.courseTitle ?? shortOrderId(refund.orderId)}
               </Link>
-              <p className="mt-0.5 text-xs text-neutral-500">
+              <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
                 {shortOrderId(refund.orderId)}
                 {refund.currency ? ` · ${formatMoney(refund.amount, refund.currency)}` : ""}
               </p>
@@ -77,9 +77,9 @@ function RefundsContent() {
             <Chip tone={refundStatusTone(refund.status)}>{statusLabel(refund.status)}</Chip>
           </div>
 
-          <p className="mt-3 text-sm text-neutral-700">{refund.reason}</p>
+          <p className="mt-3 text-sm text-neutral-700 dark:text-neutral-300">{refund.reason}</p>
 
-          <div className="mt-4 flex flex-col gap-2 border-t border-neutral-100 pt-3 text-xs text-neutral-500">
+          <div className="mt-4 flex flex-col gap-2 border-t border-neutral-100 dark:border-neutral-800 pt-3 text-xs text-neutral-500 dark:text-neutral-400">
             <p>Requested {formatDate(refund.requestedAt)}</p>
             {refund.reviewedAt ? (
               <p>

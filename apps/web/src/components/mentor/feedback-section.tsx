@@ -33,7 +33,7 @@ export function FeedbackSection({
 
   return (
     <section aria-labelledby="feedback-heading">
-      <h2 id="feedback-heading" className="text-lg font-medium text-neutral-800">
+      <h2 id="feedback-heading" className="text-lg font-medium text-neutral-800 dark:text-white/90">
         Feedback Timeline
       </h2>
       <Card className="mt-3">
@@ -46,7 +46,7 @@ export function FeedbackSection({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Share feedback — the student will see this"
-            className="min-h-20 w-full rounded-md border border-neutral-200 p-3 text-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="min-h-20 w-full rounded-md border border-neutral-200 dark:border-neutral-800 p-3 text-sm placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           />
           <button
             type="submit"
@@ -57,15 +57,17 @@ export function FeedbackSection({
           </button>
         </form>
 
-        <div className="mt-4 border-t border-neutral-100 pt-4">
+        <div className="mt-4 border-t border-neutral-100 dark:border-neutral-800 pt-4">
           {sorted.length === 0 ? (
             <EmptyState icon={MessageSquare} heading="No feedback shared yet" />
           ) : (
             <ul className="flex flex-col gap-3">
               {sorted.map((f) => (
-                <li key={f.id} className="rounded-md bg-neutral-50 p-3">
-                  <p className="whitespace-pre-wrap text-sm text-neutral-700">{f.body}</p>
-                  <p className="mt-1 text-xs text-neutral-400">
+                <li key={f.id} className="rounded-md bg-neutral-50 dark:bg-white/[0.03] p-3">
+                  <p className="whitespace-pre-wrap text-sm text-neutral-700 dark:text-neutral-300">
+                    {f.body}
+                  </p>
+                  <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
                     {new Date(f.createdAt).toLocaleDateString(undefined, {
                       month: "short",
                       day: "numeric",

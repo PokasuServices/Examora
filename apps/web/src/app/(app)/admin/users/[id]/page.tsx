@@ -50,8 +50,13 @@ function UserDetailContent({ userId }: { userId: string }) {
   if (status === "not-found" || !user) {
     return (
       <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-xl font-semibold text-neutral-800">User not found</h1>
-        <Link href="/admin/users" className="text-sm font-medium text-primary-600 hover:underline">
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+          User not found
+        </h1>
+        <Link
+          href="/admin/users"
+          className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
+        >
           ← Back to users
         </Link>
       </div>
@@ -73,7 +78,7 @@ function UserDetailContent({ userId }: { userId: string }) {
       <div>
         <Link
           href="/admin/users"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Users
@@ -85,9 +90,13 @@ function UserDetailContent({ userId }: { userId: string }) {
         <div className="flex items-start gap-4">
           <ProfileAvatar user={user} size="xl" />
           <div className="min-w-0">
-            <h1 className="text-xl font-semibold text-neutral-800">{authorDisplayName(user)}</h1>
-            <p className="mt-0.5 text-sm text-neutral-500">{user.email}</p>
-            {user.phone ? <p className="mt-0.5 text-sm text-neutral-500">{user.phone}</p> : null}
+            <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+              {authorDisplayName(user)}
+            </h1>
+            <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">{user.email}</p>
+            {user.phone ? (
+              <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">{user.phone}</p>
+            ) : null}
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               {user.roles.map((role) => (
                 <Chip key={role} tone="primary">
@@ -99,7 +108,7 @@ function UserDetailContent({ userId }: { userId: string }) {
                 {user.emailVerified ? "Email verified" : "Email not verified"}
               </Chip>
             </div>
-            <p className="mt-2 text-xs text-neutral-400">
+            <p className="mt-2 text-xs text-neutral-400 dark:text-neutral-500">
               Created{" "}
               {new Date(user.createdAt).toLocaleDateString(undefined, {
                 month: "long",
@@ -115,7 +124,9 @@ function UserDetailContent({ userId }: { userId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={ShieldCheck} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Account status</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+            Account status
+          </h2>
         </div>
         <div className="mt-4">
           <StatusManager
@@ -131,7 +142,7 @@ function UserDetailContent({ userId }: { userId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={UserIcon} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Roles</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Roles</h2>
         </div>
         <div className="mt-4">
           <RoleManager
@@ -147,7 +158,9 @@ function UserDetailContent({ userId }: { userId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={History} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Account activity</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+            Account activity
+          </h2>
         </div>
         <div className="mt-4">
           <UserAuditPanel

@@ -115,15 +115,18 @@ function CommunitySearchContent() {
 
   return (
     <main className="flex flex-col gap-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
-        <Link href="/community" className="hover:text-primary-600 hover:underline">
+      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 dark:text-neutral-400">
+        <Link
+          href="/community"
+          className="hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
+        >
           Community
         </Link>
       </nav>
 
       <div>
-        <h1 className="text-xl font-semibold text-neutral-800">Search</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">Search</h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Search discussion titles and bodies across the whole community.
         </p>
       </div>
@@ -133,7 +136,7 @@ function CommunitySearchContent() {
           <SearchIcon
             size={16}
             strokeWidth={1.75}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
             aria-hidden="true"
           />
           <label htmlFor="search-q" className="sr-only">
@@ -145,13 +148,13 @@ function CommunitySearchContent() {
             onChange={(e) => setQuery(e.target.value)}
             minLength={2}
             placeholder="Search by keyword… (at least 2 characters)"
-            className="h-11 w-full rounded-md border border-neutral-200 bg-white pl-9 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="h-11 w-full rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 pl-9 pr-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           />
         </div>
 
         {recent.length > 0 && query.trim().length === 0 ? (
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-neutral-400">Recent:</span>
+            <span className="text-xs text-neutral-400 dark:text-neutral-500">Recent:</span>
             {recent.map((q) => (
               <button
                 key={q}
@@ -161,7 +164,7 @@ function CommunitySearchContent() {
                   setPage(1);
                   runSearch(q, 1);
                 }}
-                className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs text-neutral-600 hover:bg-neutral-200"
+                className="rounded-full bg-neutral-100 dark:bg-white/5 px-2.5 py-1 text-xs text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-white/10"
               >
                 {q}
               </button>
@@ -173,7 +176,7 @@ function CommunitySearchContent() {
                 setRecent([]);
               }}
               aria-label="Clear recent searches"
-              className="ml-1 flex h-5 w-5 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100"
+              className="ml-1 flex h-5 w-5 items-center justify-center rounded-full text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5"
             >
               <X size={12} aria-hidden="true" />
             </button>
@@ -215,7 +218,7 @@ function CommunitySearchContent() {
         <EmptyState heading="No results" body={`Nothing matched "${query}".`} />
       ) : status === "ready" ? (
         <>
-          <p className="text-sm text-neutral-500" aria-live="polite">
+          <p className="text-sm text-neutral-500 dark:text-neutral-400" aria-live="polite">
             {total} {total === 1 ? "result" : "results"}
           </p>
           <div className="flex flex-col gap-3">

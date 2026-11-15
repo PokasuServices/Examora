@@ -7,21 +7,25 @@ import { SubmissionStatusChip } from "@/components/assignment/submission-status-
 export function AssignmentHistorySection({ history }: { history: SubmissionHistoryItem[] }) {
   return (
     <section aria-labelledby="assignment-history-heading">
-      <h2 id="assignment-history-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="assignment-history-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Assignment Performance
       </h2>
       <Card className="mt-3">
         {history.length === 0 ? (
           <EmptyState icon={ClipboardList} heading="No assignment submissions yet" />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {history.slice(0, 10).map((h) => (
               <li key={h.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-                <span className="min-w-0 flex-1 truncate text-neutral-700">
-                  {h.assignmentTitle} <span className="text-neutral-400">v{h.version}</span>
+                <span className="min-w-0 flex-1 truncate text-neutral-700 dark:text-neutral-300">
+                  {h.assignmentTitle}{" "}
+                  <span className="text-neutral-400 dark:text-neutral-500">v{h.version}</span>
                 </span>
                 {h.obtainedMarks !== null ? (
-                  <span className="shrink-0 tabular-nums text-neutral-500">
+                  <span className="shrink-0 tabular-nums text-neutral-500 dark:text-neutral-400">
                     {h.obtainedMarks} marks
                   </span>
                 ) : null}

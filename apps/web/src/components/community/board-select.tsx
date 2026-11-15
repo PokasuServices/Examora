@@ -19,7 +19,10 @@ export function BoardSelect({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-xs font-medium text-neutral-500">
+      <label
+        htmlFor={id}
+        className="mb-1.5 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
+      >
         Board
       </label>
       <div className="relative">
@@ -28,7 +31,7 @@ export function BoardSelect({
           value={value}
           disabled={disabled}
           onChange={(e) => onChange(e.target.value)}
-          className="h-11 w-full appearance-none rounded-md border border-neutral-200 bg-white pl-3 pr-9 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-400"
+          className="h-11 w-full appearance-none rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 pl-3 pr-9 text-sm text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:bg-neutral-50 dark:disabled:bg-white/[0.03] disabled:text-neutral-400 dark:disabled:text-neutral-500"
         >
           <option value="" disabled>
             Choose a board…
@@ -46,7 +49,7 @@ export function BoardSelect({
         <ChevronDown
           size={16}
           strokeWidth={1.75}
-          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400"
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
           aria-hidden="true"
         />
       </div>

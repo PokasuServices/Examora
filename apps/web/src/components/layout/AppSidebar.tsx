@@ -98,7 +98,7 @@ export function AppSidebar() {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        "no-scrollbar fixed left-0 top-0 z-50 mt-[65px] flex h-[calc(100vh-65px)] flex-col overflow-hidden border-r border-neutral-200 bg-white px-2 text-neutral-900 transition-all duration-300 ease-in-out dark:border-neutral-800 dark:bg-neutral-900 lg:mt-0 lg:h-screen lg:translate-x-0",
+        "no-scrollbar fixed left-0 top-0 z-50 mt-[65px] flex h-[calc(100vh-65px)] flex-col overflow-hidden border-r border-neutral-200 bg-white px-2 text-neutral-900 dark:text-white/90 transition-all duration-300 ease-in-out dark:border-neutral-800 dark:bg-neutral-900 lg:mt-0 lg:h-screen lg:translate-x-0",
         showLabels ? "w-sidebar-max" : "lg:w-sidebar-min",
         isMobileOpen ? "translate-x-0" : "-translate-x-full",
       )}
@@ -118,7 +118,7 @@ export function AppSidebar() {
               <div key={group.title}>
                 <h2
                   className={cn(
-                    "mb-2 flex px-2 text-xs uppercase leading-5 text-neutral-400",
+                    "mb-2 flex px-2 text-xs uppercase leading-5 text-neutral-400 dark:text-neutral-500",
                     showLabels ? "justify-start" : "lg:justify-center",
                   )}
                 >
@@ -195,7 +195,7 @@ export function AppSidebar() {
                                         {sub.name}
                                         <ExternalLink
                                           size={14}
-                                          className="ml-auto text-neutral-400"
+                                          className="ml-auto text-neutral-400 dark:text-neutral-500"
                                           aria-hidden="true"
                                         />
                                       </a>

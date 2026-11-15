@@ -41,8 +41,11 @@ export function CmsEditorPageShell({
   if (status === "not-found") {
     return (
       <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-xl font-semibold text-neutral-800">Not found</h1>
-        <Link href={backHref} className="text-sm font-medium text-primary-600 hover:underline">
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">Not found</h1>
+        <Link
+          href={backHref}
+          className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
+        >
           ← Back to {backLabel}
         </Link>
       </div>
@@ -64,18 +67,20 @@ export function CmsEditorPageShell({
       <div>
         <Link
           href={backHref}
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           {backLabel}
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{title}</h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">{title}</h1>
       </div>
 
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={Clock} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Status &amp; publishing</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+            Status &amp; publishing
+          </h2>
         </div>
         <div className="mt-4">{workflowActions}</div>
       </Card>
@@ -83,7 +88,7 @@ export function CmsEditorPageShell({
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={FileEdit} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Content</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Content</h2>
         </div>
         <div className="mt-4">{fieldsForm}</div>
       </Card>
@@ -91,7 +96,9 @@ export function CmsEditorPageShell({
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={History} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Version history</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+            Version history
+          </h2>
         </div>
         <div className="mt-4">{versionHistory}</div>
       </Card>

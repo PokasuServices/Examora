@@ -12,7 +12,10 @@ export function RevenueSection({ revenue }: { revenue: AdminRevenueAnalytics }) 
 
   return (
     <section aria-labelledby="admin-revenue-heading">
-      <h2 id="admin-revenue-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="admin-revenue-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Revenue
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-5">

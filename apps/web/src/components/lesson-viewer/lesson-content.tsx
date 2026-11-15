@@ -12,32 +12,40 @@ import type { LessonWithProgress } from "@examora/types";
 // renders identically to itself either way.
 const markdownComponents: Components = {
   h1: ({ children }) => (
-    <h2 className="mt-8 font-heading text-xl font-bold text-neutral-900 first:mt-0">{children}</h2>
+    <h2 className="mt-8 font-heading text-xl font-bold text-neutral-900 dark:text-white/90 first:mt-0">
+      {children}
+    </h2>
   ),
-  h2: ({ children }) => <h3 className="mt-6 text-lg font-medium text-neutral-800">{children}</h3>,
-  h3: ({ children }) => <h4 className="mt-5 text-lg font-medium text-neutral-800">{children}</h4>,
+  h2: ({ children }) => (
+    <h3 className="mt-6 text-lg font-medium text-neutral-800 dark:text-white/90">{children}</h3>
+  ),
+  h3: ({ children }) => (
+    <h4 className="mt-5 text-lg font-medium text-neutral-800 dark:text-white/90">{children}</h4>
+  ),
   p: ({ children }) => <p className="mt-4 first:mt-0">{children}</p>,
   ul: ({ children }) => <ul className="mt-4 list-disc space-y-1.5 pl-6">{children}</ul>,
   ol: ({ children }) => <ol className="mt-4 list-decimal space-y-1.5 pl-6">{children}</ol>,
-  li: ({ children }) => <li className="text-neutral-700">{children}</li>,
+  li: ({ children }) => <li className="text-neutral-700 dark:text-neutral-300">{children}</li>,
   a: ({ children, href }) => (
     <a
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="text-primary-600 underline decoration-primary-200 underline-offset-2 hover:decoration-primary-500"
+      className="text-primary-600 dark:text-primary-400 underline decoration-primary-200 underline-offset-2 hover:decoration-primary-500"
     >
       {children}
     </a>
   ),
-  strong: ({ children }) => <strong className="font-semibold text-neutral-900">{children}</strong>,
+  strong: ({ children }) => (
+    <strong className="font-semibold text-neutral-900 dark:text-white/90">{children}</strong>
+  ),
   blockquote: ({ children }) => (
-    <blockquote className="mt-4 border-l-2 border-primary-200 pl-4 text-neutral-600 italic">
+    <blockquote className="mt-4 border-l-2 border-primary-200 dark:border-primary-500/30 pl-4 text-neutral-600 dark:text-neutral-400 italic">
       {children}
     </blockquote>
   ),
   code: ({ children }) => (
-    <code className="rounded bg-neutral-100 px-1.5 py-0.5 text-[0.875em] text-neutral-800">
+    <code className="rounded bg-neutral-100 dark:bg-white/5 px-1.5 py-0.5 text-[0.875em] text-neutral-800 dark:text-white/90">
       {children}
     </code>
   ),
@@ -46,10 +54,14 @@ const markdownComponents: Components = {
       {children}
     </pre>
   ),
-  hr: () => <hr className="my-6 border-neutral-100" />,
+  hr: () => <hr className="my-6 border-neutral-100 dark:border-neutral-800" />,
   img: ({ src, alt }) => (
     // Plain <img>, not next/image — lesson image URLs are arbitrary external hosts, not part of any configured image domain allowlist.
-    <img src={src} alt={alt ?? ""} className="mt-4 rounded-md border border-neutral-100" />
+    <img
+      src={src}
+      alt={alt ?? ""}
+      className="mt-4 rounded-md border border-neutral-100 dark:border-neutral-800"
+    />
   ),
 };
 
@@ -63,11 +75,13 @@ const MEDIA_LABEL: Record<"VIDEO" | "PDF" | "IMAGE", { icon: typeof PlayCircle; 
 export function LessonContent({ lesson }: { lesson: LessonWithProgress }) {
   if (lesson.contentType === "TEXT" || lesson.contentType === "ARTICLE") {
     return (
-      <div className="max-w-none text-base leading-relaxed text-neutral-700 sm:text-lg sm:leading-relaxed">
+      <div className="max-w-none text-base leading-relaxed text-neutral-700 dark:text-neutral-300 sm:text-lg sm:leading-relaxed">
         {lesson.body ? (
           <Markdown components={markdownComponents}>{lesson.body}</Markdown>
         ) : (
-          <p className="text-neutral-400">No content has been added to this lesson yet.</p>
+          <p className="text-neutral-400 dark:text-neutral-500">
+            No content has been added to this lesson yet.
+          </p>
         )}
       </div>
     );
@@ -81,7 +95,7 @@ export function LessonContent({ lesson }: { lesson: LessonWithProgress }) {
         href={lesson.contentUrl}
         target="_blank"
         rel="noreferrer"
-        className="flex items-center gap-3 rounded-card border border-neutral-200 bg-neutral-50 p-6 text-primary-700 shadow-soft transition-colors hover:bg-primary-50"
+        className="flex items-center gap-3 rounded-card border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-white/[0.03] p-6 text-primary-700 dark:text-primary-300 shadow-soft transition-colors hover:bg-primary-50 dark:hover:bg-primary-500/15"
       >
         <Icon size={24} strokeWidth={1.75} aria-hidden="true" />
         <span className="text-sm font-medium">{media.label} ↗</span>
@@ -89,5 +103,9 @@ export function LessonContent({ lesson }: { lesson: LessonWithProgress }) {
     );
   }
 
-  return <p className="text-neutral-400">No content is available for this lesson yet.</p>;
+  return (
+    <p className="text-neutral-400 dark:text-neutral-500">
+      No content is available for this lesson yet.
+    </p>
+  );
 }

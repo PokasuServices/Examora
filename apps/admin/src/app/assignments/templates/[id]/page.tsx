@@ -124,12 +124,14 @@ function TemplateDetailContent() {
       <div>
         <Link
           href="/assignments/templates"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Templates
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{template.title}</h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          {template.title}
+        </h1>
       </div>
 
       <FieldError>{error}</FieldError>
@@ -180,7 +182,7 @@ function TemplateDetailContent() {
             <Label htmlFor="brief">Brief</Label>
             <textarea
               id="brief"
-              className="min-h-24 w-full rounded-md border border-neutral-300 p-3 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="min-h-24 w-full rounded-md border border-neutral-300 dark:border-neutral-700 p-3 text-sm text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               value={brief}
               onChange={(e) => setBrief(e.target.value)}
             />

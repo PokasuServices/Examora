@@ -22,23 +22,23 @@ const buttonVariants = cva(
         primary:
           "border-primary-600 bg-primary-600 text-white hover:border-primary-700 hover:bg-primary-700",
         secondary:
-          "border-transparent bg-neutral-200 text-neutral-700 hover:bg-neutral-300 hover:text-neutral-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10",
+          "border-transparent bg-neutral-200 text-neutral-700 hover:bg-neutral-300 hover:text-neutral-800 dark:hover:text-white/90 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10",
         normal:
           "border-neutral-300 bg-transparent text-neutral-700 hover:bg-neutral-100 dark:border-white/10 dark:text-neutral-300 dark:hover:bg-white/10",
         ghost:
           "border-transparent bg-transparent text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-white/10",
         outline:
-          "border-primary-500 bg-primary-500/10 text-primary-600 hover:border-primary-600 hover:bg-primary-500/20 hover:text-primary-700",
+          "border-primary-500 bg-primary-500/10 text-primary-600 dark:text-primary-400 hover:border-primary-600 hover:bg-primary-500/20 hover:text-primary-700 dark:hover:text-primary-300",
         danger:
           "border-danger-500 bg-danger-500 text-white hover:border-danger-600 hover:bg-danger-600",
         dangernormal:
-          "border-neutral-300 bg-transparent text-neutral-700 hover:border-danger-600 hover:bg-danger-600 hover:text-white dark:border-white/10",
+          "border-neutral-300 bg-transparent text-neutral-700 dark:text-neutral-300 hover:border-danger-600 hover:bg-danger-600 hover:text-white dark:border-white/10",
         success:
           "border-success-500 bg-success-500 text-white hover:border-success-600 hover:bg-success-600",
         successnormal:
-          "border-neutral-300 bg-transparent text-neutral-700 hover:border-success-600 hover:bg-success-600 hover:text-white dark:border-white/10",
+          "border-neutral-300 bg-transparent text-neutral-700 dark:text-neutral-300 hover:border-success-600 hover:bg-success-600 hover:text-white dark:border-white/10",
         primarynormal:
-          "border-neutral-300 bg-transparent text-neutral-700 hover:border-primary-600 hover:bg-primary-600 hover:text-white dark:border-white/10",
+          "border-neutral-300 bg-transparent text-neutral-700 dark:text-neutral-300 hover:border-primary-600 hover:bg-primary-600 hover:text-white dark:border-white/10",
       },
       size: {
         xss: "h-7 px-2 text-xs",

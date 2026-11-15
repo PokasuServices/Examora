@@ -23,10 +23,12 @@ function SessionRow({
   onRevoke: () => void;
 }) {
   return (
-    <li className="flex items-center justify-between gap-4 rounded-md border border-neutral-100 p-4">
+    <li className="flex items-center justify-between gap-4 rounded-md border border-neutral-100 dark:border-neutral-800 p-4">
       <div className="min-w-0">
-        <p className="text-sm font-medium text-neutral-800">{parseUserAgent(session.userAgent)}</p>
-        <p className="mt-0.5 text-xs text-neutral-500">
+        <p className="text-sm font-medium text-neutral-800 dark:text-white/90">
+          {parseUserAgent(session.userAgent)}
+        </p>
+        <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
           {session.ipAddress ?? "Unknown IP"} · started{" "}
           {new Date(session.createdAt).toLocaleString()}
         </p>
@@ -38,7 +40,7 @@ function SessionRow({
           type="button"
           disabled={busy}
           onClick={onRevoke}
-          className="shrink-0 text-sm font-medium text-danger-600 hover:underline disabled:pointer-events-none disabled:opacity-60"
+          className="shrink-0 text-sm font-medium text-danger-600 dark:text-danger-400 hover:underline disabled:pointer-events-none disabled:opacity-60"
         >
           {busy ? "Revoking…" : "Revoke"}
         </button>
@@ -75,14 +77,16 @@ function SessionsContent() {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={Monitor} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Current device</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+            Current device
+          </h2>
         </div>
         {current ? (
           <div className="mt-4">
             <SessionRow session={current} busy={false} onRevoke={() => undefined} />
           </div>
         ) : (
-          <p className="mt-3 text-sm text-neutral-500">
+          <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
             We couldn&rsquo;t match this browser to one of your active sessions.
           </p>
         )}
@@ -90,13 +94,13 @@ function SessionsContent() {
 
       <Card>
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-medium text-neutral-800">Other devices</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Other devices</h2>
           {others.length > 0 ? (
             <button
               type="button"
               disabled={busyId === "all"}
               onClick={() => void revokeAll()}
-              className="flex items-center gap-1.5 text-sm font-medium text-danger-600 hover:underline disabled:pointer-events-none disabled:opacity-60"
+              className="flex items-center gap-1.5 text-sm font-medium text-danger-600 dark:text-danger-400 hover:underline disabled:pointer-events-none disabled:opacity-60"
             >
               <LogOut size={14} strokeWidth={2} aria-hidden="true" />
               {busyId === "all" ? "Logging out…" : "Log out other sessions"}

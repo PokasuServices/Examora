@@ -37,7 +37,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="radiogroup"
       aria-label={ariaLabel}
-      className="inline-flex rounded-full bg-neutral-100 p-1"
+      className="inline-flex rounded-full bg-neutral-100 dark:bg-white/5 p-1"
     >
       {options.map((option, index) => {
         const selected = option.value === value;
@@ -56,8 +56,8 @@ export function SegmentedControl<T extends string>({
             className={cn(
               "rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
               selected
-                ? "bg-white text-neutral-900 shadow-soft"
-                : "text-neutral-500 hover:text-neutral-700",
+                ? "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white/90 shadow-soft"
+                : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300",
             )}
           >
             {option.label}

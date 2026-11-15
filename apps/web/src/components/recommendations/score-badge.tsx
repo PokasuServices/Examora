@@ -5,7 +5,7 @@ export function ScoreBadge({ score, className }: { score: number; className?: st
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center gap-1 rounded-full bg-success-50 px-2.5 py-1 text-xs font-semibold text-success-700",
+        "inline-flex shrink-0 items-center gap-1 rounded-full bg-success-50 dark:bg-success-500/15 px-2.5 py-1 text-xs font-semibold text-success-700 dark:text-success-300",
         className,
       )}
     >

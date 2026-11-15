@@ -35,21 +35,21 @@ export function FiltersSheet({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-white shadow-soft-hover"
+        className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-white dark:bg-neutral-900 shadow-soft-hover"
       >
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-neutral-200 px-4">
-          <h2 className="text-lg font-medium text-neutral-800">{title}</h2>
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-neutral-200 dark:border-neutral-800 px-4">
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">{title}</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label={`Close ${title.toLowerCase()}`}
-            className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="rounded-md p-1.5 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             <X size={20} aria-hidden="true" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-4">{children}</div>
-        <div className="shrink-0 border-t border-neutral-200 p-4">
+        <div className="shrink-0 border-t border-neutral-200 dark:border-neutral-800 p-4">
           <button
             type="button"
             onClick={onClose}

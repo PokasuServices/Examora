@@ -9,7 +9,10 @@ import { ListChecks, Percent, Target, Trophy } from "lucide-react";
 export function QuizPerformanceSection({ quiz }: { quiz: QuizPerformanceSummary }) {
   return (
     <section aria-labelledby="quiz-performance-heading">
-      <h2 id="quiz-performance-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="quiz-performance-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Quiz Performance
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -47,7 +50,7 @@ export function QuizPerformanceSection({ quiz }: { quiz: QuizPerformanceSummary 
         {quiz.recentAttempts.length === 0 ? (
           <EmptyState heading="No quiz attempts yet" />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {quiz.recentAttempts.map((a) => (
               <li
                 key={a.attemptId}
@@ -55,12 +58,12 @@ export function QuizPerformanceSection({ quiz }: { quiz: QuizPerformanceSummary 
               >
                 <Link
                   href={`/quizzes/attempts/${a.attemptId}/result`}
-                  className="min-w-0 flex-1 truncate text-neutral-800 hover:text-primary-600 hover:underline"
+                  className="min-w-0 flex-1 truncate text-neutral-800 dark:text-white/90 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
                 >
                   {a.quizTitle}
                 </Link>
                 <span className="flex shrink-0 items-center gap-2">
-                  <span className="tabular-nums text-neutral-500">
+                  <span className="tabular-nums text-neutral-500 dark:text-neutral-400">
                     {a.percentage !== null ? `${a.percentage}%` : "—"}
                   </span>
                   {a.passed !== null ? (

@@ -75,20 +75,20 @@ export function VersionHistoryPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      <ul className="flex flex-col divide-y divide-neutral-100">
+      <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
         {versions.map((v) => (
           <li key={v.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
             <div className="min-w-0">
-              <p className="font-medium text-neutral-800">
+              <p className="font-medium text-neutral-800 dark:text-white/90">
                 v{v.versionNumber} · {statusLabel(v.status)}
               </p>
-              <p className="truncate text-xs text-neutral-500">
+              <p className="truncate text-xs text-neutral-500 dark:text-neutral-400">
                 {v.createdByEmail} · {new Date(v.createdAt).toLocaleString()}
                 {v.changeNote ? ` — ${v.changeNote}` : ""}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <label className="flex items-center gap-1 text-xs text-neutral-500">
+              <label className="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
                 <input
                   type="radio"
                   name="compare-from"
@@ -97,7 +97,7 @@ export function VersionHistoryPanel({
                 />
                 From
               </label>
-              <label className="flex items-center gap-1 text-xs text-neutral-500">
+              <label className="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
                 <input
                   type="radio"
                   name="compare-to"
@@ -109,7 +109,7 @@ export function VersionHistoryPanel({
               <button
                 type="button"
                 onClick={() => setRestoring(v.versionNumber)}
-                className="text-xs font-medium text-primary-600 hover:underline"
+                className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline"
               >
                 Restore
               </button>
@@ -123,7 +123,7 @@ export function VersionHistoryPanel({
           type="button"
           disabled={compareFrom === null || compareTo === null || comparing}
           onClick={() => void runCompare()}
-          className="flex h-9 items-center rounded-md border border-neutral-200 px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:pointer-events-none disabled:opacity-50"
+          className="flex h-9 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] disabled:pointer-events-none disabled:opacity-50"
         >
           {comparing ? "Comparing…" : "Compare selected versions"}
         </button>
@@ -131,29 +131,37 @@ export function VersionHistoryPanel({
 
       {diff ? (
         diff.length === 0 ? (
-          <p className="text-sm text-neutral-500">No field differences between these versions.</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            No field differences between these versions.
+          </p>
         ) : (
-          <div className="overflow-x-auto contain-layout rounded-md border border-neutral-100">
+          <div className="overflow-x-auto contain-layout rounded-md border border-neutral-100 dark:border-neutral-800">
             <table className="w-full min-w-[480px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                     Field
                   </th>
-                  <th className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                     Before
                   </th>
-                  <th className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                     After
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {diff.map((entry) => (
                   <tr key={entry.field}>
-                    <td className="px-3 py-2 font-medium text-neutral-700">{entry.field}</td>
-                    <td className="px-3 py-2 text-neutral-500">{fieldValueLabel(entry.before)}</td>
-                    <td className="px-3 py-2 text-neutral-700">{fieldValueLabel(entry.after)}</td>
+                    <td className="px-3 py-2 font-medium text-neutral-700 dark:text-neutral-300">
+                      {entry.field}
+                    </td>
+                    <td className="px-3 py-2 text-neutral-500 dark:text-neutral-400">
+                      {fieldValueLabel(entry.before)}
+                    </td>
+                    <td className="px-3 py-2 text-neutral-700 dark:text-neutral-300">
+                      {fieldValueLabel(entry.after)}
+                    </td>
                   </tr>
                 ))}
               </tbody>

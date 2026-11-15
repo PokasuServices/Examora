@@ -51,28 +51,31 @@ function QuizLandingContent() {
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
+      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 dark:text-neutral-400">
         <Link href="/quizzes" className="hover:underline">
           Quizzes
         </Link>{" "}
-        <span aria-hidden="true">·</span> <span className="text-neutral-800">{quiz.title}</span>
+        <span aria-hidden="true">·</span>{" "}
+        <span className="text-neutral-800 dark:text-white/90">{quiz.title}</span>
       </nav>
 
       <div>
-        <h1 className="text-xl font-semibold text-neutral-800">{quiz.title}</h1>
-        {quiz.description ? <p className="mt-2 text-neutral-600">{quiz.description}</p> : null}
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">{quiz.title}</h1>
+        {quiz.description ? (
+          <p className="mt-2 text-neutral-600 dark:text-neutral-400">{quiz.description}</p>
+        ) : null}
       </div>
 
       <QuizMetaGrid quiz={quiz} />
 
       {quiz.sections.length > 0 ? (
         <div>
-          <h2 className="text-lg font-medium text-neutral-800">Sections</h2>
-          <ul className="mt-2 flex flex-col gap-1 text-sm text-neutral-600">
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Sections</h2>
+          <ul className="mt-2 flex flex-col gap-1 text-sm text-neutral-600 dark:text-neutral-400">
             {quiz.sections.map((s) => (
               <li key={s.id} className="flex items-center justify-between">
                 <span>{s.title}</span>
-                <span className="tabular-nums text-neutral-400">
+                <span className="tabular-nums text-neutral-400 dark:text-neutral-500">
                   {s.questionCount} {s.questionCount === 1 ? "question" : "questions"}
                 </span>
               </li>
@@ -90,7 +93,9 @@ function QuizLandingContent() {
         >
           {starting ? "Starting…" : inProgress ? "Resume attempt" : "Start quiz"}
         </button>
-        {startError ? <p className="mt-2 text-sm text-error-600">{startError}</p> : null}
+        {startError ? (
+          <p className="mt-2 text-sm text-error-600 dark:text-error-400">{startError}</p>
+        ) : null}
       </div>
 
       <AttemptHistoryList history={history} />

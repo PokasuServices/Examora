@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CommonGridShape } from "./CommonGridShape";
 
 const actionClass =
-  "inline-flex items-center justify-center rounded-lg border border-neutral-300 bg-white px-5 py-3.5 text-sm font-medium text-neutral-700 shadow-theme-xs hover:bg-neutral-50 hover:text-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400";
+  "inline-flex items-center justify-center rounded-lg border border-neutral-300 bg-white px-5 py-3.5 text-sm font-medium text-neutral-700 shadow-theme-xs hover:bg-neutral-50 dark:hover:bg-white/[0.03] hover:text-neutral-800 dark:hover:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400";
 
 /**
  * TailAdmin error screen (the template behind TMS's ErrorPageView): full
@@ -29,7 +29,7 @@ export function ErrorPage({
         <h1 className="mb-8 text-title-md font-bold text-neutral-800 dark:text-white/90">ERROR</h1>
         <p
           aria-hidden="true"
-          className="font-heading text-[96px] font-bold leading-none text-primary-600 sm:text-[140px]"
+          className="font-heading text-[96px] font-bold leading-none text-primary-600 dark:text-primary-400 sm:text-[140px]"
         >
           {code}
         </p>

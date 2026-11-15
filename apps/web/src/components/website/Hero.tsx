@@ -10,18 +10,22 @@ import { CommonGridShape } from "@/components/common/CommonGridShape";
 function ProductPreview() {
   return (
     <div aria-hidden="true" className="relative mx-auto w-full max-w-md">
-      <div className="rounded-2xl border border-white/15 bg-white p-5 shadow-theme-xl">
+      <div className="rounded-2xl border border-white/15 bg-white dark:bg-neutral-900 p-5 shadow-theme-xl">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">
+          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
             Continue learning
           </p>
-          <span className="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-700">
+          <span className="rounded-full bg-primary-50 dark:bg-primary-500/15 px-2.5 py-1 text-xs font-medium text-primary-700 dark:text-primary-300">
             In progress
           </span>
         </div>
-        <p className="mt-3 text-base font-semibold text-neutral-800">Quantitative Aptitude</p>
-        <p className="mt-0.5 text-sm text-neutral-500">Module 3 · Percentages &amp; Ratios</p>
-        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+        <p className="mt-3 text-base font-semibold text-neutral-800 dark:text-white/90">
+          Quantitative Aptitude
+        </p>
+        <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
+          Module 3 · Percentages &amp; Ratios
+        </p>
+        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-white/5">
           <div className="h-full w-[62%] rounded-full bg-primary-600" />
         </div>
         <div className="mt-5 space-y-2.5">
@@ -32,19 +36,25 @@ function ProductPreview() {
           ].map(({ icon: Icon, label, done }) => (
             <div
               key={label}
-              className="flex items-center gap-3 rounded-lg border border-neutral-200 px-3 py-2.5"
+              className="flex items-center gap-3 rounded-lg border border-neutral-200 dark:border-neutral-800 px-3 py-2.5"
             >
-              <Icon size={18} strokeWidth={1.75} className="shrink-0 text-primary-600" />
-              <span className="flex-1 truncate text-sm text-neutral-700">{label}</span>
+              <Icon
+                size={18}
+                strokeWidth={1.75}
+                className="shrink-0 text-primary-600 dark:text-primary-400"
+              />
+              <span className="flex-1 truncate text-sm text-neutral-700 dark:text-neutral-300">
+                {label}
+              </span>
               {done ? <CheckCircle2 size={16} className="shrink-0 text-success-500" /> : null}
             </div>
           ))}
         </div>
       </div>
-      <div className="absolute -bottom-6 -left-6 hidden rounded-xl border border-neutral-200 bg-white px-4 py-3 shadow-theme-lg sm:block">
-        <p className="text-xs text-neutral-500">Quiz result</p>
-        <p className="text-lg font-semibold text-neutral-800">
-          Instant score <span className="text-success-600">+ review</span>
+      <div className="absolute -bottom-14 -right-4 hidden rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 shadow-theme-lg sm:block">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">Quiz result</p>
+        <p className="text-lg font-semibold text-neutral-800 dark:text-white/90">
+          Instant score <span className="text-success-600 dark:text-success-400">+ review</span>
         </p>
       </div>
     </div>
@@ -83,7 +93,7 @@ export function Hero({ banner }: { banner?: React.ReactNode }) {
               href="/login"
               className={cn(
                 buttonVariants({ variant: "normal", size: "md" }),
-                "border-white/30 text-white hover:bg-white/10",
+                "border-white/30 text-white hover:bg-white/10 dark:border-white/30 dark:text-white dark:hover:bg-white/10",
               )}
             >
               Log in

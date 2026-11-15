@@ -18,43 +18,45 @@ export function QuizMetaGrid({ quiz }: { quiz: QuizStudentDetail }) {
     <Card>
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
         <div>
-          <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400">
             <HelpCircle size={14} strokeWidth={1.75} aria-hidden="true" />
             Questions
           </div>
-          <p className="mt-1 font-heading text-xl font-bold text-neutral-900">
+          <p className="mt-1 font-heading text-xl font-bold text-neutral-900 dark:text-white/90">
             {quiz.totalQuestions}
           </p>
         </div>
         <div>
-          <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400">
             <Award size={14} strokeWidth={1.75} aria-hidden="true" />
             Total marks
           </div>
-          <p className="mt-1 font-heading text-xl font-bold text-neutral-900">{quiz.totalMarks}</p>
+          <p className="mt-1 font-heading text-xl font-bold text-neutral-900 dark:text-white/90">
+            {quiz.totalMarks}
+          </p>
         </div>
         <div>
-          <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400">
             <Timer size={14} strokeWidth={1.75} aria-hidden="true" />
             Time limit
           </div>
-          <p className="mt-1 font-heading text-xl font-bold text-neutral-900">
+          <p className="mt-1 font-heading text-xl font-bold text-neutral-900 dark:text-white/90">
             {duration ?? "Untimed"}
           </p>
         </div>
         <div>
-          <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400">
             <Award size={14} strokeWidth={1.75} aria-hidden="true" />
             Passing score
           </div>
-          <p className="mt-1 font-heading text-xl font-bold text-neutral-900">
+          <p className="mt-1 font-heading text-xl font-bold text-neutral-900 dark:text-white/90">
             {quiz.passingScorePercent}%
           </p>
         </div>
       </div>
 
       {quiz.negativeMarkingEnabled ? (
-        <div className="mt-5 flex items-start gap-2 rounded-md border border-warning-500/30 bg-warning-50 px-3 py-2.5 text-sm text-warning-700">
+        <div className="mt-5 flex items-start gap-2 rounded-md border border-warning-500/30 bg-warning-50 dark:bg-warning-500/15 px-3 py-2.5 text-sm text-warning-700 dark:text-warning-300">
           <AlertTriangle
             size={16}
             strokeWidth={1.75}

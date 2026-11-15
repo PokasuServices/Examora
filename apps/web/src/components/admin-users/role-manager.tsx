@@ -55,14 +55,14 @@ export function RoleManager({
               </Chip>
             ))
           ) : (
-            <p className="text-sm text-neutral-500">No roles assigned.</p>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">No roles assigned.</p>
           )}
         </div>
         <div className="mt-3 flex items-center gap-3">
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="text-sm font-medium text-primary-600 hover:underline"
+            className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
           >
             Manage roles
           </button>
@@ -78,12 +78,15 @@ export function RoleManager({
         <legend className="sr-only">Assign roles</legend>
         <div className="flex flex-col gap-2">
           {ROLE_NAMES.map((role) => (
-            <label key={role} className="flex items-center gap-2.5 text-sm text-neutral-700">
+            <label
+              key={role}
+              className="flex items-center gap-2.5 text-sm text-neutral-700 dark:text-neutral-300"
+            >
               <input
                 type="checkbox"
                 checked={selected.includes(role)}
                 onChange={() => toggleRole(role)}
-                className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-primary-600 dark:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               />
               {roleLabel(role)}
             </label>
@@ -105,13 +108,15 @@ export function RoleManager({
             setSelected(currentRoles);
             setEditing(false);
           }}
-          className="text-sm font-medium text-neutral-600 hover:underline"
+          className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:underline"
         >
           Cancel
         </button>
       </div>
       {selected.length === 0 ? (
-        <p className="mt-2 text-xs text-danger-600">A user must have at least one role.</p>
+        <p className="mt-2 text-xs text-danger-600 dark:text-danger-400">
+          A user must have at least one role.
+        </p>
       ) : null}
 
       <ConfirmDialog
@@ -120,11 +125,11 @@ export function RoleManager({
         message={
           <>
             Change this user&rsquo;s roles from{" "}
-            <span className="font-medium text-neutral-800">
+            <span className="font-medium text-neutral-800 dark:text-white/90">
               {currentRoles.map(roleLabel).join(", ") || "none"}
             </span>{" "}
             to{" "}
-            <span className="font-medium text-neutral-800">
+            <span className="font-medium text-neutral-800 dark:text-white/90">
               {selected.map(roleLabel).join(", ")}
             </span>
             ?

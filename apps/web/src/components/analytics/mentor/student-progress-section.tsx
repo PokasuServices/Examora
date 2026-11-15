@@ -7,7 +7,10 @@ import { timeAgo } from "@/lib/format";
 export function StudentProgressSection({ entries }: { entries: MentorStudentProgressEntry[] }) {
   return (
     <section aria-labelledby="mentor-student-progress-heading">
-      <h2 id="mentor-student-progress-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="mentor-student-progress-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Student Progress
       </h2>
       <Card className="mt-3" density="compact">
@@ -17,7 +20,7 @@ export function StudentProgressSection({ entries }: { entries: MentorStudentProg
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] text-left text-sm">
               <thead>
-                <tr className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                <tr className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                   <th className="px-3 py-2">Student</th>
                   <th className="px-3 py-2">Completion</th>
                   <th className="px-3 py-2">Quiz Avg</th>
@@ -25,27 +28,27 @@ export function StudentProgressSection({ entries }: { entries: MentorStudentProg
                   <th className="px-3 py-2">Last Active</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {entries.map((e) => (
-                  <tr key={e.studentId} className="hover:bg-neutral-50">
+                  <tr key={e.studentId} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
                     <td className="px-3 py-2.5">
                       <Link
                         href={`/mentor/students/${e.studentId}`}
-                        className="font-medium text-neutral-800 hover:text-primary-600 hover:underline"
+                        className="font-medium text-neutral-800 dark:text-white/90 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
                       >
                         {e.studentName ?? e.studentEmail}
                       </Link>
                     </td>
-                    <td className="px-3 py-2.5 tabular-nums text-neutral-600">
+                    <td className="px-3 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
                       {e.overallCompletionPercent}%
                     </td>
-                    <td className="px-3 py-2.5 tabular-nums text-neutral-600">
+                    <td className="px-3 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
                       {e.quizAverage !== null ? `${e.quizAverage}%` : "—"}
                     </td>
-                    <td className="px-3 py-2.5 tabular-nums text-neutral-600">
+                    <td className="px-3 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
                       {e.assignmentAverage !== null ? `${e.assignmentAverage}%` : "—"}
                     </td>
-                    <td className="px-3 py-2.5 text-neutral-500">
+                    <td className="px-3 py-2.5 text-neutral-500 dark:text-neutral-400">
                       {e.lastActiveAt ? timeAgo(e.lastActiveAt) : "Never"}
                     </td>
                   </tr>

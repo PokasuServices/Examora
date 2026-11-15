@@ -66,14 +66,18 @@ export function UserAuditPanel({
   }
 
   return (
-    <ul className="flex flex-col divide-y divide-neutral-100">
+    <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
       {entries.map((entry) => {
         const change = describeChange(entry);
         return (
           <li key={entry.id} className="py-3">
-            <p className="text-sm font-medium text-neutral-800">{formatAction(entry.action)}</p>
-            {change ? <p className="mt-0.5 text-xs text-neutral-500">{change}</p> : null}
-            <p className="mt-0.5 text-xs text-neutral-400">
+            <p className="text-sm font-medium text-neutral-800 dark:text-white/90">
+              {formatAction(entry.action)}
+            </p>
+            {change ? (
+              <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">{change}</p>
+            ) : null}
+            <p className="mt-0.5 text-xs text-neutral-400 dark:text-neutral-500">
               {new Date(entry.createdAt).toLocaleString(undefined, {
                 month: "short",
                 day: "numeric",
@@ -86,7 +90,7 @@ export function UserAuditPanel({
         );
       })}
       {total > fetchSize ? (
-        <li className="pt-3 text-xs text-neutral-400">
+        <li className="pt-3 text-xs text-neutral-400 dark:text-neutral-500">
           Only the {fetchSize} most recent account-related audit entries platform-wide were checked
           — older activity for this account may not be shown.
         </li>

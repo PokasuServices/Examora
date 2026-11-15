@@ -24,11 +24,17 @@ export function DashboardFooter() {
   const health = useSystemHealth();
 
   return (
-    <footer role="contentinfo" className="mt-4 border-t border-neutral-200 py-6">
-      <div className="flex flex-col items-center justify-between gap-3 text-xs text-neutral-400 sm:flex-row">
+    <footer
+      role="contentinfo"
+      className="mt-4 border-t border-neutral-200 dark:border-neutral-800 py-6"
+    >
+      <div className="flex flex-col items-center justify-between gap-3 text-xs text-neutral-400 dark:text-neutral-500 sm:flex-row">
         <span>Examora v1.0.0</span>
         <div className="flex items-center gap-4">
-          <Link href="/faq" className="hover:text-neutral-600 hover:underline">
+          <Link
+            href="/faq"
+            className="hover:text-neutral-600 dark:hover:text-neutral-400 hover:underline"
+          >
             Help &amp; Support
           </Link>
         </div>
@@ -38,8 +44,8 @@ export function DashboardFooter() {
             className={cn(
               "h-1.5 w-1.5 rounded-full",
               health === "operational" && "bg-success-500",
-              health === "unavailable" && "bg-neutral-300",
-              health === "checking" && "bg-neutral-200",
+              health === "unavailable" && "bg-neutral-300 dark:bg-neutral-700",
+              health === "checking" && "bg-neutral-200 dark:bg-white/10",
             )}
           />
           {health === "operational"

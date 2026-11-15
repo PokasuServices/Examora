@@ -39,34 +39,46 @@ function SecurityStatusCard({
     <Card>
       <div className="flex items-center gap-2">
         <IconBadge icon={ShieldCheck} tone="primary" />
-        <h2 className="text-lg font-medium text-neutral-800">Account security status</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+          Account security status
+        </h2>
       </div>
-      <p className="mt-1 text-sm text-neutral-500">
+      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
         {passed} of {checks.length} security essentials in place.
       </p>
-      <ul className="mt-4 flex flex-col divide-y divide-neutral-100">
+      <ul className="mt-4 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
         {checks.map((check) => (
           <li key={check.label} className="flex items-center gap-3 py-2.5">
             <CheckCircle2
               size={18}
               strokeWidth={1.75}
-              className={check.pass ? "text-success-600" : "text-neutral-300"}
+              className={check.pass ? "text-success-600 dark:text-success-400" : "text-neutral-300"}
               aria-hidden="true"
             />
             <div>
-              <p className="text-sm font-medium text-neutral-800">{check.label}</p>
-              <p className="text-xs text-neutral-500">{check.hint}</p>
+              <p className="text-sm font-medium text-neutral-800 dark:text-white/90">
+                {check.label}
+              </p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">{check.hint}</p>
             </div>
           </li>
         ))}
         <li className="flex items-center gap-3 py-2.5">
-          <Monitor size={18} strokeWidth={1.75} className="text-neutral-400" aria-hidden="true" />
+          <Monitor
+            size={18}
+            strokeWidth={1.75}
+            className="text-neutral-400 dark:text-neutral-500"
+            aria-hidden="true"
+          />
           <div>
-            <p className="text-sm font-medium text-neutral-800">
+            <p className="text-sm font-medium text-neutral-800 dark:text-white/90">
               {sessionCount} active {sessionCount === 1 ? "session" : "sessions"}
             </p>
-            <p className="text-xs text-neutral-500">
-              <Link href="/profile/sessions" className="text-primary-600 hover:underline">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              <Link
+                href="/profile/sessions"
+                className="text-primary-600 dark:text-primary-400 hover:underline"
+              >
                 Review your sessions
               </Link>
             </p>
@@ -98,19 +110,19 @@ function PasswordCard({ email }: { email: string }) {
     <Card>
       <div className="flex items-center gap-2">
         <IconBadge icon={KeyRound} tone="primary" />
-        <h2 className="text-lg font-medium text-neutral-800">Password</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Password</h2>
       </div>
-      <p className="mt-2 text-sm text-neutral-500">
+      <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
         We&rsquo;ll email a reset link to{" "}
-        <span className="font-medium text-neutral-700">{email}</span> — there&rsquo;s no in-app form
-        for changing your password directly.
+        <span className="font-medium text-neutral-700 dark:text-neutral-300">{email}</span> —
+        there&rsquo;s no in-app form for changing your password directly.
       </p>
       <div className="mt-4 flex items-center gap-3">
         <button
           type="button"
           onClick={() => void sendReset()}
           disabled={status === "saving"}
-          className="flex h-10 items-center rounded-md border border-neutral-200 px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-60"
+          className="flex h-10 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-4 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-60"
         >
           {status === "saving" ? "Sending…" : "Send password reset email"}
         </button>
@@ -142,7 +154,9 @@ function EmailVerificationCard({ email, verified }: { email: string; verified: b
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <IconBadge icon={Mail} tone={verified ? "success" : "warning"} />
-          <h2 className="text-lg font-medium text-neutral-800">Email verification</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+            Email verification
+          </h2>
         </div>
         <Chip tone={verified ? "success" : "warning"}>
           {verified ? "Verified" : "Not verified"}
@@ -150,16 +164,17 @@ function EmailVerificationCard({ email, verified }: { email: string; verified: b
       </div>
       {!verified ? (
         <>
-          <p className="mt-2 text-sm text-neutral-500">
-            Verify <span className="font-medium text-neutral-700">{email}</span> to unlock full
-            account security.
+          <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+            Verify{" "}
+            <span className="font-medium text-neutral-700 dark:text-neutral-300">{email}</span> to
+            unlock full account security.
           </p>
           <div className="mt-4 flex items-center gap-3">
             <button
               type="button"
               onClick={() => void resend()}
               disabled={status === "saving"}
-              className="flex h-10 items-center rounded-md border border-neutral-200 px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-60"
+              className="flex h-10 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-4 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-60"
             >
               {status === "saving" ? "Sending…" : "Resend verification email"}
             </button>
@@ -167,7 +182,9 @@ function EmailVerificationCard({ email, verified }: { email: string; verified: b
           </div>
         </>
       ) : (
-        <p className="mt-2 text-sm text-neutral-500">Your email address is confirmed.</p>
+        <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+          Your email address is confirmed.
+        </p>
       )}
     </Card>
   );
@@ -189,11 +206,13 @@ function SessionsSummaryCard({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <IconBadge icon={Monitor} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Active sessions</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+            Active sessions
+          </h2>
         </div>
         <Link
           href="/profile/sessions"
-          className="text-sm font-medium text-primary-600 hover:underline"
+          className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
         >
           Manage all →
         </Link>
@@ -211,15 +230,17 @@ function SessionsSummaryCard({
       ) : (
         <div className="mt-4 flex flex-col gap-2 text-sm">
           {current ? (
-            <div className="flex items-center justify-between rounded-md border border-neutral-100 p-3">
+            <div className="flex items-center justify-between rounded-md border border-neutral-100 dark:border-neutral-800 p-3">
               <div>
-                <p className="font-medium text-neutral-800">{parseUserAgent(current.userAgent)}</p>
-                <p className="text-xs text-neutral-500">This device</p>
+                <p className="font-medium text-neutral-800 dark:text-white/90">
+                  {parseUserAgent(current.userAgent)}
+                </p>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">This device</p>
               </div>
               <Chip tone="success">Current</Chip>
             </div>
           ) : null}
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
             {otherCount} other {otherCount === 1 ? "session" : "sessions"} signed in.
           </p>
         </div>

@@ -11,7 +11,10 @@ export function UserGrowthSection({ userGrowth }: { userGrowth: AdminUserGrowthA
 
   return (
     <section aria-labelledby="admin-user-growth-heading">
-      <h2 id="admin-user-growth-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="admin-user-growth-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         User Growth
       </h2>
       <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -28,7 +31,9 @@ export function UserGrowthSection({ userGrowth }: { userGrowth: AdminUserGrowthA
           </ChartCard>
         </div>
         <Card>
-          <h3 className="font-heading text-sm font-semibold text-neutral-900">By role</h3>
+          <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+            By role
+          </h3>
           <div className="mt-4">
             <BreakdownBars
               items={userGrowth.usersByRole.map((r) => ({ label: r.role, value: r.count }))}

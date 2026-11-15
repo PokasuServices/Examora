@@ -13,7 +13,7 @@ export default function BookmarksRedirectPage() {
 
   return (
     <main>
-      <p className="text-sm text-neutral-500">Redirecting…</p>
+      <p className="text-sm text-neutral-500 dark:text-neutral-400">Redirecting…</p>
     </main>
   );
 }

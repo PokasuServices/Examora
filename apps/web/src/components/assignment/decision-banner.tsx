@@ -20,14 +20,18 @@ export function DecisionBanner({
     <div
       className={cn(
         "rounded-card border p-6 shadow-soft",
-        approved ? "border-success-500/30 bg-success-50" : "border-warning-500/30 bg-warning-50",
+        approved
+          ? "border-success-500/30 bg-success-50 dark:bg-success-500/15"
+          : "border-warning-500/30 bg-warning-50 dark:bg-warning-500/15",
       )}
     >
       <div className="flex items-center gap-3">
         <span
           className={cn(
             "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
-            approved ? "bg-success-500/15 text-success-700" : "bg-warning-500/15 text-warning-700",
+            approved
+              ? "bg-success-500/15 text-success-700 dark:text-success-300"
+              : "bg-warning-500/15 text-warning-700 dark:text-warning-300",
           )}
         >
           {approved ? (
@@ -40,13 +44,15 @@ export function DecisionBanner({
           <p
             className={cn(
               "font-heading text-lg font-semibold",
-              approved ? "text-success-800" : "text-warning-800",
+              approved
+                ? "text-success-800 dark:text-success-300"
+                : "text-warning-800 dark:text-warning-300",
             )}
           >
             {approved ? "Approved" : "Revision requested"}
           </p>
           {review.obtainedMarks !== null && marksTotal !== undefined ? (
-            <p className="text-sm tabular-nums text-neutral-600">
+            <p className="text-sm tabular-nums text-neutral-600 dark:text-neutral-400">
               {review.obtainedMarks} / {marksTotal} marks
             </p>
           ) : null}
@@ -54,7 +60,9 @@ export function DecisionBanner({
       </div>
 
       {review.overallComment ? (
-        <p className="mt-4 text-sm text-neutral-700">{review.overallComment}</p>
+        <p className="mt-4 text-sm text-neutral-700 dark:text-neutral-300">
+          {review.overallComment}
+        </p>
       ) : null}
 
       {!approved ? (

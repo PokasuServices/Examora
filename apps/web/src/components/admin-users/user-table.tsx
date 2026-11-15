@@ -11,46 +11,48 @@ export function UserTable({ users }: { users: UserProfile[] }) {
   return (
     <div className="overflow-x-auto contain-layout">
       <table className="w-full min-w-[760px] text-left text-sm">
-        <thead className="bg-neutral-50">
+        <thead className="bg-neutral-50 dark:bg-white/[0.03]">
           <tr>
-            <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+            <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
               User
             </th>
-            <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+            <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
               Role
             </th>
-            <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+            <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
               Status
             </th>
-            <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+            <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
               Created
             </th>
-            <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+            <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
               <span className="sr-only">Actions</span>
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-200">
+        <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
           {users.map((user) => (
-            <tr key={user.id} className="hover:bg-neutral-50">
+            <tr key={user.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
               <td className="px-4 py-3">
                 <div className="flex items-center gap-3">
                   <ProfileAvatar user={user} size="md" />
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-neutral-800">
+                    <p className="truncate font-medium text-neutral-800 dark:text-white/90">
                       {authorDisplayName(user)}
                     </p>
-                    <p className="truncate text-xs text-neutral-500">{user.email}</p>
+                    <p className="truncate text-xs text-neutral-500 dark:text-neutral-400">
+                      {user.email}
+                    </p>
                   </div>
                 </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-neutral-700">
+              <td className="whitespace-nowrap px-4 py-3 text-neutral-700 dark:text-neutral-300">
                 {user.roles.length > 0 ? user.roles.map(roleLabel).join(", ") : "—"}
               </td>
               <td className="whitespace-nowrap px-4 py-3">
                 <Chip tone={userStatusTone(user.status)}>{statusLabel(user.status)}</Chip>
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-neutral-600">
+              <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
                 {new Date(user.createdAt).toLocaleDateString(undefined, {
                   month: "short",
                   day: "numeric",
@@ -60,7 +62,7 @@ export function UserTable({ users }: { users: UserProfile[] }) {
               <td className="whitespace-nowrap px-4 py-3 text-right">
                 <Link
                   href={`/admin/users/${user.id}`}
-                  className="text-sm font-medium text-primary-600 hover:underline"
+                  className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
                 >
                   View details
                 </Link>

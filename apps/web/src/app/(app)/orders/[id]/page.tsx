@@ -58,13 +58,20 @@ function Timeline({ events }: { events: TimelineEvent[] }) {
               aria-hidden="true"
             />
             {i < sorted.length - 1 ? (
-              <span className="mt-1 w-px flex-1 bg-neutral-200" aria-hidden="true" />
+              <span
+                className="mt-1 w-px flex-1 bg-neutral-200 dark:bg-white/10"
+                aria-hidden="true"
+              />
             ) : null}
           </div>
           <div className="pb-1">
-            <p className="text-sm font-medium text-neutral-800">{event.label}</p>
-            {event.detail ? <p className="text-xs text-neutral-500">{event.detail}</p> : null}
-            <p className="text-xs text-neutral-400">{formatDateTime(event.at)}</p>
+            <p className="text-sm font-medium text-neutral-800 dark:text-white/90">{event.label}</p>
+            {event.detail ? (
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">{event.detail}</p>
+            ) : null}
+            <p className="text-xs text-neutral-400 dark:text-neutral-500">
+              {formatDateTime(event.at)}
+            </p>
           </div>
         </li>
       ))}
@@ -99,7 +106,7 @@ function RefundRequestForm({
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           rows={3}
-          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+          className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
         />
       </div>
       <FieldError>{error}</FieldError>
@@ -136,10 +143,12 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
   if (status === "not-found" || !order) {
     return (
       <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-xl font-semibold text-neutral-800">Order not found</h1>
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+          Order not found
+        </h1>
         <Link
           href="/orders/history"
-          className="text-sm font-medium text-primary-600 hover:underline"
+          className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
         >
           ← Back to order history
         </Link>
@@ -196,43 +205,45 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <div>
         <Link
           href="/orders/history"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Order history
         </Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <h1 className="text-xl font-semibold text-neutral-800">{order.courseTitle}</h1>
+          <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+            {order.courseTitle}
+          </h1>
           <Chip tone={orderStatusTone(order.status)}>{statusLabel(order.status)}</Chip>
         </div>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           {shortOrderId(order.id)} · Ordered {formatDateTime(order.createdAt)}
         </p>
       </div>
 
       {/* Order summary */}
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Order summary</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Order summary</h2>
         <dl className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
           <div>
-            <dt className="text-neutral-500">Subtotal</dt>
-            <dd className="mt-0.5 font-medium text-neutral-800">
+            <dt className="text-neutral-500 dark:text-neutral-400">Subtotal</dt>
+            <dd className="mt-0.5 font-medium text-neutral-800 dark:text-white/90">
               {formatMoney(order.subtotalAmount, order.currency)}
             </dd>
           </div>
           {order.discountAmount > 0 ? (
             <div>
-              <dt className="text-neutral-500">
+              <dt className="text-neutral-500 dark:text-neutral-400">
                 Discount{order.couponCode ? ` (${order.couponCode})` : ""}
               </dt>
-              <dd className="mt-0.5 font-medium text-neutral-800">
+              <dd className="mt-0.5 font-medium text-neutral-800 dark:text-white/90">
                 -{formatMoney(order.discountAmount, order.currency)}
               </dd>
             </div>
           ) : null}
           <div>
-            <dt className="text-neutral-500">Total paid</dt>
-            <dd className="mt-0.5 font-medium text-neutral-800">
+            <dt className="text-neutral-500 dark:text-neutral-400">Total paid</dt>
+            <dd className="mt-0.5 font-medium text-neutral-800 dark:text-white/90">
               {formatMoney(order.totalAmount, order.currency)}
             </dd>
           </div>
@@ -243,16 +254,18 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={BookOpen} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Purchased items</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+            Purchased items
+          </h2>
         </div>
-        <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 p-3 text-sm">
+        <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 dark:border-neutral-800 p-3 text-sm">
           <Link
             href={`/courses/${order.courseId}`}
-            className="font-medium text-primary-700 hover:underline"
+            className="font-medium text-primary-700 dark:text-primary-300 hover:underline"
           >
             {order.courseTitle}
           </Link>
-          <span className="font-medium text-neutral-800">
+          <span className="font-medium text-neutral-800 dark:text-white/90">
             {formatMoney(order.totalAmount, order.currency)}
           </span>
         </div>
@@ -262,25 +275,31 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={CreditCard} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Payment information</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+            Payment information
+          </h2>
         </div>
         {order.payments.length === 0 ? (
-          <p className="mt-2 text-sm text-neutral-500">No payment has been recorded yet.</p>
+          <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+            No payment has been recorded yet.
+          </p>
         ) : (
           <ul className="mt-4 flex flex-col gap-2">
             {order.payments.map((payment) => (
               <li
                 key={payment.id}
-                className="flex items-center justify-between rounded-md border border-neutral-100 p-3 text-sm"
+                className="flex items-center justify-between rounded-md border border-neutral-100 dark:border-neutral-800 p-3 text-sm"
               >
                 <div>
-                  <p className="font-medium text-neutral-800">{payment.gateway}</p>
-                  <p className="text-xs text-neutral-500">
+                  <p className="font-medium text-neutral-800 dark:text-white/90">
+                    {payment.gateway}
+                  </p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
                     {payment.verifiedAt ? formatDateTime(payment.verifiedAt) : "Not yet verified"}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-neutral-700">
+                  <span className="text-neutral-700 dark:text-neutral-300">
                     {formatMoney(payment.amount, payment.currency)}
                   </span>
                   <Chip tone={paymentStatusTone(payment.status)}>
@@ -297,22 +316,24 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={Receipt} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Invoice</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Invoice</h2>
         </div>
         {order.invoice ? (
-          <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 p-3 text-sm">
+          <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 dark:border-neutral-800 p-3 text-sm">
             <div>
-              <p className="font-medium text-neutral-800">{order.invoice.invoiceNumber}</p>
-              <p className="text-xs text-neutral-500">
+              <p className="font-medium text-neutral-800 dark:text-white/90">
+                {order.invoice.invoiceNumber}
+              </p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
                 Issued {formatDateTime(order.invoice.issuedAt)}
               </p>
             </div>
-            <span className="font-medium text-neutral-800">
+            <span className="font-medium text-neutral-800 dark:text-white/90">
               {formatMoney(order.invoice.amount, order.invoice.currency)}
             </span>
           </div>
         ) : (
-          <p className="mt-2 text-sm text-neutral-500">
+          <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
             No invoice has been issued for this order yet.
           </p>
         )}
@@ -322,16 +343,18 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={GraduationCap} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Enrollment status</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+            Enrollment status
+          </h2>
         </div>
         {enrollment ? (
-          <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 p-3 text-sm">
+          <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 dark:border-neutral-800 p-3 text-sm">
             <div>
-              <p className="font-medium text-neutral-800">
+              <p className="font-medium text-neutral-800 dark:text-white/90">
                 Enrolled {formatDateTime(enrollment.enrolledAt)}
               </p>
               {enrollment.expiresAt ? (
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">
                   Expires {formatDateTime(enrollment.expiresAt)}
                 </p>
               ) : null}
@@ -341,7 +364,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
             </Chip>
           </div>
         ) : (
-          <p className="mt-2 text-sm text-neutral-500">
+          <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
             Not enrolled in this course yet — enrollment usually follows a successful payment.
           </p>
         )}
@@ -351,13 +374,13 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={RotateCcw} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Refund</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Refund</h2>
         </div>
         {refund ? (
-          <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 p-3 text-sm">
+          <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 dark:border-neutral-800 p-3 text-sm">
             <div>
-              <p className="font-medium text-neutral-800">{refund.reason}</p>
-              <p className="text-xs text-neutral-500">
+              <p className="font-medium text-neutral-800 dark:text-white/90">{refund.reason}</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
                 Requested {formatDateTime(refund.requestedAt)}
               </p>
             </div>
@@ -370,7 +393,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
             error={refundRequestError}
           />
         ) : (
-          <p className="mt-2 text-sm text-neutral-500">
+          <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
             Refunds can only be requested for paid orders.
           </p>
         )}
@@ -380,7 +403,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={Clock} tone="primary" />
-          <h2 className="text-lg font-medium text-neutral-800">Timeline</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Timeline</h2>
         </div>
         <div className="mt-4">
           <Timeline events={events} />

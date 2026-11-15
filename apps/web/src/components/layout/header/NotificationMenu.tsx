@@ -77,14 +77,16 @@ export function NotificationMenu() {
             <h5 className="text-lg font-semibold text-neutral-800 dark:text-white/90">
               Notifications
               {unread > 0 ? (
-                <span className="ml-2 text-sm font-normal text-neutral-500">{unread} unread</span>
+                <span className="ml-2 text-sm font-normal text-neutral-500 dark:text-neutral-400">
+                  {unread} unread
+                </span>
               ) : null}
             </h5>
             <button
               type="button"
               onClick={close}
               aria-label="Close notifications"
-              className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400"
+              className="text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 dark:text-neutral-400"
             >
               <X size={22} aria-hidden="true" />
             </button>
@@ -92,13 +94,15 @@ export function NotificationMenu() {
 
           <ul className="custom-scrollbar flex h-auto flex-1 flex-col overflow-y-auto">
             {failed ? (
-              <li className="py-8 text-center text-sm text-neutral-500">
+              <li className="py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
                 Couldn&apos;t load notifications.
               </li>
             ) : items === null ? (
-              <li className="py-8 text-center text-sm text-neutral-400">Loading…</li>
+              <li className="py-8 text-center text-sm text-neutral-400 dark:text-neutral-500">
+                Loading…
+              </li>
             ) : items.length === 0 ? (
-              <li className="py-8 text-center text-sm text-neutral-500">
+              <li className="py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
                 You&apos;re all caught up.
               </li>
             ) : (
@@ -113,7 +117,7 @@ export function NotificationMenu() {
                       aria-hidden="true"
                       className={cn(
                         "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-                        n.isRead ? "bg-neutral-200" : "bg-primary-500",
+                        n.isRead ? "bg-neutral-200 dark:bg-white/10" : "bg-primary-500",
                       )}
                     />
                     <span className="block min-w-0">
@@ -138,7 +142,7 @@ export function NotificationMenu() {
           <Link
             href="/notifications"
             onClick={close}
-            className="mt-3 flex justify-center rounded-lg border border-neutral-300 bg-white p-3 text-sm font-medium text-neutral-700 shadow-theme-xs hover:bg-neutral-50 hover:text-neutral-800 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400"
+            className="mt-3 flex justify-center rounded-lg border border-neutral-300 bg-white p-3 text-sm font-medium text-neutral-700 shadow-theme-xs hover:bg-neutral-50 dark:hover:bg-white/[0.03] hover:text-neutral-800 dark:hover:text-white/90 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400"
           >
             View All Notifications
           </Link>

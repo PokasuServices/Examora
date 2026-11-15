@@ -132,14 +132,16 @@ function UserDetailContent() {
       <div>
         <Link
           href="/users"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Users
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{user.email}</h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          {user.email}
+        </h1>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className="text-sm text-neutral-600">
+          <span className="text-sm text-neutral-600 dark:text-neutral-400">
             {[user.firstName, user.lastName].filter(Boolean).join(" ") || "No name on file"}
           </span>
           <Chip tone={user.emailVerified ? "success" : "warning"}>
@@ -152,15 +154,18 @@ function UserDetailContent() {
       <FieldError>{error}</FieldError>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Roles</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Roles</h2>
         <div className="mt-4 flex flex-col gap-2">
           {ROLE_NAMES.map((role) => (
-            <label key={role} className="flex items-center gap-2 text-sm text-neutral-700">
+            <label
+              key={role}
+              className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300"
+            >
               <input
                 type="checkbox"
                 checked={selectedRoles.includes(role)}
                 onChange={() => toggleRole(role)}
-                className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-primary-600 dark:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               />
               {role}
             </label>
@@ -172,7 +177,7 @@ function UserDetailContent() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Account status</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Account status</h2>
         <div className="mt-4 max-w-xs">
           <SelectField
             id="user-status-select"
@@ -198,7 +203,7 @@ function UserDetailContent() {
         message={
           <>
             Change this user&rsquo;s roles to{" "}
-            <span className="font-medium text-neutral-800">
+            <span className="font-medium text-neutral-800 dark:text-white/90">
               {selectedRoles.join(", ") || "none"}
             </span>
             ?
@@ -217,8 +222,11 @@ function UserDetailContent() {
         message={
           <>
             Change status from{" "}
-            <span className="font-medium text-neutral-800">{statusLabel(user.status)}</span> to{" "}
-            <span className="font-medium text-neutral-800">
+            <span className="font-medium text-neutral-800 dark:text-white/90">
+              {statusLabel(user.status)}
+            </span>{" "}
+            to{" "}
+            <span className="font-medium text-neutral-800 dark:text-white/90">
               {statusLabel(selectedStatus ?? user.status)}
             </span>
             ?

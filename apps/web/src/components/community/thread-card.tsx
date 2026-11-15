@@ -27,12 +27,14 @@ export function ThreadCard({
             {showBoard ? <Chip tone="neutral">{thread.boardTitle}</Chip> : null}
             <ThreadBadges thread={thread} />
           </div>
-          <h3 className="mt-1.5 truncate text-lg font-medium text-neutral-800">{thread.title}</h3>
-          <p className="mt-1 text-xs text-neutral-500">
+          <h3 className="mt-1.5 truncate text-lg font-medium text-neutral-800 dark:text-white/90">
+            {thread.title}
+          </h3>
+          <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
             {authorDisplayName(thread.author)} · {timeAgo(thread.createdAt)}
           </p>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-1.5 text-xs text-neutral-500">
+        <div className="flex shrink-0 flex-col items-end gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
           <span className="flex items-center gap-1" title="Replies">
             <MessageCircle size={13} strokeWidth={1.75} aria-hidden="true" />
             {thread.replyCount}

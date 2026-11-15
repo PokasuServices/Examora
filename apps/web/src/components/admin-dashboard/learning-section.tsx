@@ -10,8 +10,8 @@ import type {
 function StatRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-1.5 text-sm">
-      <span className="text-neutral-500">{label}</span>
-      <span className="font-medium tabular-nums text-neutral-800">{value}</span>
+      <span className="text-neutral-500 dark:text-neutral-400">{label}</span>
+      <span className="font-medium tabular-nums text-neutral-800 dark:text-white/90">{value}</span>
     </div>
   );
 }
@@ -32,7 +32,7 @@ export function LearningSection({
 
   return (
     <section aria-labelledby="learning-heading">
-      <h2 id="learning-heading" className="text-lg font-medium text-neutral-800">
+      <h2 id="learning-heading" className="text-lg font-medium text-neutral-800 dark:text-white/90">
         Learning analytics
       </h2>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -50,9 +50,11 @@ export function LearningSection({
         </div>
 
         <Card>
-          <h3 className="font-heading text-sm font-semibold text-neutral-900">Quiz activity</h3>
+          <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+            Quiz activity
+          </h3>
           {quizzes ? (
-            <div className="mt-3 divide-y divide-neutral-100">
+            <div className="mt-3 divide-y divide-neutral-100 dark:divide-neutral-800">
               <StatRow label="Total quizzes" value={quizzes.totalQuizzes.toLocaleString()} />
               <StatRow label="Total attempts" value={quizzes.totalAttempts.toLocaleString()} />
               <StatRow
@@ -73,17 +75,17 @@ export function LearningSection({
               />
             </div>
           ) : (
-            <p className="mt-3 text-sm text-neutral-400">No data yet.</p>
+            <p className="mt-3 text-sm text-neutral-400 dark:text-neutral-500">No data yet.</p>
           )}
         </Card>
 
         <Card>
-          <h3 className="font-heading text-sm font-semibold text-neutral-900">
+          <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
             Assignment activity
           </h3>
           {assignments ? (
             <>
-              <div className="mt-3 divide-y divide-neutral-100">
+              <div className="mt-3 divide-y divide-neutral-100 dark:divide-neutral-800">
                 <StatRow
                   label="Total assignments"
                   value={assignments.totalAssignments.toLocaleString()}
@@ -111,7 +113,7 @@ export function LearningSection({
               ) : null}
             </>
           ) : (
-            <p className="mt-3 text-sm text-neutral-400">No data yet.</p>
+            <p className="mt-3 text-sm text-neutral-400 dark:text-neutral-500">No data yet.</p>
           )}
         </Card>
       </div>

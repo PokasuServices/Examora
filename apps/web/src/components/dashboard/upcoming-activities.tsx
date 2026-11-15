@@ -40,7 +40,7 @@ export function UpcomingActivities({ scope }: { scope: DashboardScope }) {
 
   return (
     <section aria-labelledby="upcoming-heading">
-      <h2 id="upcoming-heading" className="text-lg font-medium text-neutral-800">
+      <h2 id="upcoming-heading" className="text-lg font-medium text-neutral-800 dark:text-white/90">
         Upcoming
       </h2>
 
@@ -75,19 +75,19 @@ export function UpcomingActivities({ scope }: { scope: DashboardScope }) {
                   .filter((label) => groups[label]?.length)
                   .map((label) => (
                     <div key={label}>
-                      <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
                         {label}
                       </h3>
-                      <ul className="mt-1.5 flex flex-col divide-y divide-neutral-100">
+                      <ul className="mt-1.5 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
                         {groups[label]!.map((item) => (
                           <li key={item.id}>
                             <Link
                               href={`/assignments/${item.id}`}
-                              className="flex items-center gap-3 rounded-md py-2 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                              className="flex items-center gap-3 rounded-md py-2 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                             >
                               <IconBadge icon={ClipboardList} tone="primary" size={24} />
                               <span className="min-w-0 flex-1">
-                                <span className="block truncate text-sm font-medium text-neutral-800">
+                                <span className="block truncate text-sm font-medium text-neutral-800 dark:text-white/90">
                                   {item.title}
                                 </span>
                               </span>

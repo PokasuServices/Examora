@@ -41,7 +41,7 @@ function CommunityHomeContent() {
             <Search
               size={16}
               strokeWidth={1.75}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
               aria-hidden="true"
             />
             <input
@@ -49,7 +49,7 @@ function CommunityHomeContent() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search discussions & questions…"
-              className="h-11 w-full rounded-md border-0 bg-white pl-9 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="h-11 w-full rounded-md border-0 bg-white dark:bg-neutral-900 pl-9 pr-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             />
           </div>
           <button
@@ -72,14 +72,14 @@ function CommunityHomeContent() {
         </Link>
         <Link
           href="/community/me"
-          className="flex h-11 items-center gap-2 rounded-md border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="flex h-11 items-center gap-2 rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           <MessagesSquare size={16} strokeWidth={1.75} aria-hidden="true" />
           My discussions
         </Link>
         <Link
           href="/community/search"
-          className="flex h-11 items-center gap-2 rounded-md border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="flex h-11 items-center gap-2 rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           <Search size={16} strokeWidth={1.75} aria-hidden="true" />
           Advanced search
@@ -93,12 +93,22 @@ function CommunityHomeContent() {
           {/* Trending */}
           <section aria-labelledby="trending-heading">
             <div className="flex items-center gap-2">
-              <Flame size={18} strokeWidth={1.75} className="text-warning-600" aria-hidden="true" />
-              <h2 id="trending-heading" className="text-lg font-medium text-neutral-800">
+              <Flame
+                size={18}
+                strokeWidth={1.75}
+                className="text-warning-600 dark:text-warning-400"
+                aria-hidden="true"
+              />
+              <h2
+                id="trending-heading"
+                className="text-lg font-medium text-neutral-800 dark:text-white/90"
+              >
                 Trending discussions
               </h2>
             </div>
-            <p className="mt-1 text-xs text-neutral-500">Most liked and replied to recently.</p>
+            <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+              Most liked and replied to recently.
+            </p>
             <div className="mt-3">
               {data.status === "loading" ? (
                 <ThreadCardSkeletonList count={4} />
@@ -121,7 +131,10 @@ function CommunityHomeContent() {
           {/* Recent */}
           <section aria-labelledby="recent-heading">
             <div className="flex items-center justify-between">
-              <h2 id="recent-heading" className="text-lg font-medium text-neutral-800">
+              <h2
+                id="recent-heading"
+                className="text-lg font-medium text-neutral-800 dark:text-white/90"
+              >
                 Recent discussions
               </h2>
             </div>
@@ -148,7 +161,10 @@ function CommunityHomeContent() {
 
           {/* Categories & boards */}
           <section aria-labelledby="categories-heading">
-            <h2 id="categories-heading" className="text-lg font-medium text-neutral-800">
+            <h2
+              id="categories-heading"
+              className="text-lg font-medium text-neutral-800 dark:text-white/90"
+            >
               Browse by category
             </h2>
             {data.status === "loading" ? null : data.categories.length === 0 ? (
@@ -159,17 +175,23 @@ function CommunityHomeContent() {
               <div className="mt-3 flex flex-col gap-6">
                 {data.categories.map((category) => (
                   <div key={category.id}>
-                    <h3 className="text-sm font-semibold text-neutral-700">{category.title}</h3>
+                    <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+                      {category.title}
+                    </h3>
                     {category.description ? (
-                      <p className="mt-0.5 text-xs text-neutral-500">{category.description}</p>
+                      <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
+                        {category.description}
+                      </p>
                     ) : null}
                     <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                       {(data.boardsByCategory[category.id] ?? []).map((board) => (
                         <Link key={board.id} href={`/community/boards/${board.id}`}>
                           <Card interactive density="compact">
-                            <h4 className="font-medium text-neutral-900">{board.title}</h4>
+                            <h4 className="font-medium text-neutral-900 dark:text-white/90">
+                              {board.title}
+                            </h4>
                             {board.description ? (
-                              <p className="mt-1 line-clamp-2 text-sm text-neutral-500">
+                              <p className="mt-1 line-clamp-2 text-sm text-neutral-500 dark:text-neutral-400">
                                 {board.description}
                               </p>
                             ) : null}

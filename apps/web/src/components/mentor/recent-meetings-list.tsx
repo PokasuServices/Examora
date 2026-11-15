@@ -22,14 +22,17 @@ export function RecentMeetingsList({
 
   return (
     <section aria-labelledby="recent-meetings-heading">
-      <h2 id="recent-meetings-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="recent-meetings-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Recent Meetings
       </h2>
       <Card className="mt-3">
         {meetings.length === 0 ? (
           <EmptyState icon={UsersIcon} heading="No meetings logged yet" />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {meetings.slice(0, 5).map((m) => {
               const student = studentById.get(m.studentId);
               return (
@@ -37,14 +40,14 @@ export function RecentMeetingsList({
                   <div className="flex items-center justify-between gap-3">
                     <Link
                       href={`/mentor/students/${m.studentId}`}
-                      className="font-medium text-neutral-800 hover:text-primary-600 hover:underline"
+                      className="font-medium text-neutral-800 dark:text-white/90 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
                     >
                       {student
                         ? `${student.firstName ?? ""} ${student.lastName ?? ""}`.trim() ||
                           student.studentEmail
                         : "Student"}
                     </Link>
-                    <span className="shrink-0 text-xs text-neutral-400">
+                    <span className="shrink-0 text-xs text-neutral-400 dark:text-neutral-500">
                       {new Date(m.occurredAt).toLocaleDateString(undefined, {
                         month: "short",
                         day: "numeric",
@@ -52,7 +55,11 @@ export function RecentMeetingsList({
                       {m.durationMinutes ? ` · ${m.durationMinutes} min` : ""}
                     </span>
                   </div>
-                  {m.summary ? <p className="mt-1 truncate text-neutral-500">{m.summary}</p> : null}
+                  {m.summary ? (
+                    <p className="mt-1 truncate text-neutral-500 dark:text-neutral-400">
+                      {m.summary}
+                    </p>
+                  ) : null}
                 </li>
               );
             })}

@@ -98,7 +98,7 @@ function ForumsContent() {
       <FieldError>{error}</FieldError>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-medium text-neutral-800">Categories</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Categories</h2>
 
         <Card density="compact">
           <form onSubmit={(e) => void createCategory(e)} className="flex flex-wrap items-end gap-3">
@@ -132,25 +132,32 @@ function ForumsContent() {
           ) : (
             <div className="overflow-x-auto contain-layout">
               <table className="w-full min-w-[520px] text-left text-sm">
-                <thead className="bg-neutral-50">
+                <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                   <tr>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Title
                     </th>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Boards
                     </th>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Status
                     </th>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700" />
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-200">
+                <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                   {categories.map((category) => (
-                    <tr key={category.id} className="hover:bg-neutral-50">
-                      <td className="px-4 py-3 font-medium text-neutral-900">{category.title}</td>
-                      <td className="px-4 py-3 text-neutral-600">{category.boardCount}</td>
+                    <tr
+                      key={category.id}
+                      className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]"
+                    >
+                      <td className="px-4 py-3 font-medium text-neutral-900 dark:text-white/90">
+                        {category.title}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                        {category.boardCount}
+                      </td>
                       <td className="whitespace-nowrap px-4 py-3">
                         <Chip tone={category.isActive ? "success" : "neutral"}>
                           {category.isActive ? "Active" : "Inactive"}
@@ -171,7 +178,7 @@ function ForumsContent() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-medium text-neutral-800">Boards</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Boards</h2>
 
         <Card density="compact">
           <form onSubmit={(e) => void createBoard(e)} className="flex flex-wrap items-end gap-3">
@@ -217,29 +224,35 @@ function ForumsContent() {
           ) : (
             <div className="overflow-x-auto contain-layout">
               <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="bg-neutral-50">
+                <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                   <tr>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Title
                     </th>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Category
                     </th>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Threads
                     </th>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Status
                     </th>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700" />
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-200">
+                <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                   {boards.map((board) => (
-                    <tr key={board.id} className="hover:bg-neutral-50">
-                      <td className="px-4 py-3 font-medium text-neutral-900">{board.title}</td>
-                      <td className="px-4 py-3 text-neutral-600">{board.categoryTitle}</td>
-                      <td className="px-4 py-3 text-neutral-600">{board.threadCount}</td>
+                    <tr key={board.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
+                      <td className="px-4 py-3 font-medium text-neutral-900 dark:text-white/90">
+                        {board.title}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                        {board.categoryTitle}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                        {board.threadCount}
+                      </td>
                       <td className="whitespace-nowrap px-4 py-3">
                         <Chip tone={board.isActive ? "success" : "neutral"}>
                           {board.isActive ? "Active" : "Inactive"}

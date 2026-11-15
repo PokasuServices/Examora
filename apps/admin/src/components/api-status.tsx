@@ -17,7 +17,9 @@ export async function ApiStatus() {
     <span
       className={
         "inline-flex items-center gap-2 rounded-md px-3 py-1 text-sm font-medium " +
-        (isHealthy ? "bg-success-500/10 text-success-600" : "bg-error-500/10 text-error-600")
+        (isHealthy
+          ? "bg-success-500/10 text-success-600 dark:text-success-400"
+          : "bg-error-500/10 text-error-600 dark:text-error-400")
       }
     >
       <span

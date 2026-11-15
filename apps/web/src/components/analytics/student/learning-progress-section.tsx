@@ -12,7 +12,10 @@ export function LearningProgressSection({ courses }: { courses: CourseCompletion
 
   return (
     <section aria-labelledby="learning-progress-heading">
-      <h2 id="learning-progress-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="learning-progress-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Learning Progress
       </h2>
       <div className="mt-3">
@@ -39,7 +42,7 @@ export function LearningProgressSection({ courses }: { courses: CourseCompletion
         )}
       </div>
       {courses.length > 0 ? (
-        <ul className="mt-3 flex flex-col divide-y divide-neutral-100 rounded-card border border-neutral-200 bg-white shadow-soft">
+        <ul className="mt-3 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800 rounded-card border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-soft">
           {courses.map((c) => (
             <li
               key={c.courseId}
@@ -47,11 +50,11 @@ export function LearningProgressSection({ courses }: { courses: CourseCompletion
             >
               <Link
                 href={`/courses/${c.courseId}`}
-                className="min-w-0 flex-1 truncate font-medium text-neutral-800 hover:text-primary-600 hover:underline"
+                className="min-w-0 flex-1 truncate font-medium text-neutral-800 dark:text-white/90 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
               >
                 {c.courseTitle}
               </Link>
-              <span className="shrink-0 text-neutral-500">
+              <span className="shrink-0 text-neutral-500 dark:text-neutral-400">
                 {c.completedLessons}/{c.totalLessons} lessons · {c.completionPercent}%
               </span>
             </li>

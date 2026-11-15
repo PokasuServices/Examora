@@ -7,7 +7,7 @@ export function LoaderDefault({ title, className }: { title?: string; className?
     <div
       role="status"
       className={cn(
-        "flex items-center justify-center gap-3 py-6 text-sm text-neutral-500",
+        "flex items-center justify-center gap-3 py-6 text-sm text-neutral-500 dark:text-neutral-400",
         className,
       )}
     >
@@ -21,10 +21,13 @@ export function LoaderDefault({ title, className }: { title?: string; className?
 }
 
 const MESSAGE_STYLES = {
-  error: "border-danger-200 bg-danger-50 text-danger-700",
-  warning: "border-warning-200 bg-warning-50 text-warning-700",
-  success: "border-success-200 bg-success-50 text-success-700",
-  info: "border-primary-200 bg-primary-50 text-primary-700",
+  error:
+    "border-danger-200 dark:border-danger-500/30 bg-danger-50 dark:bg-danger-500/15 text-danger-700 dark:text-danger-300",
+  warning:
+    "border-warning-200 dark:border-warning-500/30 bg-warning-50 dark:bg-warning-500/15 text-warning-700 dark:text-warning-300",
+  success:
+    "border-success-200 dark:border-success-500/30 bg-success-50 dark:bg-success-500/15 text-success-700 dark:text-success-300",
+  info: "border-primary-200 dark:border-primary-500/30 bg-primary-50 dark:bg-primary-500/15 text-primary-700 dark:text-primary-300",
 } as const;
 
 /** TMS `forms/GlobalFormMessage.vue` — dismissible form-level banner. */

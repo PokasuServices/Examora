@@ -25,7 +25,7 @@ export function RequirePermission({
   if (status === "loading" || status === "unauthenticated") {
     return (
       <main>
-        <p className="text-sm text-neutral-500">Loading…</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">Loading…</p>
       </main>
     );
   }
@@ -33,8 +33,8 @@ export function RequirePermission({
   if (!user?.permissions.includes(permission)) {
     return (
       <main>
-        <h1 className="text-xl font-semibold text-neutral-800">Access denied</h1>
-        <p className="mt-2 text-sm text-neutral-600">
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">Access denied</h1>
+        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
           Your account does not have permission to view this page.
         </p>
       </main>

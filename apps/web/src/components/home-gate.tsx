@@ -30,7 +30,7 @@ export function HomeGate({ children }: { children: React.ReactNode }) {
   if (status === "loading" || status === "authenticated") {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-neutral-500">Loading…</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">Loading…</p>
       </main>
     );
   }

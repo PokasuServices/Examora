@@ -160,7 +160,7 @@ function CatalogContent() {
     <main className="flex flex-col gap-6">
       <div>
         <PageTitle>Course catalog</PageTitle>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Browse every published course — see what&rsquo;s free, what you own, and what&rsquo;s next
           to finish.
         </p>
@@ -194,7 +194,7 @@ function CatalogContent() {
           type="button"
           onClick={() => setSheetOpen(true)}
           aria-haspopup="dialog"
-          className="relative flex h-11 shrink-0 items-center gap-2 rounded-md border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="relative flex h-11 shrink-0 items-center gap-2 rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           <Filter size={16} strokeWidth={1.75} aria-hidden="true" />
           Filters
@@ -237,7 +237,7 @@ function CatalogContent() {
         />
       ) : (
         <>
-          <p className="text-sm text-neutral-500" aria-live="polite">
+          <p className="text-sm text-neutral-500 dark:text-neutral-400" aria-live="polite">
             {filtered.length} {filtered.length === 1 ? "course" : "courses"}
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

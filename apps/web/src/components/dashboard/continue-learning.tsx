@@ -31,8 +31,13 @@ export function ContinueLearning() {
   return (
     <section>
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-neutral-800">Continue learning</h2>
-        <Link href="/courses" className="text-sm font-medium text-primary-600 hover:underline">
+        <h2 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+          Continue learning
+        </h2>
+        <Link
+          href="/courses"
+          className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
+        >
           See all →
         </Link>
       </div>

@@ -26,15 +26,17 @@ function ConsentRecordCard({
     <Card>
       <div className="flex items-center gap-2">
         <IconBadge icon={FileCheck2} tone="primary" />
-        <h2 className="text-lg font-medium text-neutral-800">
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
           Consent &amp; policy acknowledgement
         </h2>
       </div>
       {consentVersion && consentedAt ? (
-        <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 p-3 text-sm">
+        <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 dark:border-neutral-800 p-3 text-sm">
           <div>
-            <p className="font-medium text-neutral-800">Terms of Service {consentVersion}</p>
-            <p className="text-xs text-neutral-500">
+            <p className="font-medium text-neutral-800 dark:text-white/90">
+              Terms of Service {consentVersion}
+            </p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
               Accepted{" "}
               {new Date(consentedAt).toLocaleDateString(undefined, {
                 year: "numeric",
@@ -46,9 +48,11 @@ function ConsentRecordCard({
           <Chip tone="success">Accepted</Chip>
         </div>
       ) : (
-        <p className="mt-3 text-sm text-neutral-500">No consent record on file yet.</p>
+        <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
+          No consent record on file yet.
+        </p>
       )}
-      <p className="mt-3 text-xs text-neutral-500">
+      <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
         This is the one consent record Examora keeps for your account — a full history of every past
         decision isn&rsquo;t available.
       </p>
@@ -84,9 +88,11 @@ function MarketingPreferencesCard() {
     <Card>
       <div className="flex items-center gap-2">
         <IconBadge icon={Mail} tone="primary" />
-        <h2 className="text-lg font-medium text-neutral-800">Marketing preferences</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+          Marketing preferences
+        </h2>
       </div>
-      <p className="mt-2 text-sm text-neutral-500">
+      <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
         Choose whether Examora can send you product updates and marketing emails. Consent is
         write-only on the backend, so we can&rsquo;t display your current choice here — only record
         a new one.
@@ -96,7 +102,7 @@ function MarketingPreferencesCard() {
           type="button"
           onClick={() => void choose(true)}
           disabled={status === "saving"}
-          className="flex h-10 items-center rounded-md border border-neutral-200 px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-60"
+          className="flex h-10 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-4 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-60"
         >
           Opt in
         </button>
@@ -104,14 +110,14 @@ function MarketingPreferencesCard() {
           type="button"
           onClick={() => void choose(false)}
           disabled={status === "saving"}
-          className="flex h-10 items-center rounded-md border border-neutral-200 px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-60"
+          className="flex h-10 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-4 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-60"
         >
           Opt out
         </button>
         <AutosaveIndicator status={status} errorLabel={error ?? "Couldn't save — try again"} />
       </div>
       {status === "saved" && lastChoice ? (
-        <p className="mt-2 text-sm text-success-700">
+        <p className="mt-2 text-sm text-success-700 dark:text-success-300">
           You&rsquo;ve {lastChoice === "in" ? "opted in to" : "opted out of"} marketing emails.
         </p>
       ) : null}

@@ -74,20 +74,24 @@ function AssignmentLandingContent() {
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
+      <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 dark:text-neutral-400">
         <Link href="/assignments" className="hover:underline">
           Assignments
         </Link>{" "}
         <span aria-hidden="true">·</span>{" "}
-        <span className="text-neutral-800">{assignment.title}</span>
+        <span className="text-neutral-800 dark:text-white/90">{assignment.title}</span>
       </nav>
 
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-semibold text-neutral-800">{assignment.title}</h1>
+          <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+            {assignment.title}
+          </h1>
           {latest ? <SubmissionStatusChip status={latest.status} /> : null}
         </div>
-        <p className="mt-2 whitespace-pre-wrap text-neutral-600">{assignment.brief}</p>
+        <p className="mt-2 whitespace-pre-wrap text-neutral-600 dark:text-neutral-400">
+          {assignment.brief}
+        </p>
       </div>
 
       <AssignmentMetaGrid assignment={assignment} />
@@ -102,7 +106,9 @@ function AssignmentLandingContent() {
         >
           {ctaLabel}
         </button>
-        {startError ? <p className="mt-2 text-sm text-error-600">{startError}</p> : null}
+        {startError ? (
+          <p className="mt-2 text-sm text-error-600 dark:text-error-400">{startError}</p>
+        ) : null}
       </div>
 
       <SubmissionHistoryList history={history} />

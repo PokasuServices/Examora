@@ -36,18 +36,18 @@ export function DashboardHub() {
         href={`${WEB_ORIGIN}/admin`}
         target="_blank"
         rel="noreferrer"
-        className="group flex items-center justify-between gap-4 rounded-card border border-primary-200 bg-primary-50 px-5 py-4 shadow-soft transition-colors hover:bg-primary-100"
+        className="group flex items-center justify-between gap-4 rounded-card border border-primary-200 dark:border-primary-500/30 bg-primary-50 dark:bg-primary-500/15 px-5 py-4 shadow-soft transition-colors hover:bg-primary-100 dark:hover:bg-primary-500/20"
       >
         <div>
-          <h2 className="font-heading text-base font-semibold text-primary-900">
+          <h2 className="font-heading text-base font-semibold text-primary-900 dark:text-primary-200">
             Executive Dashboard
           </h2>
-          <p className="mt-1 text-sm text-primary-700">
+          <p className="mt-1 text-sm text-primary-700 dark:text-primary-300">
             Platform-wide KPIs, revenue, growth, and activity across Examora.
           </p>
         </div>
         <ArrowUpRight
-          className="h-5 w-5 shrink-0 text-primary-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          className="h-5 w-5 shrink-0 text-primary-600 dark:text-primary-400 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
           aria-hidden="true"
         />
       </a>
@@ -56,7 +56,7 @@ export function DashboardHub() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {visibleGroups.map((group) => (
             <Card key={group.label} density="compact" className="flex flex-col gap-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
                 {group.label}
               </h3>
               <ul className="flex flex-col gap-1.5">
@@ -64,7 +64,7 @@ export function DashboardHub() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-sm font-medium text-primary-600 hover:underline"
+                      className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
                     >
                       {item.label}
                     </Link>

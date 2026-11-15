@@ -39,12 +39,14 @@ export function ExecutiveHero({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <div className="flex items-center gap-2 text-neutral-500">
+        <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
           <Activity size={15} strokeWidth={1.75} aria-hidden="true" />
           <span className="text-xs font-semibold uppercase tracking-wide">Executive dashboard</span>
         </div>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">Welcome back, {name}</h1>
-        <p className="mt-1 text-sm text-neutral-500">{TODAY}</p>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          Welcome back, {name}
+        </h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{TODAY}</p>
       </div>
       <HealthChip health={health} />
     </div>

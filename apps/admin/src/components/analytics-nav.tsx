@@ -12,7 +12,7 @@ const TABS = [
 export function AnalyticsNav() {
   const pathname = usePathname();
   return (
-    <div className="mb-6 flex gap-2 border-b border-neutral-200">
+    <div className="mb-6 flex gap-2 border-b border-neutral-200 dark:border-neutral-800">
       {TABS.map((tab) => {
         const active = pathname === tab.href || pathname?.startsWith(`${tab.href}/`);
         return (
@@ -21,8 +21,8 @@ export function AnalyticsNav() {
             href={tab.href}
             className={`px-3 pb-2 text-sm font-medium ${
               active
-                ? "border-b-2 border-primary-600 text-primary-700"
-                : "text-neutral-500 hover:text-neutral-800"
+                ? "border-b-2 border-primary-600 text-primary-700 dark:text-primary-300"
+                : "text-neutral-500 hover:text-neutral-800 dark:hover:text-white/90"
             }`}
           >
             {tab.label}

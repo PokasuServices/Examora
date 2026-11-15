@@ -52,7 +52,7 @@ function CreateScheduledReportForm({ onCreated }: { onCreated: () => void }) {
       <div>
         <label
           htmlFor="scheduled-name"
-          className="mb-1.5 block text-xs font-medium text-neutral-500"
+          className="mb-1.5 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
         >
           Name
         </label>
@@ -62,7 +62,7 @@ function CreateScheduledReportForm({ onCreated }: { onCreated: () => void }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Weekly enrollment summary"
-          className="h-10 w-full rounded-md border border-neutral-200 px-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         />
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
@@ -98,7 +98,7 @@ function CreateScheduledReportForm({ onCreated }: { onCreated: () => void }) {
           </button>
         </div>
       </div>
-      {error ? <p className="text-sm text-danger-600">{error}</p> : null}
+      {error ? <p className="text-sm text-danger-600 dark:text-danger-400">{error}</p> : null}
     </form>
   );
 }
@@ -168,37 +168,46 @@ export function ScheduledReportsSection() {
 
   return (
     <section aria-labelledby="scheduled-reports-heading">
-      <h2 id="scheduled-reports-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="scheduled-reports-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Scheduled Reports
       </h2>
       <Card className="mt-3">
         <CreateScheduledReportForm onCreated={load} />
       </Card>
 
-      {actionError ? <p className="mt-3 text-sm text-danger-600">{actionError}</p> : null}
+      {actionError ? (
+        <p className="mt-3 text-sm text-danger-600 dark:text-danger-400">{actionError}</p>
+      ) : null}
 
       <Card className="mt-3" density="compact">
         {reports === null ? (
-          <p className="py-4 text-center text-sm text-neutral-400">Loading…</p>
+          <p className="py-4 text-center text-sm text-neutral-400 dark:text-neutral-500">
+            Loading…
+          </p>
         ) : reports.length === 0 ? (
           <EmptyState
             heading="No scheduled reports yet"
             body="Create one above to run automatically."
           />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {reports.map((r) => (
               <li key={r.id} className="flex items-center justify-between gap-3 py-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-medium text-neutral-800">{r.name}</p>
+                    <p className="truncate text-sm font-medium text-neutral-800 dark:text-white/90">
+                      {r.name}
+                    </p>
                     <Chip tone="neutral">{REPORT_TYPE_LABELS[r.reportType]}</Chip>
                     <Chip tone="neutral">{r.format}</Chip>
                     <Chip tone="primary">
                       {r.cadence.charAt(0) + r.cadence.slice(1).toLowerCase()}
                     </Chip>
                   </div>
-                  <p className="mt-1 text-xs text-neutral-400">
+                  <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
                     {r.lastRunAt
                       ? `Last ran ${new Date(r.lastRunAt).toLocaleString()}`
                       : "Never run"}
@@ -218,7 +227,7 @@ export function ScheduledReportsSection() {
                     disabled={busyId === r.id}
                     aria-label={`Run ${r.name} now`}
                     title="Run now"
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-primary-600 disabled:pointer-events-none disabled:opacity-60"
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-primary-600 dark:hover:text-primary-400 disabled:pointer-events-none disabled:opacity-60"
                   >
                     <Play size={15} strokeWidth={1.75} aria-hidden="true" />
                   </button>
@@ -228,7 +237,7 @@ export function ScheduledReportsSection() {
                     disabled={busyId === r.id}
                     aria-label={`Delete ${r.name}`}
                     title="Delete"
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-400 hover:bg-danger-50 hover:text-danger-600 disabled:pointer-events-none disabled:opacity-60"
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-400 dark:text-neutral-500 hover:bg-danger-50 dark:hover:bg-danger-500/15 hover:text-danger-600 dark:hover:text-danger-400 disabled:pointer-events-none disabled:opacity-60"
                   >
                     <Trash2 size={15} strokeWidth={1.75} aria-hidden="true" />
                   </button>

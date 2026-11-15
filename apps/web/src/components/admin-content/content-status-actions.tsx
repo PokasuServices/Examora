@@ -41,7 +41,7 @@ export function ContentStatusActions({
               key={target}
               type="button"
               onClick={() => setPending(target)}
-              className="flex h-8 items-center rounded-md border border-neutral-200 px-3 text-xs font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="flex h-8 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             >
               {statusLabel(target)}
             </button>
@@ -55,8 +55,14 @@ export function ContentStatusActions({
           pending ? (
             <>
               Change status from{" "}
-              <span className="font-medium text-neutral-800">{statusLabel(status)}</span> to{" "}
-              <span className="font-medium text-neutral-800">{statusLabel(pending)}</span>?
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {statusLabel(status)}
+              </span>{" "}
+              to{" "}
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {statusLabel(pending)}
+              </span>
+              ?
             </>
           ) : null
         }

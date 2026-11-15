@@ -68,7 +68,7 @@ function CoursesContent() {
   return (
     <main>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-neutral-800">Courses</h1>
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">Courses</h1>
         <Link href="/content/categories">
           <Button variant="secondary">Manage categories</Button>
         </Link>
@@ -76,7 +76,7 @@ function CoursesContent() {
 
       <form
         onSubmit={create}
-        className="mt-6 flex flex-wrap items-end gap-3 rounded-lg border border-neutral-200 bg-white p-4"
+        className="mt-6 flex flex-wrap items-end gap-3 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4"
       >
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="title">Course title</Label>
@@ -86,7 +86,7 @@ function CoursesContent() {
           <Label htmlFor="category">Category</Label>
           <select
             id="category"
-            className="h-10 rounded-md border border-neutral-300 px-3 text-sm"
+            className="h-10 rounded-md border border-neutral-300 dark:border-neutral-700 px-3 text-sm"
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
           >
@@ -125,7 +125,9 @@ function CoursesContent() {
             type="button"
             onClick={() => setFilter(s)}
             className={`rounded-md px-3 py-1 text-sm ${
-              filter === s ? "bg-primary-600 text-white" : "bg-neutral-100 text-neutral-700"
+              filter === s
+                ? "bg-primary-600 text-white"
+                : "bg-neutral-100 dark:bg-white/5 text-neutral-700 dark:text-neutral-300"
             }`}
           >
             {s}
@@ -133,9 +135,9 @@ function CoursesContent() {
         ))}
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+      <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
+          <thead className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-white/[0.03] text-neutral-700 dark:text-neutral-300">
             <tr>
               <th className="px-4 py-3 font-medium">Title</th>
               <th className="px-4 py-3 font-medium">Category</th>
@@ -146,11 +148,14 @@ function CoursesContent() {
           </thead>
           <tbody>
             {courses.map((course) => (
-              <tr key={course.id} className="border-b border-neutral-100 last:border-0">
+              <tr
+                key={course.id}
+                className="border-b border-neutral-100 dark:border-neutral-800 last:border-0"
+              >
                 <td className="px-4 py-3">
                   <Link
                     href={`/content/courses/${course.id}`}
-                    className="text-primary-600 hover:underline"
+                    className="text-primary-600 dark:text-primary-400 hover:underline"
                   >
                     {course.title}
                   </Link>
@@ -169,7 +174,10 @@ function CoursesContent() {
             ))}
             {courses.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
+                <td
+                  colSpan={5}
+                  className="px-4 py-6 text-center text-neutral-500 dark:text-neutral-400"
+                >
                   No courses.
                 </td>
               </tr>

@@ -120,10 +120,10 @@ export function HeroSection() {
     return (
       <Card className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
             Let&apos;s get started
           </p>
-          <h1 className="mt-1 text-title-sm font-semibold text-neutral-800">
+          <h1 className="mt-1 text-title-sm font-semibold text-neutral-800 dark:text-white/90">
             Browse courses in Fashion Design, Architecture &amp; more
           </h1>
         </div>
@@ -139,7 +139,9 @@ export function HeroSection() {
   if (pick.kind === "fallback") {
     return (
       <Card className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-semibold text-neutral-800">Jump back into your courses</h1>
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+          Jump back into your courses
+        </h1>
         <Link href="/courses" className="w-full shrink-0 sm:w-auto">
           <Button variant="secondary" size="lg" className="w-full sm:w-auto">
             My courses
@@ -155,19 +157,21 @@ export function HeroSection() {
         <p
           className={
             pick.kind === "assignment"
-              ? `text-xs font-semibold uppercase tracking-wide ${pick.eyebrowTone === "danger" ? "text-danger-600" : "text-warning-600"}`
-              : "text-xs font-semibold uppercase tracking-wide text-neutral-500"
+              ? `text-xs font-semibold uppercase tracking-wide ${pick.eyebrowTone === "danger" ? "text-danger-600 dark:text-danger-400" : "text-warning-600"}`
+              : "text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400"
           }
         >
           {pick.eyebrow}
         </p>
-        <h1 className="mt-1 truncate text-title-sm font-semibold text-neutral-800">{pick.title}</h1>
-        <p className="mt-1 flex items-center gap-2 text-sm text-neutral-500">
+        <h1 className="mt-1 truncate text-title-sm font-semibold text-neutral-800 dark:text-white/90">
+          {pick.title}
+        </h1>
+        <p className="mt-1 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
           {pick.context}
           {pick.kind === "lesson" ? (
             <span className="inline-flex items-center gap-1.5">
               <span
-                className="h-1.5 w-24 overflow-hidden rounded-full bg-neutral-200"
+                className="h-1.5 w-24 overflow-hidden rounded-full bg-neutral-200 dark:bg-white/10"
                 aria-hidden="true"
               >
                 <span

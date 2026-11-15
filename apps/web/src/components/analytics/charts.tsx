@@ -23,7 +23,8 @@ export const CHART_COLORS = {
   warning: "#d97706",
   danger: "#dc2626",
   accent: "#0891b2",
-  grid: "#e2e8f0",
+  // Semi-transparent slate so grid lines read on both light and dark surfaces.
+  grid: "rgba(148, 163, 184, 0.25)",
   axis: "#94a3b8",
 } as const;
 
@@ -31,7 +32,7 @@ const AXIS_STYLE = { fontSize: 11, fill: CHART_COLORS.axis };
 
 function EmptyChart({ message }: { message: string }) {
   return (
-    <div className="flex h-full items-center justify-center text-sm text-neutral-400">
+    <div className="flex h-full items-center justify-center text-sm text-neutral-400 dark:text-neutral-500">
       {message}
     </div>
   );
@@ -202,7 +203,7 @@ export function BreakdownBars({
 }) {
   const total = items.reduce((sum, i) => sum + i.value, 0);
   if (items.length === 0 || total === 0) {
-    return <p className="text-sm text-neutral-400">No data yet.</p>;
+    return <p className="text-sm text-neutral-400 dark:text-neutral-500">No data yet.</p>;
   }
 
   return (
@@ -212,12 +213,12 @@ export function BreakdownBars({
         return (
           <li key={item.label}>
             <div className="mb-1 flex items-center justify-between text-sm">
-              <span className="text-neutral-700">{item.label}</span>
-              <span className="tabular-nums text-neutral-500">
+              <span className="text-neutral-700 dark:text-neutral-300">{item.label}</span>
+              <span className="tabular-nums text-neutral-500 dark:text-neutral-400">
                 {item.value.toLocaleString()} · {pct}%
               </span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-white/5">
               <div
                 className="h-full rounded-full transition-[width] duration-300"
                 style={{ width: `${pct}%`, backgroundColor: color }}

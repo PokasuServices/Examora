@@ -5,11 +5,11 @@ import type { CmsWorkflowStatus } from "@examora/types";
 import { Button } from "@examora/ui";
 
 const STATUS_STYLES: Record<CmsWorkflowStatus, string> = {
-  DRAFT: "bg-neutral-200 text-neutral-700",
-  IN_REVIEW: "bg-warning-500/10 text-warning-600",
-  APPROVED: "bg-primary-500/10 text-primary-600",
-  PUBLISHED: "bg-success-500/10 text-success-600",
-  ARCHIVED: "bg-neutral-200 text-neutral-500",
+  DRAFT: "bg-neutral-200 dark:bg-white/10 text-neutral-700 dark:text-neutral-300",
+  IN_REVIEW: "bg-warning-500/10 text-warning-600 dark:text-warning-400",
+  APPROVED: "bg-primary-500/10 text-primary-600 dark:text-primary-400",
+  PUBLISHED: "bg-success-500/10 text-success-600 dark:text-success-400",
+  ARCHIVED: "bg-neutral-200 dark:bg-white/10 text-neutral-500 dark:text-neutral-400",
 };
 
 export function WorkflowStatusBadge({ status }: { status: CmsWorkflowStatus }) {
@@ -73,14 +73,14 @@ export function WorkflowActions({
             Send back to draft
           </Button>
           {scheduledPublishAt ? (
-            <span className="text-xs text-neutral-500">
+            <span className="text-xs text-neutral-500 dark:text-neutral-400">
               Scheduled to publish {new Date(scheduledPublishAt).toLocaleString()}
             </span>
           ) : (
             <span className="flex items-center gap-1">
               <input
                 type="datetime-local"
-                className="rounded border border-neutral-300 px-2 py-1 text-xs"
+                className="rounded border border-neutral-300 dark:border-neutral-700 px-2 py-1 text-xs"
                 value={scheduleAt}
                 onChange={(e) => setScheduleAt(e.target.value)}
               />
@@ -102,14 +102,14 @@ export function WorkflowActions({
             Archive now
           </Button>
           {scheduledUnpublishAt ? (
-            <span className="text-xs text-neutral-500">
+            <span className="text-xs text-neutral-500 dark:text-neutral-400">
               Scheduled to unpublish {new Date(scheduledUnpublishAt).toLocaleString()}
             </span>
           ) : (
             <span className="flex items-center gap-1">
               <input
                 type="datetime-local"
-                className="rounded border border-neutral-300 px-2 py-1 text-xs"
+                className="rounded border border-neutral-300 dark:border-neutral-700 px-2 py-1 text-xs"
                 value={scheduleAt}
                 onChange={(e) => setScheduleAt(e.target.value)}
               />

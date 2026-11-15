@@ -75,20 +75,22 @@ function BroadcastHistoryContent() {
       <div>
         <Link
           href="/notifications"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Notifications
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">Broadcast history</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          Broadcast history
+        </h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Platform-wide announcements sent to date. To send a new broadcast, use the composer in the
           admin console.
         </p>
       </div>
 
       {status === "loading" ? (
-        <p className="text-sm text-neutral-400">Loading…</p>
+        <p className="text-sm text-neutral-400 dark:text-neutral-500">Loading…</p>
       ) : status === "error" ? (
         <RetryInline message="Couldn't load broadcast history" onRetry={load} />
       ) : campaigns.length === 0 ? (
@@ -98,10 +100,10 @@ function BroadcastHistoryContent() {
           {campaigns.map((campaign) => (
             <Card key={campaign.key} density="compact">
               <div className="flex items-start justify-between gap-3">
-                <h2 className="font-heading text-sm font-semibold text-neutral-900">
+                <h2 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
                   {campaign.title}
                 </h2>
-                <span className="shrink-0 text-xs text-neutral-400">
+                <span className="shrink-0 text-xs text-neutral-400 dark:text-neutral-500">
                   {new Date(campaign.sentAt).toLocaleDateString(undefined, {
                     month: "short",
                     day: "numeric",
@@ -109,8 +111,8 @@ function BroadcastHistoryContent() {
                   })}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-neutral-600">{campaign.body}</p>
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-neutral-500">
+              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">{campaign.body}</p>
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
                 <Users size={12} strokeWidth={1.75} aria-hidden="true" />
                 {campaign.recipientCount} recipient{campaign.recipientCount === 1 ? "" : "s"}
               </div>

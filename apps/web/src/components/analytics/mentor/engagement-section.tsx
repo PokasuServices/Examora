@@ -12,7 +12,10 @@ import { StatCard } from "@/components/dashboard/stat-card";
 export function EngagementSection({ engagement }: { engagement: MentorEngagementSummary }) {
   return (
     <section aria-labelledby="mentor-engagement-heading">
-      <h2 id="mentor-engagement-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="mentor-engagement-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Engagement
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3">

@@ -14,9 +14,9 @@ import { useNotificationsAdminApi } from "@/lib/notifications-api";
 const BROADCASTABLE_CHANNELS = NOTIFICATION_CHANNELS.filter((c) => c !== "MOBILE_PUSH");
 
 const TEXTAREA_CLASS =
-  "w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 " +
-  "placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 " +
-  "focus-visible:ring-primary-600 focus-visible:ring-offset-1";
+  "w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-900 dark:text-white/90 " +
+  "placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 " +
+  "focus-visible:ring-primary-600 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900";
 
 function BroadcastContent() {
   const api = useNotificationsAdminApi();
@@ -141,22 +141,25 @@ function BroadcastContent() {
           <div>
             <Label>Channels</Label>
             <div className="mt-2 flex flex-wrap gap-3">
-              <label className="flex items-center gap-1.5 text-sm text-neutral-500">
+              <label className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400">
                 <input
                   type="checkbox"
                   checked
                   disabled
-                  className="h-4 w-4 rounded border-neutral-300"
+                  className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700"
                 />
                 IN_APP (always)
               </label>
               {BROADCASTABLE_CHANNELS.filter((c) => c !== "IN_APP").map((channel) => (
-                <label key={channel} className="flex items-center gap-1.5 text-sm text-neutral-700">
+                <label
+                  key={channel}
+                  className="flex items-center gap-1.5 text-sm text-neutral-700 dark:text-neutral-300"
+                >
                   <input
                     type="checkbox"
                     checked={channels.includes(channel)}
                     onChange={() => toggleChannel(channel)}
-                    className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                    className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-primary-600 dark:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                   />
                   {channel}
                 </label>
@@ -166,7 +169,9 @@ function BroadcastContent() {
 
           <FieldError>{error}</FieldError>
           {result ? (
-            <p className="text-sm text-success-600">Sent to {result.count} recipient(s).</p>
+            <p className="text-sm text-success-600 dark:text-success-400">
+              Sent to {result.count} recipient(s).
+            </p>
           ) : null}
           <div>
             <Button type="submit" disabled={submitting}>
@@ -182,7 +187,7 @@ function BroadcastContent() {
         message={
           <>
             Send this notification to{" "}
-            <span className="font-medium text-neutral-800">
+            <span className="font-medium text-neutral-800 dark:text-white/90">
               {recipientIds.length} recipient{recipientIds.length === 1 ? "" : "s"}
             </span>
             ? Every recipient always gets it in their Notification Center; additional channels are

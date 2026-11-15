@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Menu, MoreHorizontal, X } from "lucide-react";
 import { cn } from "@examora/ui";
+import { ThemeToggler } from "@/components/common/ThemeToggler";
 import { useSidebar } from "@/context/SidebarContext";
 import { HeaderLogo } from "./header/HeaderLogo";
 import { NotificationMenu } from "./header/NotificationMenu";
@@ -20,7 +21,7 @@ export function AppHeader() {
   const [appMenuOpen, setAppMenuOpen] = React.useState(false);
 
   return (
-    <header className="sticky top-0 z-40 flex w-full bg-white dark:bg-neutral-900 lg:bg-neutral-50">
+    <header className="sticky top-0 z-40 flex w-full bg-white dark:bg-neutral-900 lg:bg-neutral-50 dark:lg:bg-neutral-950">
       <div className="flex grow flex-col items-center justify-between lg:flex-row lg:px-6 lg:py-2">
         <div className="flex w-full items-center justify-between gap-2 border-b border-neutral-200 px-3 py-3 dark:border-neutral-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:p-0">
           <button
@@ -61,6 +62,7 @@ export function AppHeader() {
           )}
         >
           <div className="flex items-center gap-2">
+            <ThemeToggler />
             <NotificationMenu />
           </div>
           <UserMenu />

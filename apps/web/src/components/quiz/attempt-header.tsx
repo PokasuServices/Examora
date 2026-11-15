@@ -29,17 +29,19 @@ export function AttemptHeader({
   const percent = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0;
 
   return (
-    <header className="sticky top-0 z-10 border-b border-neutral-200 bg-white">
+    <header className="sticky top-0 z-10 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
       <div className="mx-auto flex h-14 max-w-3xl items-center gap-3 px-4 sm:px-6">
         <Link
           href={`/quizzes/${quizId}`}
           aria-label="Exit quiz"
           title="Exit quiz"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           <X size={18} strokeWidth={1.75} aria-hidden="true" />
         </Link>
-        <p className="min-w-0 flex-1 truncate text-sm font-medium text-neutral-700">{quizTitle}</p>
+        <p className="min-w-0 flex-1 truncate text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          {quizTitle}
+        </p>
         <AutosaveIndicator status={autosaveStatus} />
         {remainingSeconds !== null ? (
           <span
@@ -47,7 +49,7 @@ export function AttemptHeader({
               "shrink-0 rounded-full px-3 py-1 text-sm font-medium tabular-nums",
               remainingSeconds < 60
                 ? "bg-danger-600 text-white"
-                : "bg-neutral-100 text-neutral-700",
+                : "bg-neutral-100 dark:bg-white/5 text-neutral-700 dark:text-neutral-300",
             )}
             aria-live="polite"
           >
@@ -55,7 +57,7 @@ export function AttemptHeader({
           </span>
         ) : null}
       </div>
-      <div className="h-1 w-full bg-neutral-100">
+      <div className="h-1 w-full bg-neutral-100 dark:bg-white/5">
         <div
           className="h-full bg-primary-600 transition-[width] duration-300 ease-out motion-reduce:transition-none"
           style={{ width: `${percent}%` }}

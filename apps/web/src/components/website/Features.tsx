@@ -45,7 +45,10 @@ const FEATURES: { icon: LucideIcon; title: string; body: string }[] = [
 
 export function Features() {
   return (
-    <section id="features" className="scroll-mt-20 bg-neutral-50 py-16 lg:py-24">
+    <section
+      id="features"
+      className="scroll-mt-20 bg-neutral-50 dark:bg-white/[0.03] py-16 lg:py-24"
+    >
       <div className="mx-auto max-w-screen-xl px-4 md:px-6">
         <SectionHeading
           eyebrow="Features"
@@ -56,13 +59,17 @@ export function Features() {
           {FEATURES.map(({ icon: Icon, title, body }) => (
             <div
               key={title}
-              className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-theme-xs transition-shadow hover:shadow-theme-md"
+              className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 shadow-theme-xs transition-shadow hover:shadow-theme-md"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-500/15 text-primary-600 dark:text-primary-400">
                 <Icon size={24} strokeWidth={1.75} aria-hidden="true" />
               </span>
-              <h3 className="mt-5 text-lg font-semibold text-neutral-800">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-neutral-500">{body}</p>
+              <h3 className="mt-5 text-lg font-semibold text-neutral-800 dark:text-white/90">
+                {title}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-neutral-500 dark:text-neutral-400">
+                {body}
+              </p>
             </div>
           ))}
         </div>

@@ -20,7 +20,7 @@ import { useReportsApi } from "@/lib/analytics-api";
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-8">
-      <h2 className="text-sm font-semibold text-neutral-800">{title}</h2>
+      <h2 className="text-sm font-semibold text-neutral-800 dark:text-white/90">{title}</h2>
       <div className="mt-3">{children}</div>
     </section>
   );
@@ -62,7 +62,7 @@ function ReportBuilder() {
     <Section title="Report builder">
       <form
         onSubmit={run}
-        className="flex flex-wrap items-end gap-3 rounded-lg border border-neutral-200 bg-white p-4"
+        className="flex flex-wrap items-end gap-3 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4"
       >
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="reportType">Report type</Label>
@@ -70,7 +70,7 @@ function ReportBuilder() {
             id="reportType"
             value={reportType}
             onChange={(e) => setReportType(e.target.value as ReportType)}
-            className="h-10 w-64 rounded-md border border-neutral-300 bg-white px-3 text-sm"
+            className="h-10 w-64 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 text-sm"
           >
             {REPORT_TYPES.map((type) => (
               <option key={type} value={type}>
@@ -98,12 +98,12 @@ function ReportBuilder() {
         </Button>
       </form>
 
-      {error ? <p className="mt-2 text-sm text-error-600">{error}</p> : null}
+      {error ? <p className="mt-2 text-sm text-error-600 dark:text-error-400">{error}</p> : null}
 
       {result ? (
-        <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+        <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
+            <thead className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-white/[0.03] text-neutral-700 dark:text-neutral-300">
               <tr>
                 {result.columns.map((col) => (
                   <th key={col} className="px-4 py-3 font-medium">
@@ -114,9 +114,12 @@ function ReportBuilder() {
             </thead>
             <tbody>
               {result.rows.map((row, index) => (
-                <tr key={index} className="border-b border-neutral-100 last:border-0">
+                <tr
+                  key={index}
+                  className="border-b border-neutral-100 dark:border-neutral-800 last:border-0"
+                >
                   {result.columns.map((col) => (
-                    <td key={col} className="px-4 py-3 text-neutral-600">
+                    <td key={col} className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
                       {row[col] === null ? "—" : String(row[col])}
                     </td>
                   ))}
@@ -126,7 +129,7 @@ function ReportBuilder() {
                 <tr>
                   <td
                     colSpan={result.columns.length}
-                    className="px-4 py-6 text-center text-neutral-500"
+                    className="px-4 py-6 text-center text-neutral-500 dark:text-neutral-400"
                   >
                     No rows for this report.
                   </td>
@@ -203,7 +206,7 @@ function ScheduledReports() {
     <Section title="Scheduled reports">
       <form
         onSubmit={create}
-        className="flex flex-wrap items-end gap-3 rounded-lg border border-neutral-200 bg-white p-4"
+        className="flex flex-wrap items-end gap-3 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4"
       >
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="name">Name</Label>
@@ -215,7 +218,7 @@ function ScheduledReports() {
             id="scheduledType"
             value={reportType}
             onChange={(e) => setReportType(e.target.value as ReportType)}
-            className="h-10 w-56 rounded-md border border-neutral-300 bg-white px-3 text-sm"
+            className="h-10 w-56 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 text-sm"
           >
             {REPORT_TYPES.map((type) => (
               <option key={type} value={type}>
@@ -230,7 +233,7 @@ function ScheduledReports() {
             id="format"
             value={format}
             onChange={(e) => setFormat(e.target.value as ReportFormat)}
-            className="h-10 w-28 rounded-md border border-neutral-300 bg-white px-3 text-sm"
+            className="h-10 w-28 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 text-sm"
           >
             {REPORT_FORMATS.map((f) => (
               <option key={f} value={f}>
@@ -245,7 +248,7 @@ function ScheduledReports() {
             id="cadence"
             value={cadence}
             onChange={(e) => setCadence(e.target.value as ReportCadence)}
-            className="h-10 w-32 rounded-md border border-neutral-300 bg-white px-3 text-sm"
+            className="h-10 w-32 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 text-sm"
           >
             {REPORT_CADENCES.map((c) => (
               <option key={c} value={c}>
@@ -257,11 +260,11 @@ function ScheduledReports() {
         <Button type="submit">Create</Button>
       </form>
 
-      {error ? <p className="mt-2 text-sm text-error-600">{error}</p> : null}
+      {error ? <p className="mt-2 text-sm text-error-600 dark:text-error-400">{error}</p> : null}
 
-      <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+      <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
+          <thead className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-white/[0.03] text-neutral-700 dark:text-neutral-300">
             <tr>
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Type</th>
@@ -274,23 +277,32 @@ function ScheduledReports() {
           </thead>
           <tbody>
             {items.map((report) => (
-              <tr key={report.id} className="border-b border-neutral-100 last:border-0">
-                <td className="px-4 py-3 text-neutral-800">{report.name}</td>
-                <td className="px-4 py-3 text-neutral-600">{report.reportType}</td>
-                <td className="px-4 py-3 text-neutral-600">{report.format}</td>
-                <td className="px-4 py-3 text-neutral-600">{report.cadence}</td>
+              <tr
+                key={report.id}
+                className="border-b border-neutral-100 dark:border-neutral-800 last:border-0"
+              >
+                <td className="px-4 py-3 text-neutral-800 dark:text-white/90">{report.name}</td>
+                <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                  {report.reportType}
+                </td>
+                <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                  {report.format}
+                </td>
+                <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                  {report.cadence}
+                </td>
                 <td className="px-4 py-3">
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       report.isActive
-                        ? "bg-success-50 text-success-700"
+                        ? "bg-success-50 dark:bg-success-500/15 text-success-700 dark:text-success-300"
                         : "bg-neutral-100 text-neutral-500"
                     }`}
                   >
                     {report.isActive ? "Active" : "Inactive"}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-neutral-500">
+                <td className="px-4 py-3 text-neutral-500 dark:text-neutral-400">
                   {report.lastRunAt ? new Date(report.lastRunAt).toLocaleString() : "Never"}
                 </td>
                 <td className="px-4 py-3">
@@ -298,21 +310,21 @@ function ScheduledReports() {
                     <button
                       type="button"
                       onClick={() => void toggleActive(report)}
-                      className="text-primary-600 hover:underline"
+                      className="text-primary-600 dark:text-primary-400 hover:underline"
                     >
                       {report.isActive ? "Deactivate" : "Activate"}
                     </button>
                     <button
                       type="button"
                       onClick={() => void runNow(report.id)}
-                      className="text-primary-600 hover:underline"
+                      className="text-primary-600 dark:text-primary-400 hover:underline"
                     >
                       Run now
                     </button>
                     <button
                       type="button"
                       onClick={() => void remove(report.id)}
-                      className="text-error-600 hover:underline"
+                      className="text-error-600 dark:text-error-400 hover:underline"
                     >
                       Delete
                     </button>
@@ -322,7 +334,10 @@ function ScheduledReports() {
             ))}
             {items.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-neutral-500">
+                <td
+                  colSpan={7}
+                  className="px-4 py-6 text-center text-neutral-500 dark:text-neutral-400"
+                >
                   No scheduled reports yet.
                 </td>
               </tr>
@@ -338,8 +353,8 @@ function ReportsContent() {
   return (
     <main>
       <AnalyticsNav />
-      <h1 className="text-xl font-semibold text-neutral-800">Reports</h1>
-      <p className="mt-1 text-sm text-neutral-500">
+      <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">Reports</h1>
+      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
         Run and export ad-hoc reports, or schedule recurring ones (ADR-0020).
       </p>
 

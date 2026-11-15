@@ -20,14 +20,18 @@ function TimelineNode({
           "flex h-9 w-9 items-center justify-center rounded-full ring-4",
           tone === "done" && "bg-success-500 text-white ring-success-50",
           tone === "current" && "bg-primary-600 text-white ring-primary-50",
-          tone === "next" && "bg-white text-neutral-400 ring-neutral-100",
+          tone === "next" &&
+            "bg-white dark:bg-neutral-900 text-neutral-400 dark:text-neutral-500 ring-neutral-100",
         )}
       >
         <Icon size={16} strokeWidth={2} aria-hidden="true" />
       </span>
       {!isLast ? (
         <span
-          className={cn("mt-1 w-0.5 flex-1", tone === "done" ? "bg-success-200" : "bg-neutral-200")}
+          className={cn(
+            "mt-1 w-0.5 flex-1",
+            tone === "done" ? "bg-success-200" : "bg-neutral-200 dark:bg-white/10",
+          )}
           aria-hidden="true"
         />
       ) : null}
@@ -56,16 +60,16 @@ export function LearningPathRoadmap({
           <div key={`done-${c.courseId}`} className="flex gap-4">
             <TimelineNode tone="done" icon={CheckCircle2} isLast={rowIndex === totalRows} />
             <div className="min-w-0 flex-1 pb-6">
-              <p className="text-xs font-medium uppercase tracking-wide text-success-600">
+              <p className="text-xs font-medium uppercase tracking-wide text-success-600 dark:text-success-400">
                 Completed
               </p>
               <Link
                 href={`/courses/${c.courseId}`}
-                className="mt-0.5 block text-lg font-medium text-neutral-800 hover:text-primary-600 hover:underline"
+                className="mt-0.5 block text-lg font-medium text-neutral-800 dark:text-white/90 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
               >
                 {c.courseTitle}
               </Link>
-              <p className="mt-0.5 text-sm text-neutral-500">
+              <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
                 {c.completedLessons}/{c.totalLessons} lessons · finished
               </p>
             </div>
@@ -79,7 +83,7 @@ export function LearningPathRoadmap({
           <div key={`current-${c.courseId}`} className="flex gap-4">
             <TimelineNode tone="current" icon={MapPin} isLast={rowIndex === totalRows} />
             <div className="min-w-0 flex-1 pb-6">
-              <p className="text-xs font-medium uppercase tracking-wide text-primary-600">
+              <p className="text-xs font-medium uppercase tracking-wide text-primary-600 dark:text-primary-400">
                 You are here
               </p>
               <Link
@@ -88,11 +92,11 @@ export function LearningPathRoadmap({
                     ? `/courses/${c.courseId}/lessons/${c.nextLesson.id}`
                     : `/courses/${c.courseId}`
                 }
-                className="mt-0.5 block text-lg font-medium text-neutral-800 hover:text-primary-600 hover:underline"
+                className="mt-0.5 block text-lg font-medium text-neutral-800 dark:text-white/90 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
               >
                 {c.courseTitle}
               </Link>
-              <p className="mt-0.5 text-sm text-neutral-500">
+              <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
                 {c.completionPercent}% complete
                 {c.nextLesson ? ` · Next: ${c.nextLesson.title}` : ""}
               </p>
@@ -108,18 +112,18 @@ export function LearningPathRoadmap({
             <TimelineNode tone="next" icon={Sparkles} isLast={rowIndex === totalRows} />
             <div className="min-w-0 flex-1 pb-6">
               <div className="flex items-center gap-2">
-                <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                <p className="text-xs font-medium uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
                   Next up · Step {step.order}
                 </p>
                 <ScoreBadge score={step.score} />
               </div>
               <Link
                 href={`/courses/${step.courseId}`}
-                className="mt-0.5 block text-lg font-medium text-neutral-800 hover:text-primary-600 hover:underline"
+                className="mt-0.5 block text-lg font-medium text-neutral-800 dark:text-white/90 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
               >
                 {step.courseTitle}
               </Link>
-              <p className="mt-1 flex items-start gap-1.5 text-sm text-neutral-500">
+              <p className="mt-1 flex items-start gap-1.5 text-sm text-neutral-500 dark:text-neutral-400">
                 <Sparkles
                   size={13}
                   strokeWidth={1.75}

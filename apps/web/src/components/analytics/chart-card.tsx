@@ -17,8 +17,12 @@ export function ChartCard({
     <Card>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-heading text-sm font-semibold text-neutral-900">{title}</h3>
-          {subtitle ? <p className="mt-0.5 text-xs text-neutral-500">{subtitle}</p> : null}
+          <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+            {title}
+          </h3>
+          {subtitle ? (
+            <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">{subtitle}</p>
+          ) : null}
         </div>
         {action ?? null}
       </div>

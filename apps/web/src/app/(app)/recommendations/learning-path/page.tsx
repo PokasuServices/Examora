@@ -20,13 +20,15 @@ function LearningPathContent() {
       <div>
         <Link
           href="/recommendations"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Recommendations
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">Your Learning Path</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          Your Learning Path
+        </h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Where you&rsquo;ve been, where you are, and what&rsquo;s suggested next.
         </p>
       </div>

@@ -27,7 +27,7 @@ export function RequirePermission({
   if (status === "loading" || status === "unauthenticated") {
     return (
       <main className="mx-auto max-w-2xl">
-        <p className="text-sm text-neutral-500">Loading…</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">Loading…</p>
       </main>
     );
   }

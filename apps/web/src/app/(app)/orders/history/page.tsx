@@ -61,7 +61,7 @@ function HistoryContent() {
             <Search
               size={16}
               strokeWidth={1.75}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
               aria-hidden="true"
             />
             <input
@@ -69,13 +69,13 @@ function HistoryContent() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by course name…"
-              className="h-10 w-full rounded-md border border-neutral-200 bg-neutral-50 pl-9 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-white/[0.03] pl-9 pr-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-            className="h-10 rounded-md border border-neutral-200 bg-white px-3 text-sm text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="h-10 rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 text-sm text-neutral-700 dark:text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -86,7 +86,7 @@ function HistoryContent() {
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="h-10 rounded-md border border-neutral-200 bg-white px-3 text-sm text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="h-10 rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 text-sm text-neutral-700 dark:text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -122,45 +122,45 @@ function HistoryContent() {
           <>
             <div className="overflow-x-auto contain-layout">
               <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="bg-neutral-50">
+                <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                   <tr>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Order
                     </th>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Course
                     </th>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Purchase date
                     </th>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Amount
                     </th>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Status
                     </th>
-                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                    <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       <span className="sr-only">View</span>
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-200">
+                <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                   {pageItems.map((order) => (
-                    <tr key={order.id} className="hover:bg-neutral-50">
-                      <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-neutral-500">
+                    <tr key={order.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
+                      <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-neutral-500 dark:text-neutral-400">
                         {shortOrderId(order.id)}
                       </td>
-                      <td className="max-w-xs truncate px-4 py-3 text-neutral-800">
+                      <td className="max-w-xs truncate px-4 py-3 text-neutral-800 dark:text-white/90">
                         {order.courseTitle}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-neutral-600">
+                      <td className="whitespace-nowrap px-4 py-3 text-neutral-600 dark:text-neutral-400">
                         {new Date(order.createdAt).toLocaleDateString(undefined, {
                           month: "short",
                           day: "numeric",
                           year: "numeric",
                         })}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 font-medium text-neutral-800">
+                      <td className="whitespace-nowrap px-4 py-3 font-medium text-neutral-800 dark:text-white/90">
                         {formatMoney(order.totalAmount, order.currency)}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3">
@@ -171,7 +171,7 @@ function HistoryContent() {
                       <td className="whitespace-nowrap px-4 py-3 text-right">
                         <Link
                           href={`/orders/${order.id}`}
-                          className="text-sm font-medium text-primary-600 hover:underline"
+                          className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
                         >
                           View details
                         </Link>
@@ -182,7 +182,7 @@ function HistoryContent() {
               </table>
             </div>
             <div className="flex items-center justify-between gap-3 p-4">
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
                 {filteredCount} {filteredCount === 1 ? "order" : "orders"}
               </p>
               <Pagination page={page} pageCount={pageCount} onChange={setPage} />

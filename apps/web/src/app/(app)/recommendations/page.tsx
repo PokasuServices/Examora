@@ -154,7 +154,7 @@ function RecommendationsContent() {
         action={
           <Link
             href="/recommendations/learning-path"
-            className="text-sm font-medium text-primary-600 hover:underline"
+            className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
           >
             View full path →
           </Link>

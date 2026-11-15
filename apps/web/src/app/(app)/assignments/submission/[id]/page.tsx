@@ -83,15 +83,17 @@ function WorkspaceContent() {
   return (
     <main className="mx-auto flex max-w-[1000px] flex-col gap-8">
       <div>
-        <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
+        <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 dark:text-neutral-400">
           <Link href={`/assignments/${submission.assignmentId}`} className="hover:underline">
             {submission.assignmentTitle}
           </Link>{" "}
           <span aria-hidden="true">·</span>{" "}
-          <span className="text-neutral-800">Version {submission.version}</span>
+          <span className="text-neutral-800 dark:text-white/90">Version {submission.version}</span>
         </nav>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-semibold text-neutral-800">{submission.assignmentTitle}</h1>
+          <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+            {submission.assignmentTitle}
+          </h1>
           <SubmissionStatusChip status={submission.status} />
         </div>
       </div>
@@ -112,7 +114,7 @@ function WorkspaceContent() {
           ) : null}
 
           <Card>
-            <h2 className="text-lg font-medium text-neutral-800">Files</h2>
+            <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Files</h2>
             <div className="mt-3">
               <SubmissionFileList
                 files={submission.files}
@@ -149,7 +151,9 @@ function WorkspaceContent() {
             </Card>
           ) : null}
 
-          {submitError ? <p className="text-sm text-error-600">{submitError}</p> : null}
+          {submitError ? (
+            <p className="text-sm text-error-600 dark:text-error-400">{submitError}</p>
+          ) : null}
 
           {isDraft ? (
             <div>
@@ -162,7 +166,7 @@ function WorkspaceContent() {
               </button>
             </div>
           ) : submission.status === "SUBMITTED" || submission.status === "UNDER_REVIEW" ? (
-            <p className="text-sm text-neutral-500">Awaiting review.</p>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">Awaiting review.</p>
           ) : null}
 
           <FeedbackTimeline
@@ -176,18 +180,22 @@ function WorkspaceContent() {
         <div className="lg:order-2">
           {assignment ? (
             <Card className="lg:sticky lg:top-20">
-              <h2 className="text-lg font-medium text-neutral-800">Assignment brief</h2>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-600">
+              <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+                Assignment brief
+              </h2>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-600 dark:text-neutral-400">
                 {assignment.brief}
               </p>
               {assignment.criteria.length > 0 ? (
-                <div className="mt-5 border-t border-neutral-100 pt-4">
-                  <p className="text-sm font-medium text-neutral-800">Rubric</p>
+                <div className="mt-5 border-t border-neutral-100 dark:border-neutral-800 pt-4">
+                  <p className="text-sm font-medium text-neutral-800 dark:text-white/90">Rubric</p>
                   <ul className="mt-2 flex flex-col gap-2">
                     {assignment.criteria.map((c) => (
                       <li key={c.id} className="flex items-start justify-between gap-3 text-sm">
-                        <span className="text-neutral-600">{c.title}</span>
-                        <span className="shrink-0 tabular-nums text-neutral-400">{c.maxMarks}</span>
+                        <span className="text-neutral-600 dark:text-neutral-400">{c.title}</span>
+                        <span className="shrink-0 tabular-nums text-neutral-400 dark:text-neutral-500">
+                          {c.maxMarks}
+                        </span>
                       </li>
                     ))}
                   </ul>

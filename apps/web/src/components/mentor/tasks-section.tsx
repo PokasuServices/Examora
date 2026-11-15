@@ -49,7 +49,7 @@ export function TasksSection({
 
   return (
     <section aria-labelledby="tasks-heading">
-      <h2 id="tasks-heading" className="text-lg font-medium text-neutral-800">
+      <h2 id="tasks-heading" className="text-lg font-medium text-neutral-800 dark:text-white/90">
         Tasks
       </h2>
       <Card className="mt-3">
@@ -63,7 +63,7 @@ export function TasksSection({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="New task…"
-              className="h-10 w-full rounded-md border border-neutral-200 px-3 text-sm placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             />
           </div>
           <div>
@@ -75,7 +75,7 @@ export function TasksSection({
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="h-10 rounded-md border border-neutral-200 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="h-10 rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             />
           </div>
           <button
@@ -87,21 +87,21 @@ export function TasksSection({
           </button>
         </form>
 
-        <div className="mt-4 border-t border-neutral-100 pt-4">
+        <div className="mt-4 border-t border-neutral-100 dark:border-neutral-800 pt-4">
           {sorted.length === 0 ? (
             <EmptyState icon={ListTodo} heading="No tasks yet" />
           ) : (
-            <ul className="flex flex-col divide-y divide-neutral-100">
+            <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
               {sorted.map((task) => (
                 <li key={task.id} className="flex items-center gap-3 py-2.5">
                   <div className="min-w-0 flex-1">
                     <p
-                      className={`truncate text-sm ${task.status === "COMPLETED" ? "text-neutral-400 line-through" : "text-neutral-800"}`}
+                      className={`truncate text-sm ${task.status === "COMPLETED" ? "text-neutral-400 dark:text-neutral-500 line-through" : "text-neutral-800"}`}
                     >
                       {task.title}
                     </p>
                     {task.dueDate ? (
-                      <p className="text-xs text-neutral-400">
+                      <p className="text-xs text-neutral-400 dark:text-neutral-500">
                         Due{" "}
                         {new Date(task.dueDate).toLocaleDateString(undefined, {
                           month: "short",
@@ -118,7 +118,7 @@ export function TasksSection({
                     }
                     className={`h-8 shrink-0 rounded-full border-0 px-3 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
                       task.status === "COMPLETED"
-                        ? "bg-success-50 text-success-700"
+                        ? "bg-success-50 dark:bg-success-500/15 text-success-700 dark:text-success-300"
                         : task.status === "IN_PROGRESS"
                           ? "bg-warning-50 text-warning-700"
                           : "bg-neutral-100 text-neutral-600"
@@ -134,7 +134,7 @@ export function TasksSection({
                     type="button"
                     onClick={() => void onDelete(task.id)}
                     aria-label={`Delete ${task.title}`}
-                    className="shrink-0 rounded p-1 text-neutral-400 hover:bg-danger-50 hover:text-danger-600"
+                    className="shrink-0 rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-danger-50 dark:hover:bg-danger-500/15 hover:text-danger-600 dark:hover:text-danger-400"
                   >
                     <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
                   </button>

@@ -65,17 +65,25 @@ function AssetCard({
 
   return (
     <Card density="compact" className="flex flex-col gap-3">
-      <div className="flex h-24 items-center justify-center rounded-md bg-neutral-100">
-        <FileText size={28} strokeWidth={1.5} className="text-neutral-400" aria-hidden="true" />
+      <div className="flex h-24 items-center justify-center rounded-md bg-neutral-100 dark:bg-white/5">
+        <FileText
+          size={28}
+          strokeWidth={1.5}
+          className="text-neutral-400 dark:text-neutral-500"
+          aria-hidden="true"
+        />
       </div>
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-neutral-800" title={asset.fileName}>
+        <p
+          className="truncate text-sm font-medium text-neutral-800 dark:text-white/90"
+          title={asset.fileName}
+        >
           {asset.fileName}
         </p>
-        <p className="mt-0.5 text-xs text-neutral-500">
+        <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
           {formatSize(asset.sizeBytes)} · {asset.mimeType}
         </p>
-        <p className="mt-0.5 text-xs text-neutral-400">
+        <p className="mt-0.5 text-xs text-neutral-400 dark:text-neutral-500">
           {asset.uploadedByEmail} · {new Date(asset.createdAt).toLocaleDateString()}
         </p>
       </div>
@@ -88,14 +96,16 @@ function AssetCard({
               ? "Scanning…"
               : statusLabelFallback(asset.scanStatus)}
         </Chip>
-        <span className="text-xs text-neutral-400">used {asset.usageCount}×</span>
+        <span className="text-xs text-neutral-400 dark:text-neutral-500">
+          used {asset.usageCount}×
+        </span>
       </div>
-      <div className="flex items-center gap-3 border-t border-neutral-100 pt-2">
+      <div className="flex items-center gap-3 border-t border-neutral-100 dark:border-neutral-800 pt-2">
         {asset.scanStatus === "CLEAN" ? (
           <button
             type="button"
             onClick={onDownload}
-            className="flex items-center gap-1 text-xs font-medium text-primary-600 hover:underline"
+            className="flex items-center gap-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline"
           >
             <Download size={12} strokeWidth={2} aria-hidden="true" />
             Download
@@ -106,7 +116,7 @@ function AssetCard({
           disabled={asset.usageCount > 0 || deleting}
           onClick={onDelete}
           title={asset.usageCount > 0 ? "Still referenced by content" : undefined}
-          className="ml-auto flex items-center gap-1 text-xs font-medium text-danger-600 hover:underline disabled:pointer-events-none disabled:opacity-40"
+          className="ml-auto flex items-center gap-1 text-xs font-medium text-danger-600 dark:text-danger-400 hover:underline disabled:pointer-events-none disabled:opacity-40"
         >
           <Trash2 size={12} strokeWidth={2} aria-hidden="true" />
           {deleting ? "Deleting…" : "Delete"}
@@ -152,8 +162,8 @@ function MediaLibraryContent() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-xl font-semibold text-neutral-800">Media Library</h2>
-        <p className="mt-0.5 text-sm text-neutral-500">
+        <h2 className="text-xl font-semibold text-neutral-800 dark:text-white/90">Media Library</h2>
+        <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
           Upload once, reuse across pages and banners. Every upload is quarantined until scanned
           clean.
         </p>
@@ -162,13 +172,13 @@ function MediaLibraryContent() {
       <Card>
         <label
           htmlFor="asset-upload"
-          className="flex h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-neutral-200 text-neutral-500 hover:border-primary-300 hover:bg-primary-50/30"
+          className="flex h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:border-primary-300 hover:bg-primary-50/30"
         >
           <Upload size={20} strokeWidth={1.75} aria-hidden="true" />
           <span className="text-sm font-medium">
             {uploading ? "Uploading…" : "Click to upload an asset"}
           </span>
-          <span className="text-xs text-neutral-400">
+          <span className="text-xs text-neutral-400 dark:text-neutral-500">
             PNG, JPEG, GIF, WEBP, SVG, or PDF — up to 10 MB
           </span>
         </label>
@@ -181,8 +191,12 @@ function MediaLibraryContent() {
           disabled={uploading}
           className="sr-only"
         />
-        {uploadError ? <p className="mt-2 text-sm text-danger-600">{uploadError}</p> : null}
-        {deleteError ? <p className="mt-2 text-sm text-danger-600">{deleteError}</p> : null}
+        {uploadError ? (
+          <p className="mt-2 text-sm text-danger-600 dark:text-danger-400">{uploadError}</p>
+        ) : null}
+        {deleteError ? (
+          <p className="mt-2 text-sm text-danger-600 dark:text-danger-400">{deleteError}</p>
+        ) : null}
       </Card>
 
       {status === "loading" ? (

@@ -35,26 +35,33 @@ function timeAgo(iso: string): string {
 export function ActivityTimelineSection({ items }: { items: ActivityTimelineItem[] }) {
   return (
     <section aria-labelledby="activity-timeline-heading">
-      <h2 id="activity-timeline-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="activity-timeline-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Recent Activity
       </h2>
       <Card className="mt-3">
         {items.length === 0 ? (
           <EmptyState icon={Activity} heading="No activity yet" />
         ) : (
-          <ul className="flex flex-col divide-y divide-neutral-100">
+          <ul className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {items.slice(0, 15).map((item, i) => (
               <li key={i} className="flex items-start gap-3 py-2.5">
                 <IconBadge icon={EVENT_ICON[item.type]} tone="primary" size={24} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="truncate text-sm text-neutral-800">{item.title}</p>
-                    <span className="shrink-0 text-xs text-neutral-400">
+                    <p className="truncate text-sm text-neutral-800 dark:text-white/90">
+                      {item.title}
+                    </p>
+                    <span className="shrink-0 text-xs text-neutral-400 dark:text-neutral-500">
                       {timeAgo(item.occurredAt)}
                     </span>
                   </div>
                   {item.description ? (
-                    <p className="mt-0.5 truncate text-xs text-neutral-500">{item.description}</p>
+                    <p className="mt-0.5 truncate text-xs text-neutral-500 dark:text-neutral-400">
+                      {item.description}
+                    </p>
                   ) : null}
                 </div>
               </li>

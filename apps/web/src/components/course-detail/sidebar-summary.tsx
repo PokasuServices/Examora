@@ -50,7 +50,7 @@ export function SidebarSummary({
 
   return (
     <Card className="lg:sticky lg:top-20">
-      <p className="font-heading text-3xl font-bold text-neutral-900">
+      <p className="font-heading text-3xl font-bold text-neutral-900 dark:text-white/90">
         {isFree ? "Free" : formatMoney(course.priceAmount!, course.priceCurrency)}
       </p>
 
@@ -72,12 +72,14 @@ export function SidebarSummary({
         </button>
       )}
 
-      {purchaseError ? <p className="mt-3 text-sm text-error-600">{purchaseError}</p> : null}
+      {purchaseError ? (
+        <p className="mt-3 text-sm text-error-600 dark:text-error-400">{purchaseError}</p>
+      ) : null}
 
       {access === "locked" ? (
-        <p className="mt-3 text-xs text-neutral-500">
+        <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
           Already purchased?{" "}
-          <Link href="/orders" className="text-primary-600 hover:underline">
+          <Link href="/orders" className="text-primary-600 dark:text-primary-400 hover:underline">
             Check your order history
           </Link>
           .
@@ -85,14 +87,16 @@ export function SidebarSummary({
       ) : null}
 
       {curriculum ? (
-        <div className="mt-6 border-t border-neutral-100 pt-5">
-          <p className="text-sm font-medium text-neutral-800">This course includes</p>
-          <ul className="mt-3 flex flex-col gap-2.5 text-sm text-neutral-600">
+        <div className="mt-6 border-t border-neutral-100 dark:border-neutral-800 pt-5">
+          <p className="text-sm font-medium text-neutral-800 dark:text-white/90">
+            This course includes
+          </p>
+          <ul className="mt-3 flex flex-col gap-2.5 text-sm text-neutral-600 dark:text-neutral-400">
             <li className="flex items-center gap-2.5">
               <Layers
                 size={16}
                 strokeWidth={1.75}
-                className="shrink-0 text-neutral-400"
+                className="shrink-0 text-neutral-400 dark:text-neutral-500"
                 aria-hidden="true"
               />
               {curriculum.subjects.length}{" "}
@@ -102,7 +106,7 @@ export function SidebarSummary({
               <BookOpen
                 size={16}
                 strokeWidth={1.75}
-                className="shrink-0 text-neutral-400"
+                className="shrink-0 text-neutral-400 dark:text-neutral-500"
                 aria-hidden="true"
               />
               {curriculum.totalLessons} {curriculum.totalLessons === 1 ? "lesson" : "lessons"}
@@ -113,7 +117,7 @@ export function SidebarSummary({
                 <HelpCircle
                   size={16}
                   strokeWidth={1.75}
-                  className="shrink-0 text-neutral-400"
+                  className="shrink-0 text-neutral-400 dark:text-neutral-500"
                   aria-hidden="true"
                 />
                 {totals.quizzes} {totals.quizzes === 1 ? "quiz" : "quizzes"}
@@ -124,7 +128,7 @@ export function SidebarSummary({
                 <ClipboardList
                   size={16}
                   strokeWidth={1.75}
-                  className="shrink-0 text-neutral-400"
+                  className="shrink-0 text-neutral-400 dark:text-neutral-500"
                   aria-hidden="true"
                 />
                 {totals.assignments} {totals.assignments === 1 ? "assignment" : "assignments"}

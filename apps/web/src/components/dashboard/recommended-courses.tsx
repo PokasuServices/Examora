@@ -31,7 +31,9 @@ export function RecommendedCourses() {
     <section>
       <div className="flex items-center gap-2">
         <Sparkles size={18} strokeWidth={1.75} className="text-accent-500" aria-hidden="true" />
-        <h2 className="text-xl font-semibold text-neutral-800">Recommended for you</h2>
+        <h2 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+          Recommended for you
+        </h2>
       </div>
 
       <div className="mt-4">

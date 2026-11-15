@@ -10,19 +10,24 @@ function NewThreadContent() {
 
   return (
     <main className="mx-auto max-w-2xl">
-      <nav aria-label="Breadcrumb" className="mb-4 text-sm text-neutral-500">
-        <Link href="/community" className="hover:text-primary-600 hover:underline">
+      <nav aria-label="Breadcrumb" className="mb-4 text-sm text-neutral-500 dark:text-neutral-400">
+        <Link
+          href="/community"
+          className="hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
+        >
           Community
         </Link>{" "}
         /{" "}
         <Link
           href={`/community/boards/${boardId}`}
-          className="hover:text-primary-600 hover:underline"
+          className="hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
         >
           Back to board
         </Link>
       </nav>
-      <h1 className="text-xl font-semibold text-neutral-800">Start a new thread</h1>
+      <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+        Start a new thread
+      </h1>
       <div className="mt-6">
         <CreateThreadForm initialBoardId={boardId} />
       </div>

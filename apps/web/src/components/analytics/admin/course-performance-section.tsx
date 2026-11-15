@@ -6,7 +6,10 @@ import { EmptyState } from "@/components/ui/empty-state";
 export function CoursePerformanceSection({ entries }: { entries: AdminCoursePerformanceEntry[] }) {
   return (
     <section aria-labelledby="admin-course-performance-heading">
-      <h2 id="admin-course-performance-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="admin-course-performance-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Course Performance
       </h2>
       <Card className="mt-3" density="compact">
@@ -16,7 +19,7 @@ export function CoursePerformanceSection({ entries }: { entries: AdminCoursePerf
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead>
-                <tr className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                <tr className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                   <th className="px-3 py-2">Course</th>
                   <th className="px-3 py-2">Enrollments</th>
                   <th className="px-3 py-2">Avg. Completion</th>
@@ -24,27 +27,27 @@ export function CoursePerformanceSection({ entries }: { entries: AdminCoursePerf
                   <th className="px-3 py-2">Revenue</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {entries.map((c) => (
-                  <tr key={c.courseId} className="hover:bg-neutral-50">
+                  <tr key={c.courseId} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
                     <td className="px-3 py-2.5">
                       <Link
                         href={`/courses/${c.courseId}`}
-                        className="font-medium text-neutral-800 hover:text-primary-600 hover:underline"
+                        className="font-medium text-neutral-800 dark:text-white/90 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
                       >
                         {c.courseTitle}
                       </Link>
                     </td>
-                    <td className="px-3 py-2.5 tabular-nums text-neutral-600">
+                    <td className="px-3 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
                       {c.enrollmentCount.toLocaleString()}
                     </td>
-                    <td className="px-3 py-2.5 tabular-nums text-neutral-600">
+                    <td className="px-3 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
                       {c.averageCompletionPercent}%
                     </td>
-                    <td className="px-3 py-2.5 tabular-nums text-neutral-600">
+                    <td className="px-3 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
                       {c.averageQuizPercentage !== null ? `${c.averageQuizPercentage}%` : "—"}
                     </td>
-                    <td className="px-3 py-2.5 tabular-nums text-neutral-600">
+                    <td className="px-3 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
                       {c.revenue.toLocaleString()}
                     </td>
                   </tr>

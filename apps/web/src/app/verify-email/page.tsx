@@ -45,8 +45,13 @@ function VerifyEmailContent() {
   if (state === "verified") {
     return (
       <AuthLayout title="Email verified">
-        <p className="text-sm text-neutral-600">Your account is now active.</p>
-        <Link href="/" className="mt-6 inline-block text-sm text-primary-600 hover:underline">
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          Your account is now active.
+        </p>
+        <Link
+          href="/"
+          className="mt-6 inline-block text-sm text-primary-600 dark:text-primary-400 hover:underline"
+        >
           Continue
         </Link>
       </AuthLayout>
@@ -56,7 +61,9 @@ function VerifyEmailContent() {
   if (state === "verifying") {
     return (
       <AuthLayout title="Verifying…">
-        <p className="text-sm text-neutral-600">Confirming your email address.</p>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          Confirming your email address.
+        </p>
       </AuthLayout>
     );
   }
@@ -64,8 +71,8 @@ function VerifyEmailContent() {
   if (state === "error") {
     return (
       <AuthLayout title="Verification failed">
-        <p className="text-sm text-error-600">{error}</p>
-        <p className="mt-4 text-sm text-neutral-600">
+        <p className="text-sm text-error-600 dark:text-error-400">{error}</p>
+        <p className="mt-4 text-sm text-neutral-600 dark:text-neutral-400">
           The link may have expired. Request a new one below.
         </p>
         <ResendForm
@@ -106,7 +113,7 @@ function ResendForm({
 }) {
   if (sent) {
     return (
-      <p className="mt-4 text-sm text-neutral-600">
+      <p className="mt-4 text-sm text-neutral-600 dark:text-neutral-400">
         If that account needs verifying, a new link is on its way.
       </p>
     );

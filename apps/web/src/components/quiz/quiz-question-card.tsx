@@ -17,9 +17,13 @@ export function QuizQuestionCard({
 }) {
   return (
     <Card>
-      <p className="text-xs font-medium text-neutral-400">Question {index + 1}</p>
-      <p className="mt-1 text-lg font-medium leading-relaxed text-neutral-900">{question.text}</p>
-      <p className="mt-2 text-xs text-neutral-500">
+      <p className="text-xs font-medium text-neutral-400 dark:text-neutral-500">
+        Question {index + 1}
+      </p>
+      <p className="mt-1 text-lg font-medium leading-relaxed text-neutral-900 dark:text-white/90">
+        {question.text}
+      </p>
+      <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
         {question.marks} {question.marks === 1 ? "mark" : "marks"} ·{" "}
         {question.type === "MULTIPLE_CHOICE" ? "Select all that apply" : "Select one"}
       </p>
@@ -34,8 +38,8 @@ export function QuizQuestionCard({
               className={cn(
                 "flex cursor-pointer items-center gap-3 rounded-md border px-4 py-3 text-sm transition-colors",
                 selected
-                  ? "border-primary-500 bg-primary-50"
-                  : "border-neutral-200 hover:bg-neutral-50",
+                  ? "border-primary-500 bg-primary-50 dark:bg-primary-500/15"
+                  : "border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-white/[0.03]",
               )}
             >
               <input
@@ -48,12 +52,12 @@ export function QuizQuestionCard({
               {OPTION_KEYS[i] ? (
                 <span
                   aria-hidden="true"
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-neutral-200 text-[10px] font-medium text-neutral-400"
+                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-neutral-200 dark:border-neutral-800 text-[10px] font-medium text-neutral-400 dark:text-neutral-500"
                 >
                   {OPTION_KEYS[i]}
                 </span>
               ) : null}
-              <span className="text-neutral-800">{option.text}</span>
+              <span className="text-neutral-800 dark:text-white/90">{option.text}</span>
             </label>
           );
         })}

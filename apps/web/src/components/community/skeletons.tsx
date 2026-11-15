@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function ThreadCardSkeleton() {
   return (
-    <div className="flex gap-3 rounded-card border border-neutral-200 bg-white p-4 shadow-soft sm:gap-4">
+    <div className="flex gap-3 rounded-card border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 shadow-soft sm:gap-4">
       <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
       <div className="min-w-0 flex-1">
         <Skeleton className="h-4 w-24 rounded-full" />

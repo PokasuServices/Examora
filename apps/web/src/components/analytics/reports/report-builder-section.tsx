@@ -60,7 +60,10 @@ export function ReportBuilderSection() {
 
   return (
     <section aria-labelledby="report-builder-heading">
-      <h2 id="report-builder-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="report-builder-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Report Builder
       </h2>
       <Card className="mt-3">
@@ -75,7 +78,7 @@ export function ReportBuilderSection() {
           <div>
             <label
               htmlFor="report-from"
-              className="mb-1.5 block text-xs font-medium text-neutral-500"
+              className="mb-1.5 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
             >
               From
             </label>
@@ -85,13 +88,13 @@ export function ReportBuilderSection() {
               disabled={!isDateFiltered}
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="h-10 w-full rounded-md border border-neutral-200 px-3 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-400"
+              className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:bg-neutral-50 dark:disabled:bg-white/[0.03] disabled:text-neutral-400 dark:disabled:text-neutral-500"
             />
           </div>
           <div>
             <label
               htmlFor="report-to"
-              className="mb-1.5 block text-xs font-medium text-neutral-500"
+              className="mb-1.5 block text-xs font-medium text-neutral-500 dark:text-neutral-400"
             >
               To
             </label>
@@ -101,7 +104,7 @@ export function ReportBuilderSection() {
               disabled={!isDateFiltered}
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="h-10 w-full rounded-md border border-neutral-200 px-3 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-400"
+              className="h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm text-neutral-900 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:bg-neutral-50 dark:disabled:bg-white/[0.03] disabled:text-neutral-400 dark:disabled:text-neutral-500"
             />
           </div>
           <div className="flex items-end">
@@ -117,18 +120,20 @@ export function ReportBuilderSection() {
           </div>
         </div>
         {!isDateFiltered ? (
-          <p className="mt-2 text-xs text-neutral-400">
+          <p className="mt-2 text-xs text-neutral-400 dark:text-neutral-500">
             {REPORT_TYPE_LABELS[reportType]} doesn&rsquo;t use a date range — it always reflects
             current totals.
           </p>
         ) : null}
 
-        {error ? <p className="mt-3 text-sm text-danger-600">{error}</p> : null}
+        {error ? (
+          <p className="mt-3 text-sm text-danger-600 dark:text-danger-400">{error}</p>
+        ) : null}
 
         {result ? (
           <div className="mt-5">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
                 {result.rows.length} row{result.rows.length === 1 ? "" : "s"} · generated{" "}
                 {new Date(result.generatedAt).toLocaleString()}
               </p>
@@ -137,7 +142,7 @@ export function ReportBuilderSection() {
                   type="button"
                   onClick={() => void handleExport("CSV")}
                   disabled={exporting !== null}
-                  className="flex h-9 items-center gap-1.5 rounded-md border border-neutral-200 px-3 text-xs font-medium text-neutral-700 hover:bg-neutral-50 disabled:pointer-events-none disabled:opacity-60"
+                  className="flex h-9 items-center gap-1.5 rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] disabled:pointer-events-none disabled:opacity-60"
                 >
                   <Download size={13} strokeWidth={1.75} aria-hidden="true" />
                   {exporting === "CSV" ? "Exporting…" : "Export CSV"}
@@ -146,7 +151,7 @@ export function ReportBuilderSection() {
                   type="button"
                   onClick={() => void handleExport("PDF")}
                   disabled={exporting !== null}
-                  className="flex h-9 items-center gap-1.5 rounded-md border border-neutral-200 px-3 text-xs font-medium text-neutral-700 hover:bg-neutral-50 disabled:pointer-events-none disabled:opacity-60"
+                  className="flex h-9 items-center gap-1.5 rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] disabled:pointer-events-none disabled:opacity-60"
                 >
                   <Download size={13} strokeWidth={1.75} aria-hidden="true" />
                   {exporting === "PDF" ? "Exporting…" : "Export PDF"}

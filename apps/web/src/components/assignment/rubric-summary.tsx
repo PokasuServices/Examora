@@ -6,19 +6,21 @@ export function RubricSummary({ criteria }: { criteria: RubricCriterion[] }) {
 
   return (
     <section aria-labelledby="rubric-heading">
-      <h2 id="rubric-heading" className="text-lg font-medium text-neutral-800">
+      <h2 id="rubric-heading" className="text-lg font-medium text-neutral-800 dark:text-white/90">
         Rubric
       </h2>
-      <ul className="mt-3 flex flex-col divide-y divide-neutral-100 overflow-hidden rounded-card border border-neutral-200 bg-white shadow-soft">
+      <ul className="mt-3 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800 overflow-hidden rounded-card border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-soft">
         {criteria.map((c) => (
           <li key={c.id} className="flex items-start justify-between gap-4 px-5 py-3.5">
             <div className="min-w-0">
-              <p className="text-sm font-medium text-neutral-800">{c.title}</p>
+              <p className="text-sm font-medium text-neutral-800 dark:text-white/90">{c.title}</p>
               {c.description ? (
-                <p className="mt-0.5 text-sm text-neutral-500">{c.description}</p>
+                <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
+                  {c.description}
+                </p>
               ) : null}
             </div>
-            <span className="shrink-0 text-sm font-medium tabular-nums text-neutral-500">
+            <span className="shrink-0 text-sm font-medium tabular-nums text-neutral-500 dark:text-neutral-400">
               {c.maxMarks} {c.maxMarks === 1 ? "mark" : "marks"}
             </span>
           </li>

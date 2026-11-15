@@ -166,14 +166,16 @@ function QuizDetailContent() {
       <div>
         <Link
           href="/assessment/quizzes"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Quizzes
         </Link>
         <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-neutral-800">{quiz.title}</h1>
+            <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+              {quiz.title}
+            </h1>
             <Chip tone={STATUS_TONE[quiz.status]}>{statusLabel(quiz.status)}</Chip>
           </div>
           <StatusActions
@@ -181,7 +183,7 @@ function QuizDetailContent() {
             onChange={(s) => setPending({ kind: "STATUS", status: s })}
           />
         </div>
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
           {quiz.totalQuestions} question{quiz.totalQuestions === 1 ? "" : "s"} · {quiz.totalMarks}{" "}
           marks · {quiz.timeLimitMinutes ? `${quiz.timeLimitMinutes} min` : "Untimed"} · Pass at{" "}
           {quiz.passingScorePercent}%
@@ -191,29 +193,29 @@ function QuizDetailContent() {
 
       {dashboard ? (
         <Card>
-          <h2 className="text-lg font-medium text-neutral-800">Results</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Results</h2>
           <div className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
             <div>
-              <p className="text-neutral-500">Total attempts</p>
-              <p className="mt-1 text-lg font-semibold text-neutral-900">
+              <p className="text-neutral-500 dark:text-neutral-400">Total attempts</p>
+              <p className="mt-1 text-lg font-semibold text-neutral-900 dark:text-white/90">
                 {dashboard.totalAttempts}
               </p>
             </div>
             <div>
-              <p className="text-neutral-500">Completed</p>
-              <p className="mt-1 text-lg font-semibold text-neutral-900">
+              <p className="text-neutral-500 dark:text-neutral-400">Completed</p>
+              <p className="mt-1 text-lg font-semibold text-neutral-900 dark:text-white/90">
                 {dashboard.completedAttempts}
               </p>
             </div>
             <div>
-              <p className="text-neutral-500">Pass rate</p>
-              <p className="mt-1 text-lg font-semibold text-neutral-900">
+              <p className="text-neutral-500 dark:text-neutral-400">Pass rate</p>
+              <p className="mt-1 text-lg font-semibold text-neutral-900 dark:text-white/90">
                 {dashboard.passRate !== null ? `${dashboard.passRate}%` : "—"}
               </p>
             </div>
             <div>
-              <p className="text-neutral-500">Average score</p>
-              <p className="mt-1 text-lg font-semibold text-neutral-900">
+              <p className="text-neutral-500 dark:text-neutral-400">Average score</p>
+              <p className="mt-1 text-lg font-semibold text-neutral-900 dark:text-white/90">
                 {dashboard.averagePercentage !== null ? `${dashboard.averagePercentage}%` : "—"}
               </p>
             </div>
@@ -222,7 +224,7 @@ function QuizDetailContent() {
       ) : null}
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Sections</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Sections</h2>
         <form onSubmit={addSection} className="mt-4 flex items-end gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="sectionTitle">New section title</Label>
@@ -237,10 +239,10 @@ function QuizDetailContent() {
           </Button>
         </form>
         {quiz.sections.length > 0 ? (
-          <ul className="mt-4 divide-y divide-neutral-100">
+          <ul className="mt-4 divide-y divide-neutral-100 dark:divide-neutral-800">
             {quiz.sections.map((s) => (
               <li key={s.id} className="flex items-center justify-between py-2.5 text-sm">
-                <span className="text-neutral-800">{s.title}</span>
+                <span className="text-neutral-800 dark:text-white/90">{s.title}</span>
                 <Button
                   variant="ghost"
                   onClick={() => setPending({ kind: "REMOVE_SECTION", id: s.id, title: s.title })}
@@ -251,14 +253,16 @@ function QuizDetailContent() {
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-neutral-500">
+          <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
             No sections yet — questions can still be assigned unsectioned.
           </p>
         )}
       </Card>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800">Assigned questions</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">
+          Assigned questions
+        </h2>
         <form onSubmit={assignQuestion} className="mt-4 flex flex-wrap items-end gap-3">
           <div className="w-full sm:w-72">
             <SelectField
@@ -302,15 +306,17 @@ function QuizDetailContent() {
         </form>
 
         {quiz.questions.length > 0 ? (
-          <ul className="mt-4 divide-y divide-neutral-100">
+          <ul className="mt-4 divide-y divide-neutral-100 dark:divide-neutral-800">
             {quiz.questions.map((assignment) => (
               <li
                 key={assignment.id}
                 className="flex items-center justify-between gap-3 py-2.5 text-sm"
               >
-                <span className="min-w-0 truncate text-neutral-800">
+                <span className="min-w-0 truncate text-neutral-800 dark:text-white/90">
                   {assignment.question.text.slice(0, 80)}{" "}
-                  <span className="text-neutral-400">({assignment.marks} marks)</span>
+                  <span className="text-neutral-400 dark:text-neutral-500">
+                    ({assignment.marks} marks)
+                  </span>
                 </span>
                 <Button
                   variant="ghost"
@@ -328,7 +334,7 @@ function QuizDetailContent() {
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-neutral-500">
+          <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
             No questions assigned yet — a quiz needs at least one PUBLISHED question assigned before
             it can be published.
           </p>
@@ -350,17 +356,26 @@ function QuizDetailContent() {
           !pending ? null : pending.kind === "STATUS" ? (
             <>
               Change status to{" "}
-              <span className="font-medium text-neutral-800">{statusLabel(pending.status)}</span>?
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {statusLabel(pending.status)}
+              </span>
+              ?
             </>
           ) : pending.kind === "REMOVE_SECTION" ? (
             <>
-              This removes <span className="font-medium text-neutral-800">{pending.title}</span>.
-              Questions in it stay assigned to the quiz, unsectioned.
+              This removes{" "}
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {pending.title}
+              </span>
+              . Questions in it stay assigned to the quiz, unsectioned.
             </>
           ) : (
             <>
-              Remove <span className="font-medium text-neutral-800">{pending.text}</span> from this
-              quiz?
+              Remove{" "}
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {pending.text}
+              </span>{" "}
+              from this quiz?
             </>
           )
         }

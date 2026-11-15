@@ -20,7 +20,7 @@ function AnalyticsContent() {
     <main className="flex flex-col gap-8">
       <div>
         <PageTitle>My Analytics</PageTitle>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           How you&rsquo;re progressing, what&rsquo;s going well, and where to focus next.
         </p>
       </div>

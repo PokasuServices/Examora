@@ -79,11 +79,11 @@ function DashboardContent() {
 
       <Card>
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-medium text-neutral-800">Recent orders</h2>
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Recent orders</h2>
           {hasAnyOrders ? (
             <Link
               href="/orders/history"
-              className="text-sm font-medium text-primary-600 hover:underline"
+              className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
             >
               View all →
             </Link>
@@ -92,9 +92,9 @@ function DashboardContent() {
 
         {status === "loading" ? (
           <div className="mt-4 flex flex-col gap-2">
-            <div className="h-14 animate-pulse rounded-md bg-neutral-100" />
-            <div className="h-14 animate-pulse rounded-md bg-neutral-100" />
-            <div className="h-14 animate-pulse rounded-md bg-neutral-100" />
+            <div className="h-14 animate-pulse rounded-md bg-neutral-100 dark:bg-white/5" />
+            <div className="h-14 animate-pulse rounded-md bg-neutral-100 dark:bg-white/5" />
+            <div className="h-14 animate-pulse rounded-md bg-neutral-100 dark:bg-white/5" />
           </div>
         ) : !hasAnyOrders ? (
           <EmptyState
@@ -105,18 +105,18 @@ function DashboardContent() {
             actionHref="/courses"
           />
         ) : (
-          <ul className="mt-4 flex flex-col divide-y divide-neutral-100">
+          <ul className="mt-4 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {recentOrders.map((order) => (
               <li key={order.id}>
                 <Link
                   href={`/orders/${order.id}`}
-                  className="flex items-center justify-between gap-4 py-3 hover:bg-neutral-50"
+                  className="flex items-center justify-between gap-4 py-3 hover:bg-neutral-50 dark:hover:bg-white/[0.03]"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-neutral-800">
+                    <p className="truncate text-sm font-medium text-neutral-800 dark:text-white/90">
                       {order.courseTitle}
                     </p>
-                    <p className="mt-0.5 text-xs text-neutral-500">
+                    <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
                       {shortOrderId(order.id)} ·{" "}
                       {new Date(order.createdAt).toLocaleDateString(undefined, {
                         month: "short",
@@ -126,7 +126,7 @@ function DashboardContent() {
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
-                    <span className="text-sm font-medium text-neutral-800">
+                    <span className="text-sm font-medium text-neutral-800 dark:text-white/90">
                       {formatMoney(order.totalAmount, order.currency)}
                     </span>
                     <Chip tone={orderStatusTone(order.status)}>{statusLabel(order.status)}</Chip>

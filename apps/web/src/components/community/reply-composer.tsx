@@ -46,14 +46,14 @@ export function ReplyComposer({
         onChange={(e) => setBody(e.target.value)}
         placeholder={placeholder}
         maxLength={10000}
-        className="min-h-24 w-full rounded-md border border-neutral-200 p-3 text-sm text-neutral-800 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+        className="min-h-24 w-full rounded-md border border-neutral-200 dark:border-neutral-800 p-3 text-sm text-neutral-800 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
       />
       <div className="flex justify-end gap-2">
         {onCancel ? (
           <button
             type="button"
             onClick={onCancel}
-            className="flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium text-neutral-600 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             Cancel
           </button>

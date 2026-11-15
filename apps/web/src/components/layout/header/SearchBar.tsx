@@ -35,7 +35,7 @@ export function SearchBar() {
           <label htmlFor="global-search" className="sr-only">
             Search courses, lessons, discussions
           </label>
-          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500">
+          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-neutral-400">
             <Search size={20} strokeWidth={1.75} aria-hidden="true" />
           </span>
           <input
@@ -45,7 +45,7 @@ export function SearchBar() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search courses, lessons, discussions…"
-            className="h-11 w-full rounded-lg border border-neutral-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-neutral-800 shadow-theme-xs placeholder:text-neutral-400 focus:border-primary-300 focus:outline-none focus:ring-4 focus:ring-primary-500/10 dark:border-neutral-800 dark:bg-white/[0.03] dark:text-white/90 xl:w-[430px]"
+            className="h-11 w-full rounded-lg border border-neutral-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-neutral-800 shadow-theme-xs placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:border-primary-300 focus:outline-none focus:ring-4 focus:ring-primary-500/10 dark:border-neutral-800 dark:bg-white/[0.03] dark:text-white/90 xl:w-[430px]"
           />
           <button
             type="button"

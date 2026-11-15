@@ -40,7 +40,7 @@ export function CatalogCourseCard({ entry }: { entry: EnrichedCourse }) {
   return (
     <Link
       href={`/courses/${course.id}`}
-      className="group flex flex-col rounded-card border border-neutral-200 bg-white p-4 shadow-soft transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-soft-hover motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="group flex flex-col rounded-card border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 shadow-soft transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-soft-hover motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       <div
         className={cn(
@@ -56,18 +56,20 @@ export function CatalogCourseCard({ entry }: { entry: EnrichedCourse }) {
           {isFree ? "Free" : formatMoney(course.priceAmount!, course.priceCurrency)}
         </Chip>
         {entry.status === "completed" ? (
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-success-600">
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-success-600 dark:text-success-400">
             <CheckCircle2 size={14} strokeWidth={2} aria-hidden="true" />
             Completed
           </span>
         ) : null}
       </div>
 
-      <h3 className="mt-2 line-clamp-2 font-heading text-base font-semibold leading-snug text-neutral-900">
+      <h3 className="mt-2 line-clamp-2 font-heading text-base font-semibold leading-snug text-neutral-900 dark:text-white/90">
         {course.title}
       </h3>
       {course.description ? (
-        <p className="mt-1 line-clamp-2 text-sm text-neutral-500">{course.description}</p>
+        <p className="mt-1 line-clamp-2 text-sm text-neutral-500 dark:text-neutral-400">
+          {course.description}
+        </p>
       ) : null}
 
       {entry.recommendedReason ? (
@@ -80,13 +82,13 @@ export function CatalogCourseCard({ entry }: { entry: EnrichedCourse }) {
 
       {typeof entry.completionPercent === "number" && entry.status !== "locked" ? (
         <div className="mt-3 flex items-center gap-2">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-200">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-200 dark:bg-white/10">
             <div
               className="h-full rounded-full bg-primary-600"
               style={{ width: `${entry.completionPercent}%` }}
             />
           </div>
-          <span className="shrink-0 text-xs font-medium tabular-nums text-neutral-500">
+          <span className="shrink-0 text-xs font-medium tabular-nums text-neutral-500 dark:text-neutral-400">
             {entry.completionPercent}%
           </span>
         </div>
@@ -97,7 +99,7 @@ export function CatalogCourseCard({ entry }: { entry: EnrichedCourse }) {
           "mt-3 inline-flex w-full items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
           cta.tone === "primary"
             ? "bg-primary-600 text-white group-hover:bg-primary-700"
-            : "bg-neutral-100 text-neutral-700 group-hover:bg-neutral-200",
+            : "bg-neutral-100 dark:bg-white/5 text-neutral-700 dark:text-neutral-300 group-hover:bg-neutral-200 dark:group-hover:bg-white/10",
         )}
       >
         {cta.label}

@@ -34,17 +34,21 @@ export function RecommendationCard({
   return (
     <Link
       href={href}
-      className="group block w-64 shrink-0 rounded-card border border-neutral-200 bg-white p-4 shadow-soft transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-soft-hover motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="group block w-64 shrink-0 rounded-card border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 shadow-soft transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-soft-hover motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       <div className="flex items-start justify-between gap-2">
         <IconBadge icon={icon} tone="primary" />
         <ScoreBadge score={score} />
       </div>
 
-      <h3 className="mt-3 line-clamp-2 text-lg font-medium text-neutral-800">{title}</h3>
-      {subtitle ? <p className="mt-0.5 truncate text-sm text-neutral-500">{subtitle}</p> : null}
+      <h3 className="mt-3 line-clamp-2 text-lg font-medium text-neutral-800 dark:text-white/90">
+        {title}
+      </h3>
+      {subtitle ? (
+        <p className="mt-0.5 truncate text-sm text-neutral-500 dark:text-neutral-400">{subtitle}</p>
+      ) : null}
 
-      <p className="mt-2.5 flex items-start gap-1.5 text-xs text-neutral-500">
+      <p className="mt-2.5 flex items-start gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
         <AI_ICON
           size={13}
           strokeWidth={1.75}
@@ -54,12 +58,12 @@ export function RecommendationCard({
         <span className="line-clamp-2">{reason}</span>
       </p>
 
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-neutral-100 pt-3">
-        <span className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-neutral-400">
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-neutral-100 dark:border-neutral-800 pt-3">
+        <span className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
           <typeMeta.icon size={11} strokeWidth={2} aria-hidden="true" />
           {typeMeta.label}
         </span>
-        <span className="text-xs font-medium text-primary-600 group-hover:underline">
+        <span className="text-xs font-medium text-primary-600 dark:text-primary-400 group-hover:underline">
           {actionLabel} →
         </span>
       </div>

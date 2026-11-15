@@ -96,3 +96,30 @@
     background-color: theme("colors.neutral.200");
   }
 }
+
+/* Dark mode (TMS ThemeProvider: `dark` class on <html>) — native controls,
+   scrollbars and text selection follow the theme. */
+.dark {
+  color-scheme: dark;
+}
+.dark ::selection {
+  background-color: theme("colors.primary.800");
+  color: theme("colors.white");
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: theme("colors.neutral.700");
+}
+
+/* Recharts tooltips are styled inline (light); restyle them in dark mode,
+   as TMS does for its ApexCharts tooltips. */
+.dark .recharts-default-tooltip {
+  background-color: theme("colors.neutral.900") !important;
+  border-color: theme("colors.neutral.800") !important;
+  color: theme("colors.neutral.300");
+}
+.dark .recharts-tooltip-label {
+  color: theme("colors.white") !important;
+}
+.dark .recharts-legend-item-text {
+  color: theme("colors.neutral.400") !important;
+}

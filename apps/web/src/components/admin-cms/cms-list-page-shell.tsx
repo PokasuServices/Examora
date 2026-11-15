@@ -58,8 +58,8 @@ export function CmsListPageShell({
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-semibold text-neutral-800">{heading}</h2>
-            <p className="mt-0.5 text-sm text-neutral-500">{subtitle}</p>
+            <h2 className="text-xl font-semibold text-neutral-800 dark:text-white/90">{heading}</h2>
+            <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">{subtitle}</p>
           </div>
           {!formOpen ? (
             <button
@@ -104,7 +104,7 @@ export function CmsListPageShell({
             <>
               {table}
               <div className="flex items-center justify-between gap-3 p-4">
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">
                   {total} {total === 1 ? "item" : "items"}
                 </p>
                 <Pagination page={page} pageCount={pageCount} onChange={setPage} />

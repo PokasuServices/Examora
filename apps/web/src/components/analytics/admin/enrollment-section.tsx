@@ -14,7 +14,10 @@ export function EnrollmentSection({ enrollment }: { enrollment: AdminEnrollmentA
 
   return (
     <section aria-labelledby="admin-enrollment-heading">
-      <h2 id="admin-enrollment-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="admin-enrollment-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Enrollment
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -58,7 +61,9 @@ export function EnrollmentSection({ enrollment }: { enrollment: AdminEnrollmentA
           </ChartCard>
         </div>
         <Card>
-          <h3 className="font-heading text-sm font-semibold text-neutral-900">By source</h3>
+          <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+            By source
+          </h3>
           <div className="mt-4">
             <BreakdownBars
               items={enrollment.enrollmentsBySource.map((s) => ({

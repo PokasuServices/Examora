@@ -48,9 +48,11 @@ export function BannerCreateForm({
           linkUrl: linkUrl || undefined,
         });
       }}
-      className="flex flex-col gap-4 rounded-md border border-neutral-100 bg-neutral-50/50 p-4"
+      className="flex flex-col gap-4 rounded-md border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 p-4"
     >
-      <h3 className="font-heading text-sm font-semibold text-neutral-900">New banner</h3>
+      <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
+        New banner
+      </h3>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="banner-title">Title</Label>
@@ -99,7 +101,7 @@ export function BannerCreateForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm font-medium text-neutral-600 hover:underline"
+          className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:underline"
         >
           Cancel
         </button>
@@ -149,7 +151,7 @@ export function BannerFieldsForm({
       className="flex flex-col gap-4"
     >
       {!editable ? (
-        <p className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-500">
+        <p className="rounded-md bg-neutral-100 dark:bg-white/5 px-3 py-2 text-xs text-neutral-500 dark:text-neutral-400">
           Only content in Draft can be edited — send it back to draft first.
         </p>
       ) : null}

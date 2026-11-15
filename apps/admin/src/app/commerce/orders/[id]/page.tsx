@@ -60,10 +60,12 @@ function OrderDetailContent() {
   if (status === "not-found" || !order) {
     return (
       <main className="flex flex-col gap-4">
-        <h1 className="text-xl font-semibold text-neutral-800">Order not found</h1>
+        <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">
+          Order not found
+        </h1>
         <Link
           href="/commerce/orders"
-          className="text-sm font-medium text-primary-600 hover:underline"
+          className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
         >
           ← Back to orders
         </Link>
@@ -76,13 +78,15 @@ function OrderDetailContent() {
       <div>
         <Link
           href="/commerce/orders"
-          className="flex items-center gap-1 text-sm text-neutral-500 hover:text-primary-600"
+          className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Orders
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{order.courseTitle}</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800 dark:text-white/90">
+          {order.courseTitle}
+        </h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           {order.userEmail} · ordered {new Date(order.createdAt).toLocaleString()}
         </p>
       </div>
@@ -93,24 +97,24 @@ function OrderDetailContent() {
         </div>
         <dl className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <dt className="text-neutral-500">Subtotal</dt>
-            <dd className="mt-0.5 font-medium text-neutral-800">
+            <dt className="text-neutral-500 dark:text-neutral-400">Subtotal</dt>
+            <dd className="mt-0.5 font-medium text-neutral-800 dark:text-white/90">
               {formatMoney(order.subtotalAmount, order.currency)}
             </dd>
           </div>
           {order.discountAmount > 0 ? (
             <div>
-              <dt className="text-neutral-500">
+              <dt className="text-neutral-500 dark:text-neutral-400">
                 Discount {order.couponCode ? `(${order.couponCode})` : ""}
               </dt>
-              <dd className="mt-0.5 font-medium text-neutral-800">
+              <dd className="mt-0.5 font-medium text-neutral-800 dark:text-white/90">
                 -{formatMoney(order.discountAmount, order.currency)}
               </dd>
             </div>
           ) : null}
           <div>
-            <dt className="text-neutral-500">Total</dt>
-            <dd className="mt-0.5 font-medium text-neutral-800">
+            <dt className="text-neutral-500 dark:text-neutral-400">Total</dt>
+            <dd className="mt-0.5 font-medium text-neutral-800 dark:text-white/90">
               {formatMoney(order.totalAmount, order.currency)}
             </dd>
           </div>
@@ -118,20 +122,22 @@ function OrderDetailContent() {
       </Card>
 
       <Card density="compact">
-        <h2 className="text-lg font-medium text-neutral-800">Payments</h2>
-        <ul className="mt-3 flex flex-col divide-y divide-neutral-100">
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Payments</h2>
+        <ul className="mt-3 flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
           {order.payments.map((payment) => (
             <li key={payment.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-              <span className="text-neutral-700">
+              <span className="text-neutral-700 dark:text-neutral-300">
                 {payment.gateway} · {payment.status} · {payment.gatewayPaymentId ?? "—"}
               </span>
-              <span className="shrink-0 text-neutral-500">
+              <span className="shrink-0 text-neutral-500 dark:text-neutral-400">
                 {payment.verifiedAt ? new Date(payment.verifiedAt).toLocaleString() : "—"}
               </span>
             </li>
           ))}
           {order.payments.length === 0 ? (
-            <li className="py-4 text-sm text-neutral-400">No payment attempts yet.</li>
+            <li className="py-4 text-sm text-neutral-400 dark:text-neutral-500">
+              No payment attempts yet.
+            </li>
           ) : null}
         </ul>
       </Card>
@@ -139,10 +145,10 @@ function OrderDetailContent() {
       {order.invoice ? (
         <Card density="compact">
           <div className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="font-medium text-neutral-800">
+            <span className="font-medium text-neutral-800 dark:text-white/90">
               Invoice {order.invoice.invoiceNumber}
             </span>
-            <span className="text-neutral-500">
+            <span className="text-neutral-500 dark:text-neutral-400">
               {formatMoney(order.invoice.amount, order.invoice.currency)} · issued{" "}
               {new Date(order.invoice.issuedAt).toLocaleDateString()}
             </span>

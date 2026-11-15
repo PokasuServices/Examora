@@ -134,48 +134,50 @@ function ModerationQueueContent() {
         ) : (
           <div className="overflow-x-auto contain-layout">
             <table className="w-full min-w-[800px] text-left text-sm">
-              <thead className="bg-neutral-50">
+              <thead className="bg-neutral-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Target
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Preview
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Reason
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Reporter
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status
                   </th>
-                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700" />
+                  <th className="whitespace-nowrap border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {reports.map((report) => (
-                  <tr key={report.id} className="hover:bg-neutral-50">
+                  <tr key={report.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03]">
                     <td className="px-4 py-3">
                       {report.targetType === "THREAD" ? (
                         <Link
                           href={`/community/threads/${report.targetId}`}
-                          className="font-medium text-primary-600 hover:underline"
+                          className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                         >
                           Thread
                         </Link>
                       ) : (
-                        <span className="text-neutral-700">Reply</span>
+                        <span className="text-neutral-700 dark:text-neutral-300">Reply</span>
                       )}
                     </td>
-                    <td className="max-w-xs truncate px-4 py-3 text-neutral-600">
+                    <td className="max-w-xs truncate px-4 py-3 text-neutral-600 dark:text-neutral-400">
                       {report.targetPreview ?? "—"}
                     </td>
-                    <td className="max-w-xs truncate px-4 py-3 text-neutral-600">
+                    <td className="max-w-xs truncate px-4 py-3 text-neutral-600 dark:text-neutral-400">
                       {report.reason}
                     </td>
-                    <td className="px-4 py-3 text-neutral-600">{report.reporterEmail}</td>
+                    <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">
+                      {report.reporterEmail}
+                    </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <Chip tone={STATUS_TONE[report.status]}>{statusLabel(report.status)}</Chip>
                     </td>
@@ -195,7 +197,7 @@ function ModerationQueueContent() {
                           </Button>
                         </div>
                       ) : (
-                        <span className="text-xs text-neutral-500">
+                        <span className="text-xs text-neutral-500 dark:text-neutral-400">
                           {statusLabel(report.status)} by {report.reviewedByEmail ?? "—"}
                         </span>
                       )}

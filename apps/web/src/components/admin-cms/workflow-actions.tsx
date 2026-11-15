@@ -63,7 +63,7 @@ export function WorkflowActions({
                 key={target}
                 type="button"
                 onClick={() => setPendingTransition(target)}
-                className="flex h-8 items-center rounded-md border border-neutral-200 px-3 text-xs font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                className="flex h-8 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               >
                 {transitionActionLabel(target)}
               </button>
@@ -73,7 +73,7 @@ export function WorkflowActions({
           <button
             type="button"
             onClick={() => setScheduling("publish")}
-            className="flex h-8 items-center rounded-md border border-neutral-200 px-3 text-xs font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="flex h-8 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             Schedule publish
           </button>
@@ -82,7 +82,7 @@ export function WorkflowActions({
           <button
             type="button"
             onClick={() => setScheduling("unpublish")}
-            className="flex h-8 items-center rounded-md border border-neutral-200 px-3 text-xs font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="flex h-8 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             Schedule unpublish
           </button>
@@ -90,19 +90,19 @@ export function WorkflowActions({
       </div>
 
       {scheduledPublishAt ? (
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">
           Scheduled to publish {new Date(scheduledPublishAt).toLocaleString()} — call
           &ldquo;Schedule publish&rdquo; again with a new time to reschedule.
         </p>
       ) : null}
       {scheduledUnpublishAt ? (
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">
           Scheduled to unpublish {new Date(scheduledUnpublishAt).toLocaleString()} — call
           &ldquo;Schedule unpublish&rdquo; again with a new time to reschedule.
         </p>
       ) : null}
       {publishedAt ? (
-        <p className="text-xs text-neutral-400">
+        <p className="text-xs text-neutral-400 dark:text-neutral-500">
           Published {new Date(publishedAt).toLocaleString()}
         </p>
       ) : null}
@@ -110,7 +110,10 @@ export function WorkflowActions({
       {scheduling ? (
         <form onSubmit={(e) => void submitSchedule(e)} className="flex items-end gap-3">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="cms-schedule-at" className="text-xs font-medium text-neutral-500">
+            <label
+              htmlFor="cms-schedule-at"
+              className="text-xs font-medium text-neutral-500 dark:text-neutral-400"
+            >
               {scheduling === "publish" ? "Publish at" : "Unpublish at"}
             </label>
             <input
@@ -119,7 +122,7 @@ export function WorkflowActions({
               required
               value={scheduleAt}
               onChange={(e) => setScheduleAt(e.target.value)}
-              className="h-9 rounded-md border border-neutral-200 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="h-9 rounded-md border border-neutral-200 dark:border-neutral-800 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             />
           </div>
           <button
@@ -132,7 +135,7 @@ export function WorkflowActions({
           <button
             type="button"
             onClick={() => setScheduling(null)}
-            className="text-xs font-medium text-neutral-600 hover:underline"
+            className="text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:underline"
           >
             Cancel
           </button>
@@ -146,8 +149,13 @@ export function WorkflowActions({
           pendingTransition ? (
             <>
               Change status from{" "}
-              <span className="font-medium text-neutral-800">{statusLabel(status)}</span> to{" "}
-              <span className="font-medium text-neutral-800">{statusLabel(pendingTransition)}</span>
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {statusLabel(status)}
+              </span>{" "}
+              to{" "}
+              <span className="font-medium text-neutral-800 dark:text-white/90">
+                {statusLabel(pendingTransition)}
+              </span>
               ?
             </>
           ) : null

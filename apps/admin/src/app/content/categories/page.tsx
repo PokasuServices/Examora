@@ -52,13 +52,13 @@ function CategoriesContent() {
 
   return (
     <main>
-      <nav className="mb-6 text-sm text-neutral-500">
+      <nav className="mb-6 text-sm text-neutral-500 dark:text-neutral-400">
         <Link href="/content/courses" className="hover:underline">
           Courses
         </Link>{" "}
-        · <span className="text-neutral-800">Categories</span>
+        · <span className="text-neutral-800 dark:text-white/90">Categories</span>
       </nav>
-      <h1 className="text-xl font-semibold text-neutral-800">Categories</h1>
+      <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">Categories</h1>
 
       <form onSubmit={create} className="mt-6 flex items-end gap-3">
         <div className="flex flex-1 flex-col gap-1.5">
@@ -69,16 +69,18 @@ function CategoriesContent() {
       </form>
       <FieldError>{error}</FieldError>
 
-      <ul className="mt-8 flex flex-col divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
-        {loading ? <li className="p-4 text-sm text-neutral-500">Loading…</li> : null}
+      <ul className="mt-8 flex flex-col divide-y divide-neutral-200 dark:divide-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+        {loading ? (
+          <li className="p-4 text-sm text-neutral-500 dark:text-neutral-400">Loading…</li>
+        ) : null}
         {!loading && categories.length === 0 ? (
-          <li className="p-4 text-sm text-neutral-500">No categories yet.</li>
+          <li className="p-4 text-sm text-neutral-500 dark:text-neutral-400">No categories yet.</li>
         ) : null}
         {categories.map((category) => (
           <li key={category.id} className="flex items-center justify-between p-4">
             <div>
               <p className="font-medium">{category.name}</p>
-              <p className="text-sm text-neutral-500">
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
                 /{category.slug} · {category.isActive ? "Active" : "Inactive"}
               </p>
             </div>

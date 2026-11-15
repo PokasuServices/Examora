@@ -11,7 +11,10 @@ export function AssignmentsAnalyticsSection({
 }) {
   return (
     <section aria-labelledby="admin-assignments-heading">
-      <h2 id="admin-assignments-heading" className="text-lg font-medium text-neutral-800">
+      <h2
+        id="admin-assignments-heading"
+        className="text-lg font-medium text-neutral-800 dark:text-white/90"
+      >
         Assignments
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-5">
@@ -55,7 +58,7 @@ export function AssignmentsAnalyticsSection({
       </div>
       {assignments.decisionBreakdown.length > 0 ? (
         <Card className="mt-3">
-          <h3 className="font-heading text-sm font-semibold text-neutral-900">
+          <h3 className="font-heading text-sm font-semibold text-neutral-900 dark:text-white/90">
             Decisions breakdown
           </h3>
           <div className="mt-4">

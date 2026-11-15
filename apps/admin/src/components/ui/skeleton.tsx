@@ -2,12 +2,14 @@ import { cn } from "@examora/ui";
 
 /** Shimmer placeholder block — respects prefers-reduced-motion (see globals.css). Mirrors apps/web's Skeleton. */
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("animate-pulse rounded-md bg-neutral-200/70", className)} />;
+  return (
+    <div className={cn("animate-pulse rounded-md bg-neutral-200/70 dark:bg-white/10", className)} />
+  );
 }
 
 export function StatCardSkeleton() {
   return (
-    <div className="rounded-card border border-neutral-200 bg-white p-6 shadow-soft">
+    <div className="rounded-card border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 shadow-soft">
       <Skeleton className="h-8 w-8 rounded-full" />
       <Skeleton className="mt-4 h-3 w-20" />
       <Skeleton className="mt-2 h-8 w-16" />

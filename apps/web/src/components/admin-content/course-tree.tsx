@@ -8,7 +8,7 @@ import { cn } from "@examora/ui";
 import type { NodeCollection, Selection } from "./use-course-editor";
 
 const STATUS_DOT: Record<string, string> = {
-  DRAFT: "bg-neutral-300",
+  DRAFT: "bg-neutral-300 dark:bg-neutral-700",
   PUBLISHED: "bg-success-500",
   ARCHIVED: "bg-warning-500",
 };
@@ -16,7 +16,10 @@ const STATUS_DOT: Record<string, string> = {
 function StatusDot({ status }: { status: string }) {
   return (
     <span
-      className={cn("h-1.5 w-1.5 shrink-0 rounded-full", STATUS_DOT[status] ?? "bg-neutral-300")}
+      className={cn(
+        "h-1.5 w-1.5 shrink-0 rounded-full",
+        STATUS_DOT[status] ?? "bg-neutral-300 dark:bg-neutral-700",
+      )}
       aria-hidden="true"
     />
   );
@@ -49,7 +52,9 @@ function TreeRow({
     <div
       className={cn(
         "group flex items-center gap-1 rounded-md py-1.5 pr-2 text-sm",
-        selected ? "bg-primary-50 text-primary-700" : "text-neutral-700 hover:bg-neutral-100",
+        selected
+          ? "bg-primary-50 dark:bg-primary-500/15 text-primary-700 dark:text-primary-300"
+          : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5",
       )}
       style={{ paddingLeft: `${depth * 16 + 4}px` }}
     >
@@ -59,7 +64,7 @@ function TreeRow({
           onClick={onToggle}
           aria-label={expanded ? `Collapse ${label}` : `Expand ${label}`}
           aria-expanded={expanded}
-          className="flex h-5 w-5 shrink-0 items-center justify-center text-neutral-400 hover:text-neutral-700"
+          className="flex h-5 w-5 shrink-0 items-center justify-center text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
         >
           <ChevronRight
             size={14}
@@ -85,7 +90,7 @@ function TreeRow({
           onClick={onAddChild}
           aria-label={addLabel}
           title={addLabel}
-          className="hidden h-5 w-5 shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700 group-hover:flex"
+          className="hidden h-5 w-5 shrink-0 items-center justify-center rounded text-neutral-400 dark:text-neutral-500 hover:bg-neutral-200 dark:hover:bg-white/10 hover:text-neutral-700 dark:hover:text-neutral-300 group-hover:flex"
         >
           <Plus size={13} strokeWidth={2} aria-hidden="true" />
         </button>
