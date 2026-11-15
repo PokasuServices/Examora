@@ -3,6 +3,85 @@
 AI-powered exam preparation and mentoring platform for design/fashion/architecture/aptitude
 entrance exams. Governed by [`documents/00_Master_Development_Guide_Examora_Platform_MDG-00.docx`](documents/00_Master_Development_Guide_Examora_Platform_MDG-00.docx).
 
+## Quick Start — run Examora on your computer
+
+> The simple version. Developers wanting the details (native setup without Docker, single-app
+> modes, etc.) can skip to [Getting Started](#getting-started) further down.
+
+### 1. Install these once
+
+| Tool               | Why                                   | Get it                                                                           |
+| ------------------ | ------------------------------------- | -------------------------------------------------------------------------------- |
+| **Git**            | Download the code                     | https://git-scm.com                                                              |
+| **Node.js 20+**    | Runs the apps                         | https://nodejs.org (choose the "LTS" version)                                    |
+| **pnpm**           | Installs the project's packages       | After Node is installed, run: `corepack enable`                                  |
+| **Docker Desktop** | Runs the database and helper services | https://www.docker.com/products/docker-desktop — keep it **open** while you work |
+
+### 2. First time only — set everything up
+
+Open a terminal in the project folder and run these one by one:
+
+```bash
+pnpm install              # 1. download all packages (takes a few minutes the first time)
+cp .env.example .env      # 2. create your settings file (the defaults already work)
+docker compose up -d      # 3. start the database and helper services
+pnpm db:migrate           # 4. create the database tables and load demo data + demo logins
+pnpm dev                  # 5. start the apps
+```
+
+Wait until the terminal shows **"Ready"**, then open the links in section 4 below.
+
+### 3. Every time after `git pull` — get the latest changes and run
+
+```bash
+git pull                  # get the latest code
+pnpm install              # install any new packages
+docker compose up -d      # make sure the database is running (safe if it already is)
+pnpm db:migrate           # apply any database changes
+pnpm dev                  # start the apps
+```
+
+To **stop** the apps, press `Ctrl + C` in the terminal. To also stop the database:
+`docker compose down` (your data is kept).
+
+### 4. Open in your browser
+
+| What                      | Link                           | Who it's for                                                 |
+| ------------------------- | ------------------------------ | ------------------------------------------------------------ |
+| **Website + Student app** | http://localhost:3000          | Public website, then students / mentors / admins after login |
+| **Admin app**             | http://localhost:3002          | Staff only — admin login                                     |
+| API (for developers)      | http://localhost:3001/api/docs | Backend API documentation                                    |
+
+The first time you open a page it can take a few seconds to load (the app is preparing it). After
+that it's fast.
+
+### 5. Demo login details
+
+These accounts are created automatically by `pnpm db:migrate` (section 2). **All use the same
+password:**
+
+> Password: **`a-strong-password-123`**
+
+| Role          | Email                  | Where to log in                                                | What you'll see                        |
+| ------------- | ---------------------- | -------------------------------------------------------------- | -------------------------------------- |
+| Student       | `student@examora.test` | http://localhost:3000/login                                    | Student dashboard, courses, quizzes    |
+| Mentor        | `mentor@examora.test`  | http://localhost:3000/login                                    | Mentor dashboard and assigned students |
+| Administrator | `admin@examora.test`   | http://localhost:3000/login **or** http://localhost:3002/login | Admin dashboard and management screens |
+
+These are **demo accounts for local use only** — they are never created on the live (production)
+site. Tip: use the ☀️/🌙 button in the top bar to switch between light and dark mode.
+
+### 6. Something not working?
+
+| Problem                                                   | Fix                                                                                                 |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `docker` command fails / "cannot connect to Docker"       | Open **Docker Desktop** and wait until it says it's running, then try again.                        |
+| "Port 3000 is already in use"                             | Another program is using that port. Close it (or restart your computer) and run `pnpm dev` again.   |
+| Every page shows an error (500) after a `git pull`        | Stop with `Ctrl + C` and run `pnpm dev` again.                                                      |
+| Login says the email or password is wrong                 | Run `pnpm db:seed` — it recreates the demo accounts and resets their password.                      |
+| Website shows **"API: unreachable"** or data doesn't load | The backend is still starting — wait 10–20 seconds and refresh. If it persists, restart `pnpm dev`. |
+| `pnpm` is not recognised                                  | Run `corepack enable` once (needs Node.js installed first), then open a new terminal.               |
+
 ## Status
 
 **Sprint 13 — Production Readiness (complete). Examora v1.0.0 — feature development is complete.**
