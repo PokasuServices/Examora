@@ -75,7 +75,7 @@ function SessionsContent() {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={Monitor} tone="primary" />
-          <h2 className="font-heading text-lg font-semibold text-neutral-900">Current device</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Current device</h2>
         </div>
         {current ? (
           <div className="mt-4">
@@ -90,7 +90,7 @@ function SessionsContent() {
 
       <Card>
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-heading text-lg font-semibold text-neutral-900">Other devices</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Other devices</h2>
           {others.length > 0 ? (
             <button
               type="button"

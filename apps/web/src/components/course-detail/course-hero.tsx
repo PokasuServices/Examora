@@ -36,7 +36,7 @@ export function CourseHero({
   const duration = curriculum ? formatDuration(totalDurationMinutes(curriculum)) : null;
 
   return (
-    <section className="overflow-hidden rounded-card border border-neutral-900/[0.06] bg-white shadow-soft">
+    <section className="overflow-hidden rounded-card border border-neutral-200 bg-white shadow-soft">
       <div
         className={cn("h-40 w-full bg-gradient-to-br sm:h-52", courseCoverWash(course.title))}
         aria-hidden="true"
@@ -51,9 +51,7 @@ export function CourseHero({
         </div>
 
         <div>
-          <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-            {course.title}
-          </h1>
+          <h1 className="text-xl font-semibold text-neutral-800">{course.title}</h1>
           {course.description ? (
             <p className="mt-2 max-w-2xl text-sm text-neutral-600 sm:text-base">
               {course.description}

@@ -87,7 +87,7 @@ function CommunityProfileContent() {
 
   if (status === "error") {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+      <main>
         <RetryInline message="Couldn't load this profile" onRetry={load} />
       </main>
     );
@@ -105,7 +105,7 @@ function CommunityProfileContent() {
       : { id: userId, email: "", firstName: null, lastName: null });
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
         <Link href="/community" className="hover:text-primary-600 hover:underline">
           Community
@@ -115,7 +115,7 @@ function CommunityProfileContent() {
       <Card className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:text-left">
         <Avatar author={displayAuthor} size="lg" />
         <div className="min-w-0 flex-1">
-          <h1 className="font-heading text-xl font-bold text-neutral-900">
+          <h1 className="text-xl font-semibold text-neutral-800">
             {status === "loading"
               ? "Loading…"
               : displayAuthor.email
@@ -144,10 +144,7 @@ function CommunityProfileContent() {
 
       {/* Recent threads */}
       <section aria-labelledby="profile-threads-heading">
-        <h2
-          id="profile-threads-heading"
-          className="font-heading text-lg font-semibold text-neutral-900"
-        >
+        <h2 id="profile-threads-heading" className="text-lg font-medium text-neutral-800">
           Recent discussions
         </h2>
         <div className="mt-3">
@@ -167,10 +164,7 @@ function CommunityProfileContent() {
 
       {/* Activity */}
       <section aria-labelledby="profile-activity-heading">
-        <h2
-          id="profile-activity-heading"
-          className="font-heading text-lg font-semibold text-neutral-900"
-        >
+        <h2 id="profile-activity-heading" className="text-lg font-medium text-neutral-800">
           Recent activity
         </h2>
         <Card className="mt-3">
@@ -213,10 +207,7 @@ function CommunityProfileContent() {
 
       {/* Reputation ledger */}
       <section aria-labelledby="profile-reputation-heading">
-        <h2
-          id="profile-reputation-heading"
-          className="font-heading text-lg font-semibold text-neutral-900"
-        >
+        <h2 id="profile-reputation-heading" className="text-lg font-medium text-neutral-800">
           Reputation history
         </h2>
         <Card className="mt-3">
@@ -246,10 +237,7 @@ function CommunityProfileContent() {
       {isSelf ? (
         <section aria-labelledby="profile-bookmarks-heading">
           <div className="flex items-center justify-between">
-            <h2
-              id="profile-bookmarks-heading"
-              className="font-heading text-lg font-semibold text-neutral-900"
-            >
+            <h2 id="profile-bookmarks-heading" className="text-lg font-medium text-neutral-800">
               Your bookmarks
             </h2>
             <Link

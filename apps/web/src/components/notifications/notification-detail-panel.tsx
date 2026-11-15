@@ -39,7 +39,7 @@ export function NotificationDetailPanel({
         aria-label="Notification detail"
         className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-white shadow-soft-hover"
       >
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-neutral-900/[0.06] px-5">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-neutral-200 px-5">
           <div className="flex items-center gap-2">
             <Icon size={16} strokeWidth={1.75} className="text-primary-600" aria-hidden="true" />
             <Chip tone={meta.tone}>{meta.label}</Chip>
@@ -55,9 +55,7 @@ export function NotificationDetailPanel({
         </div>
 
         <div className="flex-1 overflow-y-auto p-5">
-          <h2 className="font-heading text-lg font-semibold text-neutral-900">
-            {notification.title}
-          </h2>
+          <h2 className="text-lg font-medium text-neutral-800">{notification.title}</h2>
           <p className="mt-1 text-xs text-neutral-400">
             {new Date(notification.createdAt).toLocaleString(undefined, {
               dateStyle: "long",

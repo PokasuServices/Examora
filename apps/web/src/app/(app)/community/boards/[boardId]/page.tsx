@@ -86,7 +86,7 @@ function BoardThreadsContent() {
 
   if (data.status === "not-found") {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+      <main>
         <EmptyState
           heading="Board not found"
           body="This board may have been removed."
@@ -98,7 +98,7 @@ function BoardThreadsContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-[1100px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
         <Link href="/community" className="hover:text-primary-600 hover:underline">
           Community
@@ -108,9 +108,7 @@ function BoardThreadsContent() {
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-            {data.board?.title ?? "Board"}
-          </h1>
+          <h1 className="text-xl font-semibold text-neutral-800">{data.board?.title ?? "Board"}</h1>
           {data.board?.description ? (
             <p className="mt-1 max-w-2xl text-sm text-neutral-500">{data.board.description}</p>
           ) : null}

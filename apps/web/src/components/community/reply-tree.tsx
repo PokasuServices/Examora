@@ -42,7 +42,7 @@ function ReplyNode({
         "rounded-card border p-4",
         reply.isAcceptedAnswer
           ? "border-success-200 bg-success-50/60"
-          : "border-neutral-900/[0.06] bg-white",
+          : "border-neutral-200 bg-white",
       )}
     >
       {reply.isAcceptedAnswer ? (

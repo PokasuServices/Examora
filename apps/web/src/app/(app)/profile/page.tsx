@@ -30,7 +30,7 @@ function QuickActionLink({
   onClick?: () => void;
 }) {
   const className =
-    "flex flex-col items-start gap-2 rounded-md border border-neutral-900/[0.06] bg-white p-3 text-sm font-medium text-neutral-700 transition-colors hover:border-primary-200 hover:bg-primary-50/50 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500";
+    "flex flex-col items-start gap-2 rounded-md border border-neutral-200 bg-white p-3 text-sm font-medium text-neutral-700 transition-colors hover:border-primary-200 hover:bg-primary-50/50 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500";
   if (href) {
     return (
       <Link href={href} className={className}>
@@ -99,7 +99,7 @@ function ProfileContent() {
           <div className="flex items-start gap-4">
             <ProfileAvatar user={profile} size="xl" />
             <div className="min-w-0">
-              <h2 className="font-heading text-xl font-semibold text-neutral-900">
+              <h2 className="text-xl font-semibold text-neutral-800">
                 {authorDisplayName(profile)}
               </h2>
               <p className="mt-0.5 truncate text-sm text-neutral-500">{profile.email}</p>
@@ -148,9 +148,7 @@ function ProfileContent() {
       {/* ---------- Personal Information ---------- */}
       <Card id="personal-information">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-heading text-lg font-semibold text-neutral-900">
-            Personal information
-          </h2>
+          <h2 className="text-lg font-medium text-neutral-800">Personal information</h2>
           {dirty ? <Chip tone="warning">Unsaved changes</Chip> : null}
         </div>
 

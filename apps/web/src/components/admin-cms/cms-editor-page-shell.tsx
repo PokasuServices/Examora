@@ -41,7 +41,7 @@ export function CmsEditorPageShell({
   if (status === "not-found") {
     return (
       <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="font-heading text-2xl font-bold text-neutral-900">Not found</h1>
+        <h1 className="text-xl font-semibold text-neutral-800">Not found</h1>
         <Link href={backHref} className="text-sm font-medium text-primary-600 hover:underline">
           ← Back to {backLabel}
         </Link>
@@ -60,7 +60,7 @@ export function CmsEditorPageShell({
   }
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href={backHref}
@@ -69,17 +69,13 @@ export function CmsEditorPageShell({
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           {backLabel}
         </Link>
-        <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-          {title}
-        </h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{title}</h1>
       </div>
 
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={Clock} tone="primary" />
-          <h2 className="font-heading text-base font-semibold text-neutral-900">
-            Status &amp; publishing
-          </h2>
+          <h2 className="text-lg font-medium text-neutral-800">Status &amp; publishing</h2>
         </div>
         <div className="mt-4">{workflowActions}</div>
       </Card>
@@ -87,7 +83,7 @@ export function CmsEditorPageShell({
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={FileEdit} tone="primary" />
-          <h2 className="font-heading text-base font-semibold text-neutral-900">Content</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Content</h2>
         </div>
         <div className="mt-4">{fieldsForm}</div>
       </Card>
@@ -95,7 +91,7 @@ export function CmsEditorPageShell({
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={History} tone="primary" />
-          <h2 className="font-heading text-base font-semibold text-neutral-900">Version history</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Version history</h2>
         </div>
         <div className="mt-4">{versionHistory}</div>
       </Card>

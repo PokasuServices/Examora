@@ -30,7 +30,7 @@ export function DesktopCourseNav({
 }) {
   return (
     <aside className={collapsed ? "hidden" : "hidden shrink-0 basis-[300px] lg:block"}>
-      <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-card border border-neutral-900/[0.06] bg-white p-4 shadow-soft">
+      <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-card border border-neutral-200 bg-white p-4 shadow-soft">
         <div className="mb-1 flex items-center justify-between">
           <p className="font-heading text-sm font-semibold text-neutral-900">Course content</p>
           <button

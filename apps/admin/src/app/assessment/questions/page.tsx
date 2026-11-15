@@ -82,7 +82,7 @@ function CreateQuestionForm({ onCreated }: { onCreated: () => void }) {
 
   return (
     <Card>
-      <h2 className="font-heading text-base font-semibold text-neutral-900">New question</h2>
+      <h2 className="text-lg font-medium text-neutral-800">New question</h2>
       <form onSubmit={create} className="mt-4 flex flex-col gap-4">
         <div className="w-full sm:w-56">
           <SelectField
@@ -191,7 +191,7 @@ function QuestionsContent() {
   }, [load]);
 
   return (
-    <main className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <PageHeader
         title="Question bank"
         subtitle="Author reusable questions and publish them for use in quizzes."
@@ -239,22 +239,22 @@ function QuestionsContent() {
             <table className="w-full min-w-[680px] text-left text-sm">
               <thead className="bg-neutral-50">
                 <tr>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                     Text
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                     Type
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                     Difficulty
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                     Status
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500" />
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-neutral-200">
                 {questions.map((q) => (
                   <tr key={q.id} className="hover:bg-neutral-50">
                     <td className="max-w-md truncate px-4 py-3 text-neutral-800">{q.text}</td>

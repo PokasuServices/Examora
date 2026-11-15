@@ -40,7 +40,7 @@ export function UpcomingActivities({ scope }: { scope: DashboardScope }) {
 
   return (
     <section aria-labelledby="upcoming-heading">
-      <h2 id="upcoming-heading" className="font-heading text-lg font-semibold text-neutral-900">
+      <h2 id="upcoming-heading" className="text-lg font-medium text-neutral-800">
         Upcoming
       </h2>
 

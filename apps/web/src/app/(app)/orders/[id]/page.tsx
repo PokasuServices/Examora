@@ -136,7 +136,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
   if (status === "not-found" || !order) {
     return (
       <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="font-heading text-2xl font-bold text-neutral-900">Order not found</h1>
+        <h1 className="text-xl font-semibold text-neutral-800">Order not found</h1>
         <Link
           href="/orders/history"
           className="text-sm font-medium text-primary-600 hover:underline"
@@ -192,7 +192,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
   ];
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/orders/history"
@@ -202,9 +202,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
           Order history
         </Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-            {order.courseTitle}
-          </h1>
+          <h1 className="text-xl font-semibold text-neutral-800">{order.courseTitle}</h1>
           <Chip tone={orderStatusTone(order.status)}>{statusLabel(order.status)}</Chip>
         </div>
         <p className="mt-1 text-sm text-neutral-500">
@@ -214,7 +212,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
 
       {/* Order summary */}
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Order summary</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Order summary</h2>
         <dl className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
           <div>
             <dt className="text-neutral-500">Subtotal</dt>
@@ -245,7 +243,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={BookOpen} tone="primary" />
-          <h2 className="font-heading text-base font-semibold text-neutral-900">Purchased items</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Purchased items</h2>
         </div>
         <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 p-3 text-sm">
           <Link
@@ -264,9 +262,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={CreditCard} tone="primary" />
-          <h2 className="font-heading text-base font-semibold text-neutral-900">
-            Payment information
-          </h2>
+          <h2 className="text-lg font-medium text-neutral-800">Payment information</h2>
         </div>
         {order.payments.length === 0 ? (
           <p className="mt-2 text-sm text-neutral-500">No payment has been recorded yet.</p>
@@ -301,7 +297,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={Receipt} tone="primary" />
-          <h2 className="font-heading text-base font-semibold text-neutral-900">Invoice</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Invoice</h2>
         </div>
         {order.invoice ? (
           <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 p-3 text-sm">
@@ -326,9 +322,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={GraduationCap} tone="primary" />
-          <h2 className="font-heading text-base font-semibold text-neutral-900">
-            Enrollment status
-          </h2>
+          <h2 className="text-lg font-medium text-neutral-800">Enrollment status</h2>
         </div>
         {enrollment ? (
           <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 p-3 text-sm">
@@ -357,7 +351,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={RotateCcw} tone="primary" />
-          <h2 className="font-heading text-base font-semibold text-neutral-900">Refund</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Refund</h2>
         </div>
         {refund ? (
           <div className="mt-4 flex items-center justify-between rounded-md border border-neutral-100 p-3 text-sm">
@@ -386,7 +380,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={Clock} tone="primary" />
-          <h2 className="font-heading text-base font-semibold text-neutral-900">Timeline</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Timeline</h2>
         </div>
         <div className="mt-4">
           <Timeline events={events} />

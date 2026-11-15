@@ -69,7 +69,7 @@ function CourseEditorContent({ courseId }: { courseId: string }) {
   if (status === "not-found" || !course) {
     return (
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="font-heading text-2xl font-bold text-neutral-900">Course not found</h1>
+        <h1 className="text-xl font-semibold text-neutral-800">Course not found</h1>
         <Link
           href="/admin/content/courses"
           className="text-sm font-medium text-primary-600 hover:underline"
@@ -145,7 +145,7 @@ function CourseEditorContent({ courseId }: { courseId: string }) {
   );
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/admin/content/courses"
@@ -154,9 +154,7 @@ function CourseEditorContent({ courseId }: { courseId: string }) {
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Courses
         </Link>
-        <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-          {course.title}
-        </h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{course.title}</h1>
       </div>
 
       <button

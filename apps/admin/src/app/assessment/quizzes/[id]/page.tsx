@@ -137,7 +137,7 @@ function QuizDetailContent() {
 
   if (status === "loading") {
     return (
-      <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-6 w-32" />
         <Card>
           <Skeleton className="h-6 w-64" />
@@ -149,7 +149,7 @@ function QuizDetailContent() {
 
   if (status === "error" || !quiz) {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <main>
         <Card>
           <RetryInline message="Couldn't load this quiz" onRetry={load} />
         </Card>
@@ -162,7 +162,7 @@ function QuizDetailContent() {
   );
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/assessment/quizzes"
@@ -173,7 +173,7 @@ function QuizDetailContent() {
         </Link>
         <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <h1 className="font-heading text-2xl font-bold text-neutral-900">{quiz.title}</h1>
+            <h1 className="text-xl font-semibold text-neutral-800">{quiz.title}</h1>
             <Chip tone={STATUS_TONE[quiz.status]}>{statusLabel(quiz.status)}</Chip>
           </div>
           <StatusActions
@@ -191,7 +191,7 @@ function QuizDetailContent() {
 
       {dashboard ? (
         <Card>
-          <h2 className="font-heading text-base font-semibold text-neutral-900">Results</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Results</h2>
           <div className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
             <div>
               <p className="text-neutral-500">Total attempts</p>
@@ -222,7 +222,7 @@ function QuizDetailContent() {
       ) : null}
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Sections</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Sections</h2>
         <form onSubmit={addSection} className="mt-4 flex items-end gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="sectionTitle">New section title</Label>
@@ -258,9 +258,7 @@ function QuizDetailContent() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">
-          Assigned questions
-        </h2>
+        <h2 className="text-lg font-medium text-neutral-800">Assigned questions</h2>
         <form onSubmit={assignQuestion} className="mt-4 flex flex-wrap items-end gap-3">
           <div className="w-full sm:w-72">
             <SelectField

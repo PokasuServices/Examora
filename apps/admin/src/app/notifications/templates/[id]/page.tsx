@@ -56,7 +56,7 @@ function TemplateDetailContent() {
 
   if (status === "loading") {
     return (
-      <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-6 w-32" />
         <Card>
           <Skeleton className="h-6 w-64" />
@@ -68,8 +68,8 @@ function TemplateDetailContent() {
 
   if (status === "not-found" || !template) {
     return (
-      <main className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="font-heading text-2xl font-bold text-neutral-900">Template not found</h1>
+      <main className="flex flex-col gap-4">
+        <h1 className="text-xl font-semibold text-neutral-800">Template not found</h1>
         <Link
           href="/notifications/templates"
           className="text-sm font-medium text-primary-600 hover:underline"
@@ -81,7 +81,7 @@ function TemplateDetailContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/notifications/templates"
@@ -90,7 +90,7 @@ function TemplateDetailContent() {
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Templates
         </Link>
-        <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900">
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800">
           {template.eventType}{" "}
           <span className="font-normal text-neutral-400">· {template.channel}</span>
         </h1>

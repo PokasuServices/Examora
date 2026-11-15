@@ -205,7 +205,7 @@ function Student360Content() {
 
   if (status === "loading") {
     return (
-      <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-8 w-64" />
         <Card>
           <Skeleton className="h-24 w-full" />
@@ -219,7 +219,7 @@ function Student360Content() {
 
   if (status === "error" || !student360) {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <main>
         <Card>
           <RetryInline message="Couldn't load this student" onRetry={load} />
         </Card>
@@ -237,7 +237,7 @@ function Student360Content() {
   } = student360;
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <PageHeader
         title={[profile.firstName, profile.lastName].filter(Boolean).join(" ") || profile.email}
         subtitle={`${profile.email} · Mentor: ${currentMentor?.email ?? "Unassigned"}`}
@@ -270,7 +270,7 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Quiz history</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Quiz history</h2>
         {quizHistory.length > 0 ? (
           <ul className="mt-4 divide-y divide-neutral-100">
             {quizHistory.slice(0, 10).map((a) => (
@@ -292,9 +292,7 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">
-          Assignment history
-        </h2>
+        <h2 className="text-lg font-medium text-neutral-800">Assignment history</h2>
         {assignmentHistory.length > 0 ? (
           <ul className="mt-4 divide-y divide-neutral-100">
             {assignmentHistory.slice(0, 10).map((s) => (
@@ -314,7 +312,7 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Activity timeline</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Activity timeline</h2>
         {activityTimeline.length > 0 ? (
           <ul className="mt-4 divide-y divide-neutral-100">
             {activityTimeline.slice(0, 15).map((item, i) => (
@@ -333,7 +331,7 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Private notes</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Private notes</h2>
         <p className="mt-1 text-xs text-neutral-400">Never visible to the student.</p>
         {notes.length > 0 ? (
           <ul className="mt-4 flex flex-col gap-2">
@@ -366,7 +364,7 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Tasks</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Tasks</h2>
         {tasks.length > 0 ? (
           <ul className="mt-4 flex flex-col gap-2">
             {tasks.map((t) => (
@@ -413,7 +411,7 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Feedback</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Feedback</h2>
         {feedback.length > 0 ? (
           <ul className="mt-4 flex flex-col gap-3">
             {feedback.map((f) => (
@@ -442,7 +440,7 @@ function Student360Content() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Meeting history</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Meeting history</h2>
         {meetings.length > 0 ? (
           <ul className="mt-4 flex flex-col gap-3">
             {meetings.map((m) => (

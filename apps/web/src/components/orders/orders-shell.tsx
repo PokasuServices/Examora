@@ -31,11 +31,9 @@ export function OrdersShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 lg:flex-row lg:gap-10 lg:px-8">
+    <main className="flex flex-col gap-8 lg:flex-row lg:gap-10">
       <nav aria-label="Orders" className="lg:w-52 lg:shrink-0">
-        <h1 className="px-1 font-heading text-2xl font-bold text-neutral-900">
-          Orders &amp; Billing
-        </h1>
+        <h1 className="px-1 text-xl font-semibold text-neutral-800">Orders &amp; Billing</h1>
         <ul className="mt-4 flex gap-1 overflow-x-auto pb-1 lg:mt-6 lg:flex-col lg:overflow-visible lg:pb-0">
           {ORDERS_NAV.map((item) => {
             const active =

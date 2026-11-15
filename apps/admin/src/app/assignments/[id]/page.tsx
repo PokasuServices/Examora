@@ -121,7 +121,7 @@ function AssignmentDetailContent() {
 
   if (loadStatus === "loading") {
     return (
-      <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-6 w-32" />
         <Card>
           <Skeleton className="h-6 w-64" />
@@ -133,7 +133,7 @@ function AssignmentDetailContent() {
 
   if (loadStatus === "error" || !assignment) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+      <main>
         <Card>
           <RetryInline message="Couldn't load this assignment" onRetry={load} />
         </Card>
@@ -142,7 +142,7 @@ function AssignmentDetailContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/assignments"
@@ -152,7 +152,7 @@ function AssignmentDetailContent() {
           Assignments
         </Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="font-heading text-2xl font-bold text-neutral-900">{assignment.title}</h1>
+          <h1 className="text-xl font-semibold text-neutral-800">{assignment.title}</h1>
           <Chip tone={STATUS_TONE[assignment.status]}>{statusLabel(assignment.status)}</Chip>
         </div>
       </div>
@@ -170,7 +170,7 @@ function AssignmentDetailContent() {
       <FieldError>{error}</FieldError>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Details</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Details</h2>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -214,7 +214,7 @@ function AssignmentDetailContent() {
       </Card>
 
       <Card density="compact">
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Rubric criteria</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Rubric criteria</h2>
         <form
           onSubmit={(e) => void addCriterion(e)}
           className="mt-3 flex flex-wrap items-end gap-3"

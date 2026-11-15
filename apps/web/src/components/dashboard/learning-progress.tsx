@@ -87,7 +87,7 @@ export function LearningProgress() {
 
   return (
     <section>
-      <h2 className="font-heading text-xl font-semibold text-neutral-900">Learning progress</h2>
+      <h2 className="text-xl font-semibold text-neutral-800">Learning progress</h2>
       <Card className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
           {activity.status === "loading" ? (

@@ -15,6 +15,7 @@ import { DirectoryFilterControls } from "@/components/admin-users/directory-filt
 import { UserTable } from "@/components/admin-users/user-table";
 import { useUserDirectory } from "@/components/admin-users/use-user-directory";
 import type { AdminUserGrowthAnalytics } from "@examora/types";
+import { PageTitle } from "@/components/ui/page-header";
 
 function useDirectoryStatsData() {
   const api = useAdminAnalyticsApi();
@@ -60,9 +61,9 @@ function UsersDirectoryContent() {
   const activeFilterCount = statusFilter !== "ALL" ? 1 : 0;
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
-        <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">Users</h1>
+        <PageTitle>Users</PageTitle>
         <p className="mt-1 text-sm text-neutral-500">
           Manage students, mentors, reviewers and administrators.
         </p>

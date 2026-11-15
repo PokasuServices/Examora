@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 /** Same w-64 tile shape as CourseCardSkeleton, for the non-course recommendation rails. */
 export function RecommendationCardSkeleton() {
   return (
-    <div className="w-64 shrink-0 rounded-card border border-neutral-900/[0.06] bg-white p-4 shadow-soft">
+    <div className="w-64 shrink-0 rounded-card border border-neutral-200 bg-white p-4 shadow-soft">
       <div className="flex items-center justify-between">
         <Skeleton className="h-8 w-8 rounded-full" />
         <Skeleton className="h-5 w-16 rounded-full" />

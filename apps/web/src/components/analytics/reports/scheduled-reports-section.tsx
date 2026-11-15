@@ -168,10 +168,7 @@ export function ScheduledReportsSection() {
 
   return (
     <section aria-labelledby="scheduled-reports-heading">
-      <h2
-        id="scheduled-reports-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="scheduled-reports-heading" className="text-lg font-medium text-neutral-800">
         Scheduled Reports
       </h2>
       <Card className="mt-3">

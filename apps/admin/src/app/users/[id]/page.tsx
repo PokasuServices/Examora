@@ -103,7 +103,7 @@ function UserDetailContent() {
 
   if (loadStatus === "loading") {
     return (
-      <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-6 w-32" />
         <Card>
           <Skeleton className="h-6 w-64" />
@@ -115,7 +115,7 @@ function UserDetailContent() {
 
   if (loadStatus === "error" || !user) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
+      <main>
         <Card>
           <RetryInline message="Couldn't load this user" onRetry={load} />
         </Card>
@@ -128,7 +128,7 @@ function UserDetailContent() {
   const statusChanged = selectedStatus !== user.status;
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/users"
@@ -137,7 +137,7 @@ function UserDetailContent() {
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Users
         </Link>
-        <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900">{user.email}</h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{user.email}</h1>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <span className="text-sm text-neutral-600">
             {[user.firstName, user.lastName].filter(Boolean).join(" ") || "No name on file"}
@@ -152,7 +152,7 @@ function UserDetailContent() {
       <FieldError>{error}</FieldError>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Roles</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Roles</h2>
         <div className="mt-4 flex flex-col gap-2">
           {ROLE_NAMES.map((role) => (
             <label key={role} className="flex items-center gap-2 text-sm text-neutral-700">
@@ -172,7 +172,7 @@ function UserDetailContent() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Account status</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Account status</h2>
         <div className="mt-4 max-w-xs">
           <SelectField
             id="user-status-select"

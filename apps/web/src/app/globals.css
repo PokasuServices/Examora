@@ -29,3 +29,70 @@
     opacity: 0.6;
   }
 }
+
+/* ------------------------------------------------------------------
+   TMS / TailAdmin layout architecture — sidebar menu classes, ported
+   from the TMS frontend's assets/main.css (`@utility menu-*`), colored
+   with this app's own tokens.
+   ------------------------------------------------------------------ */
+@layer components {
+  .menu-item {
+    @apply relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500;
+  }
+  .menu-item-active {
+    @apply bg-primary-50 text-primary-700 dark:bg-primary-500/[0.12] dark:text-primary-400;
+  }
+  .menu-item-inactive {
+    @apply text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-white/5;
+  }
+  .menu-item-icon-active {
+    @apply text-primary-600 dark:text-primary-400;
+  }
+  .menu-item-icon-inactive {
+    @apply text-neutral-500 group-hover:text-neutral-700 dark:text-neutral-400 dark:group-hover:text-neutral-300;
+  }
+  .menu-dropdown-item {
+    @apply relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500;
+  }
+  .menu-dropdown-item-active {
+    @apply bg-primary-50 text-primary-700 dark:bg-primary-500/20 dark:text-primary-300;
+  }
+  .menu-dropdown-item-inactive {
+    @apply text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-white/5;
+  }
+
+  /* Label collapses smoothly with the rail instead of popping. */
+  .menu-item-text {
+    @apply overflow-hidden whitespace-nowrap;
+    max-width: 0;
+    opacity: 0;
+    transition:
+      max-width 300ms ease-in-out,
+      opacity 200ms ease-in-out;
+  }
+  .menu-item-text.sidebar-expanded {
+    max-width: 200px;
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    border-radius: 9999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: theme("colors.neutral.200");
+  }
+}

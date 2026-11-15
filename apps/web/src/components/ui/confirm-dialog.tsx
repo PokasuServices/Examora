@@ -40,18 +40,19 @@ export function ConfirmDialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-neutral-900/40" onClick={onCancel} aria-hidden="true" />
+    <div className="fixed inset-0 z-99999 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-neutral-400/50 backdrop-blur-[25px]"
+        onClick={onCancel}
+        aria-hidden="true"
+      />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
-        className="relative w-full max-w-sm rounded-card border border-neutral-900/[0.06] bg-white p-6 shadow-soft-hover"
+        className="relative w-full max-w-sm rounded-lg bg-white p-6 shadow-lg"
       >
-        <h2
-          id="confirm-dialog-title"
-          className="font-heading text-lg font-semibold text-neutral-900"
-        >
+        <h2 id="confirm-dialog-title" className="text-lg font-medium text-neutral-800">
           {title}
         </h2>
         <div className="mt-2 text-sm text-neutral-600">{message}</div>

@@ -17,7 +17,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   if (status !== "authenticated") {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-12">
+      <main className="mx-auto max-w-3xl">
         <p className="text-sm text-neutral-500">Loading…</p>
       </main>
     );

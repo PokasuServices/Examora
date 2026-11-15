@@ -75,7 +75,7 @@ function AdminThreadDetailContent() {
 
   if (status === "loading") {
     return (
-      <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-4 w-32" />
         <Card>
           <Skeleton className="h-6 w-64" />
@@ -87,7 +87,7 @@ function AdminThreadDetailContent() {
 
   if (status === "error" || !thread) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+      <main>
         <Card>
           <RetryInline message="Couldn't load this thread" onRetry={load} />
         </Card>
@@ -96,7 +96,7 @@ function AdminThreadDetailContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/community/moderation"
@@ -105,7 +105,7 @@ function AdminThreadDetailContent() {
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Moderation queue
         </Link>
-        <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900">{thread.title}</h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{thread.title}</h1>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           {thread.isHidden ? <Chip tone="danger">Hidden</Chip> : null}
           {thread.isLocked ? <Chip tone="neutral">Locked</Chip> : null}

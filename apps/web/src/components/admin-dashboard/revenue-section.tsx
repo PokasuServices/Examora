@@ -16,7 +16,7 @@ export function RevenueSection({
 
   return (
     <section aria-labelledby="revenue-heading">
-      <h2 id="revenue-heading" className="font-heading text-lg font-semibold text-neutral-900">
+      <h2 id="revenue-heading" className="text-lg font-medium text-neutral-800">
         Revenue overview
       </h2>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -33,7 +33,7 @@ export function RevenueSection({
         <div className="flex flex-col gap-4">
           <Card>
             <p className="text-xs font-medium text-neutral-500">Orders</p>
-            <p className="mt-1 font-heading text-2xl font-bold text-neutral-900">
+            <p className="mt-1 text-xl font-semibold text-neutral-800">
               {revenue.ordersPaid.toLocaleString()}
             </p>
             <p className="mt-1 text-xs text-neutral-500">
@@ -42,7 +42,7 @@ export function RevenueSection({
           </Card>
           <Card>
             <p className="text-xs font-medium text-neutral-500">Refunds</p>
-            <p className="mt-1 font-heading text-2xl font-bold text-neutral-900">
+            <p className="mt-1 text-xl font-semibold text-neutral-800">
               {formatMoney(revenue.totalRefunded, revenue.currency)}
             </p>
             <p className="mt-1 text-xs text-neutral-500">

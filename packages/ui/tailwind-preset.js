@@ -1,12 +1,16 @@
 /**
  * Shared Tailwind preset — design tokens per DS-18 §2 (Color palette, Typography
- * scale, Spacing, Border radius). Original values only; never sampled from
- * /screens (ADR-0008). Sprint 0 placeholder — refined with real brand design
- * starting Sprint 2 (see docs/TECHNICAL_DEBT_REGISTER.md TD-001).
+ * scale, Spacing, Border radius). Each app layers its own color/font overrides
+ * on top (apps/web + apps/admin tailwind.config.js).
+ *
+ * Layout architecture tokens (shadows, z-index, sidebar widths, radius) follow
+ * the TailAdmin structure used by the TMS frontend: flat bordered cards,
+ * 6px control radius, theme-* elevation scale, collapsible 220px/60px sidebar.
  *
  * @type {import('tailwindcss').Config}
  */
 module.exports = {
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
@@ -52,14 +56,39 @@ module.exports = {
       },
       borderRadius: {
         sm: "4px",
-        md: "8px",
-        lg: "12px",
-        xl: "16px",
+        md: "6px",
+        lg: "8px",
+        xl: "12px",
+        "2xl": "16px",
       },
       fontSize: {
         caption: ["0.75rem", { lineHeight: "1rem" }],
         body: ["1rem", { lineHeight: "1.5rem" }],
         heading: ["1.5rem", { lineHeight: "2rem", fontWeight: "600" }],
+        "title-sm": ["30px", { lineHeight: "38px" }],
+        "title-md": ["36px", { lineHeight: "44px" }],
+      },
+      spacing: {
+        "sidebar-max": "255px",
+        "sidebar-min": "60px",
+      },
+      boxShadow: {
+        "theme-xs": "0px 1px 2px 0px rgba(16, 24, 40, 0.05)",
+        "theme-sm": "0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06)",
+        "theme-md":
+          "0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06)",
+        "theme-lg":
+          "0px 12px 16px -4px rgba(16, 24, 40, 0.08), 0px 4px 6px -2px rgba(16, 24, 40, 0.03)",
+        "theme-xl":
+          "0px 20px 24px -4px rgba(16, 24, 40, 0.08), 0px 8px 8px -4px rgba(16, 24, 40, 0.03)",
+      },
+      zIndex: {
+        1: "1",
+        9: "9",
+        99: "99",
+        999: "999",
+        9999: "9999",
+        99999: "99999",
       },
     },
   },

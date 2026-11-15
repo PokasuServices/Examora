@@ -39,7 +39,7 @@ function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-heading text-base font-semibold text-neutral-900">{title}</h2>
+      <h2 className="text-lg font-medium text-neutral-800">{title}</h2>
       {children}
     </section>
   );
@@ -89,7 +89,7 @@ function MentorAnalyticsContent() {
   }));
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <PageHeader
         title="My mentee analytics"
         subtitle="Progress, performance, and engagement across your assigned students."
@@ -189,24 +189,24 @@ function MentorAnalyticsContent() {
                   <table className="w-full min-w-[640px] text-left text-sm">
                     <thead className="bg-neutral-50">
                       <tr>
-                        <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                        <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                           Student
                         </th>
-                        <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                        <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                           Completion
                         </th>
-                        <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                        <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                           Quiz avg
                         </th>
-                        <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                        <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                           Assignment avg
                         </th>
-                        <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                        <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                           Last active
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-neutral-100">
+                    <tbody className="divide-y divide-neutral-200">
                       {students.map((s) => (
                         <tr key={s.studentId} className="hover:bg-neutral-50">
                           <td className="px-4 py-3 text-neutral-800">

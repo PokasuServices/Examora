@@ -9,10 +9,7 @@ import { ListChecks, Percent, Target, Trophy } from "lucide-react";
 export function QuizPerformanceSection({ quiz }: { quiz: QuizPerformanceSummary }) {
   return (
     <section aria-labelledby="quiz-performance-heading">
-      <h2
-        id="quiz-performance-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="quiz-performance-heading" className="text-lg font-medium text-neutral-800">
         Quiz Performance
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">

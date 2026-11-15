@@ -57,10 +57,7 @@ export function CommunityActivity() {
   return (
     <section aria-labelledby="community-activity-heading">
       <div className="flex items-center justify-between">
-        <h2
-          id="community-activity-heading"
-          className="font-heading text-lg font-semibold text-neutral-900"
-        >
+        <h2 id="community-activity-heading" className="text-lg font-medium text-neutral-800">
           Community
         </h2>
         <Link href="/community" className="text-xs font-medium text-primary-600 hover:underline">

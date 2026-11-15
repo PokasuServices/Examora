@@ -11,10 +11,7 @@ export function NotificationsAnalyticsSection({
 }) {
   return (
     <section aria-labelledby="admin-notifications-heading">
-      <h2
-        id="admin-notifications-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="admin-notifications-heading" className="text-lg font-medium text-neutral-800">
         Notifications
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-2">
@@ -51,7 +48,7 @@ export function NotificationsAnalyticsSection({
                   <th className="px-3 py-2">Success Rate</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-neutral-200">
                 {notifications.deliveryByChannel.map((c) => (
                   <tr key={c.channel} className="hover:bg-neutral-50">
                     <td className="px-3 py-2.5 font-medium text-neutral-800">{c.channel}</td>

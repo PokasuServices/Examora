@@ -39,9 +39,7 @@ function SecurityStatusCard({
     <Card>
       <div className="flex items-center gap-2">
         <IconBadge icon={ShieldCheck} tone="primary" />
-        <h2 className="font-heading text-lg font-semibold text-neutral-900">
-          Account security status
-        </h2>
+        <h2 className="text-lg font-medium text-neutral-800">Account security status</h2>
       </div>
       <p className="mt-1 text-sm text-neutral-500">
         {passed} of {checks.length} security essentials in place.
@@ -100,7 +98,7 @@ function PasswordCard({ email }: { email: string }) {
     <Card>
       <div className="flex items-center gap-2">
         <IconBadge icon={KeyRound} tone="primary" />
-        <h2 className="font-heading text-lg font-semibold text-neutral-900">Password</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Password</h2>
       </div>
       <p className="mt-2 text-sm text-neutral-500">
         We&rsquo;ll email a reset link to{" "}
@@ -144,9 +142,7 @@ function EmailVerificationCard({ email, verified }: { email: string; verified: b
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <IconBadge icon={Mail} tone={verified ? "success" : "warning"} />
-          <h2 className="font-heading text-lg font-semibold text-neutral-900">
-            Email verification
-          </h2>
+          <h2 className="text-lg font-medium text-neutral-800">Email verification</h2>
         </div>
         <Chip tone={verified ? "success" : "warning"}>
           {verified ? "Verified" : "Not verified"}
@@ -193,7 +189,7 @@ function SessionsSummaryCard({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <IconBadge icon={Monitor} tone="primary" />
-          <h2 className="font-heading text-lg font-semibold text-neutral-900">Active sessions</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Active sessions</h2>
         </div>
         <Link
           href="/profile/sessions"

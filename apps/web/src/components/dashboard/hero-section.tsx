@@ -123,7 +123,7 @@ export function HeroSection() {
           <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
             Let&apos;s get started
           </p>
-          <h1 className="mt-1 font-heading text-[32px] font-bold leading-tight text-neutral-900">
+          <h1 className="mt-1 text-title-sm font-semibold text-neutral-800">
             Browse courses in Fashion Design, Architecture &amp; more
           </h1>
         </div>
@@ -139,9 +139,7 @@ export function HeroSection() {
   if (pick.kind === "fallback") {
     return (
       <Card className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-heading text-2xl font-bold text-neutral-900">
-          Jump back into your courses
-        </h1>
+        <h1 className="text-xl font-semibold text-neutral-800">Jump back into your courses</h1>
         <Link href="/courses" className="w-full shrink-0 sm:w-auto">
           <Button variant="secondary" size="lg" className="w-full sm:w-auto">
             My courses
@@ -163,9 +161,7 @@ export function HeroSection() {
         >
           {pick.eyebrow}
         </p>
-        <h1 className="mt-1 truncate font-heading text-[32px] font-bold leading-tight text-neutral-900">
-          {pick.title}
-        </h1>
+        <h1 className="mt-1 truncate text-title-sm font-semibold text-neutral-800">{pick.title}</h1>
         <p className="mt-1 flex items-center gap-2 text-sm text-neutral-500">
           {pick.context}
           {pick.kind === "lesson" ? (

@@ -96,7 +96,7 @@ function QuestionDetailContent() {
 
   if (status === "loading") {
     return (
-      <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-6 w-32" />
         <Card>
           <Skeleton className="h-6 w-64" />
@@ -108,7 +108,7 @@ function QuestionDetailContent() {
 
   if (status === "error" || !question) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+      <main>
         <Card>
           <RetryInline message="Couldn't load this question" onRetry={load} />
         </Card>
@@ -117,7 +117,7 @@ function QuestionDetailContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/assessment/questions"
@@ -128,9 +128,7 @@ function QuestionDetailContent() {
         </Link>
         <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <h1 className="font-heading text-2xl font-bold text-neutral-900">
-              {statusLabel(question.type)}
-            </h1>
+            <h1 className="text-xl font-semibold text-neutral-800">{statusLabel(question.type)}</h1>
             <Chip tone={STATUS_TONE[question.status]}>{statusLabel(question.status)}</Chip>
           </div>
           <StatusActions
@@ -142,7 +140,7 @@ function QuestionDetailContent() {
       <FieldError>{error}</FieldError>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Details</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Details</h2>
         <form onSubmit={saveDetails} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="text">Question text</Label>
@@ -171,7 +169,7 @@ function QuestionDetailContent() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Options</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Options</h2>
         <ul className="mt-4 flex flex-col gap-2">
           {question.options.map((o) => (
             <li

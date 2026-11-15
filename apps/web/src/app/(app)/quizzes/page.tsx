@@ -21,9 +21,9 @@ function QuizCatalogContent() {
   }, []);
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12">
+    <main>
       <div className="flex items-center justify-between">
-        <h1 className="text-heading">Quizzes</h1>
+        <h1 className="text-xl font-semibold text-neutral-800">Quizzes</h1>
         <Link href="/dashboard" className="text-sm text-primary-600 hover:underline">
           My learning →
         </Link>

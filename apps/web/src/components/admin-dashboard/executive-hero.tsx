@@ -43,9 +43,7 @@ export function ExecutiveHero({
           <Activity size={15} strokeWidth={1.75} aria-hidden="true" />
           <span className="text-xs font-semibold uppercase tracking-wide">Executive dashboard</span>
         </div>
-        <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-          Welcome back, {name}
-        </h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800">Welcome back, {name}</h1>
         <p className="mt-1 text-sm text-neutral-500">{TODAY}</p>
       </div>
       <HealthChip health={health} />

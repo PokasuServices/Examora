@@ -11,16 +11,15 @@ import { AssignmentPerformanceSection } from "@/components/analytics/student/ass
 import { ActivityTimelineSection } from "@/components/analytics/student/activity-timeline-section";
 import { AchievementsSection } from "@/components/analytics/student/achievements-section";
 import { ContinueLearningSection } from "@/components/analytics/student/continue-learning-section";
+import { PageTitle } from "@/components/ui/page-header";
 
 function AnalyticsContent() {
   const data = useStudentAnalytics();
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-8">
       <div>
-        <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-          My Analytics
-        </h1>
+        <PageTitle>My Analytics</PageTitle>
         <p className="mt-1 text-sm text-neutral-500">
           How you&rsquo;re progressing, what&rsquo;s going well, and where to focus next.
         </p>

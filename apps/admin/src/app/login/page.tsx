@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, useAuth } from "@examora/auth-client";
 import { Button, FieldError, Input, Label } from "@examora/ui";
-import { AuthCard } from "@/components/auth-card";
+import { AuthLayout } from "@/components/layout/AuthLayout";
 
 const WEB_ORIGIN = process.env.NEXT_PUBLIC_WEB_ORIGIN ?? "http://localhost:3000";
 
@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <AuthCard title="Admin sign in" description="Staff access only.">
+    <AuthLayout title="Admin sign in" description="Staff access only.">
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Email</Label>
@@ -66,6 +66,6 @@ export default function AdminLoginPage() {
           Reset it on the student site
         </a>
       </p>
-    </AuthCard>
+    </AuthLayout>
   );
 }

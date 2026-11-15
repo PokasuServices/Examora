@@ -12,10 +12,7 @@ export function LearningProgressSection({ courses }: { courses: CourseCompletion
 
   return (
     <section aria-labelledby="learning-progress-heading">
-      <h2
-        id="learning-progress-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="learning-progress-heading" className="text-lg font-medium text-neutral-800">
         Learning Progress
       </h2>
       <div className="mt-3">
@@ -42,7 +39,7 @@ export function LearningProgressSection({ courses }: { courses: CourseCompletion
         )}
       </div>
       {courses.length > 0 ? (
-        <ul className="mt-3 flex flex-col divide-y divide-neutral-100 rounded-card border border-neutral-900/[0.06] bg-white shadow-soft">
+        <ul className="mt-3 flex flex-col divide-y divide-neutral-100 rounded-card border border-neutral-200 bg-white shadow-soft">
           {courses.map((c) => (
             <li
               key={c.courseId}

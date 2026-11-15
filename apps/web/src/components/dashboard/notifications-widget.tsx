@@ -47,10 +47,7 @@ export function NotificationsWidget() {
   return (
     <section aria-labelledby="notifications-heading">
       <div className="flex items-center justify-between">
-        <h2
-          id="notifications-heading"
-          className="font-heading text-lg font-semibold text-neutral-900"
-        >
+        <h2 id="notifications-heading" className="text-lg font-medium text-neutral-800">
           Notifications
         </h2>
         <div className="flex items-center gap-3">

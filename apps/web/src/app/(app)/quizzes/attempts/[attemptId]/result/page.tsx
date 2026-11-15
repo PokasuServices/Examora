@@ -33,7 +33,7 @@ function ResultContent() {
 
   if (state.status === "error") {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+      <main className="mx-auto max-w-2xl">
         <EmptyState
           icon={HelpCircle}
           heading="Result not available"
@@ -52,7 +52,7 @@ function ResultContent() {
   const { result } = state;
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-12">
+    <main className="mx-auto flex max-w-2xl flex-col gap-6">
       <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
         <Link href="/quizzes" className="hover:underline">
           Quizzes

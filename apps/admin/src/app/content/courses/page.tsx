@@ -66,9 +66,9 @@ function CoursesContent() {
     id ? (categories.find((c) => c.id === id)?.name ?? "—") : "—";
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
+    <main>
       <div className="flex items-center justify-between">
-        <h1 className="text-heading">Courses</h1>
+        <h1 className="text-xl font-semibold text-neutral-800">Courses</h1>
         <Link href="/content/categories">
           <Button variant="secondary">Manage categories</Button>
         </Link>
@@ -135,7 +135,7 @@ function CoursesContent() {
 
       <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
             <tr>
               <th className="px-4 py-3 font-medium">Title</th>
               <th className="px-4 py-3 font-medium">Category</th>

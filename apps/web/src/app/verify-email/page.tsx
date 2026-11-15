@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ApiError, useAuth } from "@examora/auth-client";
 import { Button, Input, Label } from "@examora/ui";
-import { AuthCard } from "@/components/auth-card";
+import { AuthLayout } from "@/components/layout/AuthLayout";
 
 type VerifyState = "idle" | "verifying" | "verified" | "error";
 
@@ -44,26 +44,26 @@ function VerifyEmailContent() {
 
   if (state === "verified") {
     return (
-      <AuthCard title="Email verified">
+      <AuthLayout title="Email verified">
         <p className="text-sm text-neutral-600">Your account is now active.</p>
         <Link href="/" className="mt-6 inline-block text-sm text-primary-600 hover:underline">
           Continue
         </Link>
-      </AuthCard>
+      </AuthLayout>
     );
   }
 
   if (state === "verifying") {
     return (
-      <AuthCard title="Verifying…">
+      <AuthLayout title="Verifying…">
         <p className="text-sm text-neutral-600">Confirming your email address.</p>
-      </AuthCard>
+      </AuthLayout>
     );
   }
 
   if (state === "error") {
     return (
-      <AuthCard title="Verification failed">
+      <AuthLayout title="Verification failed">
         <p className="text-sm text-error-600">{error}</p>
         <p className="mt-4 text-sm text-neutral-600">
           The link may have expired. Request a new one below.
@@ -74,12 +74,12 @@ function VerifyEmailContent() {
           onSubmit={resend}
           sent={resendSent}
         />
-      </AuthCard>
+      </AuthLayout>
     );
   }
 
   return (
-    <AuthCard
+    <AuthLayout
       title={pending ? "Check your email" : "Verify your email"}
       description="Click the link we emailed you to activate your account."
     >
@@ -89,7 +89,7 @@ function VerifyEmailContent() {
         onSubmit={resend}
         sent={resendSent}
       />
-    </AuthCard>
+    </AuthLayout>
   );
 }
 

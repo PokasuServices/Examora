@@ -54,7 +54,7 @@ export function LessonNavButtons({
       {previousLesson ? (
         <Link
           href={`/courses/${courseId}/lessons/${previousLesson.lessonId}`}
-          className="group flex items-center gap-3 rounded-card border border-neutral-900/[0.06] bg-white p-4 shadow-soft transition-all hover:-translate-y-px hover:shadow-soft-hover"
+          className="group flex items-center gap-3 rounded-card border border-neutral-200 bg-white p-4 shadow-soft transition-all hover:-translate-y-px hover:shadow-soft-hover"
         >
           <ChevronLeft
             size={20}
@@ -76,7 +76,7 @@ export function LessonNavButtons({
         <Link
           href={`/courses/${courseId}/lessons/${nextLesson.lessonId}`}
           className={cn(
-            "group flex items-center justify-end gap-3 rounded-card border border-neutral-900/[0.06] bg-white p-4 text-right shadow-soft transition-all hover:-translate-y-px hover:shadow-soft-hover",
+            "group flex items-center justify-end gap-3 rounded-card border border-neutral-200 bg-white p-4 text-right shadow-soft transition-all hover:-translate-y-px hover:shadow-soft-hover",
           )}
         >
           <span className="min-w-0">

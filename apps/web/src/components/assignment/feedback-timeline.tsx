@@ -68,10 +68,7 @@ export function FeedbackTimeline({
 
   return (
     <section aria-labelledby="feedback-timeline-heading">
-      <h2
-        id="feedback-timeline-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="feedback-timeline-heading" className="text-lg font-medium text-neutral-800">
         Feedback
       </h2>
 

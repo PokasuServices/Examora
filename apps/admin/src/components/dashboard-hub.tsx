@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { useAuth } from "@examora/auth-client";
-import { NAV_GROUPS, WEB_ORIGIN } from "@/components/shell/sidebar";
+import { MENU_GROUPS, WEB_ORIGIN } from "@/config/menu";
 import { Card } from "@/components/ui/card";
 
 /**
@@ -17,12 +17,16 @@ export function DashboardHub() {
   const { user } = useAuth();
   const permissions = user?.permissions ?? [];
 
-  const visibleGroups = NAV_GROUPS.filter((group) => group.label !== "Platform")
-    .map((group) => ({
-      ...group,
-      items: group.items.filter(
-        (item) => !item.permission || permissions.includes(item.permission),
-      ),
+  // One card per sidebar section (Assessment, Assignments, …) — the same
+  // menu config the AppSidebar renders; "Platform" links out to apps/web
+  // and is covered by the Executive Dashboard card above.
+  const visibleGroups = MENU_GROUPS.flatMap((group) => group.items)
+    .filter((item) => item.subItems && item.name !== "Platform")
+    .map((item) => ({
+      label: item.name,
+      items: (item.subItems ?? [])
+        .filter((sub) => !sub.permission || permissions.includes(sub.permission))
+        .map((sub) => ({ href: sub.path, label: sub.name })),
     }))
     .filter((group) => group.items.length > 0);
 

@@ -35,7 +35,7 @@ function ReviewContent() {
 
   if (state.status === "error") {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+      <main className="mx-auto max-w-2xl">
         <EmptyState
           icon={HelpCircle}
           heading="Review not available"
@@ -61,7 +61,7 @@ function ReviewContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-12">
+    <main className="mx-auto flex max-w-2xl flex-col gap-6">
       <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
         <Link href={`/quizzes/attempts/${attemptId}/result`} className="hover:underline">
           Result
@@ -69,9 +69,7 @@ function ReviewContent() {
         <span aria-hidden="true">·</span> <span className="text-neutral-800">Review</span>
       </nav>
 
-      <h1 className="font-heading text-2xl font-bold text-neutral-900">
-        Review — {review.quizTitle}
-      </h1>
+      <h1 className="text-xl font-semibold text-neutral-800">Review — {review.quizTitle}</h1>
 
       <QuestionPalette
         count={review.questions.length}

@@ -27,7 +27,7 @@ function formatLastActive(iso: string | null): string {
 export function StudentTable({ students }: { students: MergedStudent[] }) {
   return (
     <>
-      <div className="hidden overflow-x-auto rounded-card border border-neutral-900/[0.06] bg-white shadow-soft sm:block">
+      <div className="hidden overflow-x-auto rounded-card border border-neutral-200 bg-white shadow-soft sm:block">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-neutral-100 text-xs font-medium text-neutral-400">
@@ -54,7 +54,7 @@ export function StudentTable({ students }: { students: MergedStudent[] }) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100">
+          <tbody className="divide-y divide-neutral-200">
             {students.map((s) => (
               <tr key={s.studentId} className="hover:bg-neutral-50">
                 <td className="px-5 py-3">
@@ -94,7 +94,7 @@ export function StudentTable({ students }: { students: MergedStudent[] }) {
           <li key={s.studentId}>
             <Link
               href={`/mentor/students/${s.studentId}`}
-              className="block rounded-card border border-neutral-900/[0.06] bg-white p-4 shadow-soft"
+              className="block rounded-card border border-neutral-200 bg-white p-4 shadow-soft"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">

@@ -11,10 +11,7 @@ export function UserGrowthSection({ userGrowth }: { userGrowth: AdminUserGrowthA
 
   return (
     <section aria-labelledby="admin-user-growth-heading">
-      <h2
-        id="admin-user-growth-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="admin-user-growth-heading" className="text-lg font-medium text-neutral-800">
         User Growth
       </h2>
       <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-3">

@@ -11,6 +11,7 @@ import { useMentorStudents, type MergedStudent } from "@/components/mentor/use-m
 import { StudentTable } from "@/components/mentor/student-table";
 import { StudentListSkeleton } from "@/components/mentor/skeletons";
 import type { ActivityBucket } from "@/components/mentor/activity-status";
+import { PageTitle } from "@/components/ui/page-header";
 
 type StatusFilter = "all" | ActivityBucket;
 type SortOption = "name" | "progress" | "quiz" | "assignment" | "last-active";
@@ -66,7 +67,7 @@ function MentorStudentsContent() {
 
   if (status === "error") {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+      <main>
         <RetryInline message="Couldn't load your students" onRetry={retry} />
       </main>
     );
@@ -94,11 +95,9 @@ function MentorStudentsContent() {
   );
 
   return (
-    <main className="mx-auto flex max-w-[1200px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
-        <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-          My Students
-        </h1>
+        <PageTitle>My Students</PageTitle>
         <p className="mt-1 text-sm text-neutral-500">
           {students.length} assigned {students.length === 1 ? "student" : "students"}
         </p>

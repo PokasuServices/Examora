@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function AdminDashboardPage() {
   return (
     <RequirePermission permission="analytics:admin">
-      <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <PageHeader
           title="Dashboard"
           subtitle="Operational tools for Examora — manage assessments, assignments, mentoring, community, commerce, and notifications."

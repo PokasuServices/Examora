@@ -49,7 +49,7 @@ function NotificationDetailContent() {
 
   if (status === "loading") {
     return (
-      <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-6 w-32" />
         <Card>
           <Skeleton className="h-6 w-64" />
@@ -61,8 +61,8 @@ function NotificationDetailContent() {
 
   if (status === "not-found" || !notification) {
     return (
-      <main className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="font-heading text-2xl font-bold text-neutral-900">Notification not found</h1>
+      <main className="flex flex-col gap-4">
+        <h1 className="text-xl font-semibold text-neutral-800">Notification not found</h1>
         <Link
           href="/notifications"
           className="text-sm font-medium text-primary-600 hover:underline"
@@ -74,7 +74,7 @@ function NotificationDetailContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/notifications"
@@ -83,9 +83,7 @@ function NotificationDetailContent() {
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Deliveries
         </Link>
-        <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900">
-          {notification.title}
-        </h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{notification.title}</h1>
         <p className="mt-1 text-sm text-neutral-500">
           {notification.userEmail} · {notification.eventType} · {notification.category}
         </p>
@@ -105,7 +103,7 @@ function NotificationDetailContent() {
       </Card>
 
       <div>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Deliveries</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Deliveries</h2>
         <div className="mt-3 flex flex-col gap-3">
           {notification.deliveries.map((delivery) => (
             <Card key={delivery.id} density="compact">

@@ -34,19 +34,18 @@ module.exports = {
         heading: ["var(--font-heading)", "var(--font-body)", "ui-sans-serif", "sans-serif"],
       },
       borderRadius: {
-        // Spec: buttons & inputs 12px — overrides the shared preset's 8px
-        // `md`, so @examora/ui's Button/Input pick this up with no source
-        // changes (Tailwind resolves each app's own compiled theme).
-        md: "12px",
-        // Spec: cards 20px. Kept as its own named key (`rounded-card`)
-        // rather than overloading `xl`/`2xl`, since 20px isn't a stock step.
-        card: "20px",
+        // TMS/TailAdmin architecture: controls and cards share the crisp
+        // 6px `rounded-md`. `rounded-card` stays its own key so card
+        // surfaces can diverge from controls later without a sweep.
+        md: "6px",
+        card: "6px",
       },
       boxShadow: {
-        // "Very soft only" per spec — two low-opacity layers, paired with a
-        // hairline border on cards rather than a harder single shadow.
-        soft: "0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05)",
-        "soft-hover": "0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 28px rgba(15, 23, 42, 0.08)",
+        // TMS/TailAdmin elevation: cards are flat (border + theme-xs);
+        // hover lift uses theme-md.
+        soft: "0px 1px 2px 0px rgba(16, 24, 40, 0.05)",
+        "soft-hover":
+          "0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06)",
       },
     },
   },

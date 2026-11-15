@@ -37,8 +37,8 @@ export function FiltersSheet({
         aria-label={title}
         className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-white shadow-soft-hover"
       >
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-neutral-900/[0.06] px-4">
-          <h2 className="font-heading text-base font-semibold text-neutral-900">{title}</h2>
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-neutral-200 px-4">
+          <h2 className="text-lg font-medium text-neutral-800">{title}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -49,7 +49,7 @@ export function FiltersSheet({
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-4">{children}</div>
-        <div className="shrink-0 border-t border-neutral-900/[0.06] p-4">
+        <div className="shrink-0 border-t border-neutral-200 p-4">
           <button
             type="button"
             onClick={onClose}

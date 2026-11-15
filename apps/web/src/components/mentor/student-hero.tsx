@@ -18,7 +18,7 @@ export function StudentHero({ student360 }: { student360: Student360 }) {
             {initials}
           </span>
           <div>
-            <h1 className="font-heading text-xl font-bold text-neutral-900 sm:text-2xl">{name}</h1>
+            <h1 className="text-xl font-semibold text-neutral-800">{name}</h1>
             <p className="mt-0.5 flex items-center gap-1.5 text-sm text-neutral-500">
               <Mail size={14} strokeWidth={1.75} aria-hidden="true" />
               {profile.email}

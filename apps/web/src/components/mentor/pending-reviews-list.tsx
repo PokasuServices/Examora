@@ -14,10 +14,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 export function PendingReviewsList({ items }: { items: ReviewerQueueItem[] }) {
   return (
     <section aria-labelledby="pending-reviews-heading">
-      <h2
-        id="pending-reviews-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="pending-reviews-heading" className="text-lg font-medium text-neutral-800">
         Pending Assignment Reviews
       </h2>
       <Card className="mt-3">

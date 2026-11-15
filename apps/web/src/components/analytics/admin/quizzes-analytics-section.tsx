@@ -5,10 +5,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 export function QuizzesAnalyticsSection({ quizzes }: { quizzes: AdminQuizAnalytics }) {
   return (
     <section aria-labelledby="admin-quizzes-heading">
-      <h2
-        id="admin-quizzes-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="admin-quizzes-heading" className="text-lg font-medium text-neutral-800">
         Quizzes
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-5">

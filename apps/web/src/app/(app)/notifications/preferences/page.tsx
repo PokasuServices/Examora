@@ -62,7 +62,7 @@ function ChannelsCard({
 }) {
   return (
     <Card>
-      <h2 className="font-heading text-base font-semibold text-neutral-900">Channels</h2>
+      <h2 className="text-lg font-medium text-neutral-800">Channels</h2>
       <p className="mt-1 text-sm text-neutral-500">
         Choose where non-critical updates reach you. Security and account alerts always go through
         by email, regardless of these settings.
@@ -95,7 +95,7 @@ function DigestCard({
 }) {
   return (
     <Card>
-      <h2 className="font-heading text-base font-semibold text-neutral-900">Digest</h2>
+      <h2 className="text-lg font-medium text-neutral-800">Digest</h2>
       <p className="mt-1 text-sm text-neutral-500">How often batched updates should arrive.</p>
       <div className="mt-4">
         <SegmentedControl
@@ -134,7 +134,7 @@ function MutedCategoriesCard({
 
   return (
     <Card>
-      <h2 className="font-heading text-base font-semibold text-neutral-900">Muted categories</h2>
+      <h2 className="text-lg font-medium text-neutral-800">Muted categories</h2>
       <p className="mt-1 text-sm text-neutral-500">
         Non-critical notifications in these categories won&rsquo;t be sent by email, SMS, WhatsApp,
         or browser push — they still appear in your Notification Center. Try{" "}
@@ -200,7 +200,7 @@ function QuietHoursCard({
     <Card>
       <div className="flex items-center gap-2">
         <Moon size={16} strokeWidth={1.75} className="text-primary-600" aria-hidden="true" />
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Quiet hours</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Quiet hours</h2>
       </div>
       <p className="mt-1 text-sm text-neutral-500">
         Non-critical channel sends are held during this window; security and account alerts always
@@ -245,9 +245,7 @@ function LocaleCard({
 }) {
   return (
     <Card>
-      <h2 className="font-heading text-base font-semibold text-neutral-900">
-        Language &amp; time zone
-      </h2>
+      <h2 className="text-lg font-medium text-neutral-800">Language &amp; time zone</h2>
       <div className="mt-4 grid grid-cols-2 gap-3">
         <div>
           <label
@@ -333,7 +331,7 @@ function WebPushCard() {
     <Card>
       <div className="flex items-center gap-2">
         <Smartphone size={16} strokeWidth={1.75} className="text-primary-600" aria-hidden="true" />
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Devices</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Devices</h2>
       </div>
       {!supported ? (
         <p className="mt-2 text-sm text-neutral-500">
@@ -422,7 +420,7 @@ function PreferencesContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
           <Link
@@ -432,9 +430,7 @@ function PreferencesContent() {
             <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
             Notifications
           </Link>
-          <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-            Preferences
-          </h1>
+          <h1 className="mt-1 text-xl font-semibold text-neutral-800">Preferences</h1>
         </div>
       </div>
 
@@ -449,7 +445,7 @@ function PreferencesContent() {
           <LocaleCard prefs={prefs} onChange={patch} />
           <WebPushCard />
 
-          <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-card border border-neutral-900/[0.06] bg-white/95 p-4 shadow-soft-hover backdrop-blur">
+          <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-card border border-neutral-200 bg-white/95 p-4 shadow-soft-hover backdrop-blur">
             {error ? <p className="mr-auto text-sm text-danger-600">{error}</p> : null}
             {saved && !dirty ? (
               <p className="mr-auto flex items-center gap-1 text-sm text-success-700">

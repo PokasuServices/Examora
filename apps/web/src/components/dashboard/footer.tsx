@@ -24,7 +24,7 @@ export function DashboardFooter() {
   const health = useSystemHealth();
 
   return (
-    <footer role="contentinfo" className="mt-4 border-t border-neutral-900/[0.06] py-6">
+    <footer role="contentinfo" className="mt-4 border-t border-neutral-200 py-6">
       <div className="flex flex-col items-center justify-between gap-3 text-xs text-neutral-400 sm:flex-row">
         <span>Examora v1.0.0</span>
         <div className="flex items-center gap-4">

@@ -51,14 +51,14 @@ function CategoriesContent() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12">
+    <main>
       <nav className="mb-6 text-sm text-neutral-500">
         <Link href="/content/courses" className="hover:underline">
           Courses
         </Link>{" "}
         · <span className="text-neutral-800">Categories</span>
       </nav>
-      <h1 className="text-heading">Categories</h1>
+      <h1 className="text-xl font-semibold text-neutral-800">Categories</h1>
 
       <form onSubmit={create} className="mt-6 flex items-end gap-3">
         <div className="flex flex-1 flex-col gap-1.5">

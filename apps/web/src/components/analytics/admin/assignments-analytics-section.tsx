@@ -11,10 +11,7 @@ export function AssignmentsAnalyticsSection({
 }) {
   return (
     <section aria-labelledby="admin-assignments-heading">
-      <h2
-        id="admin-assignments-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="admin-assignments-heading" className="text-lg font-medium text-neutral-800">
         Assignments
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-5">

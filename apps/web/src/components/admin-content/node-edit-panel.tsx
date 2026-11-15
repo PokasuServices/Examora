@@ -207,9 +207,7 @@ export function NodeCreatePanel({
       }}
       className="flex flex-col gap-4"
     >
-      <h3 className="font-heading text-base font-semibold text-neutral-900">
-        New {singular[collection]}
-      </h3>
+      <h3 className="text-lg font-medium text-neutral-800">New {singular[collection]}</h3>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="new-node-title">Title</Label>
         <Input

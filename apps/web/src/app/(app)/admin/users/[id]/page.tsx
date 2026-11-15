@@ -50,7 +50,7 @@ function UserDetailContent({ userId }: { userId: string }) {
   if (status === "not-found" || !user) {
     return (
       <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="font-heading text-2xl font-bold text-neutral-900">User not found</h1>
+        <h1 className="text-xl font-semibold text-neutral-800">User not found</h1>
         <Link href="/admin/users" className="text-sm font-medium text-primary-600 hover:underline">
           ← Back to users
         </Link>
@@ -69,7 +69,7 @@ function UserDetailContent({ userId }: { userId: string }) {
   }
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/admin/users"
@@ -85,9 +85,7 @@ function UserDetailContent({ userId }: { userId: string }) {
         <div className="flex items-start gap-4">
           <ProfileAvatar user={user} size="xl" />
           <div className="min-w-0">
-            <h1 className="font-heading text-2xl font-bold text-neutral-900">
-              {authorDisplayName(user)}
-            </h1>
+            <h1 className="text-xl font-semibold text-neutral-800">{authorDisplayName(user)}</h1>
             <p className="mt-0.5 text-sm text-neutral-500">{user.email}</p>
             {user.phone ? <p className="mt-0.5 text-sm text-neutral-500">{user.phone}</p> : null}
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -117,7 +115,7 @@ function UserDetailContent({ userId }: { userId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={ShieldCheck} tone="primary" />
-          <h2 className="font-heading text-base font-semibold text-neutral-900">Account status</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Account status</h2>
         </div>
         <div className="mt-4">
           <StatusManager
@@ -133,7 +131,7 @@ function UserDetailContent({ userId }: { userId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={UserIcon} tone="primary" />
-          <h2 className="font-heading text-base font-semibold text-neutral-900">Roles</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Roles</h2>
         </div>
         <div className="mt-4">
           <RoleManager
@@ -149,9 +147,7 @@ function UserDetailContent({ userId }: { userId: string }) {
       <Card>
         <div className="flex items-center gap-2">
           <IconBadge icon={History} tone="primary" />
-          <h2 className="font-heading text-base font-semibold text-neutral-900">
-            Account activity
-          </h2>
+          <h2 className="text-lg font-medium text-neutral-800">Account activity</h2>
         </div>
         <div className="mt-4">
           <UserAuditPanel

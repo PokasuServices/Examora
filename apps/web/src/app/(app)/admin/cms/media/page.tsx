@@ -152,7 +152,7 @@ function MediaLibraryContent() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="font-heading text-xl font-semibold text-neutral-900">Media Library</h2>
+        <h2 className="text-xl font-semibold text-neutral-800">Media Library</h2>
         <p className="mt-0.5 text-sm text-neutral-500">
           Upload once, reuse across pages and banners. Every upload is quarantined until scanned
           clean.

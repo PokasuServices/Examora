@@ -17,7 +17,7 @@ function InvoicesContent() {
   return (
     <Card density="compact" className="min-w-0">
       <div className="flex items-center gap-2 p-4 pb-0">
-        <h2 className="font-heading text-lg font-semibold text-neutral-900">Invoices</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Invoices</h2>
       </div>
       {status === "loading" ? (
         <div className="flex flex-col gap-2 p-4">
@@ -37,21 +37,21 @@ function InvoicesContent() {
           <table className="w-full min-w-[520px] text-left text-sm">
             <thead className="bg-neutral-50">
               <tr>
-                <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                   Invoice number
                 </th>
-                <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                   Date
                 </th>
-                <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                   Amount
                 </th>
-                <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                   Status
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody className="divide-y divide-neutral-200">
               {invoices.map((invoice) => (
                 <tr key={invoice.id} className="hover:bg-neutral-50">
                   <td className="whitespace-nowrap px-4 py-3 font-medium text-neutral-800">

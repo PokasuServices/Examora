@@ -8,13 +8,13 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   interactive?: boolean;
 }
 
-/** Base surface for every card on the dashboard — 20px radius, hairline border, very soft shadow. */
+/** Base surface for every card — TMS CardComponent look: 6px radius, neutral-200 border, flat (theme-xs) elevation. */
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, density = "default", interactive = false, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        "rounded-card border border-neutral-900/[0.06] bg-white shadow-soft",
+        "rounded-card border border-neutral-200 bg-white shadow-soft",
         density === "default" ? "p-6" : "p-4",
         interactive &&
           "transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-soft-hover motion-reduce:transition-none motion-reduce:hover:translate-y-0",

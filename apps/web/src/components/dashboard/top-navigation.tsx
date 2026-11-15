@@ -41,7 +41,7 @@ export function TopNavigation({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h2 className="font-heading text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-medium text-neutral-800">
           {greeting()}, {name}
         </h2>
         <p className="text-sm text-neutral-500">{today}</p>

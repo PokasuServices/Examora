@@ -54,7 +54,7 @@ export function RecommendationSection({
           <Icon size={18} strokeWidth={1.75} className="text-accent-500" aria-hidden="true" />
           <h2
             id={`rec-${title.replace(/\s+/g, "-").toLowerCase()}`}
-            className="font-heading text-xl font-semibold text-neutral-900"
+            className="text-xl font-semibold text-neutral-800"
           >
             {title}
           </h2>

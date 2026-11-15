@@ -27,9 +27,7 @@ export function ThreadCard({
             {showBoard ? <Chip tone="neutral">{thread.boardTitle}</Chip> : null}
             <ThreadBadges thread={thread} />
           </div>
-          <h3 className="mt-1.5 truncate font-heading text-base font-semibold text-neutral-900">
-            {thread.title}
-          </h3>
+          <h3 className="mt-1.5 truncate text-lg font-medium text-neutral-800">{thread.title}</h3>
           <p className="mt-1 text-xs text-neutral-500">
             {authorDisplayName(thread.author)} · {timeAgo(thread.createdAt)}
           </p>

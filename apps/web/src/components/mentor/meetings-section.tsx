@@ -43,7 +43,7 @@ export function MeetingsSection({
 
   return (
     <section aria-labelledby="meetings-heading">
-      <h2 id="meetings-heading" className="font-heading text-lg font-semibold text-neutral-900">
+      <h2 id="meetings-heading" className="text-lg font-medium text-neutral-800">
         Meetings
       </h2>
       <Card className="mt-3">

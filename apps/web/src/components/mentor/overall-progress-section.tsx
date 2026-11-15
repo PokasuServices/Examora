@@ -5,10 +5,7 @@ import { Card } from "@/components/ui/card";
 export function OverallProgressSection({ stats }: { stats: LearningDashboard["stats"] }) {
   return (
     <section aria-labelledby="overall-progress-heading">
-      <h2
-        id="overall-progress-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="overall-progress-heading" className="text-lg font-medium text-neutral-800">
         Overall Progress
       </h2>
       <Card className="mt-3">
@@ -18,9 +15,7 @@ export function OverallProgressSection({ stats }: { stats: LearningDashboard["st
               <GraduationCap size={14} strokeWidth={1.75} aria-hidden="true" />
               Courses started
             </div>
-            <p className="mt-1 font-heading text-2xl font-bold text-neutral-900">
-              {stats.coursesStarted}
-            </p>
+            <p className="mt-1 text-xl font-semibold text-neutral-800">{stats.coursesStarted}</p>
           </div>
           <div>
             <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500">
@@ -36,9 +31,7 @@ export function OverallProgressSection({ stats }: { stats: LearningDashboard["st
               <BookOpen size={14} strokeWidth={1.75} aria-hidden="true" />
               Lessons done
             </div>
-            <p className="mt-1 font-heading text-2xl font-bold text-neutral-900">
-              {stats.lessonsCompleted}
-            </p>
+            <p className="mt-1 text-xl font-semibold text-neutral-800">{stats.lessonsCompleted}</p>
           </div>
         </div>
       </Card>

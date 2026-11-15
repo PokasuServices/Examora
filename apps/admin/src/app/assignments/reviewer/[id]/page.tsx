@@ -152,7 +152,7 @@ function ReviewWorkspaceContent() {
 
   if (loadStatus === "loading") {
     return (
-      <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-6 w-32" />
         <Card>
           <Skeleton className="h-6 w-64" />
@@ -164,7 +164,7 @@ function ReviewWorkspaceContent() {
 
   if (loadStatus === "error" || !submission) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+      <main>
         <Card>
           <RetryInline message="Couldn't load this submission" onRetry={load} />
         </Card>
@@ -180,7 +180,7 @@ function ReviewWorkspaceContent() {
   const totalPossible = submission.criteria.reduce((sum, c) => sum + c.maxMarks, 0);
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/assignments/reviewer"
@@ -190,9 +190,7 @@ function ReviewWorkspaceContent() {
           Reviewer queue
         </Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="font-heading text-2xl font-bold text-neutral-900">
-            {submission.assignmentTitle}
-          </h1>
+          <h1 className="text-xl font-semibold text-neutral-800">{submission.assignmentTitle}</h1>
           <Chip tone={STATUS_TONE[submission.status]}>{statusLabel(submission.status)}</Chip>
         </div>
         <p className="mt-1 text-sm text-neutral-500">
@@ -209,7 +207,7 @@ function ReviewWorkspaceContent() {
       <FieldError>{error}</FieldError>
 
       <Card density="compact">
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Files</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Files</h2>
         {submission.files.length > 0 ? (
           <ul className="mt-3 flex flex-col divide-y divide-neutral-100">
             {submission.files.map((f) => (
@@ -241,7 +239,7 @@ function ReviewWorkspaceContent() {
 
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-heading text-base font-semibold text-neutral-900">Rubric scoring</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Rubric scoring</h2>
           <span className="text-sm text-neutral-500">
             {totalAwarded} / {totalPossible} marks
           </span>
@@ -333,7 +331,7 @@ function ReviewWorkspaceContent() {
       </Card>
 
       <Card density="compact">
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Comments</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Comments</h2>
         {submission.comments.length > 0 ? (
           <ul className="mt-3 flex flex-col gap-3">
             {submission.comments.map((c) => (

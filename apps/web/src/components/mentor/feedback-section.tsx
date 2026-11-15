@@ -33,7 +33,7 @@ export function FeedbackSection({
 
   return (
     <section aria-labelledby="feedback-heading">
-      <h2 id="feedback-heading" className="font-heading text-lg font-semibold text-neutral-900">
+      <h2 id="feedback-heading" className="text-lg font-medium text-neutral-800">
         Feedback Timeline
       </h2>
       <Card className="mt-3">

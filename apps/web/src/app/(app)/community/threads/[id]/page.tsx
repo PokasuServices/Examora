@@ -44,7 +44,7 @@ function ThreadDetailContent() {
 
   if (data.loadState === "not-found") {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+      <main className="mx-auto max-w-2xl">
         <EmptyState
           heading="Discussion not available"
           body="This thread may have been removed, or you don't have access to it."
@@ -57,7 +57,7 @@ function ThreadDetailContent() {
 
   if (data.loadState === "loading" || !data.thread) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+      <main className="mx-auto max-w-3xl">
         <p className="text-sm text-neutral-500">Loading…</p>
       </main>
     );
@@ -89,7 +89,7 @@ function ThreadDetailContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto flex max-w-3xl flex-col gap-6">
       <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
         <Link href="/community" className="hover:text-primary-600 hover:underline">
           Community
@@ -141,9 +141,7 @@ function ThreadDetailContent() {
           </form>
         ) : (
           <>
-            <h1 className="mt-3 font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-              {thread.title}
-            </h1>
+            <h1 className="mt-3 text-xl font-semibold text-neutral-800">{thread.title}</h1>
             <div className="mt-3 flex items-center gap-3">
               <Avatar author={thread.author} size="md" />
               <div className="min-w-0 text-sm">
@@ -246,7 +244,7 @@ function ThreadDetailContent() {
       </div>
 
       <section aria-labelledby="replies-heading">
-        <h2 id="replies-heading" className="font-heading text-lg font-semibold text-neutral-900">
+        <h2 id="replies-heading" className="text-lg font-medium text-neutral-800">
           {replyCount} {replyCount === 1 ? "reply" : "replies"}
         </h2>
 
