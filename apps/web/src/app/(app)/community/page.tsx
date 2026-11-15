@@ -25,10 +25,10 @@ function CommunityHomeContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-[1200px] flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-8">
       {/* Hero */}
       <div className="rounded-card bg-gradient-to-br from-primary-600 to-primary-700 p-8 text-white shadow-soft sm:p-10">
-        <h1 className="font-heading text-2xl font-bold sm:text-3xl">Community</h1>
+        <h1 className="text-2xl font-semibold sm:text-title-sm">Community</h1>
         <p className="mt-2 max-w-xl text-sm text-primary-50 sm:text-base">
           Ask questions, help other learners, and follow the discussions that matter to your
           courses.
@@ -94,10 +94,7 @@ function CommunityHomeContent() {
           <section aria-labelledby="trending-heading">
             <div className="flex items-center gap-2">
               <Flame size={18} strokeWidth={1.75} className="text-warning-600" aria-hidden="true" />
-              <h2
-                id="trending-heading"
-                className="font-heading text-lg font-semibold text-neutral-900"
-              >
+              <h2 id="trending-heading" className="text-lg font-medium text-neutral-800">
                 Trending discussions
               </h2>
             </div>
@@ -124,10 +121,7 @@ function CommunityHomeContent() {
           {/* Recent */}
           <section aria-labelledby="recent-heading">
             <div className="flex items-center justify-between">
-              <h2
-                id="recent-heading"
-                className="font-heading text-lg font-semibold text-neutral-900"
-              >
+              <h2 id="recent-heading" className="text-lg font-medium text-neutral-800">
                 Recent discussions
               </h2>
             </div>
@@ -154,10 +148,7 @@ function CommunityHomeContent() {
 
           {/* Categories & boards */}
           <section aria-labelledby="categories-heading">
-            <h2
-              id="categories-heading"
-              className="font-heading text-lg font-semibold text-neutral-900"
-            >
+            <h2 id="categories-heading" className="text-lg font-medium text-neutral-800">
               Browse by category
             </h2>
             {data.status === "loading" ? null : data.categories.length === 0 ? (

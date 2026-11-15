@@ -46,7 +46,7 @@ function WorkspaceContent() {
 
   if (loadState === "not-found") {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+      <main className="mx-auto max-w-2xl">
         <EmptyState
           icon={ClipboardList}
           heading="Submission not available"
@@ -81,7 +81,7 @@ function WorkspaceContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-[1000px] flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto flex max-w-[1000px] flex-col gap-8">
       <div>
         <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
           <Link href={`/assignments/${submission.assignmentId}`} className="hover:underline">
@@ -91,9 +91,7 @@ function WorkspaceContent() {
           <span className="text-neutral-800">Version {submission.version}</span>
         </nav>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-            {submission.assignmentTitle}
-          </h1>
+          <h1 className="text-xl font-semibold text-neutral-800">{submission.assignmentTitle}</h1>
           <SubmissionStatusChip status={submission.status} />
         </div>
       </div>
@@ -114,7 +112,7 @@ function WorkspaceContent() {
           ) : null}
 
           <Card>
-            <h2 className="font-heading text-base font-semibold text-neutral-900">Files</h2>
+            <h2 className="text-lg font-medium text-neutral-800">Files</h2>
             <div className="mt-3">
               <SubmissionFileList
                 files={submission.files}
@@ -178,9 +176,7 @@ function WorkspaceContent() {
         <div className="lg:order-2">
           {assignment ? (
             <Card className="lg:sticky lg:top-20">
-              <h2 className="font-heading text-base font-semibold text-neutral-900">
-                Assignment brief
-              </h2>
+              <h2 className="text-lg font-medium text-neutral-800">Assignment brief</h2>
               <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-600">
                 {assignment.brief}
               </p>

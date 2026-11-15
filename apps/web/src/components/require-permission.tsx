@@ -26,7 +26,7 @@ export function RequirePermission({
 
   if (status === "loading" || status === "unauthenticated") {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-12">
+      <main className="mx-auto max-w-2xl">
         <p className="text-sm text-neutral-500">Loading…</p>
       </main>
     );
@@ -34,7 +34,7 @@ export function RequirePermission({
 
   if (!user?.permissions.includes(permission)) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+      <main className="mx-auto max-w-2xl">
         <EmptyState
           icon={Lock}
           heading="Access restricted"

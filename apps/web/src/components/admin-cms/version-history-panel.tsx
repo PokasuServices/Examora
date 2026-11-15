@@ -148,7 +148,7 @@ export function VersionHistoryPanel({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-neutral-200">
                 {diff.map((entry) => (
                   <tr key={entry.field}>
                     <td className="px-3 py-2 font-medium text-neutral-700">{entry.field}</td>

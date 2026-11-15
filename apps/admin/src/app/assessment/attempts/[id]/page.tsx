@@ -44,7 +44,7 @@ function AttemptDetailContent() {
 
   if (status === "loading") {
     return (
-      <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-6 w-32" />
         <Card>
           <Skeleton className="h-6 w-64" />
@@ -56,7 +56,7 @@ function AttemptDetailContent() {
 
   if (status === "error" || !attempt) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+      <main>
         <Card>
           <RetryInline message="Couldn't load this attempt" onRetry={load} />
         </Card>
@@ -65,7 +65,7 @@ function AttemptDetailContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/assessment/attempts"
@@ -74,9 +74,7 @@ function AttemptDetailContent() {
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Attempt monitoring
         </Link>
-        <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900">
-          {attempt.quizTitle}
-        </h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{attempt.quizTitle}</h1>
         <p className="mt-1 text-sm text-neutral-500">{attempt.userEmail}</p>
       </div>
 
@@ -116,7 +114,7 @@ function AttemptDetailContent() {
       </Card>
 
       <Card density="compact" className="min-w-0">
-        <h2 className="px-2 pt-2 font-heading text-base font-semibold text-neutral-900">Answers</h2>
+        <h2 className="px-2 pt-2 text-lg font-medium text-neutral-800">Answers</h2>
         {attempt.answers.length === 0 ? (
           <EmptyState icon={ClipboardCheck} heading="No answers recorded" />
         ) : (

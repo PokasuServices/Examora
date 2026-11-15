@@ -19,10 +19,7 @@ export function PerformanceTrendsSection({
 
   return (
     <section aria-labelledby="mentor-trends-heading">
-      <h2
-        id="mentor-trends-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="mentor-trends-heading" className="text-lg font-medium text-neutral-800">
         Performance Trends
       </h2>
 

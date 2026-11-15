@@ -36,7 +36,7 @@ export function CurriculumAccordion({
   return (
     <section aria-labelledby={showHeading ? "curriculum-heading" : undefined}>
       {showHeading ? (
-        <h2 id="curriculum-heading" className="font-heading text-xl font-semibold text-neutral-900">
+        <h2 id="curriculum-heading" className="text-xl font-semibold text-neutral-800">
           Curriculum
         </h2>
       ) : null}
@@ -57,13 +57,11 @@ export function CurriculumAccordion({
             <details
               key={subject.id}
               open={currentLessonId ? containsCurrent : index === 0}
-              className="group rounded-card border border-neutral-900/[0.06] bg-white shadow-soft [&_summary::-webkit-details-marker]:hidden"
+              className="group rounded-card border border-neutral-200 bg-white shadow-soft [&_summary::-webkit-details-marker]:hidden"
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
                 <div className="min-w-0">
-                  <p className="truncate font-heading text-base font-semibold text-neutral-900">
-                    {subject.title}
-                  </p>
+                  <p className="truncate text-lg font-medium text-neutral-800">{subject.title}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
                     <span>
                       {lessonCount} {lessonCount === 1 ? "lesson" : "lessons"}

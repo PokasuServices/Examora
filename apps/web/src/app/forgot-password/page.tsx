@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useAuth } from "@examora/auth-client";
 import { Button, Input, Label } from "@examora/ui";
-import { AuthCard } from "@/components/auth-card";
+import { AuthLayout } from "@/components/layout/AuthLayout";
 
 export default function ForgotPasswordPage() {
   const { request } = useAuth();
@@ -26,19 +26,19 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <AuthCard title="Check your email">
+      <AuthLayout title="Check your email">
         <p className="text-sm text-neutral-600">
           If an account exists for <strong>{email}</strong>, we&apos;ve sent a password reset link.
         </p>
         <Link href="/login" className="mt-6 inline-block text-sm text-primary-600 hover:underline">
           Back to login
         </Link>
-      </AuthCard>
+      </AuthLayout>
     );
   }
 
   return (
-    <AuthCard title="Forgot your password?" description="We'll email you a link to reset it.">
+    <AuthLayout title="Forgot your password?" description="We'll email you a link to reset it.">
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Email</Label>
@@ -58,6 +58,6 @@ export default function ForgotPasswordPage() {
       <Link href="/login" className="mt-6 inline-block text-sm text-primary-600 hover:underline">
         Back to login
       </Link>
-    </AuthCard>
+    </AuthLayout>
   );
 }

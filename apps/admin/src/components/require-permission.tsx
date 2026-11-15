@@ -24,7 +24,7 @@ export function RequirePermission({
 
   if (status === "loading" || status === "unauthenticated") {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-12">
+      <main>
         <p className="text-sm text-neutral-500">Loading…</p>
       </main>
     );
@@ -32,8 +32,8 @@ export function RequirePermission({
 
   if (!user?.permissions.includes(permission)) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-12">
-        <h1 className="text-heading">Access denied</h1>
+      <main>
+        <h1 className="text-xl font-semibold text-neutral-800">Access denied</h1>
         <p className="mt-2 text-sm text-neutral-600">
           Your account does not have permission to view this page.
         </p>

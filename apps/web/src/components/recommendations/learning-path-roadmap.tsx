@@ -61,7 +61,7 @@ export function LearningPathRoadmap({
               </p>
               <Link
                 href={`/courses/${c.courseId}`}
-                className="mt-0.5 block font-heading text-base font-semibold text-neutral-900 hover:text-primary-600 hover:underline"
+                className="mt-0.5 block text-lg font-medium text-neutral-800 hover:text-primary-600 hover:underline"
               >
                 {c.courseTitle}
               </Link>
@@ -88,7 +88,7 @@ export function LearningPathRoadmap({
                     ? `/courses/${c.courseId}/lessons/${c.nextLesson.id}`
                     : `/courses/${c.courseId}`
                 }
-                className="mt-0.5 block font-heading text-base font-semibold text-neutral-900 hover:text-primary-600 hover:underline"
+                className="mt-0.5 block text-lg font-medium text-neutral-800 hover:text-primary-600 hover:underline"
               >
                 {c.courseTitle}
               </Link>
@@ -115,7 +115,7 @@ export function LearningPathRoadmap({
               </div>
               <Link
                 href={`/courses/${step.courseId}`}
-                className="mt-0.5 block font-heading text-base font-semibold text-neutral-900 hover:text-primary-600 hover:underline"
+                className="mt-0.5 block text-lg font-medium text-neutral-800 hover:text-primary-600 hover:underline"
               >
                 {step.courseTitle}
               </Link>

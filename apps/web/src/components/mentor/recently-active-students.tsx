@@ -24,10 +24,7 @@ export function RecentlyActiveStudents({ entries }: { entries: MentorStudentProg
 
   return (
     <section aria-labelledby="recently-active-heading">
-      <h2
-        id="recently-active-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="recently-active-heading" className="text-lg font-medium text-neutral-800">
         Recently Active Students
       </h2>
       <Card className="mt-3">

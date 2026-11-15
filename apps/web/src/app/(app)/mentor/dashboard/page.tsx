@@ -10,6 +10,7 @@ import { RecentMeetingsList } from "@/components/mentor/recent-meetings-list";
 import { RecentlyActiveStudents } from "@/components/mentor/recently-active-students";
 import { QuickActions } from "@/components/mentor/quick-actions";
 import { MentorDashboardSkeleton } from "@/components/mentor/skeletons";
+import { PageTitle } from "@/components/ui/page-header";
 
 function MentorDashboardContent() {
   const data = useMentorDashboardData();
@@ -20,7 +21,7 @@ function MentorDashboardContent() {
 
   if (data.status === "error") {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+      <main>
         <RetryInline message="Couldn't load your mentor dashboard" onRetry={data.retry} />
       </main>
     );
@@ -29,11 +30,9 @@ function MentorDashboardContent() {
   const { dashboard, engagement, reviewStats, pendingReviews, studentProgress } = data;
 
   return (
-    <main className="mx-auto flex max-w-[1200px] flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-8">
       <div>
-        <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-          Mentor Dashboard
-        </h1>
+        <PageTitle>Mentor Dashboard</PageTitle>
         <p className="mt-1 text-sm text-neutral-500">
           {dashboard.profile.firstName
             ? `Welcome back, ${dashboard.profile.firstName}.`

@@ -109,7 +109,7 @@ function EnrollmentsContent() {
 
   return (
     <Card>
-      <h2 className="font-heading text-lg font-semibold text-neutral-900">Your courses</h2>
+      <h2 className="text-lg font-medium text-neutral-800">Your courses</h2>
       <ul className="mt-4 flex flex-col gap-3">
         {courses.map((course) => (
           <EnrollmentRow key={course.id} course={course} />

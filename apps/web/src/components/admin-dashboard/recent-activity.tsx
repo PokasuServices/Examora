@@ -23,10 +23,7 @@ export function RecentActivity({ events }: { events: ActivityEvent[] }) {
     <section aria-labelledby="recent-activity-heading">
       <div className="flex items-center gap-2">
         <Clock size={17} strokeWidth={1.75} className="text-neutral-500" aria-hidden="true" />
-        <h2
-          id="recent-activity-heading"
-          className="font-heading text-lg font-semibold text-neutral-900"
-        >
+        <h2 id="recent-activity-heading" className="text-lg font-medium text-neutral-800">
           Recent activity
         </h2>
       </div>

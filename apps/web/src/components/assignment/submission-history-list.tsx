@@ -7,13 +7,10 @@ export function SubmissionHistoryList({ history }: { history: SubmissionHistoryI
 
   return (
     <section aria-labelledby="submission-history-heading">
-      <h2
-        id="submission-history-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="submission-history-heading" className="text-lg font-medium text-neutral-800">
         Your submissions
       </h2>
-      <ul className="mt-3 flex flex-col divide-y divide-neutral-100 overflow-hidden rounded-card border border-neutral-900/[0.06] bg-white shadow-soft">
+      <ul className="mt-3 flex flex-col divide-y divide-neutral-100 overflow-hidden rounded-card border border-neutral-200 bg-white shadow-soft">
         {history.map((h) => (
           <li key={h.id}>
             <Link

@@ -29,7 +29,7 @@ export function AttemptHeader({
   const percent = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0;
 
   return (
-    <header className="sticky top-0 z-10 border-b border-neutral-900/[0.06] bg-white">
+    <header className="sticky top-0 z-10 border-b border-neutral-200 bg-white">
       <div className="mx-auto flex h-14 max-w-3xl items-center gap-3 px-4 sm:px-6">
         <Link
           href={`/quizzes/${quizId}`}

@@ -14,10 +14,7 @@ export function ProgressTracker({
 
   return (
     <section aria-labelledby="progress-tracker-heading">
-      <h2
-        id="progress-tracker-heading"
-        className="font-heading text-xl font-semibold text-neutral-900"
-      >
+      <h2 id="progress-tracker-heading" className="text-xl font-semibold text-neutral-800">
         Progress tracker
       </h2>
       <Card className="mt-4">

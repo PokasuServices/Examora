@@ -68,7 +68,7 @@ function CourseDetailContent() {
 
   if (!course) {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-12">
+      <main>
         <p className="text-sm text-neutral-500">Loading…</p>
         <FieldError>{error}</FieldError>
       </main>
@@ -76,7 +76,7 @@ function CourseDetailContent() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
+    <main>
       <nav className="mb-6 text-sm text-neutral-500">
         <Link href="/content/courses" className="hover:underline">
           Courses
@@ -86,7 +86,7 @@ function CourseDetailContent() {
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-heading">{course.title}</h1>
+          <h1 className="text-xl font-semibold text-neutral-800">{course.title}</h1>
           <StatusBadge status={course.status} />
         </div>
         <StatusActions status={course.status} onChange={(s) => void changeStatus(s)} />

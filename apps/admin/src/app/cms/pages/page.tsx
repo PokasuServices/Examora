@@ -86,8 +86,8 @@ function CmsPagesContent() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12">
-      <h1 className="text-heading">Landing & Static Pages</h1>
+    <main>
+      <h1 className="text-xl font-semibold text-neutral-800">Landing & Static Pages</h1>
       <p className="mt-1 text-sm text-neutral-500">
         Draft → Review → Approval → Publish → Archive, with version history and scheduling
         (ADR-0022).

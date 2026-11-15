@@ -93,9 +93,9 @@ function AdminAnalyticsContent() {
   }, []);
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12">
+    <main>
       <AnalyticsNav />
-      <h1 className="text-heading">Platform analytics</h1>
+      <h1 className="text-xl font-semibold text-neutral-800">Platform analytics</h1>
       <p className="mt-1 text-sm text-neutral-500">
         Cross-platform KPIs, growth, revenue, and performance across every module.
       </p>
@@ -195,7 +195,7 @@ function AdminAnalyticsContent() {
         <Section title="Course performance">
           <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+              <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
                 <tr>
                   <th className="px-4 py-3 font-medium">Course</th>
                   <th className="px-4 py-3 font-medium">Enrollments</th>
@@ -226,7 +226,7 @@ function AdminAnalyticsContent() {
         <Section title="Mentor performance">
           <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+              <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
                 <tr>
                   <th className="px-4 py-3 font-medium">Mentor</th>
                   <th className="px-4 py-3 font-medium">Active students</th>
@@ -309,7 +309,7 @@ function AdminAnalyticsContent() {
         <Section title="Notification delivery">
           <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+              <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
                 <tr>
                   <th className="px-4 py-3 font-medium">Channel</th>
                   <th className="px-4 py-3 font-medium">Queued</th>

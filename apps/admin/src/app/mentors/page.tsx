@@ -95,7 +95,7 @@ function MentorsContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <PageHeader
         title="Mentors"
         subtitle="A mentor profile extends an existing MENTOR-role user — assign the role first from Users."
@@ -112,9 +112,7 @@ function MentorsContent() {
       />
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">
-          Create mentor profile
-        </h2>
+        <h2 className="text-lg font-medium text-neutral-800">Create mentor profile</h2>
         <form onSubmit={create} className="mt-4 flex flex-wrap items-end gap-3">
           <div className="w-64">
             <SelectField
@@ -178,21 +176,21 @@ function MentorsContent() {
             <table className="w-full min-w-[560px] text-left text-sm">
               <thead className="bg-neutral-50">
                 <tr>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                     Mentor
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                     Specialization
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                     Workload
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-neutral-200">
                 {mentors.map((m) => (
                   <tr key={m.id} className="hover:bg-neutral-50">
                     <td className="px-4 py-3">

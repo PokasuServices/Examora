@@ -96,8 +96,8 @@ function CmsBannersContent() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12">
-      <h1 className="text-heading">Banners</h1>
+    <main>
+      <h1 className="text-xl font-semibold text-neutral-800">Banners</h1>
       <p className="mt-1 text-sm text-neutral-500">
         Draft → Review → Approval → Publish → Archive, backed by a reusable media library image
         (ADR-0022 §2, §5).

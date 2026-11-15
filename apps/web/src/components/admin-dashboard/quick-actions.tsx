@@ -45,17 +45,14 @@ const ACTIONS: QuickAction[] = [
 export function QuickActions() {
   return (
     <section aria-labelledby="quick-actions-heading">
-      <h2
-        id="quick-actions-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="quick-actions-heading" className="text-lg font-medium text-neutral-800">
         Quick actions
       </h2>
       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {ACTIONS.map((action) => {
           const Icon = action.icon;
           const className =
-            "flex flex-col items-start gap-2 rounded-md border border-neutral-900/[0.06] bg-white p-3 text-sm font-medium text-neutral-700 transition-colors hover:border-primary-200 hover:bg-primary-50/50 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500";
+            "flex flex-col items-start gap-2 rounded-md border border-neutral-200 bg-white p-3 text-sm font-medium text-neutral-700 transition-colors hover:border-primary-200 hover:bg-primary-50/50 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500";
           if (action.external) {
             return (
               <a

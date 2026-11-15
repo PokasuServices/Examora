@@ -14,7 +14,7 @@ export function NotificationSection({
 
   return (
     <section aria-labelledby="notification-heading">
-      <h2 id="notification-heading" className="font-heading text-lg font-semibold text-neutral-900">
+      <h2 id="notification-heading" className="text-lg font-medium text-neutral-800">
         Notification overview
       </h2>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -40,7 +40,7 @@ export function NotificationSection({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-neutral-200">
                 {notifications.deliveryByChannel.map((row) => (
                   <tr key={row.channel}>
                     <td className="whitespace-nowrap px-3 py-2 font-medium text-neutral-800">
@@ -80,7 +80,7 @@ export function NotificationSection({
             />
             <h3 className="font-heading text-sm font-semibold text-neutral-900">Templates</h3>
           </div>
-          <p className="mt-2 font-heading text-2xl font-bold text-neutral-900">{templateCount}</p>
+          <p className="mt-2 text-xl font-semibold text-neutral-800">{templateCount}</p>
           <p className="mt-1 text-xs text-neutral-500">
             Reusable notification templates configured.
           </p>

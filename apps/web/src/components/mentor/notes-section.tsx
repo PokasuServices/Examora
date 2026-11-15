@@ -51,7 +51,7 @@ export function NotesSection({
 
   return (
     <section aria-labelledby="notes-heading">
-      <h2 id="notes-heading" className="font-heading text-lg font-semibold text-neutral-900">
+      <h2 id="notes-heading" className="text-lg font-medium text-neutral-800">
         Mentor Notes
       </h2>
       <Card className="mt-3">

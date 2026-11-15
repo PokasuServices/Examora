@@ -56,10 +56,7 @@ export function ReportDialog({
         className="relative w-full max-w-md rounded-card bg-white p-6 shadow-soft-hover"
       >
         <div className="flex items-start justify-between gap-4">
-          <h2
-            id="report-dialog-title"
-            className="font-heading text-lg font-semibold text-neutral-900"
-          >
+          <h2 id="report-dialog-title" className="text-lg font-medium text-neutral-800">
             Report this {targetLabel}
           </h2>
           <button

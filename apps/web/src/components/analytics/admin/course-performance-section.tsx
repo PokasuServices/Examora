@@ -6,10 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 export function CoursePerformanceSection({ entries }: { entries: AdminCoursePerformanceEntry[] }) {
   return (
     <section aria-labelledby="admin-course-performance-heading">
-      <h2
-        id="admin-course-performance-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="admin-course-performance-heading" className="text-lg font-medium text-neutral-800">
         Course Performance
       </h2>
       <Card className="mt-3" density="compact">
@@ -27,7 +24,7 @@ export function CoursePerformanceSection({ entries }: { entries: AdminCoursePerf
                   <th className="px-3 py-2">Revenue</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-neutral-200">
                 {entries.map((c) => (
                   <tr key={c.courseId} className="hover:bg-neutral-50">
                     <td className="px-3 py-2.5">

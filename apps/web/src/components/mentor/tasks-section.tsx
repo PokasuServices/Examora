@@ -49,7 +49,7 @@ export function TasksSection({
 
   return (
     <section aria-labelledby="tasks-heading">
-      <h2 id="tasks-heading" className="font-heading text-lg font-semibold text-neutral-900">
+      <h2 id="tasks-heading" className="text-lg font-medium text-neutral-800">
         Tasks
       </h2>
       <Card className="mt-3">

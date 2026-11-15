@@ -19,21 +19,21 @@ export function ReportTable({ result }: { result: ReportResult }) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-md border border-neutral-900/[0.06]">
+    <div className="overflow-x-auto rounded-md border border-neutral-200">
       <table className="w-full min-w-[640px] text-left text-sm">
         <thead className="bg-neutral-50">
           <tr>
             {result.columns.map((col) => (
               <th
                 key={col}
-                className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500"
+                className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700"
               >
                 {col}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-100">
+        <tbody className="divide-y divide-neutral-200">
           {result.rows.map((row, i) => (
             <tr key={i} className="hover:bg-neutral-50">
               {result.columns.map((col) => (

@@ -37,12 +37,9 @@ export function SubmitConfirmDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="submit-dialog-title"
-        className="relative w-full max-w-sm rounded-card border border-neutral-900/[0.06] bg-white p-6 shadow-soft-hover"
+        className="relative w-full max-w-sm rounded-card border border-neutral-200 bg-white p-6 shadow-soft-hover"
       >
-        <h2
-          id="submit-dialog-title"
-          className="font-heading text-lg font-semibold text-neutral-900"
-        >
+        <h2 id="submit-dialog-title" className="text-lg font-medium text-neutral-800">
           Submit this assignment?
         </h2>
         <p className="mt-2 text-sm text-neutral-600">

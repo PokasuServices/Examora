@@ -35,10 +35,7 @@ function timeAgo(iso: string): string {
 export function ActivityTimelineSection({ items }: { items: ActivityTimelineItem[] }) {
   return (
     <section aria-labelledby="activity-timeline-heading">
-      <h2
-        id="activity-timeline-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="activity-timeline-heading" className="text-lg font-medium text-neutral-800">
         Recent Activity
       </h2>
       <Card className="mt-3">

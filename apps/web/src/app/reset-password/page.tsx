@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ApiError, useAuth } from "@examora/auth-client";
 import { Button, FieldError, Input, Label } from "@examora/ui";
-import { AuthCard } from "@/components/auth-card";
+import { AuthLayout } from "@/components/layout/AuthLayout";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -31,7 +31,7 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <AuthCard title="Invalid link">
+      <AuthLayout title="Invalid link">
         <p className="text-sm text-neutral-600">
           This password reset link is missing its token. Request a new one below.
         </p>
@@ -41,12 +41,12 @@ function ResetPasswordForm() {
         >
           Request a new link
         </Link>
-      </AuthCard>
+      </AuthLayout>
     );
   }
 
   return (
-    <AuthCard title="Reset your password">
+    <AuthLayout title="Reset your password">
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="newPassword">New password</Label>
@@ -65,7 +65,7 @@ function ResetPasswordForm() {
           {submitting ? "Resetting…" : "Reset password"}
         </Button>
       </form>
-    </AuthCard>
+    </AuthLayout>
   );
 }
 

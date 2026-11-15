@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 export function RubricBreakdown({ scores }: { scores: RubricScoreEntry[] }) {
   return (
     <Card>
-      <h3 className="font-heading text-base font-semibold text-neutral-900">Rubric breakdown</h3>
+      <h3 className="text-lg font-medium text-neutral-800">Rubric breakdown</h3>
       <ul className="mt-4 flex flex-col gap-4">
         {scores.map((s) => {
           const percent = s.maxMarks > 0 ? Math.round((s.marksAwarded / s.maxMarks) * 100) : 0;

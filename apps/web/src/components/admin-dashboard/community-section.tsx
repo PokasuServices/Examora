@@ -9,9 +9,7 @@ function StatBlock({ label, value }: { label: string; value: number }) {
   return (
     <div>
       <p className="text-xs font-medium text-neutral-500">{label}</p>
-      <p className="mt-1 font-heading text-2xl font-bold text-neutral-900">
-        {value.toLocaleString()}
-      </p>
+      <p className="mt-1 text-xl font-semibold text-neutral-800">{value.toLocaleString()}</p>
     </div>
   );
 }
@@ -27,7 +25,7 @@ export function CommunitySection({
 
   return (
     <section aria-labelledby="community-heading">
-      <h2 id="community-heading" className="font-heading text-lg font-semibold text-neutral-900">
+      <h2 id="community-heading" className="text-lg font-medium text-neutral-800">
         Community overview
       </h2>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">

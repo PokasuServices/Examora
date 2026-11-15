@@ -79,7 +79,7 @@ function DashboardContent() {
 
       <Card>
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-heading text-lg font-semibold text-neutral-900">Recent orders</h2>
+          <h2 className="text-lg font-medium text-neutral-800">Recent orders</h2>
           {hasAnyOrders ? (
             <Link
               href="/orders/history"

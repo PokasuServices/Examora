@@ -7,10 +7,7 @@ import { SubmissionStatusChip } from "@/components/assignment/submission-status-
 export function AssignmentHistorySection({ history }: { history: SubmissionHistoryItem[] }) {
   return (
     <section aria-labelledby="assignment-history-heading">
-      <h2
-        id="assignment-history-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="assignment-history-heading" className="text-lg font-medium text-neutral-800">
         Assignment Performance
       </h2>
       <Card className="mt-3">

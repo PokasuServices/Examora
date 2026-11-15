@@ -103,7 +103,7 @@ function ReportBuilder() {
       {result ? (
         <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+            <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
               <tr>
                 {result.columns.map((col) => (
                   <th key={col} className="px-4 py-3 font-medium">
@@ -261,7 +261,7 @@ function ScheduledReports() {
 
       <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-200 bg-white">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
             <tr>
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Type</th>
@@ -336,9 +336,9 @@ function ScheduledReports() {
 
 function ReportsContent() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12">
+    <main>
       <AnalyticsNav />
-      <h1 className="text-heading">Reports</h1>
+      <h1 className="text-xl font-semibold text-neutral-800">Reports</h1>
       <p className="mt-1 text-sm text-neutral-500">
         Run and export ad-hoc reports, or schedule recurring ones (ADR-0020).
       </p>

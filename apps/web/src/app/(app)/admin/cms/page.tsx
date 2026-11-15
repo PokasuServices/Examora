@@ -31,7 +31,7 @@ function TypeCard({
           <Icon size={18} strokeWidth={1.75} className="text-primary-600" aria-hidden={true} />
           <h3 className="font-heading text-sm font-semibold text-neutral-900">{label}</h3>
         </div>
-        <p className="mt-3 font-heading text-2xl font-bold text-neutral-900">{counts.total}</p>
+        <p className="mt-3 text-xl font-semibold text-neutral-800">{counts.total}</p>
         <p className="mt-1 text-xs text-neutral-500">{counts.published} published</p>
       </Card>
     </Link>
@@ -75,7 +75,7 @@ function CmsOverviewContent() {
               />
               <h3 className="font-heading text-sm font-semibold text-neutral-900">Media</h3>
             </div>
-            <p className="mt-3 font-heading text-2xl font-bold text-neutral-900">{mediaTotal}</p>
+            <p className="mt-3 text-xl font-semibold text-neutral-800">{mediaTotal}</p>
             <p className="mt-1 text-xs text-neutral-500">assets uploaded</p>
           </Card>
         </Link>

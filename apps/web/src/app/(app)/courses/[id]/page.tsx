@@ -34,7 +34,7 @@ function CourseDetailContent() {
 
   if (notFound) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+      <main>
         <EmptyState
           icon={Lock}
           heading="Course not available"
@@ -48,7 +48,7 @@ function CourseDetailContent() {
 
   if (!course) {
     return (
-      <main className="mx-auto flex max-w-[1200px] flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-8">
         <CourseHeroSkeleton />
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <CurriculumSkeleton />
@@ -61,7 +61,7 @@ function CourseDetailContent() {
   const cta = getCourseCta(access, progress, purchaseState);
 
   return (
-    <main className="mx-auto flex max-w-[1200px] flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-8">
       <CourseHero
         course={course}
         curriculum={curriculum}

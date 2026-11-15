@@ -28,12 +28,13 @@ module.exports = {
         heading: ["var(--font-heading)", "var(--font-body)", "ui-sans-serif", "sans-serif"],
       },
       borderRadius: {
-        md: "12px",
-        card: "20px",
+        md: "6px",
+        card: "6px",
       },
       boxShadow: {
-        soft: "0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05)",
-        "soft-hover": "0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 28px rgba(15, 23, 42, 0.08)",
+        soft: "0px 1px 2px 0px rgba(16, 24, 40, 0.05)",
+        "soft-hover":
+          "0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06)",
       },
     },
   },

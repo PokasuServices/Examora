@@ -51,7 +51,7 @@ function UsersListContent() {
   const pageCount = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1;
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <PageHeader
         title="Users"
         subtitle={data ? `${data.total.toLocaleString()} total` : undefined}
@@ -74,21 +74,21 @@ function UsersListContent() {
               <table className="w-full min-w-[640px] text-left text-sm">
                 <thead className="bg-neutral-50">
                   <tr>
-                    <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                       Email
                     </th>
-                    <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                       Name
                     </th>
-                    <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                       Roles
                     </th>
-                    <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                       Status
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-100">
+                <tbody className="divide-y divide-neutral-200">
                   {(data?.items ?? []).map((user) => (
                     <tr key={user.id} className="hover:bg-neutral-50">
                       <td className="px-4 py-3">

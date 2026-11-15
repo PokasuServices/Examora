@@ -27,27 +27,27 @@ export function CmsListTable<T extends CmsListItemBase>({
       <table className="w-full min-w-[680px] text-left text-sm">
         <thead className="bg-neutral-50">
           <tr>
-            <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+            <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
               Title
             </th>
-            <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+            <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
               Status
             </th>
-            <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+            <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
               Version
             </th>
-            <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+            <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
               Updated
             </th>
-            <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+            <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
               Scheduled
             </th>
-            <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+            <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
               <span className="sr-only">Actions</span>
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-100">
+        <tbody className="divide-y divide-neutral-200">
           {items.map((item) => (
             <tr key={item.id} className="hover:bg-neutral-50">
               <td className="max-w-xs truncate px-4 py-3 font-medium text-neutral-800">

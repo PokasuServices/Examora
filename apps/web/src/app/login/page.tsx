@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiError, useAuth } from "@examora/auth-client";
 import { Button, FieldError, Input, Label } from "@examora/ui";
-import { AuthCard } from "@/components/auth-card";
+import { AuthLayout } from "@/components/layout/AuthLayout";
 
 const API_ORIGIN = process.env.NEXT_PUBLIC_API_ORIGIN ?? "http://localhost:3001";
 
@@ -32,7 +32,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthCard title="Log in" description="Welcome back to Examora.">
+    <AuthLayout title="Log in" description="Welcome back to Examora.">
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Email</Label>
@@ -86,6 +86,6 @@ export default function LoginPage() {
           Register
         </Link>
       </p>
-    </AuthCard>
+    </AuthLayout>
   );
 }

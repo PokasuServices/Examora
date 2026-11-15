@@ -38,7 +38,7 @@ function Student360Content() {
 
   if (loadState === "not-found") {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+      <main>
         <EmptyState
           icon={Users}
           heading="Student not available"
@@ -55,7 +55,7 @@ function Student360Content() {
   }
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-8">
       <StudentHero student360={student360} />
       <OverallProgressSection stats={student360.learningProgress.stats} />
       <LearningProgressSection courses={student360.learningProgress.continueLearning} />

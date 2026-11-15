@@ -84,8 +84,8 @@ function CmsFaqContent() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12">
-      <h1 className="text-heading">FAQ</h1>
+    <main>
+      <h1 className="text-xl font-semibold text-neutral-800">FAQ</h1>
       <p className="mt-1 text-sm text-neutral-500">
         Draft → Review → Approval → Publish → Archive, with version history (ADR-0022).
       </p>

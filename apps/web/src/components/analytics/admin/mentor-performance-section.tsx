@@ -5,10 +5,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 export function MentorPerformanceSection({ entries }: { entries: AdminMentorPerformanceEntry[] }) {
   return (
     <section aria-labelledby="admin-mentor-performance-heading">
-      <h2
-        id="admin-mentor-performance-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="admin-mentor-performance-heading" className="text-lg font-medium text-neutral-800">
         Mentor Performance
       </h2>
       <Card className="mt-3" density="compact">
@@ -26,7 +23,7 @@ export function MentorPerformanceSection({ entries }: { entries: AdminMentorPerf
                   <th className="px-3 py-2">Avg. Turnaround</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-neutral-200">
                 {entries.map((m) => (
                   <tr key={m.mentorId} className="hover:bg-neutral-50">
                     <td className="px-3 py-2.5 font-medium text-neutral-800">{m.mentorEmail}</td>

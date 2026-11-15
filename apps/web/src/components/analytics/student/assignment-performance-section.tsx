@@ -19,10 +19,7 @@ export function AssignmentPerformanceSection({
 }) {
   return (
     <section aria-labelledby="assignment-performance-heading">
-      <h2
-        id="assignment-performance-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="assignment-performance-heading" className="text-lg font-medium text-neutral-800">
         Assignment Performance
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3">

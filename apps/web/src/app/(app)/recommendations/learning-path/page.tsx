@@ -16,7 +16,7 @@ function LearningPathContent() {
     data.completed.length === 0 && data.current.length === 0 && data.next.length === 0;
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/recommendations"
@@ -25,9 +25,7 @@ function LearningPathContent() {
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Recommendations
         </Link>
-        <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-          Your Learning Path
-        </h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800">Your Learning Path</h1>
         <p className="mt-1 text-sm text-neutral-500">
           Where you&rsquo;ve been, where you are, and what&rsquo;s suggested next.
         </p>

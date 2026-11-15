@@ -40,7 +40,7 @@ export function CatalogCourseCard({ entry }: { entry: EnrichedCourse }) {
   return (
     <Link
       href={`/courses/${course.id}`}
-      className="group flex flex-col rounded-card border border-neutral-900/[0.06] bg-white p-4 shadow-soft transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-soft-hover motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="group flex flex-col rounded-card border border-neutral-200 bg-white p-4 shadow-soft transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-soft-hover motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       <div
         className={cn(

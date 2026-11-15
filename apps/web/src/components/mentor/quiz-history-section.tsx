@@ -7,7 +7,7 @@ import { HelpCircle } from "lucide-react";
 export function QuizHistorySection({ attempts }: { attempts: AdminAttemptSummary[] }) {
   return (
     <section aria-labelledby="quiz-history-heading">
-      <h2 id="quiz-history-heading" className="font-heading text-lg font-semibold text-neutral-900">
+      <h2 id="quiz-history-heading" className="text-lg font-medium text-neutral-800">
         Quiz Performance
       </h2>
       <Card className="mt-3">

@@ -10,6 +10,13 @@ const nextConfig = {
   // actual Docker/CI build environment is always Linux, where this is a no-op
   // distinction (Linux containers don't have this restriction either way).
   output: process.env.DOCKER_BUILD === "1" ? "standalone" : undefined,
+  // Dev-only: keep compiled pages in memory for the whole session instead of
+  // evicting them after 60s idle (default buffer: 5 pages), so navigating
+  // back to a page never triggers a recompile. No effect on next build/start.
+  onDemandEntries: {
+    maxInactiveAge: 60 * 60 * 1000,
+    pagesBufferLength: 200,
+  },
 };
 
 export default nextConfig;

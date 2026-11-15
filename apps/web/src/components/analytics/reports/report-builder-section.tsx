@@ -60,10 +60,7 @@ export function ReportBuilderSection() {
 
   return (
     <section aria-labelledby="report-builder-heading">
-      <h2
-        id="report-builder-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="report-builder-heading" className="text-lg font-medium text-neutral-800">
         Report Builder
       </h2>
       <Card className="mt-3">

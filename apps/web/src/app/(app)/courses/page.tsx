@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { RetryInline } from "@/components/ui/retry-inline";
 import type { SelectFieldOption } from "@/components/ui/select-field";
 import type { EnrichedCourse, QuickFilter, SortOption } from "@/components/courses/types";
+import { PageTitle } from "@/components/ui/page-header";
 
 const PAGE_SIZE = 12;
 
@@ -156,11 +157,9 @@ function CatalogContent() {
   ].filter(Boolean).length;
 
   return (
-    <main className="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
-        <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-          Course catalog
-        </h1>
+        <PageTitle>Course catalog</PageTitle>
         <p className="mt-1 text-sm text-neutral-500">
           Browse every published course — see what&rsquo;s free, what you own, and what&rsquo;s next
           to finish.

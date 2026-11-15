@@ -7,10 +7,7 @@ import { timeAgo } from "@/lib/format";
 export function StudentProgressSection({ entries }: { entries: MentorStudentProgressEntry[] }) {
   return (
     <section aria-labelledby="mentor-student-progress-heading">
-      <h2
-        id="mentor-student-progress-heading"
-        className="font-heading text-lg font-semibold text-neutral-900"
-      >
+      <h2 id="mentor-student-progress-heading" className="text-lg font-medium text-neutral-800">
         Student Progress
       </h2>
       <Card className="mt-3" density="compact">
@@ -28,7 +25,7 @@ export function StudentProgressSection({ entries }: { entries: MentorStudentProg
                   <th className="px-3 py-2">Last Active</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-neutral-200">
                 {entries.map((e) => (
                   <tr key={e.studentId} className="hover:bg-neutral-50">
                     <td className="px-3 py-2.5">

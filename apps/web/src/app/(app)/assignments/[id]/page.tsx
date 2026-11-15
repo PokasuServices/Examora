@@ -22,7 +22,7 @@ function AssignmentLandingContent() {
 
   if (landing.status === "not-found") {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+      <main className="mx-auto max-w-2xl">
         <EmptyState
           icon={ClipboardList}
           heading="Assignment not available"
@@ -73,7 +73,7 @@ function AssignmentLandingContent() {
           : "View submission";
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-12">
+    <main className="mx-auto flex max-w-2xl flex-col gap-6">
       <nav aria-label="Breadcrumb" className="text-sm text-neutral-500">
         <Link href="/assignments" className="hover:underline">
           Assignments
@@ -84,9 +84,7 @@ function AssignmentLandingContent() {
 
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
-            {assignment.title}
-          </h1>
+          <h1 className="text-xl font-semibold text-neutral-800">{assignment.title}</h1>
           {latest ? <SubmissionStatusChip status={latest.status} /> : null}
         </div>
         <p className="mt-2 whitespace-pre-wrap text-neutral-600">{assignment.brief}</p>

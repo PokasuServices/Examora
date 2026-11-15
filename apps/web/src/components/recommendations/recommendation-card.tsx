@@ -34,16 +34,14 @@ export function RecommendationCard({
   return (
     <Link
       href={href}
-      className="group block w-64 shrink-0 rounded-card border border-neutral-900/[0.06] bg-white p-4 shadow-soft transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-soft-hover motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="group block w-64 shrink-0 rounded-card border border-neutral-200 bg-white p-4 shadow-soft transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-soft-hover motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       <div className="flex items-start justify-between gap-2">
         <IconBadge icon={icon} tone="primary" />
         <ScoreBadge score={score} />
       </div>
 
-      <h3 className="mt-3 line-clamp-2 font-heading text-base font-semibold text-neutral-900">
-        {title}
-      </h3>
+      <h3 className="mt-3 line-clamp-2 text-lg font-medium text-neutral-800">{title}</h3>
       {subtitle ? <p className="mt-0.5 truncate text-sm text-neutral-500">{subtitle}</p> : null}
 
       <p className="mt-2.5 flex items-start gap-1.5 text-xs text-neutral-500">

@@ -57,7 +57,7 @@ function FeatureFlagsContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <PageHeader
         title="Recommendation feature flags"
         subtitle="Disable a recommendation type platform-wide without a deploy."
@@ -81,21 +81,21 @@ function FeatureFlagsContent() {
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead className="bg-neutral-50">
                 <tr>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                     Recommendation type
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                     Status
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                     Last updated by
                   </th>
-                  <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  <th className="whitespace-nowrap border-b border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-neutral-200">
                 {flags.map((flag) => (
                   <tr key={flag.type} className="hover:bg-neutral-50">
                     <td className="px-4 py-3 font-medium text-neutral-800">

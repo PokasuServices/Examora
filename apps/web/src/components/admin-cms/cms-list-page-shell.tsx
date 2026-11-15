@@ -58,7 +58,7 @@ export function CmsListPageShell({
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="font-heading text-xl font-semibold text-neutral-900">{heading}</h2>
+            <h2 className="text-xl font-semibold text-neutral-800">{heading}</h2>
             <p className="mt-0.5 text-sm text-neutral-500">{subtitle}</p>
           </div>
           {!formOpen ? (

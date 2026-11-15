@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ApiError, useAuth } from "@examora/auth-client";
 import { CURRENT_TERMS_VERSION } from "@examora/shared";
 import { Button, FieldError, Input, Label } from "@examora/ui";
-import { AuthCard } from "@/components/auth-card";
+import { AuthLayout } from "@/components/layout/AuthLayout";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -47,7 +47,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthCard title="Create your account" description="Start preparing for your entrance exam.">
+    <AuthLayout title="Create your account" description="Start preparing for your entrance exam.">
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
@@ -107,6 +107,6 @@ export default function RegisterPage() {
           Log in
         </Link>
       </p>
-    </AuthCard>
+    </AuthLayout>
   );
 }

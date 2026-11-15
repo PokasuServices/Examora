@@ -47,7 +47,7 @@ function OrderDetailContent() {
 
   if (status === "loading") {
     return (
-      <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-6 w-32" />
         <Card>
           <Skeleton className="h-6 w-64" />
@@ -59,8 +59,8 @@ function OrderDetailContent() {
 
   if (status === "not-found" || !order) {
     return (
-      <main className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="font-heading text-2xl font-bold text-neutral-900">Order not found</h1>
+      <main className="flex flex-col gap-4">
+        <h1 className="text-xl font-semibold text-neutral-800">Order not found</h1>
         <Link
           href="/commerce/orders"
           className="text-sm font-medium text-primary-600 hover:underline"
@@ -72,7 +72,7 @@ function OrderDetailContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/commerce/orders"
@@ -81,9 +81,7 @@ function OrderDetailContent() {
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Orders
         </Link>
-        <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900">
-          {order.courseTitle}
-        </h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{order.courseTitle}</h1>
         <p className="mt-1 text-sm text-neutral-500">
           {order.userEmail} · ordered {new Date(order.createdAt).toLocaleString()}
         </p>
@@ -120,7 +118,7 @@ function OrderDetailContent() {
       </Card>
 
       <Card density="compact">
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Payments</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Payments</h2>
         <ul className="mt-3 flex flex-col divide-y divide-neutral-100">
           {order.payments.map((payment) => (
             <li key={payment.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">

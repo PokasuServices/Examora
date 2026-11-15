@@ -27,7 +27,7 @@ export function CommerceSection({
 
   return (
     <section aria-labelledby="commerce-heading">
-      <h2 id="commerce-heading" className="font-heading text-lg font-semibold text-neutral-900">
+      <h2 id="commerce-heading" className="text-lg font-medium text-neutral-800">
         Commerce overview
       </h2>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">

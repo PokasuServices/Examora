@@ -78,7 +78,7 @@ function MentorDetailContent() {
 
   if (status === "loading") {
     return (
-      <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-6 w-32" />
         <Card>
           <Skeleton className="h-6 w-64" />
@@ -90,7 +90,7 @@ function MentorDetailContent() {
 
   if (status === "error" || !mentor) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
+      <main>
         <Card>
           <RetryInline message="Couldn't load this mentor" onRetry={load} />
         </Card>
@@ -99,7 +99,7 @@ function MentorDetailContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <div>
         <Link
           href="/mentors"
@@ -108,7 +108,7 @@ function MentorDetailContent() {
           <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
           Mentors
         </Link>
-        <h1 className="mt-1 font-heading text-2xl font-bold text-neutral-900">{mentor.email}</h1>
+        <h1 className="mt-1 text-xl font-semibold text-neutral-800">{mentor.email}</h1>
         <p className="mt-2 text-sm text-neutral-600">
           Workload: {mentor.activeStudentCount} / {mentor.maxStudents} students
         </p>
@@ -117,7 +117,7 @@ function MentorDetailContent() {
       <FieldError>{error}</FieldError>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Profile</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Profile</h2>
         <form onSubmit={save} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-wrap items-end gap-3">
             <div className="flex flex-col gap-1.5">
@@ -158,7 +158,7 @@ function MentorDetailContent() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Danger zone</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Danger zone</h2>
         <p className="mt-1 text-sm text-neutral-500">Permanently delete this mentor profile.</p>
         <Button
           variant="ghost"

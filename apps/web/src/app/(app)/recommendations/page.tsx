@@ -19,7 +19,7 @@ function RecommendationsContent() {
   const data = useRecommendationsHome();
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-10">
       <div className="rounded-card bg-gradient-to-br from-primary-600 to-accent-600 p-8 text-white shadow-soft sm:p-10">
         <div className="flex items-center gap-2 text-primary-100">
           <Sparkles size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -27,7 +27,7 @@ function RecommendationsContent() {
             AI-powered, just for you
           </span>
         </div>
-        <h1 className="mt-2 font-heading text-2xl font-bold sm:text-3xl">Recommended for you</h1>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-title-sm">Recommended for you</h1>
         <p className="mt-2 max-w-xl text-sm text-primary-50 sm:text-base">
           Personalized suggestions based on your enrollments, progress, and activity — every
           suggestion below tells you exactly why it&rsquo;s here.

@@ -26,7 +26,7 @@ function ConsentRecordCard({
     <Card>
       <div className="flex items-center gap-2">
         <IconBadge icon={FileCheck2} tone="primary" />
-        <h2 className="font-heading text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-medium text-neutral-800">
           Consent &amp; policy acknowledgement
         </h2>
       </div>
@@ -84,9 +84,7 @@ function MarketingPreferencesCard() {
     <Card>
       <div className="flex items-center gap-2">
         <IconBadge icon={Mail} tone="primary" />
-        <h2 className="font-heading text-lg font-semibold text-neutral-900">
-          Marketing preferences
-        </h2>
+        <h2 className="text-lg font-medium text-neutral-800">Marketing preferences</h2>
       </div>
       <p className="mt-2 text-sm text-neutral-500">
         Choose whether Examora can send you product updates and marketing emails. Consent is

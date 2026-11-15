@@ -24,7 +24,7 @@ export function CourseRailSection({
     <section aria-labelledby={`${title}-heading`.replace(/\s+/g, "-").toLowerCase()}>
       <h2
         id={`${title}-heading`.replace(/\s+/g, "-").toLowerCase()}
-        className="font-heading text-xl font-semibold text-neutral-900"
+        className="text-xl font-semibold text-neutral-800"
       >
         {title}
       </h2>

@@ -12,7 +12,7 @@ export default function BookmarksRedirectPage() {
   }, [router]);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+    <main>
       <p className="text-sm text-neutral-500">Redirecting…</p>
     </main>
   );

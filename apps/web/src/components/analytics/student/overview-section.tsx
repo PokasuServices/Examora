@@ -5,7 +5,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 export function OverviewSection({ progress }: { progress: LearningProgressSummary }) {
   return (
     <section aria-labelledby="overview-heading">
-      <h2 id="overview-heading" className="font-heading text-lg font-semibold text-neutral-900">
+      <h2 id="overview-heading" className="text-lg font-medium text-neutral-800">
         Overview
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">

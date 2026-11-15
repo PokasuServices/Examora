@@ -43,7 +43,7 @@ function MentorDashboardContent() {
 
   if (status === "loading") {
     return (
-      <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex flex-col gap-6">
         <Skeleton className="h-8 w-64" />
         <Card>
           <Skeleton className="h-24 w-full" />
@@ -57,7 +57,7 @@ function MentorDashboardContent() {
 
   if (status === "error" || !dashboard) {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <main>
         <Card>
           <RetryInline message="Couldn't load your mentor dashboard" onRetry={load} />
         </Card>
@@ -66,14 +66,14 @@ function MentorDashboardContent() {
   }
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex flex-col gap-6">
       <PageHeader
         title="My mentor dashboard"
         subtitle={`${dashboard.assignedStudents.length} / ${dashboard.profile.maxStudents} students · ${dashboard.pendingTaskCount} pending task${dashboard.pendingTaskCount === 1 ? "" : "s"}`}
       />
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">My students</h2>
+        <h2 className="text-lg font-medium text-neutral-800">My students</h2>
         {dashboard.assignedStudents.length > 0 ? (
           <ul className="mt-4 divide-y divide-neutral-100">
             {dashboard.assignedStudents.map((s) => (
@@ -99,7 +99,7 @@ function MentorDashboardContent() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Upcoming tasks</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Upcoming tasks</h2>
         {dashboard.upcomingTasks.length > 0 ? (
           <ul className="mt-4 divide-y divide-neutral-100">
             {dashboard.upcomingTasks.map((t) => (
@@ -125,7 +125,7 @@ function MentorDashboardContent() {
       </Card>
 
       <Card>
-        <h2 className="font-heading text-base font-semibold text-neutral-900">Recent meetings</h2>
+        <h2 className="text-lg font-medium text-neutral-800">Recent meetings</h2>
         {dashboard.recentMeetings.length > 0 ? (
           <ul className="mt-4 divide-y divide-neutral-100">
             {dashboard.recentMeetings.map((m) => (
