@@ -8,6 +8,7 @@ export function SubmitConfirmDialog({
   answeredCount,
   totalCount,
   submitting,
+  error = null,
   onConfirm,
   onCancel,
 }: {
@@ -15,6 +16,8 @@ export function SubmitConfirmDialog({
   answeredCount: number;
   totalCount: number;
   submitting: boolean;
+  /** Shown when saving the last answers or submitting failed — the attempt is still open. */
+  error?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -63,6 +66,20 @@ export function SubmitConfirmDialog({
               {unanswered} {unanswered === 1 ? "question is" : "questions are"} unanswered. You
               can&rsquo;t change answers after submitting.
             </span>
+          </div>
+        ) : null}
+        {error ? (
+          <div
+            role="alert"
+            className="mt-3 flex items-start gap-2 rounded-md border border-error-500/30 bg-error-50 dark:bg-error-500/15 px-3 py-2 text-sm text-error-700 dark:text-error-300"
+          >
+            <AlertTriangle
+              size={16}
+              strokeWidth={1.75}
+              className="mt-0.5 shrink-0"
+              aria-hidden="true"
+            />
+            <span>{error}</span>
           </div>
         ) : null}
         <div className="mt-5 flex justify-end gap-2">
