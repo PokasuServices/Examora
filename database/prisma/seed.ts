@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import {
   BASELINE_PERMISSION_CODES,
@@ -10,6 +9,7 @@ import {
 } from "@examora/types";
 import * as argon2 from "argon2";
 import { PrismaClient } from "../generated/client/index.js";
+import { deterministicUuid } from "./seed-id.js";
 
 const prisma = new PrismaClient();
 
@@ -19,11 +19,12 @@ const prisma = new PrismaClient();
  * no natural business-key unique constraint (Question, QuizAttempt, Order,
  * etc.). Same label always produces the same id; different labels never
  * collide in practice (MD5 keyspace). Not a security boundary — this is
- * fixture data, not anything requiring unpredictability.
+ * fixture data, not anything requiring unpredictability. Always a valid v4
+ * UUID, since the API's `@IsUUID("4")` validators reject anything else
+ * (see seed-id.ts).
  */
 function seedId(label: string): string {
-  const hash = createHash("md5").update(`examora-demo-seed:${label}`).digest("hex");
-  return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-${hash.slice(12, 16)}-${hash.slice(16, 20)}-${hash.slice(20, 32)}`;
+  return deterministicUuid("examora-demo-seed", label);
 }
 
 /**
