@@ -12,6 +12,7 @@ import {
   Req,
 } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 import type { Request } from "express";
 import type {
   AttemptHistoryItem,
@@ -97,6 +98,12 @@ export class QuizAttemptsController {
   }
 
   @Patch(":id/answers")
+  // One request per answered question: the global 100/min-per-IP default is
+  // easily exceeded by several students on a shared connection (classroom,
+  // exam centre) during a timed attempt, and a rejected autosave is a lost
+  // answer. Still bounded, and the endpoint only ever touches the caller's
+  // own in-progress attempt.
+  @Throttle({ default: { limit: 600, ttl: 60_000 } })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Autosave a single answer" })
   async autosave(

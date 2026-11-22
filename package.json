@@ -35,6 +35,9 @@
     "db:generate": "pnpm --filter @examora/database generate",
     "db:migrate": "pnpm --filter @examora/database migrate:dev && pnpm --filter @examora/database seed",
     "db:seed": "pnpm --filter @examora/database seed",
+    "db:seed:bulk": "pnpm --filter @examora/database seed && pnpm --filter @examora/database seed:bulk",
+    "db:seed:bulk:large": "pnpm --filter @examora/database seed && pnpm --filter @examora/database seed:bulk:large",
+    "db:seed:bulk:clean": "pnpm --filter @examora/database seed:bulk:clean",
     "db:studio": "pnpm --filter @examora/database studio"
   },
   "devDependencies": {

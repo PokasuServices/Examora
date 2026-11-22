@@ -26,6 +26,7 @@ function AttemptContent() {
     setActiveIndex,
     autosaveStatus,
     submitting,
+    submitError,
     toggleOption,
     submit,
   } = useQuizAttempt(attemptId);
@@ -153,6 +154,7 @@ function AttemptContent() {
         answeredCount={answeredCount}
         totalCount={questions.length}
         submitting={submitting}
+        error={submitError}
         onConfirm={() => void submit()}
         onCancel={() => setConfirmOpen(false)}
       />
