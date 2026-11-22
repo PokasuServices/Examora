@@ -71,16 +71,33 @@ password:**
 These are **demo accounts for local use only** — they are never created on the live (production)
 site. Tip: use the ☀️/🌙 button in the top bar to switch between light and dark mode.
 
+**Want lots of test data?** The accounts above come with one example of everything. To fill the app
+with hundreds of students, orders, quiz attempts, assignment submissions, forum posts and
+notifications (great for testing lists, filters, dashboards and the reviewer queue), run:
+
+```bash
+pnpm db:seed:bulk          # about 200 students (takes ~30 seconds)
+pnpm db:seed:bulk:large    # about 1000 students
+pnpm db:seed:bulk:clean    # remove all of it again (the demo accounts above are kept)
+```
+
+This also adds two more logins (same password): `reviewer@examora.test` (has a full review queue)
+and `guardian@examora.test`, plus numbered accounts like `student0001@bulk.examora.test`,
+`mentor001@bulk.examora.test` and `admin01@bulk.examora.test`.
+
 ### 6. Something not working?
 
-| Problem                                                   | Fix                                                                                                 |
-| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `docker` command fails / "cannot connect to Docker"       | Open **Docker Desktop** and wait until it says it's running, then try again.                        |
-| "Port 3000 is already in use"                             | Another program is using that port. Close it (or restart your computer) and run `pnpm dev` again.   |
-| Every page shows an error (500) after a `git pull`        | Stop with `Ctrl + C` and run `pnpm dev` again.                                                      |
-| Login says the email or password is wrong                 | Run `pnpm db:seed` — it recreates the demo accounts and resets their password.                      |
-| Website shows **"API: unreachable"** or data doesn't load | The backend is still starting — wait 10–20 seconds and refresh. If it persists, restart `pnpm dev`. |
-| `pnpm` is not recognised                                  | Run `corepack enable` once (needs Node.js installed first), then open a new terminal.               |
+| Problem                                                              | Fix                                                                                                                                                                                            |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docker` command fails / "cannot connect to Docker"                  | Open **Docker Desktop** and wait until it says it's running, then try again.                                                                                                                   |
+| "Port 3000 is already in use"                                        | Another program is using that port. Close it (or restart your computer) and run `pnpm dev` again.                                                                                              |
+| Every page shows an error (500) after a `git pull`                   | Stop with `Ctrl + C` and run `pnpm dev` again.                                                                                                                                                 |
+| Login says the email or password is wrong                            | Run `pnpm db:seed` — it recreates the demo accounts and resets their password.                                                                                                                 |
+| Website shows **"API: unreachable"** or data doesn't load            | The backend is still starting — wait 10–20 seconds and refresh. If it persists, restart `pnpm dev`.                                                                                            |
+| `pnpm` is not recognised                                             | Run `corepack enable` once (needs Node.js installed first), then open a new terminal.                                                                                                          |
+| `docker compose up` says a port is already allocated                 | Another project uses it. In `.env` change the `*_PORT` value **and** the matching URL (`DATABASE_URL`, `REDIS_URL`, or `S3_ENDPOINT` for `MINIO_PORT`).                                        |
+| Uploaded files won't download / seed says "S3/MinIO unavailable"     | `S3_ENDPOINT` in `.env` must use the same port as `MINIO_PORT`. Fix it, then run `pnpm db:seed` again.                                                                                         |
+| Starting a quiz/assignment says "quizId/assignmentId must be a UUID" | Your local database has demo data from an older seed. Reset it (local demo data only): `pnpm --filter @examora/database migrate:reset --force`, then `pnpm db:seed:bulk` if you use bulk data. |
 
 ## Status
 
@@ -251,6 +268,41 @@ Course/Enrollment/Progress data (`CourseRecommendationService`), not stored.
 seeding (unrelated to user accounts or mock data) still runs there, and a clear log line explains
 what was skipped and why.
 
+### Bulk / volume test data (optional)
+
+`database/prisma/seed-bulk.ts` is an optional layer on top of `seed.ts` for thorough testing.
+`pnpm db:seed:bulk` runs the regular seed first, then adds (medium scale; `SEED_SCALE=small|medium|large`
+or `pnpm db:seed:bulk:large`):
+
+- **Users** — 200 students (mixed ACTIVE / PENDING_VERIFICATION / INACTIVE / SUSPENDED / ARCHIVED,
+  sign-ups spread over 6 months, awkward names: very long, accented, Devanagari, missing), 10 mentors,
+  4 reviewers, 25 guardians linked via `guardianEmail`, 2 admins, consent history.
+- **Commerce** — enrollments across the catalog; orders in every status (paid, failed→retried,
+  pending, cancelled, refunded, partially refunded), refund requests pending/denied/processed,
+  expired enrollments, and 7 `BULK*` coupons (active, expired, maxed out, inactive, future).
+- **Learning & quizzes** — lesson progress (none / partial / complete / stalled "at-risk"), a
+  per-subject question bank, practice tests, timed mock exams with sections + negative marking,
+  a draft and an archived quiz, and ~550 attempts (submitted, auto-submitted, in progress).
+- **Assignments** — 28 assignments (closed, upcoming, due within 36h, no deadline, draft, archived,
+  no subject, very long brief) with rubrics and templates; ~620 submissions through the whole
+  workflow: draft → submitted (unassigned and assigned) → under review (draft, partially scored
+  review) → approved / revision requested → resubmitted v2/v3, late submissions, comment threads,
+  and files in every scan state. `mentor@examora.test` and `reviewer@examora.test` each get a
+  populated review queue.
+- **Mentoring, community, notifications, CMS** — mentor assignments (with reassignment history,
+  one over-capacity mentor and one idle mentor), notes/tasks (incl. overdue)/feedback/meetings;
+  ~120 forum threads with nested replies, accepted answers, likes, reports, hidden/locked/pinned
+  posts and a 45-reply thread; ~2,500 notifications with per-channel delivery states and
+  preferences; CMS items in every workflow state with version history; scheduled reports; audit log.
+
+It's deterministic and idempotent (re-running inserts nothing new), consistent with the API's
+rules (published reviews score every criterion, paid orders have a captured payment + invoice,
+reputation totals match the ledger, etc.), and `pnpm db:seed:bulk:clean` removes exactly what it
+created (`@bulk.examora.test` users, `bulk-` slugs, `BULK` coupons). To switch scale, clean first.
+Like `seed.ts`, submission files marked CLEAN are only recorded when they were really uploaded to
+S3/MinIO, so make sure `S3_ENDPOINT` points at this project's MinIO (`MINIO_PORT`). Never runs with
+`NODE_ENV=production`.
+
 To create an _additional_ administrator beyond the seeded ones, self-register normally (always
 grants STUDENT) and promote directly in the database:
 
@@ -380,6 +432,8 @@ pnpm test            # unit/integration tests
 pnpm format          # format with Prettier
 pnpm changeset       # record a changeset for a change
 pnpm db:studio       # open Prisma Studio
+pnpm db:seed:bulk    # add bulk test data (see "Bulk / volume test data")
+pnpm db:seed:bulk:clean  # remove bulk test data
 ```
 
 ## Engineering Standards
