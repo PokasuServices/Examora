@@ -5,6 +5,7 @@ import type {
   LeaderboardEntry,
   MethodStats,
   TopicInsight,
+  SectionScore,
 } from "@examora/types";
 import { PrismaService } from "../../prisma/prisma.service";
 import { decToNum } from "../assessment.mappers";
@@ -303,6 +304,28 @@ export class AttemptAnalysisService {
     });
     const insight = analyseAnswers(rows);
 
+    const sectionRows = await this.prisma.quizSection.findMany({
+      where: { quizId: attempt.quizId },
+      orderBy: { position: "asc" },
+      select: { id: true, title: true },
+    });
+    const sections: SectionScore[] = sectionRows.map((sec) => {
+      const inSection = snapshot
+        .map((s, i) => ({ s, r: rows[i]! }))
+        .filter(({ s }) => s.sectionId === sec.id);
+      return {
+        sectionId: sec.id,
+        title: sec.title,
+        questionCount: inSection.length,
+        obtained: Math.round(inSection.reduce((t, x) => t + x.r.awarded, 0) * 100) / 100,
+        total: Math.round(inSection.reduce((t, x) => t + x.r.marks, 0) * 100) / 100,
+        correct: inSection.filter((x) => x.r.correct === true).length,
+        wrong: inSection.filter((x) => x.r.correct === false).length,
+        unattempted: inSection.filter((x) => x.r.correct === null && !x.r.pending).length,
+        pending: inSection.filter((x) => x.r.pending).length,
+      };
+    });
+
     const obtained = decToNum(attempt.obtainedMarks);
     const total = decToNum(attempt.totalMarks);
     const seconds = attempt.submittedAt
@@ -326,6 +349,7 @@ export class AttemptAnalysisService {
       methods: insight.methods,
       unattempted: insight.unattempted,
       subjects: insight.subjects,
+      sections,
       weakTopics: insight.weakTopics,
       opportunityTopics: insight.opportunityTopics,
       strongTopics: insight.strongTopics,

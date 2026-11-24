@@ -342,6 +342,60 @@ function ReportContent() {
         <StatTile icon={Clock} label="Time taken" value={formatDuration(a.totalTimeSeconds)} />
       </div>
 
+      {a.sections.length > 1 ? (
+        <Card>
+          <h2 className="text-base font-medium text-neutral-800 dark:text-white/90">By section</h2>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[520px] text-left text-sm">
+              <thead className="text-xs text-neutral-500 dark:text-neutral-400">
+                <tr>
+                  <th scope="col" className="py-2 pr-3 font-medium">
+                    Section
+                  </th>
+                  <th scope="col" className="py-2 pr-3 text-right font-medium">
+                    Score
+                  </th>
+                  <th scope="col" className="py-2 pr-3 text-right font-medium">
+                    Correct
+                  </th>
+                  <th scope="col" className="py-2 pr-3 text-right font-medium">
+                    Wrong
+                  </th>
+                  <th scope="col" className="py-2 pr-3 text-right font-medium">
+                    Skipped
+                  </th>
+                  <th scope="col" className="py-2 text-right font-medium">
+                    Awaiting review
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                {a.sections.map((sec) => (
+                  <tr key={sec.sectionId}>
+                    <th
+                      scope="row"
+                      className="py-2 pr-3 font-normal text-neutral-700 dark:text-neutral-300"
+                    >
+                      {sec.title}
+                      <span className="block text-xs text-neutral-500">
+                        {sec.questionCount} questions
+                      </span>
+                    </th>
+                    <td className="py-2 pr-3 text-right font-medium tabular-nums text-neutral-800 dark:text-white/90">
+                      {sec.obtained} / {sec.total}
+                    </td>
+                    <td className="py-2 pr-3 text-right tabular-nums">{sec.correct}</td>
+                    <td className="py-2 pr-3 text-right tabular-nums">{sec.wrong}</td>
+                    <td className="py-2 pr-3 text-right tabular-nums">{sec.unattempted}</td>
+                    <td className="py-2 text-right tabular-nums">{sec.pending || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      ) : null}
+
       <div className="grid gap-4 lg:grid-cols-2">
         <MethodsCard a={a} />
         <Card>

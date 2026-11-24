@@ -21,7 +21,7 @@ import {
   type QuestionType,
 } from "@examora/types";
 import { QuestionOptionInputDto } from "./question-option-input.dto";
-import { QuestionResourceDto } from "./question-resource.dto";
+import { ExplanationStepDto, QuestionResourceDto } from "./question-resource.dto";
 
 export class CreateQuestionDto {
   @ApiPropertyOptional({ description: "Classifying subject id (reuses the curriculum taxonomy)" })
@@ -95,6 +95,17 @@ export class CreateQuestionDto {
   @IsString()
   @MaxLength(500)
   explanationVideoUrl?: string | null;
+
+  @ApiPropertyOptional({
+    type: [ExplanationStepDto],
+    description: "Step-by-step explanation images, in order",
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(12)
+  @ValidateNested({ each: true })
+  @Type(() => ExplanationStepDto)
+  explanationSteps?: ExplanationStepDto[];
 
   @ApiPropertyOptional({ type: [QuestionResourceDto] })
   @IsOptional()

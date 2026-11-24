@@ -15,6 +15,7 @@ import type {
   QuizStudentDetail,
   QuizSummary,
   QuestionResource,
+  ExplanationStep,
 } from "@examora/types";
 import type {
   Prisma,
@@ -41,6 +42,16 @@ export function toQuestionOption(row: QuestionOption): QuestionOptionDto {
     isCorrect: row.isCorrect,
     position: row.position,
   };
+}
+
+/** Question.explanationSteps is free-form JSON; keep only entries with an image. */
+export function toExplanationSteps(json: Prisma.JsonValue | null): ExplanationStep[] {
+  if (!Array.isArray(json)) return [];
+  return json.flatMap((s) =>
+    s && typeof s === "object" && !Array.isArray(s) && typeof s.imageUrl === "string" && s.imageUrl
+      ? [{ imageUrl: s.imageUrl, caption: typeof s.caption === "string" ? s.caption : null }]
+      : [],
+  );
 }
 
 /** Question.resources is free-form JSON; keep only well-formed { label, url } entries. */
@@ -93,6 +104,7 @@ export function toQuestion(row: Question & { options: QuestionOption[] }): Quest
     topicId: row.topicId,
     criteria: toCriteria(row.criteria),
     explanationImageUrl: row.explanationImageUrl,
+    explanationSteps: toExplanationSteps(row.explanationSteps),
     explanationVideoUrl: row.explanationVideoUrl,
     resources: toResources(row.resources),
     tags: row.tags,
@@ -338,6 +350,7 @@ export function toAttemptReview(params: {
       marks: s.marks,
       explanation: question?.explanation ?? null,
       explanationImageUrl: question?.explanationImageUrl ?? null,
+      explanationSteps: toExplanationSteps(question?.explanationSteps ?? null),
       explanationVideoUrl: question?.explanationVideoUrl ?? null,
       resources: toResources(question?.resources ?? null),
       options: (question?.options ?? []).map((o) => ({

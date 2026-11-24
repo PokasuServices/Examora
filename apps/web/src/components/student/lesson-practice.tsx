@@ -164,6 +164,7 @@ function PracticeQuestion({
           <QuestionExplanation
             explanation={answer.explanation}
             imageUrl={answer.explanationImageUrl}
+            steps={answer.explanationSteps}
             videoUrl={answer.explanationVideoUrl}
             resources={answer.resources}
           />

@@ -14,6 +14,7 @@ import type { Prisma, PrismaClient } from "../generated/client/index.js";
 import { deterministicUuid } from "./seed-id.js";
 import { seedRotationQuiz } from "./seed-question-engine.js";
 import { seedPracticeAndExtras } from "./seed-practice.js";
+import { seedPracticeLibrary } from "./seed-practice-library.js";
 import {
   SAMPLE_COURSE,
   SAMPLE_PAST_PAPER_STATS,
@@ -450,10 +451,11 @@ export async function seedStudentModule(
   const licences = await seedLearnLicencesAndProgress(prisma, ids.studentId);
   const rotation = await seedRotationQuiz(prisma, ids.adminId);
   const extras = await seedPracticeAndExtras(prisma, ids);
+  const library = await seedPracticeLibrary(prisma, ids.adminId);
   // eslint-disable-next-line no-console -- seed script CLI output
   console.log(
     `Student module sample data: ${xpRows} new XP rows, the "${SAMPLE_COURSE.title}" course, ` +
-      `${licences} new licences (every student × every course), demo-student progress; ${rotation}; ${extras}.`,
+      `${licences} new licences (every student × every course), demo-student progress; ${rotation}; ${extras}; ${library}.`,
   );
 }
 

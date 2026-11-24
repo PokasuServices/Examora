@@ -104,6 +104,12 @@ export function QuestionEditor({
     initial?.explanationVideoUrl ?? "",
   );
   const [resources, setResources] = React.useState<ResourceDraft[]>(initial?.resources ?? []);
+  const [steps, setSteps] = React.useState<{ imageUrl: string; caption: string }[]>(
+    (initial?.explanationSteps ?? []).map((s) => ({
+      imageUrl: s.imageUrl,
+      caption: s.caption ?? "",
+    })),
+  );
   const [tags, setTags] = React.useState((initial?.tags ?? []).join(", "));
   const [subjectId, setSubjectId] = React.useState<string | null>(initial?.subjectId ?? null);
   const [topicId, setTopicId] = React.useState<string | null>(initial?.topicId ?? null);
@@ -191,6 +197,9 @@ export function QuestionEditor({
       explanation: explanation.trim(),
       explanationImageUrl: explanationImageUrl || null,
       explanationVideoUrl: explanationVideoUrl || null,
+      explanationSteps: steps
+        .filter((s) => s.imageUrl)
+        .map((s) => ({ imageUrl: s.imageUrl, caption: s.caption.trim() || null })),
       resources: cleanResources.map((r) => ({ label: r.label.trim(), url: r.url.trim() })),
       subjectId: subjectId ?? undefined,
       topicId,
@@ -429,7 +438,79 @@ export function QuestionEditor({
         />
         <div className="flex flex-col gap-2">
           <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            Further reading
+            Step-by-step images (optional)
+          </span>
+          <p className="text-xs text-neutral-500">
+            Students see these one at a time as Step 1, Step 2… Add a short caption for each.
+          </p>
+          {steps.map((s, i) => (
+            <div
+              key={i}
+              className="flex flex-col gap-2 rounded-md border border-neutral-200 p-3 dark:border-neutral-800"
+            >
+              <MediaField
+                id={`explanation-step-${i}`}
+                label={`Step ${i + 1} image`}
+                kind="image"
+                value={s.imageUrl}
+                onChange={(v) =>
+                  setSteps((prev) => prev.map((x, j) => (j === i ? { ...x, imageUrl: v } : x)))
+                }
+              />
+              <Input
+                aria-label={`Step ${i + 1} caption`}
+                placeholder="What this step shows"
+                maxLength={300}
+                value={s.caption}
+                onChange={(e) =>
+                  setSteps((prev) =>
+                    prev.map((x, j) => (j === i ? { ...x, caption: e.target.value } : x)),
+                  )
+                }
+              />
+              <div className="flex gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={i === 0}
+                  onClick={() =>
+                    setSteps((prev) => {
+                      const next = [...prev];
+                      [next[i - 1], next[i]] = [next[i]!, next[i - 1]!];
+                      return next;
+                    })
+                  }
+                >
+                  Move up
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSteps((prev) => prev.filter((_, j) => j !== i))}
+                >
+                  Remove
+                </Button>
+              </div>
+            </div>
+          ))}
+          {steps.length < 12 ? (
+            <div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setSteps((prev) => [...prev, { imageUrl: "", caption: "" }])}
+              >
+                Add step image
+              </Button>
+            </div>
+          ) : null}
+        </div>
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            Reference links
           </span>
           {resources.map((r, i) => (
             <div key={i} className="flex flex-wrap items-center gap-2">

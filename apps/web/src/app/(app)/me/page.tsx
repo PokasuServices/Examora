@@ -605,6 +605,13 @@ function ProfileContent() {
   const api = useStudentApi();
   const { data, errorStatus, loading, reload } = useLoad(() => api.profile(), "profile");
   const [tab, setTab] = React.useState<Tab>("Activity");
+  // Deep links such as /me?tab=performance open a tab directly.
+  React.useEffect(() => {
+    const key = new URLSearchParams(window.location.search).get("tab")?.toLowerCase();
+    if (!key) return;
+    const match = TABS.find((t) => t.toLowerCase().startsWith(key));
+    if (match) setTab(match);
+  }, []);
   if (errorStatus !== null) return <ErrorPanel status={errorStatus} onRetry={reload} />;
   if (loading || !data) return <LoadingPanel />;
 

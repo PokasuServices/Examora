@@ -17,6 +17,11 @@ function assertMediaRef(field: string, value: string | null | undefined): void {
   }
 }
 
+/** Steps keep their order; captions are trimmed and empty ones dropped. */
+function cleanSteps(steps: { imageUrl: string; caption?: string | null }[]) {
+  return steps.map((s) => ({ imageUrl: s.imageUrl, caption: s.caption?.trim() || null }));
+}
+
 /** Empty strings clear a media field, like null. */
 const mediaOrNull = (v: string | null | undefined) => (v === undefined ? undefined : v || null);
 
@@ -209,6 +214,10 @@ export class QuestionsService {
           partialMarking: type === "MULTIPLE_CHOICE" ? dto.partialMarking : false,
           explanationImageUrl: mediaOrNull(dto.explanationImageUrl),
           explanationVideoUrl: mediaOrNull(dto.explanationVideoUrl),
+          explanationSteps:
+            dto.explanationSteps === undefined
+              ? undefined
+              : (cleanSteps(dto.explanationSteps) as unknown as Prisma.InputJsonValue),
           resources:
             dto.resources === undefined
               ? undefined
@@ -323,6 +332,7 @@ export class QuestionsService {
       partialMarking: dto.type === "MULTIPLE_CHOICE" ? (dto.partialMarking ?? false) : false,
       explanationImageUrl: dto.explanationImageUrl || null,
       explanationVideoUrl: dto.explanationVideoUrl || null,
+      explanationSteps: cleanSteps(dto.explanationSteps ?? []) as unknown as Prisma.InputJsonValue,
       resources: (dto.resources ?? []) as unknown as Prisma.InputJsonValue,
       topicId: dto.topicId ?? null,
       criteria: (dto.type === "UPLOAD"
@@ -335,6 +345,9 @@ export class QuestionsService {
     assertMediaRef("imageUrl", dto.imageUrl);
     assertMediaRef("explanationImageUrl", dto.explanationImageUrl);
     assertMediaRef("explanationVideoUrl", dto.explanationVideoUrl);
+    dto.explanationSteps?.forEach((s, i) =>
+      assertMediaRef(`explanationSteps[${i}].imageUrl`, s.imageUrl || "-"),
+    );
     dto.options?.forEach((o, i) => assertMediaRef(`options[${i}].imageUrl`, o.imageUrl));
   }
 

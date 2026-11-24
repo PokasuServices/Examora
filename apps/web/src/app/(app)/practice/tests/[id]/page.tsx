@@ -8,6 +8,7 @@ import { Button } from "@examora/ui";
 import { RequireAuth } from "@/components/require-auth";
 import { ErrorPanel, LoadingPanel } from "@/components/student/load-panels";
 import { ShareTestCard } from "@/components/student/share-test-card";
+import { TestSections } from "@/components/student/test-sections";
 import { useLoad } from "@/components/student/use-load";
 import { Card } from "@/components/ui/card";
 import { IconBadge } from "@/components/ui/icon-badge";
@@ -162,19 +163,9 @@ function TestContent() {
           />
         </dl>
 
-        {data.sections.length > 0 ? (
-          <div className="mt-5">
-            <h2 className="text-sm font-medium text-neutral-800 dark:text-white/90">Sections</h2>
-            <ul className="mt-2 divide-y divide-neutral-200 rounded-md border border-neutral-200 text-sm dark:divide-neutral-800 dark:border-neutral-800">
-              {data.sections.map((s) => (
-                <li key={s.id} className="flex justify-between px-3 py-2">
-                  <span className="text-neutral-700 dark:text-neutral-300">{s.title}</span>
-                  <span className="text-neutral-500">{s.questionCount} questions</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
+        <div className="mt-6">
+          <TestSections sections={data.sections} />
+        </div>
 
         {data.lastScore ? (
           <p className="mt-4 text-sm">

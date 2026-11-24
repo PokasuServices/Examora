@@ -7,6 +7,7 @@ import {
 import type { DailyQuizQuestion, DailyQuizResult, DailyQuizStatus } from "@examora/types";
 import { shortName } from "../assessment/quiz-attempts/attempt-analysis.service";
 import { XpService } from "../gamification/xp.service";
+import { toExplanationSteps, toResources } from "../assessment/assessment.mappers";
 import { PrismaService } from "../prisma/prisma.service";
 
 export const DAILY_QUESTION_COUNT = 10;
@@ -184,7 +185,12 @@ export class DailyQuizService {
     const ids = quiz.questionIds as string[];
     const questions = await this.prisma.question.findMany({
       where: { id: { in: ids } },
-      include: { options: { select: { id: true, isCorrect: true } } },
+      include: {
+        options: {
+          orderBy: { position: "asc" },
+          select: { id: true, text: true, isCorrect: true },
+        },
+      },
     });
     const byId = new Map(questions.map((q) => [q.id, q]));
     const given = new Map(answers.map((a) => [a.questionId, a]));
@@ -206,6 +212,13 @@ export class DailyQuizService {
         correctOptionId: correctOption,
         correct,
         ms: a?.ms ?? capMs,
+        text: q?.text ?? "",
+        options: (q?.options ?? []).map((o) => ({ id: o.id, text: o.text })),
+        explanation: q?.explanation ?? null,
+        explanationImageUrl: q?.explanationImageUrl ?? null,
+        explanationVideoUrl: q?.explanationVideoUrl ?? null,
+        explanationSteps: toExplanationSteps(q?.explanationSteps ?? null),
+        resources: toResources(q?.resources ?? null),
       };
     });
     // Reported time can't be less than plausible nor more than the real elapsed time.

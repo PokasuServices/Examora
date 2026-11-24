@@ -20,6 +20,7 @@ import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { IconBadge } from "@/components/ui/icon-badge";
 import { PageHeader } from "@/components/ui/page-header";
+import { QuestionExplanation } from "@/components/student/question-explanation";
 import { useXp } from "@/context/XpContext";
 import { useStudentApi } from "@/lib/student-api";
 
@@ -236,17 +237,58 @@ function DailyContent() {
               {result.xpAwarded > 0 ? <Chip tone="warning">+{result.xpAwarded} XP</Chip> : null}
             </div>
             <ol className="mt-4 flex flex-col gap-1.5 text-sm">
-              {result.answers.map((a, i) => (
-                <li key={a.questionId} className="flex items-center gap-2">
-                  {a.correct ? (
-                    <CheckCircle2 size={16} className="text-success-600" aria-label="Correct" />
-                  ) : (
-                    <XCircle size={16} className="text-danger-600" aria-label="Wrong" />
-                  )}
-                  Question {i + 1}:{" "}
-                  {a.correct ? "correct" : a.chosenOptionId ? "wrong" : "no answer"}
-                </li>
-              ))}
+              {result.answers.map((a, i) => {
+                const chosen = a.options.find((o) => o.id === a.chosenOptionId)?.text;
+                const right = a.options.find((o) => o.id === a.correctOptionId)?.text;
+                return (
+                  <li key={a.questionId}>
+                    <details className="group rounded-md border border-neutral-200 dark:border-neutral-800">
+                      <summary className="flex cursor-pointer list-none items-start gap-2 px-3 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+                        {a.correct ? (
+                          <CheckCircle2
+                            size={16}
+                            className="mt-0.5 shrink-0 text-success-600"
+                            aria-label="Correct"
+                          />
+                        ) : (
+                          <XCircle
+                            size={16}
+                            className="mt-0.5 shrink-0 text-danger-600"
+                            aria-label="Wrong"
+                          />
+                        )}
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-neutral-800 dark:text-white/90">
+                            {i + 1}. {a.text}
+                          </span>
+                          <span className="block text-xs text-neutral-500">
+                            {a.correct ? "Correct" : a.chosenOptionId ? "Wrong" : "No answer"} · see
+                            why
+                          </span>
+                        </span>
+                      </summary>
+                      <div className="border-t border-neutral-200 px-3 pb-3 pt-2 dark:border-neutral-800">
+                        <p className="text-sm text-neutral-700 dark:text-neutral-300">
+                          Your answer: <strong>{chosen ?? "none"}</strong>
+                          {!a.correct && right ? (
+                            <>
+                              {" "}
+                              · Correct answer: <strong>{right}</strong>
+                            </>
+                          ) : null}
+                        </p>
+                        <QuestionExplanation
+                          explanation={a.explanation}
+                          imageUrl={a.explanationImageUrl}
+                          videoUrl={a.explanationVideoUrl}
+                          steps={a.explanationSteps}
+                          resources={a.resources}
+                        />
+                      </div>
+                    </details>
+                  </li>
+                );
+              })}
             </ol>
           </Card>
           <Leaderboard rows={result.leaderboard} />

@@ -12,7 +12,7 @@ import type {
   LessonPracticeQuestion,
   LessonQuestionType,
 } from "@examora/types";
-import { toResources } from "../assessment/assessment.mappers";
+import { toExplanationSteps, toResources } from "../assessment/assessment.mappers";
 import { PrismaService } from "../prisma/prisma.service";
 
 const ANSWERABLE: LessonQuestionType[] = [
@@ -29,6 +29,7 @@ const QUESTION_SELECT = {
   imageUrl: true,
   explanation: true,
   explanationImageUrl: true,
+  explanationSteps: true,
   explanationVideoUrl: true,
   resources: true,
   numericMin: true,
@@ -94,6 +95,7 @@ export class LessonQuestionsService {
             : null,
         explanation: q.explanation,
         explanationImageUrl: q.explanationImageUrl,
+        explanationSteps: toExplanationSteps(q.explanationSteps),
         explanationVideoUrl: q.explanationVideoUrl,
         resources: toResources(q.resources),
       };

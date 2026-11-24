@@ -2,7 +2,7 @@
  * Student module redesign, phases 4–8: practice & tests, attempt analysis,
  * doubts, sketches, daily quiz, colleges & webinars, and the student profile.
  */
-import type { DifficultyLevel, QuestionType } from "./quiz";
+import type { DifficultyLevel, ExplanationStep, QuestionResource, QuestionType } from "./quiz";
 
 // ---------------------------------------------------------------------------
 // Practice (phase 4)
@@ -51,9 +51,31 @@ export interface PracticeOverview {
   weakTopics: WeakTopicAction[];
 }
 
+/** One row of a section's marking scheme: questions of one type and the same marks. */
+export interface MarkingRow {
+  type: QuestionType;
+  questionCount: number;
+  marksEach: number;
+  /** Marks lost for a wrong answer (0 = no negative marking). */
+  negativeEach: number;
+  /** Multi-select questions that give part marks for some correct options. */
+  partialMarking: boolean;
+}
+
+export interface PracticeTestSection {
+  /** Null for the single implicit section of a test without sections. */
+  id: string | null;
+  title: string;
+  description: string | null;
+  questionCount: number;
+  totalMarks: number;
+  marking: MarkingRow[];
+}
+
 export interface PracticeTestDetail extends PracticeTestItem {
   crumbs: { course: { id: string; title: string }; category: { id: string; title: string } | null };
-  sections: { id: string; title: string; questionCount: number }[];
+  /** Always at least one entry; a test without sections gets one "All questions" section. */
+  sections: PracticeTestSection[];
   negativeMarking: boolean;
   requireAllVisited: boolean;
 }
@@ -93,6 +115,20 @@ export interface TopicInsight {
   reason: string;
 }
 
+/** Score in one section of a sectioned test. */
+export interface SectionScore {
+  sectionId: string;
+  title: string;
+  questionCount: number;
+  obtained: number;
+  total: number;
+  correct: number;
+  wrong: number;
+  unattempted: number;
+  /** Sketch answers still waiting for a reviewer. */
+  pending: number;
+}
+
 export interface AttemptAnalysis {
   attemptId: string;
   quizTitle: string;
@@ -115,6 +151,8 @@ export interface AttemptAnalysis {
     total: number;
     percent: number;
   }[];
+  /** Per-section scores (empty for a test without sections). */
+  sections: SectionScore[];
   /** Topics where knowledge-based answers went wrong. */
   weakTopics: TopicInsight[];
   /** Topics with low accuracy or skipped questions. */
@@ -259,6 +297,14 @@ export interface DailyQuizResult {
     chosenOptionId: string | null;
     correctOptionId: string | null;
     correct: boolean;
+    /** Question and explanation, revealed once the quiz is finished. */
+    text: string;
+    options: { id: string; text: string }[];
+    explanation: string | null;
+    explanationImageUrl: string | null;
+    explanationVideoUrl: string | null;
+    explanationSteps: ExplanationStep[];
+    resources: QuestionResource[];
   }[];
   leaderboard: {
     rank: number;

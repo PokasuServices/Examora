@@ -29,6 +29,7 @@ export interface QuestionInput {
   explanation?: string;
   explanationImageUrl?: string | null;
   explanationVideoUrl?: string | null;
+  explanationSteps?: { imageUrl: string; caption?: string | null }[];
   resources?: { label: string; url: string }[];
   tags?: string[];
   options: { text: string; imageUrl?: string | null; isCorrect: boolean }[];

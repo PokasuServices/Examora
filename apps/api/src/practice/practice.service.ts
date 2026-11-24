@@ -1,9 +1,12 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import type {
+  MarkingRow,
   PracticeCategoryView,
   PracticeOverview,
   PracticeTestDetail,
   PracticeTestItem,
+  PracticeTestSection,
+  QuestionType,
   WeakTopicAction,
 } from "@examora/types";
 import { PrismaService } from "../prisma/prisma.service";
@@ -22,6 +25,66 @@ const slugify = (s: string) =>
     .slice(0, 60) || "category";
 
 /** Practice page: categories of tests per course (student module redesign, phase 4). */
+interface MarkingInput {
+  sectionId: string | null;
+  type: QuestionType;
+  partialMarking: boolean;
+  marks: number;
+  negative: number;
+}
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/** Groups questions by type and marks into marking-scheme rows. */
+export function markingRows(questions: MarkingInput[]): MarkingRow[] {
+  const rows = new Map<string, MarkingRow>();
+  for (const q of questions) {
+    // Sketch questions are marked by a reviewer and never lose marks.
+    const negative = q.type === "UPLOAD" ? 0 : round2(q.negative);
+    const partial = q.type === "MULTIPLE_CHOICE" && q.partialMarking;
+    const key = `${q.type}|${q.marks}|${negative}|${partial}`;
+    const row = rows.get(key);
+    if (row) row.questionCount++;
+    else
+      rows.set(key, {
+        type: q.type,
+        questionCount: 1,
+        marksEach: round2(q.marks),
+        negativeEach: negative,
+        partialMarking: partial,
+      });
+  }
+  return [...rows.values()];
+}
+
+/** Test sections with instructions and marking schemes (one implicit section if none). */
+export function buildSections(
+  sections: { id: string; title: string; description: string | null }[],
+  questions: MarkingInput[],
+): PracticeTestSection[] {
+  const summarise = (qs: MarkingInput[]) => ({
+    questionCount: qs.length,
+    totalMarks: round2(qs.reduce((t, q) => t + q.marks, 0)),
+    marking: markingRows(qs),
+  });
+  if (sections.length === 0) {
+    return [{ id: null, title: "All questions", description: null, ...summarise(questions) }];
+  }
+  const out: PracticeTestSection[] = sections.map((sec) => ({
+    id: sec.id,
+    title: sec.title,
+    description: sec.description,
+    ...summarise(questions.filter((q) => q.sectionId === sec.id)),
+  }));
+  const loose = questions.filter(
+    (q) => !q.sectionId || !sections.some((x) => x.id === q.sectionId),
+  );
+  if (loose.length > 0) {
+    out.push({ id: null, title: "Other questions", description: null, ...summarise(loose) });
+  }
+  return out;
+}
+
 @Injectable()
 export class PracticeService {
   constructor(private readonly prisma: PrismaService) {}
@@ -206,7 +269,16 @@ export class PracticeService {
         subject: { select: { course: { select: { id: true, title: true } } } },
         sections: {
           orderBy: { position: "asc" },
-          select: { id: true, title: true, _count: { select: { quizQuestions: true } } },
+          select: { id: true, title: true, description: true },
+        },
+        quizQuestions: {
+          orderBy: { position: "asc" },
+          select: {
+            sectionId: true,
+            marks: true,
+            negativeMarks: true,
+            question: { select: { type: true, partialMarking: true } },
+          },
         },
       },
     });
@@ -218,11 +290,21 @@ export class PracticeService {
     return {
       ...item,
       crumbs: { course, category: quiz.practiceCategory },
-      sections: quiz.sections.map((s) => ({
-        id: s.id,
-        title: s.title,
-        questionCount: s._count.quizQuestions,
-      })),
+      sections: buildSections(
+        quiz.sections,
+        quiz.quizQuestions.map((qq) => ({
+          sectionId: qq.sectionId,
+          type: qq.question.type as QuestionType,
+          partialMarking: qq.question.partialMarking,
+          marks: Number(qq.marks),
+          negative:
+            qq.negativeMarks !== null
+              ? Number(qq.negativeMarks)
+              : quiz.negativeMarkingEnabled
+                ? Number(qq.marks) * Number(quiz.negativeMarksPerWrong)
+                : 0,
+        })),
+      ),
       negativeMarking: quiz.negativeMarkingEnabled,
       requireAllVisited: quiz.requireAllVisited,
     };

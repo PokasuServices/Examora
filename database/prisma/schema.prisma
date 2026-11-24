@@ -912,6 +912,8 @@ model Question {
   /// Explanation media shown after submit.
   explanationImageUrl String?         @map("explanation_image_url")
   explanationVideoUrl String?         @map("explanation_video_url")
+  /// Step-by-step explanation images: [{ imageUrl, caption }] in order.
+  explanationSteps    Json?           @map("explanation_steps")
   /// Further reading: [{ label, url }].
   resources           Json?
   tags                String[]        @default([])

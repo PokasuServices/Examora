@@ -33,6 +33,12 @@ export interface QuestionOption {
 }
 
 /** A "further reading" link shown with a question's explanation. */
+/** One image in a step-by-step explanation, with an optional caption. */
+export interface ExplanationStep {
+  imageUrl: string;
+  caption: string | null;
+}
+
 export interface QuestionResource {
   label: string;
   url: string;
@@ -62,6 +68,8 @@ export interface Question {
   criteria: string[];
   explanationImageUrl: string | null;
   explanationVideoUrl: string | null;
+  /** Image sequence shown as numbered steps. */
+  explanationSteps: ExplanationStep[];
   resources: QuestionResource[];
   tags: string[];
   status: ContentStatus;
@@ -221,6 +229,7 @@ export interface AttemptReviewQuestion {
   explanation: string | null;
   explanationImageUrl: string | null;
   explanationVideoUrl: string | null;
+  explanationSteps: ExplanationStep[];
   resources: QuestionResource[];
   options: { id: string; text: string; imageUrl: string | null; isCorrect: boolean }[];
   selectedOptionIds: string[];

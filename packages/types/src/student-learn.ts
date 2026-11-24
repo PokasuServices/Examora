@@ -3,7 +3,7 @@
  * topics → lessons + topic quizzes. Progress counts a topic's lessons
  * completed plus its quizzes attempted (at least one finished attempt).
  */
-import type { DifficultyLevel, QuestionResource } from "./quiz";
+import type { DifficultyLevel, ExplanationStep, QuestionResource } from "./quiz";
 import type { AnswerMethod } from "./student-practice";
 
 export type SubjectKind = "SUBJECT" | "ESSENTIALS";
@@ -136,6 +136,7 @@ export interface LessonPracticeAnswer {
   explanation: string | null;
   explanationImageUrl: string | null;
   explanationVideoUrl: string | null;
+  explanationSteps: ExplanationStep[];
   resources: QuestionResource[];
 }
 

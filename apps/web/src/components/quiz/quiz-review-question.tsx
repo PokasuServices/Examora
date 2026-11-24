@@ -140,6 +140,7 @@ export function QuizReviewQuestionCard({
       <QuestionExplanation
         explanation={question.explanation}
         imageUrl={question.explanationImageUrl}
+        steps={question.explanationSteps}
         videoUrl={question.explanationVideoUrl}
         resources={question.resources}
       />

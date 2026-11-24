@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { AlertTriangle, ChevronRight, Clock, Lock, ListChecks } from "lucide-react";
+import { AlertTriangle, ChevronRight, Clock, Lock, ListChecks, TrendingUp } from "lucide-react";
 import type { PracticeTestItem, WeakTopicAction } from "@examora/types";
 import { cn } from "@examora/ui";
 import { ProgressBar } from "@/components/progress-bar";
@@ -176,6 +176,14 @@ function PracticeContent() {
       <PageHeader
         title="Practice"
         subtitle="Timed tests in exam format, with a detailed report after each one."
+        actions={
+          <Link
+            href="/me?tab=performance"
+            className="inline-flex h-10 items-center gap-1.5 rounded-md border border-neutral-300 px-4 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-white/5"
+          >
+            <TrendingUp size={16} aria-hidden="true" /> See my test performance
+          </Link>
+        }
       />
 
       {courses.data && courses.data.length > 1 && courseId ? (
