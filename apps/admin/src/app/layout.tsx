@@ -29,7 +29,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className="min-h-screen bg-neutral-50 font-sans text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-300">
+      {/* Browser extensions (e.g. ColorZilla, Grammarly) add attributes to <body> before React
+          hydrates; ignore those attribute differences here. Children are still checked. */}
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-neutral-50 font-sans text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-300"
+      >
         <Providers>{children}</Providers>
       </body>
     </html>
