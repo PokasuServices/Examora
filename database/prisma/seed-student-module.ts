@@ -451,7 +451,7 @@ export async function seedStudentModule(
   const licences = await seedLearnLicencesAndProgress(prisma, ids.studentId);
   const rotation = await seedRotationQuiz(prisma, ids.adminId);
   const extras = await seedPracticeAndExtras(prisma, ids);
-  const library = await seedPracticeLibrary(prisma, ids.adminId);
+  const library = await seedPracticeLibrary(prisma, ids);
   // eslint-disable-next-line no-console -- seed script CLI output
   console.log(
     `Student module sample data: ${xpRows} new XP rows, the "${SAMPLE_COURSE.title}" course, ` +

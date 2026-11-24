@@ -12,6 +12,7 @@ import {
   Max,
   MaxLength,
   Min,
+  ValidateIf,
 } from "class-validator";
 
 export class CreateQuizDto {
@@ -75,6 +76,35 @@ export class CreateQuizDto {
   @IsOptional()
   @IsBoolean()
   requireAllVisited?: boolean;
+
+  @ApiPropertyOptional({ default: 0, minimum: 0, description: "Extra XP once for a 100% score" })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10000)
+  perfectBonusXp?: number;
+
+  @ApiPropertyOptional({ nullable: true, example: "UCEED", description: "Past papers: exam name" })
+  @IsOptional()
+  @ValidateIf((o: CreateQuizDto) => o.exam !== null)
+  @IsString()
+  @MaxLength(40)
+  exam?: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: 2024, description: "Past papers: year" })
+  @IsOptional()
+  @ValidateIf((o: CreateQuizDto) => o.paperYear !== null)
+  @IsInt()
+  @Min(1990)
+  @Max(2100)
+  paperYear?: number | null;
+
+  @ApiPropertyOptional({ nullable: true, description: "Short note shown to students" })
+  @IsOptional()
+  @ValidateIf((o: CreateQuizDto) => o.note !== null)
+  @IsString()
+  @MaxLength(500)
+  note?: string | null;
 
   @ApiProperty({ example: "NID UG Mock Test 1" })
   @IsString()

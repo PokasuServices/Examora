@@ -11,7 +11,13 @@ export class QuizSectionsService {
     await this.assertQuizExists(quizId);
     const position = dto.position ?? (await this.nextPosition(quizId));
     return this.prisma.quizSection.create({
-      data: { quizId, title: dto.title, description: dto.description, position },
+      data: {
+        quizId,
+        title: dto.title,
+        description: dto.description,
+        position,
+        timeLimitMinutes: dto.timeLimitMinutes ?? null,
+      },
     });
   }
 
@@ -31,7 +37,12 @@ export class QuizSectionsService {
     await this.findByIdOrThrow(quizId, id);
     return this.prisma.quizSection.update({
       where: { id },
-      data: { title: dto.title, description: dto.description, position: dto.position },
+      data: {
+        title: dto.title,
+        description: dto.description,
+        position: dto.position,
+        timeLimitMinutes: dto.timeLimitMinutes,
+      },
     });
   }
 

@@ -59,7 +59,12 @@ export function markingRows(questions: MarkingInput[]): MarkingRow[] {
 
 /** Test sections with instructions and marking schemes (one implicit section if none). */
 export function buildSections(
-  sections: { id: string; title: string; description: string | null }[],
+  sections: {
+    id: string;
+    title: string;
+    description: string | null;
+    timeLimitMinutes?: number | null;
+  }[],
   questions: MarkingInput[],
 ): PracticeTestSection[] {
   const summarise = (qs: MarkingInput[]) => ({
@@ -68,21 +73,48 @@ export function buildSections(
     marking: markingRows(qs),
   });
   if (sections.length === 0) {
-    return [{ id: null, title: "All questions", description: null, ...summarise(questions) }];
+    return [
+      {
+        id: null,
+        title: "All questions",
+        description: null,
+        timeLimitMinutes: null,
+        ...summarise(questions),
+      },
+    ];
   }
   const out: PracticeTestSection[] = sections.map((sec) => ({
     id: sec.id,
     title: sec.title,
     description: sec.description,
+    timeLimitMinutes: sec.timeLimitMinutes ?? null,
     ...summarise(questions.filter((q) => q.sectionId === sec.id)),
   }));
   const loose = questions.filter(
     (q) => !q.sectionId || !sections.some((x) => x.id === q.sectionId),
   );
   if (loose.length > 0) {
-    out.push({ id: null, title: "Other questions", description: null, ...summarise(loose) });
+    out.push({
+      id: null,
+      title: "Other questions",
+      description: null,
+      timeLimitMinutes: null,
+      ...summarise(loose),
+    });
   }
   return out;
+}
+
+/**
+ * Past papers (tests with a year) list newest year first; tests without a
+ * year keep the admin's order after them.
+ */
+export function sortPapers(tests: PracticeTestItem[]): PracticeTestItem[] {
+  if (!tests.some((t) => t.paperYear !== null)) return tests;
+  return tests
+    .map((t, i) => ({ t, i }))
+    .sort((a, b) => (b.t.paperYear ?? -1) - (a.t.paperYear ?? -1) || a.i - b.i)
+    .map(({ t }) => t);
 }
 
 @Injectable()
@@ -137,6 +169,10 @@ export class PracticeService {
         id: q.id,
         title: q.title,
         description: q.description,
+        exam: q.exam,
+        paperYear: q.paperYear,
+        note: q.note,
+        perfectBonusXp: q.perfectBonusXp,
         questionCount: q.quizQuestions.length,
         totalMarks: q.quizQuestions.reduce((sum, qq) => sum + Number(qq.marks), 0),
         timeLimitMinutes: q.timeLimitMinutes,
@@ -186,7 +222,7 @@ export class PracticeService {
       id: c.id,
       title: c.title,
       description: c.description,
-      tests: c.quizzes.map((q) => items.get(q.id)!).filter(Boolean),
+      tests: sortPapers(c.quizzes.map((q) => items.get(q.id)!).filter(Boolean)),
     }));
     return {
       course: { id: course.id, title: course.title },
@@ -269,7 +305,7 @@ export class PracticeService {
         subject: { select: { course: { select: { id: true, title: true } } } },
         sections: {
           orderBy: { position: "asc" },
-          select: { id: true, title: true, description: true },
+          select: { id: true, title: true, description: true, timeLimitMinutes: true },
         },
         quizQuestions: {
           orderBy: { position: "asc" },

@@ -39,6 +39,8 @@ export function useQuizApi() {
             ? { questionId, selectedOptionIds }
             : { questionId, selectedOptionIds, numericAnswer },
       }),
+    nextSection: (attemptId: string) =>
+      request<AttemptState>(`/quiz-attempts/${attemptId}/sections/next`, { method: "POST" }),
     submitAttempt: (attemptId: string) =>
       request<AttemptResult>(`/quiz-attempts/${attemptId}/submit`, { method: "POST" }),
     getResult: (attemptId: string) =>

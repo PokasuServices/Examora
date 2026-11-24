@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { ApiError } from "@examora/auth-client";
 import type { AttemptQuestion, AttemptState } from "@examora/types";
 import { useQuizApi } from "@/lib/quiz-api";
 import type { AutosaveStatus } from "@/components/ui/autosave-indicator";
@@ -48,6 +49,13 @@ export function useQuizAttempt(attemptId: string) {
   const [answers, setAnswers] = React.useState<AnswersMap>({});
   const [numeric, setNumeric] = React.useState<NumericMap>({});
   const [remainingSeconds, setRemainingSeconds] = React.useState<number | null>(null);
+  /** Timed-by-section tests: seconds left in the open section. */
+  const [sectionRemaining, setSectionRemaining] = React.useState<number | null>(null);
+  const [movingSection, setMovingSection] = React.useState(false);
+  const [sectionError, setSectionError] = React.useState<string | null>(null);
+  /** Questions whose content the server hid (their section hadn't started). */
+  const hiddenIds = React.useRef<Set<string>>(new Set());
+  const syncRef = React.useRef<() => Promise<void>>(async () => undefined);
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [autosaveStatus, setAutosaveStatus] = React.useState<AutosaveStatus>("idle");
   const [submitting, setSubmitting] = React.useState(false);
@@ -99,7 +107,16 @@ export function useQuizAttempt(attemptId: string) {
           failed.current.delete(questionId);
           retries.current.delete(questionId);
           return true;
-        } catch {
+        } catch (err) {
+          // 409: the section closed (or the attempt ended). That answer can no
+          // longer change, so stop retrying it and reload the test state.
+          if (err instanceof ApiError && err.status === 409) {
+            unsynced.current.delete(questionId);
+            failed.current.delete(questionId);
+            retries.current.delete(questionId);
+            void syncRef.current();
+            return true;
+          }
           // Only mark as unsynced if nothing newer replaced it meanwhile.
           if (latest.current[questionId] === value && latestNumeric.current[questionId] === raw) {
             unsynced.current.add(questionId);
@@ -174,32 +191,64 @@ export function useQuizAttempt(attemptId: string) {
     [attemptId, flush, router],
   );
 
+  /** Applies server state; answers for newly opened (previously hidden) questions come from the server. */
+  const applyState = React.useCallback(
+    (state: AttemptState, initialLoad: boolean) => {
+      if (state.status !== "IN_PROGRESS") {
+        router.replace(`/quizzes/attempts/${attemptId}/result`);
+        return;
+      }
+      setAttempt(state);
+      setRemainingSeconds(state.remainingSeconds);
+      setSectionRemaining(state.timing ? state.timing.sectionRemainingSeconds : null);
+      const nextAnswers: AnswersMap = { ...latest.current };
+      const nextNumeric: NumericMap = { ...latestNumeric.current };
+      const nowHidden = new Set<string>();
+      for (const q of state.questions) {
+        const hidden =
+          state.timing !== null &&
+          state.timing !== undefined &&
+          state.timing.sections.find((x) => x.id === q.sectionId)?.status === "UPCOMING";
+        if (hidden) nowHidden.add(q.questionId);
+        if (initialLoad || hiddenIds.current.has(q.questionId) || !(q.questionId in nextAnswers)) {
+          nextAnswers[q.questionId] = q.selectedOptionIds;
+          if (q.type === "NUMERIC") {
+            numericIds.current.add(q.questionId);
+            nextNumeric[q.questionId] = q.numericAnswer === null ? "" : String(q.numericAnswer);
+          }
+        }
+      }
+      hiddenIds.current = nowHidden;
+      latest.current = nextAnswers;
+      latestNumeric.current = nextNumeric;
+      setAnswers(nextAnswers);
+      setNumeric(nextNumeric);
+      // Keep the student inside the open section.
+      if (state.timing) {
+        const open = state.timing.currentSectionId;
+        setActiveIndex((i) => {
+          if (state.questions[i]?.sectionId === open) return i;
+          const first = state.questions.findIndex((q) => q.sectionId === open);
+          return first >= 0 ? first : i;
+        });
+      }
+      setLoadState("ready");
+    },
+    [attemptId, router],
+  );
+
+  const syncState = React.useCallback(async () => {
+    const state = await apiRef.current.getAttempt(attemptId).catch(() => null);
+    if (state) applyState(state, false);
+  }, [attemptId, applyState]);
+  syncRef.current = syncState;
+
   React.useEffect(() => {
     let cancelled = false;
     apiRef.current
       .getAttempt(attemptId)
       .then((state) => {
-        if (cancelled) return;
-        if (state.status !== "IN_PROGRESS") {
-          router.replace(`/quizzes/attempts/${attemptId}/result`);
-          return;
-        }
-        setAttempt(state);
-        setRemainingSeconds(state.remainingSeconds);
-        const initial: AnswersMap = {};
-        const initialNumeric: NumericMap = {};
-        for (const q of state.questions) {
-          initial[q.questionId] = q.selectedOptionIds;
-          if (q.type === "NUMERIC") {
-            numericIds.current.add(q.questionId);
-            initialNumeric[q.questionId] = q.numericAnswer === null ? "" : String(q.numericAnswer);
-          }
-        }
-        latest.current = initial;
-        latestNumeric.current = initialNumeric;
-        setAnswers(initial);
-        setNumeric(initialNumeric);
-        setLoadState("ready");
+        if (!cancelled) applyState(state, true);
       })
       .catch(() => {
         if (!cancelled) setLoadState("not-found");
@@ -207,7 +256,52 @@ export function useQuizAttempt(attemptId: string) {
     return () => {
       cancelled = true;
     };
-  }, [attemptId, router]);
+  }, [attemptId, applyState]);
+
+  /** Section clock: when it runs out the server opens the next section; fetch it. */
+  React.useEffect(() => {
+    if (sectionRemaining === null || !attempt?.timing) return;
+    const last =
+      attempt.timing.sections[attempt.timing.sections.length - 1]?.id ===
+      attempt.timing.currentSectionId;
+    if (sectionRemaining <= 0) {
+      if (last) return; // the overall timer submits
+      const t = setTimeout(() => {
+        void flush().then(() => syncState());
+      }, 1200);
+      return () => clearTimeout(t);
+    }
+    const timer = setTimeout(() => setSectionRemaining((s) => (s === null ? null : s - 1)), 1000);
+    return () => clearTimeout(timer);
+  }, [sectionRemaining, attempt, flush, syncState]);
+
+  /** Finish the open section early and start the next one. */
+  const nextSection = React.useCallback(async () => {
+    setSectionError(null);
+    setMovingSection(true);
+    try {
+      const saved = await flush();
+      if (!saved) {
+        setSectionError(
+          "Some answers couldn't be saved yet. Check your connection and try again; you're still in this section.",
+        );
+        return false;
+      }
+      const state = await apiRef.current.nextSection(attemptId);
+      applyState(state, false);
+      return true;
+    } catch (err) {
+      setSectionError(
+        err instanceof ApiError && err.status !== 0
+          ? err.message
+          : "Couldn't move to the next section. Try again.",
+      );
+      void syncState();
+      return false;
+    } finally {
+      setMovingSection(false);
+    }
+  }, [attemptId, flush, applyState, syncState]);
 
   React.useEffect(() => {
     if (remainingSeconds === null) return;
@@ -293,6 +387,10 @@ export function useQuizAttempt(attemptId: string) {
     isAnswered,
     answeredCount,
     remainingSeconds,
+    sectionRemaining,
+    nextSection,
+    movingSection,
+    sectionError,
     activeIndex,
     setActiveIndex,
     autosaveStatus,

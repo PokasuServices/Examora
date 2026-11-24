@@ -31,6 +31,64 @@ type PendingAction =
   | { kind: "UNASSIGN"; id: string; text: string }
   | null;
 
+/** A section's own time limit, saved when the field loses focus. Blank = shares the test's time. */
+function SectionTimeField({
+  quizId,
+  sectionId,
+  initial,
+}: {
+  quizId: string;
+  sectionId: string;
+  initial: number | null;
+}) {
+  const api = useAssessmentApi();
+  const [value, setValue] = React.useState(initial?.toString() ?? "");
+  const [state, setState] = React.useState<"idle" | "saving" | "saved" | "error">("idle");
+  async function save() {
+    const minutes = value.trim() === "" ? null : Number(value);
+    if (minutes !== null && (!Number.isInteger(minutes) || minutes < 1 || minutes > 600)) {
+      setState("error");
+      return;
+    }
+    if (minutes === initial) return;
+    setState("saving");
+    try {
+      await api.updateSection(quizId, sectionId, { timeLimitMinutes: minutes });
+      setState("saved");
+    } catch {
+      setState("error");
+    }
+  }
+  return (
+    <span className="ml-auto flex items-center gap-2">
+      <Label htmlFor={`section-time-${sectionId}`} className="text-xs text-neutral-500">
+        Section time (min)
+      </Label>
+      <Input
+        id={`section-time-${sectionId}`}
+        inputMode="numeric"
+        placeholder="Shared"
+        value={value}
+        onChange={(e) => {
+          setValue(e.target.value);
+          setState("idle");
+        }}
+        onBlur={() => void save()}
+        className="h-8 w-20"
+      />
+      <span aria-live="polite" className="w-14 text-xs">
+        {state === "saving" ? (
+          "Saving…"
+        ) : state === "saved" ? (
+          "Saved"
+        ) : state === "error" ? (
+          <span className="text-danger-600">1–600</span>
+        ) : null}
+      </span>
+    </span>
+  );
+}
+
 function QuizDetailContent() {
   const { id } = useParams<{ id: string }>();
   const api = useAssessmentApi();
@@ -263,8 +321,12 @@ function QuizDetailContent() {
         {quiz.sections.length > 0 ? (
           <ul className="mt-4 divide-y divide-neutral-100 dark:divide-neutral-800">
             {quiz.sections.map((s) => (
-              <li key={s.id} className="flex items-center justify-between py-2.5 text-sm">
+              <li
+                key={s.id}
+                className="flex flex-wrap items-center justify-between gap-3 py-2.5 text-sm"
+              >
                 <span className="text-neutral-800 dark:text-white/90">{s.title}</span>
+                <SectionTimeField quizId={quiz.id} sectionId={s.id} initial={s.timeLimitMinutes} />
                 <Button
                   variant="ghost"
                   onClick={() => setPending({ kind: "REMOVE_SECTION", id: s.id, title: s.title })}

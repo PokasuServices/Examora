@@ -107,6 +107,12 @@ export const MENU_GROUPS: MenuGroup[] = [
           { name: "Attempts", path: "/assessment/attempts", permission: "quiz:attempts:read" },
           { name: "Question reports", path: "/assessment/reports", permission: "question:manage" },
           { name: "Sketch review", path: "/assessment/sketches", permission: "assignment:review" },
+          { name: "Rating sets", path: "/assessment/rating-sets", permission: "assignment:review" },
+          {
+            name: "Reported sketches",
+            path: "/assessment/sketch-reports",
+            permission: "assignment:review",
+          },
         ],
       },
       {

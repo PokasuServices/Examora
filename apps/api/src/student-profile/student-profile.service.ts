@@ -29,6 +29,9 @@ const XP_REASON_LABEL: Record<string, string> = {
   TEST_COMPLETED: "Test finished",
   DAILY_QUIZ: "Daily quiz",
   TEST_SHARED: "A friend opened your shared test",
+  TEST_PERFECT_BONUS: "Perfect score bonus",
+  SKETCH_SELF_RATING: "Rated your own sketch",
+  SKETCH_PEER_FEEDBACK: "Gave feedback on a classmate's sketch",
   WELCOME: "Welcome bonus",
 };
 

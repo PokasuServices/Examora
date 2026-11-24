@@ -39,6 +39,7 @@ export interface QuestionInput {
   subjectId?: string;
   topicId?: string | null;
   criteria?: string[];
+  rubricId?: string | null;
 }
 
 export function useAssessmentApi() {
@@ -91,6 +92,12 @@ export function useAssessmentApi() {
       request<QuizSection[]>(`${BASE}/quizzes/${quizId}/sections`, { method: "GET" }),
     createSection: (quizId: string, body: { title: string; description?: string }) =>
       request<QuizSection>(`${BASE}/quizzes/${quizId}/sections`, { method: "POST", body }),
+    updateSection: (
+      quizId: string,
+      id: string,
+      body: { title?: string; description?: string; timeLimitMinutes?: number | null },
+    ) =>
+      request<QuizSection>(`${BASE}/quizzes/${quizId}/sections/${id}`, { method: "PATCH", body }),
     deleteSection: (quizId: string, id: string) =>
       request<void>(`${BASE}/quizzes/${quizId}/sections/${id}`, { method: "DELETE" }),
 

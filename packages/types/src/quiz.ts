@@ -66,6 +66,8 @@ export interface Question {
   topicId: string | null;
   /** UPLOAD questions: criteria a sketch is rated on. */
   criteria: string[];
+  /** UPLOAD questions: named rating-factor set (replaces criteria when set). */
+  rubricId: string | null;
   explanationImageUrl: string | null;
   explanationVideoUrl: string | null;
   /** Image sequence shown as numbered steps. */
@@ -99,6 +101,13 @@ export interface Quiz {
   unlockAfterQuizId: string | null;
   /** Every question must be opened before the attempt can be submitted. */
   requireAllVisited: boolean;
+  /** Extra XP once for a 100% score. */
+  perfectBonusXp: number;
+  /** Past papers: the exam and year the paper follows. */
+  exam: string | null;
+  paperYear: number | null;
+  /** Short note shown to students, e.g. "Questions recalled by students". */
+  note: string | null;
   title: string;
   slug: string;
   description: string | null;
@@ -121,6 +130,8 @@ export interface QuizSection {
   title: string;
   description: string | null;
   position: number;
+  /** Own time limit for the section, in minutes; null = shares the test's time. */
+  timeLimitMinutes: number | null;
 }
 
 /** A question assigned to a quiz, with a preview of the question for admin authoring UIs. */
@@ -200,6 +211,24 @@ export interface AttemptState {
   /** Every question must be opened before submitting. */
   requireAllVisited?: boolean;
   sections?: { id: string; title: string }[];
+  /** Set when the test times each section separately; sections then run in order. */
+  timing?: AttemptTiming | null;
+}
+
+export interface AttemptSectionTiming {
+  id: string;
+  title: string;
+  minutes: number;
+  /** DONE = closed (time up or moved on); UPCOMING = not started, questions hidden. */
+  status: "DONE" | "CURRENT" | "UPCOMING";
+}
+
+export interface AttemptTiming {
+  currentSectionId: string;
+  /** When the current section closes. */
+  sectionEndsAt: string;
+  sectionRemainingSeconds: number;
+  sections: AttemptSectionTiming[];
 }
 
 /** Result summary — only meaningful once an attempt is SUBMITTED/AUTO_SUBMITTED. */

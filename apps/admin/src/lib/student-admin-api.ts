@@ -8,6 +8,9 @@ import type {
   CollegeEnquiryView,
   QuestionReportView,
   SketchCommentView,
+  SketchReportView,
+  SketchRubricView,
+  SketchRevisionQueueItem,
   SketchReviewQueueItem,
   Topic,
 } from "@examora/types";
@@ -98,6 +101,30 @@ export function useStudentAdminApi() {
       }),
     deleteSketchComment: (id: string) =>
       request<void>(`/admin/sketches/comments/${id}`, { method: "DELETE" }),
+
+    // Sketch rating sets & reported sketches
+    rubrics: () => get<SketchRubricView[]>("/admin/sketch-works/rubrics"),
+    createRubric: (body: {
+      title: string;
+      factors: { title: string; description: string | null }[];
+    }) => request<SketchRubricView[]>("/admin/sketch-works/rubrics", { method: "POST", body }),
+    updateRubric: (
+      id: string,
+      body: { title?: string; factors?: { title: string; description: string | null }[] },
+    ) =>
+      request<SketchRubricView[]>(`/admin/sketch-works/rubrics/${id}`, { method: "PATCH", body }),
+    deleteRubric: (id: string) =>
+      request<void>(`/admin/sketch-works/rubrics/${id}`, { method: "DELETE" }),
+    revisions: (status: "pending" | "reviewed") =>
+      get<SketchRevisionQueueItem[]>(`/admin/sketch-works/revisions?status=${status}`),
+    rateRevision: (
+      versionId: string,
+      body: { scores: Record<string, number>; comment: string | null },
+    ) => request<void>(`/admin/sketch-works/versions/${versionId}/expert`, { method: "PUT", body }),
+    sketchReports: (status: "OPEN" | "RESOLVED") =>
+      get<SketchReportView[]>(`/admin/sketch-works/reports?status=${status}`),
+    setSketchReport: (id: string, status: "OPEN" | "RESOLVED") =>
+      request<void>(`/admin/sketch-works/reports/${id}`, { method: "PATCH", body: { status } }),
 
     // Colleges, webinars, enquiries
     colleges: () => get<AdminCollege[]>("/admin/colleges"),

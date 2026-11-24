@@ -234,6 +234,14 @@ const DIAGRAMS: Record<string, () => [string, string]> = {
   ],
 };
 
+for (let i = 1; i <= 6; i++) {
+  DIAGRAMS[`peer-sketch-${i}`] = () => [D.terminusSketchSvg(i), `Classmate sketch ${i}`];
+  DIAGRAMS[`peer-sketch-${i}-rev`] = () => [
+    D.terminusSketchSvg(i, true),
+    `Classmate sketch ${i}, revised`,
+  ];
+}
+
 class Media {
   private cache = new Map<string, string | null>();
   constructor(
@@ -1697,6 +1705,247 @@ const NID_TESTS: TestSpec[] = [
   },
 ];
 
+// ---------------------------------------------------------------------------
+// Paper details: exam/year, note, section times and perfect-score bonus
+// ---------------------------------------------------------------------------
+
+interface TestMeta {
+  exam?: string;
+  year?: number;
+  note?: string;
+  bonus?: number;
+  /** Total minutes (overrides the spec) and minutes per section, in order. */
+  minutes?: number;
+  sectionMinutes?: (number | null)[];
+}
+
+const paperNote = (exam: string, year: number) =>
+  `Practice paper written by Examora in the ${exam} ${year} pattern: same sections, question types and marking; new questions.`;
+const uceed = (year: number): TestMeta => ({
+  exam: "UCEED",
+  year,
+  note: paperNote("UCEED", year),
+  bonus: 100,
+  minutes: 180,
+  sectionMinutes: [120, 60],
+});
+const nid = (year: number): TestMeta => ({
+  exam: "NID DAT",
+  year,
+  note: paperNote("NID DAT Prelims", year),
+  bonus: 100,
+  minutes: 180,
+  sectionMinutes: [100, 80],
+});
+
+const TEST_META: Record<string, TestMeta> = {
+  "uceed-mock-1": { bonus: 50, sectionMinutes: [60, 30] },
+  "uceed-mock-2": { bonus: 50, sectionMinutes: [60, 30] },
+  "paper-nid-2024": nid(2024),
+  "paper-uceed-2024": uceed(2024),
+  "paper-uceed-2023": uceed(2023),
+  "paper-uceed-2025": uceed(2025),
+  "paper-uceed-2022": uceed(2022),
+  "paper-nid-2025": nid(2025),
+  "paper-nid-2023": nid(2023),
+  "paper-ceed-2024": {
+    exam: "CEED",
+    year: 2024,
+    note: paperNote("CEED", 2024),
+    bonus: 100,
+    minutes: 180,
+    sectionMinutes: [60, 120],
+  },
+  "school-paper-1": { bonus: 50, sectionMinutes: [30, 30] },
+  "school-paper-2": { bonus: 50, sectionMinutes: [30, 30] },
+  aptitude: { bonus: 25 },
+  "uceed-course-mock-1": { bonus: 50, sectionMinutes: [60, 30] },
+  "uceed-course-2024": uceed(2024),
+  "nid-course-2024": nid(2024),
+  "nift-gat-mock-1": { bonus: 30 },
+  ...Object.fromEntries([1, 2, 3, 4, 5, 6].map((n) => [`predicted-${n}`, { bonus: 25 }])),
+};
+
+/** More past papers so the Past year papers tab spans several exams and years. */
+const EXTRA_PAPERS: TestSpec[] = [
+  {
+    key: "paper-uceed-2025",
+    category: "past-paper-style",
+    title: "UCEED: 2025 pattern (practice paper)",
+    description: "Part A with UCEED marking, Part B drawing.",
+    minutes: 180,
+    maxAttempts: 2,
+    xp: 150,
+    level: "HARD",
+    sections: [
+      {
+        title: "Part A",
+        description: UCEED_A,
+        items: [
+          nat("cube-27"),
+          nat("puz-widgets"),
+          nat("rect-diag"),
+          nat("arrange-art"),
+          msq("crafts-msq"),
+          msq("transparency"),
+          mcq("seating"),
+          mcq("code-cat"),
+          mcq("mirror-p"),
+          mcq("eames"),
+          mcq("lotus"),
+          mcq("hatching"),
+          mcq("heads"),
+          mcq("syllogism"),
+        ],
+      },
+      { title: "Part B", description: UPLOAD_NOTE, items: [B("sketch-bottle", 50, null)] },
+    ],
+  },
+  {
+    key: "paper-uceed-2022",
+    category: "past-paper-style",
+    title: "UCEED: 2022 pattern (practice paper)",
+    description: "Part A with UCEED marking, Part B drawing.",
+    minutes: 180,
+    maxAttempts: 2,
+    xp: 150,
+    sections: [
+      {
+        title: "Part A",
+        description: UCEED_A,
+        items: [
+          nat("walk-5"),
+          nat("triangles"),
+          nat("cuboid-24"),
+          nat("fold-holes"),
+          msq("secondary-msq"),
+          msq("crafts-msq"),
+          mcq("series-letters"),
+          mcq("odd-cube"),
+          mcq("rot-180"),
+          mcq("starry"),
+          mcq("madhubani"),
+          mcq("die-gt4"),
+          mcq("aesthetic"),
+          mcq("ds-x"),
+        ],
+      },
+      { title: "Part B", description: UPLOAD_NOTE, items: [B("sketch-gate", 50, null)] },
+    ],
+  },
+  {
+    key: "paper-nid-2025",
+    category: "past-paper-style",
+    title: "NID DAT Prelims: 2025 pattern (practice paper)",
+    description: "Section 1: aptitude. Section 2: two drawing questions, 30 marks each.",
+    minutes: 180,
+    maxAttempts: 2,
+    xp: 150,
+    level: "HARD",
+    sections: [
+      {
+        title: "Section 1: Aptitude",
+        description:
+          "Single-answer questions: 1 mark. Select-all questions: 2 marks. No negative marking.",
+        items: [
+          B("puz-widgets"),
+          B("series-n2"),
+          B("walk-5"),
+          B("analogy-knife"),
+          B("tf-tablet"),
+          B("ds-x"),
+          B("cube-adjacent"),
+          B("triangles"),
+          B("fold-holes"),
+          B("mondrian"),
+          B("pritzker"),
+          B("secondary-msq", 2),
+          B("two-point-vert"),
+          B("iso-tf"),
+          B("arrange-art"),
+        ],
+      },
+      {
+        title: "Section 2: Design & drawing",
+        description: UPLOAD_NOTE,
+        items: [B("sketch-stall", 30, null), B("sketch-bottle", 30, null)],
+      },
+    ],
+  },
+  {
+    key: "paper-nid-2023",
+    category: "past-paper-style",
+    title: "NID DAT Prelims: 2023 pattern (practice paper)",
+    description: "Section 1: aptitude. Section 2: two drawing questions, 30 marks each.",
+    minutes: 180,
+    maxAttempts: 2,
+    xp: 150,
+    sections: [
+      {
+        title: "Section 1: Aptitude",
+        description:
+          "Single-answer questions: 1 mark. Select-all questions: 2 marks. No negative marking.",
+        items: [
+          B("clock-420"),
+          B("code-cat"),
+          B("seating"),
+          B("odd-cube"),
+          B("syllogism"),
+          B("rot-180"),
+          B("cube-27"),
+          B("madhubani"),
+          B("starry"),
+          B("transparency", 2),
+          B("one-point"),
+          B("hatching"),
+          B("rect-diag"),
+          B("die-gt4"),
+        ],
+      },
+      {
+        title: "Section 2: Design & drawing",
+        description: UPLOAD_NOTE,
+        items: [B("sketch-gate", 30, null), B("sketch-stall", 30, null)],
+      },
+    ],
+  },
+  {
+    key: "paper-ceed-2024",
+    category: "past-paper-style",
+    title: "CEED: 2024 pattern (practice paper)",
+    description: "Part A: objective questions with negative marking. Part B: drawing and design.",
+    minutes: 180,
+    maxAttempts: 2,
+    xp: 150,
+    level: "HARD",
+    sections: [
+      {
+        title: "Part A",
+        description:
+          "NAT: 4 marks, no negative marking.\nMSQ: 4 marks, −1 for a wrong answer.\nMCQ: 3 marks, −0.5 for a wrong answer.",
+        items: [
+          nat("cube-27"),
+          nat("circle-154"),
+          nat("walk-5"),
+          msq("transparency"),
+          msq("secondary-msq"),
+          B("pritzker", 3, 0.5),
+          B("lotus", 3, 0.5),
+          B("mondrian", 3, 0.5),
+          B("two-point-vert", 3, 0.5),
+          B("ds-x", 3, 0.5),
+          B("syllogism", 3, 0.5),
+        ],
+      },
+      {
+        title: "Part B",
+        description: UPLOAD_NOTE,
+        items: [B("sketch-bottle", 50, null), B("sketch-gate", 50, null)],
+      },
+    ],
+  },
+];
+
 /** Tests for other sample courses, so their Practice pages aren't empty. */
 const OTHER_COURSES: {
   title: string;
@@ -1902,7 +2151,27 @@ async function seedTests(
   let created = 0;
   for (const [pos, t] of tests.entries()) {
     const quizId = sid(`quiz:${courseKey}/${t.key}`);
-    if (await prisma.quiz.findUnique({ where: { id: quizId }, select: { id: true } })) continue;
+    const m = TEST_META[t.key] ?? {};
+    const sectionTime = (i: number) => m.sectionMinutes?.[i] ?? null;
+    if (await prisma.quiz.findUnique({ where: { id: quizId }, select: { id: true } })) {
+      await prisma.quiz.update({
+        where: { id: quizId },
+        data: {
+          exam: m.exam ?? null,
+          paperYear: m.year ?? null,
+          note: m.note ?? null,
+          perfectBonusXp: m.bonus ?? 0,
+          ...(m.minutes ? { timeLimitMinutes: m.minutes } : {}),
+        },
+      });
+      for (const i of t.sections.keys()) {
+        await prisma.quizSection.updateMany({
+          where: { id: sid(`section:${courseKey}/${t.key}/${i}`) },
+          data: { timeLimitMinutes: sectionTime(i) },
+        });
+      }
+      continue;
+    }
     const unlock = t.unlockAfter ? sid(`quiz:${courseKey}/${t.unlockAfter}`) : null;
     await prisma.quiz.create({
       data: {
@@ -1914,8 +2183,12 @@ async function seedTests(
         title: t.title,
         slug: `${courseKey}-${t.key}`,
         description: t.description,
-        timeLimitMinutes: t.minutes,
+        timeLimitMinutes: m.minutes ?? t.minutes,
         maxAttempts: t.maxAttempts,
+        exam: m.exam ?? null,
+        paperYear: m.year ?? null,
+        note: m.note ?? null,
+        perfectBonusXp: m.bonus ?? 0,
         xpReward: t.xp,
         level: t.level ?? "MEDIUM",
         position: pos,
@@ -1928,6 +2201,7 @@ async function seedTests(
             title: s.title,
             description: s.description,
             position: i,
+            timeLimitMinutes: sectionTime(i),
           })),
         },
       },
@@ -1954,10 +2228,332 @@ async function seedTests(
   return created;
 }
 
-export async function seedPracticeLibrary(prisma: PrismaClient, adminId: string): Promise<string> {
+// ---------------------------------------------------------------------------
+// Sketch rating sets and a demo workspace (test upload + one revision)
+// ---------------------------------------------------------------------------
+
+/** Factor names match each question's existing criteria so earlier ratings still line up. */
+const RUBRICS: { key: string; title: string; questions: string[]; factors: [string, string][] }[] =
+  [
+    {
+      key: "observation",
+      title: "Observation drawing",
+      questions: [sid("question:sketch-platform")],
+      factors: [
+        ["Observation", "Shows people, objects and details you would really see in the scene."],
+        ["Composition", "Arranges the scene so the eye goes to the main subject first."],
+        [
+          "Perspective",
+          "Uses a consistent eye level and vanishing points; sizes shrink with distance.",
+        ],
+        ["Line quality", "Confident lines with varied weight; little scribbling or erasing."],
+        ["Detail", "Small, telling details (signs, bags, shadows) that make the scene believable."],
+      ],
+    },
+    {
+      key: "scene",
+      title: "Scene drawing",
+      questions: [bankQ("sketch-stall")],
+      factors: [
+        ["Observation", "Captures the people and objects of the scene as they would really look."],
+        ["Composition", "A clear focal point and a balanced arrangement of figures."],
+        [
+          "Light and shade",
+          "A clear light source, with cast shadows and highlights that agree with it.",
+        ],
+        ["Proportion", "Figures and objects are the right size relative to each other."],
+        ["Detail", "Specific details that tell the story of the place."],
+      ],
+    },
+    {
+      key: "design-aptitude",
+      title: "Design aptitude",
+      questions: [bankQ("sketch-bottle")],
+      factors: [
+        ["Idea", "A clear idea that answers the brief, not just a restyled existing product."],
+        ["Usability", "The design solves the user's actual problem (here: use with gloves)."],
+        ["Drawing clarity", "Views are consistent and easy to read."],
+        ["Proportion", "Parts are sized sensibly relative to each other and to the hand."],
+        ["Presentation", "Neat layout, short labels, and the key detail is easy to find."],
+      ],
+    },
+    {
+      key: "memory",
+      title: "Memory drawing",
+      questions: [bankQ("sketch-gate")],
+      factors: [
+        ["Memory and observation", "Includes details you actually remember about the place."],
+        ["Perspective", "A believable depth with a consistent horizon and vanishing points."],
+        ["Composition", "The gate and the two people are placed with a clear focus."],
+        ["Line quality", "Clean, confident lines with varied weight."],
+        ["Detail", "Textures, signs and small objects that make it feel real."],
+      ],
+    },
+  ];
+
+async function seedRubrics(prisma: PrismaClient): Promise<number> {
+  for (const r of RUBRICS) {
+    const id = sid(`sketch-rubric:${r.key}`);
+    const factors = r.factors.map(([title, description]) => ({ title, description }));
+    await prisma.sketchRubric.upsert({
+      where: { id },
+      create: { id, title: r.title, factors: factors as unknown as Prisma.InputJsonValue },
+      update: { title: r.title, factors: factors as unknown as Prisma.InputJsonValue },
+    });
+    await prisma.question.updateMany({
+      where: { id: { in: r.questions } },
+      data: {
+        rubricId: id,
+        criteria: factors.map((x) => x.title) as unknown as Prisma.InputJsonValue,
+      },
+    });
+  }
+  return RUBRICS.length;
+}
+
+/** The demo student's Mock Test 1 sketch as a workspace: test upload + a revision with feedback. */
+async function seedDemoWorkspace(
+  prisma: PrismaClient,
+  media: Media,
+  studentId: string,
+  mentorId: string,
+): Promise<boolean> {
+  const questionId = sid("question:sketch-platform");
+  const answer = await prisma.quizAttemptAnswer.findFirst({
+    where: {
+      questionId,
+      uploadAssetId: { not: null },
+      attempt: { userId: studentId, status: { in: ["SUBMITTED", "AUTO_SUBMITTED"] } },
+    },
+    select: { id: true, uploadAssetId: true, answeredAt: true },
+  });
+  const revisionRef = await media.ref("persp-1");
+  if (!answer || !revisionRef) return false;
+  const workId = sid("sketch-work:demo");
+  await prisma.sketchWork.upsert({
+    where: { userId_questionId: { userId: studentId, questionId } },
+    create: { id: workId, userId: studentId, questionId },
+    update: {},
+  });
+  const work = await prisma.sketchWork.findUniqueOrThrow({
+    where: { userId_questionId: { userId: studentId, questionId } },
+    select: { id: true },
+  });
+  const existingTest = await prisma.sketchVersion.findUnique({
+    where: { answerId: answer.id },
+    select: { id: true },
+  });
+  if (!existingTest) {
+    await prisma.sketchVersion.create({
+      data: {
+        id: sid("sketch-version:demo/test"),
+        workId: work.id,
+        kind: "TEST",
+        answerId: answer.id,
+        assetId: answer.uploadAssetId!,
+        description: "Drawn in the test: bus terminus from the first floor.",
+        ...(answer.answeredAt ? { createdAt: answer.answeredAt } : {}),
+      },
+    });
+  }
+  const revisionId = sid("sketch-version:demo/rev1");
+  await prisma.sketchVersion.upsert({
+    where: { id: revisionId },
+    create: {
+      id: revisionId,
+      workId: work.id,
+      kind: "REVISION",
+      assetId: revisionRef.replace("media:", ""),
+      description:
+        "Revision 1: rebuilt the perspective around a single vanishing point, as the reviewer suggested.",
+    },
+    update: {},
+  });
+  await prisma.sketchComment.upsert({
+    where: { id: sid("sketch-pin:demo/rev1") },
+    create: {
+      id: sid("sketch-pin:demo/rev1"),
+      versionId: revisionId,
+      authorId: mentorId,
+      x: 0.5,
+      y: 0.37,
+      body: "Much better: everything now meets at this vanishing point.",
+    },
+    update: {},
+  });
+  await prisma.sketchWorkComment.upsert({
+    where: { id: sid("sketch-work-comment:demo/1") },
+    create: {
+      id: sid("sketch-work-comment:demo/1"),
+      workId: work.id,
+      authorId: mentorId,
+      body: "Good progress between the test sketch and revision 1. Next, add people at three depths to show scale.",
+    },
+    update: {},
+  });
+  const others = await prisma.user.findMany({
+    where: { id: { not: studentId }, roles: { some: { role: { name: "STUDENT" } } } },
+    select: { id: true },
+    take: 3,
+    orderBy: { createdAt: "asc" },
+  });
+  for (const [i, o] of others.entries()) {
+    await prisma.sketchWorkView.upsert({
+      where: { workId_viewerId: { workId: work.id, viewerId: o.id } },
+      create: { workId: work.id, viewerId: o.id },
+      update: {},
+    });
+    if (i < 2) {
+      await prisma.sketchClap.upsert({
+        where: { workId_userId: { workId: work.id, userId: o.id } },
+        create: { workId: work.id, userId: o.id },
+        update: {},
+      });
+    }
+  }
+  return true;
+}
+
+/** Classmates' sketches for Mock Test 1's sketch question, so the community grid has content. */
+async function seedSketchCommunity(
+  prisma: PrismaClient,
+  media: Media,
+  studentId: string,
+): Promise<number> {
+  const questionId = sid("question:sketch-platform");
+  const factors = RUBRICS.find((r) => r.key === "observation")!.factors.map(([t]) => t);
+  const attempts = await prisma.quizAttempt.findMany({
+    where: {
+      quizId: sid("quiz:mock-test-1"),
+      userId: { not: studentId },
+      status: { in: ["SUBMITTED", "AUTO_SUBMITTED"] },
+      user: { email: { endsWith: "@bulk.examora.test" } },
+    },
+    orderBy: { startedAt: "asc" },
+    take: 6,
+    select: { id: true, userId: true, submittedAt: true },
+  });
+  const owners = attempts.map((a) => a.userId);
+  let n = 0;
+  for (const [i, a] of attempts.entries()) {
+    const k = i + 1;
+    const testRef = await media.ref(`peer-sketch-${k}`);
+    if (!testRef) return n;
+    const answer = await prisma.quizAttemptAnswer.upsert({
+      where: { attemptId_questionId: { attemptId: a.id, questionId } },
+      create: {
+        attemptId: a.id,
+        questionId,
+        selectedOptionIds: [],
+        uploadAssetId: testRef.replace("media:", ""),
+        answeredAt: a.submittedAt ?? new Date(),
+        visitedAt: a.submittedAt ?? new Date(),
+      },
+      update: {},
+      select: { id: true, uploadAssetId: true },
+    });
+    if (!answer.uploadAssetId) continue;
+    const work = await prisma.sketchWork.upsert({
+      where: { userId_questionId: { userId: a.userId, questionId } },
+      create: { id: sid(`sketch-work:peer/${k}`), userId: a.userId, questionId },
+      update: {},
+      select: { id: true },
+    });
+    const testVersionId = sid(`sketch-version:peer/${k}/test`);
+    const existingTest = await prisma.sketchVersion.findUnique({
+      where: { answerId: answer.id },
+      select: { id: true },
+    });
+    const testId = existingTest?.id ?? testVersionId;
+    if (!existingTest) {
+      await prisma.sketchVersion.create({
+        data: {
+          id: testVersionId,
+          workId: work.id,
+          kind: "TEST",
+          answerId: answer.id,
+          assetId: answer.uploadAssetId,
+        },
+      });
+    }
+    // Every classmate rated their own test upload (unlocks the grid for them).
+    const selfScores = Object.fromEntries(factors.map((f, j) => [f, 2 + ((k + j) % 4)]));
+    await prisma.sketchVersionRating.upsert({
+      where: { versionId_raterId: { versionId: testId, raterId: a.userId } },
+      create: { versionId: testId, raterId: a.userId, kind: "SELF", scores: selfScores },
+      update: {},
+    });
+    await prisma.sketchReview.upsert({
+      where: { answerId: answer.id },
+      create: { answerId: answer.id, selfScores, selfRatedAt: new Date() },
+      update: {},
+    });
+    // Half of them uploaded a revision; two are left waiting for reviewer feedback.
+    let latestId = testId;
+    if (k % 2 === 0) {
+      const revRef = await media.ref(`peer-sketch-${k}-rev`);
+      if (revRef) {
+        const revId = sid(`sketch-version:peer/${k}/rev1`);
+        await prisma.sketchVersion.upsert({
+          where: { id: revId },
+          create: {
+            id: revId,
+            workId: work.id,
+            kind: "REVISION",
+            assetId: revRef.replace("media:", ""),
+            description: "Revision 1: firmer lines, people at three depths and shadows under them.",
+          },
+          update: {},
+        });
+        latestId = revId;
+      }
+    }
+    // Feedback, claps and views from the other classmates.
+    for (const [j, rater] of owners.entries()) {
+      if (rater === a.userId) continue;
+      if ((j + k) % 2 === 0) {
+        await prisma.sketchPeerFeedback.upsert({
+          where: { versionId_raterId: { versionId: latestId, raterId: rater } },
+          create: {
+            versionId: latestId,
+            raterId: rater,
+            likedFactors: factors.filter((_, x) => (x + j + k) % 3 !== 0),
+            comment:
+              j % 3 === 0 ? "The vanishing point works well. Try varying line weight more." : null,
+            xpAwarded: false,
+          },
+          update: {},
+        });
+      }
+      await prisma.sketchWorkView.upsert({
+        where: { workId_viewerId: { workId: work.id, viewerId: rater } },
+        create: { workId: work.id, viewerId: rater },
+        update: {},
+      });
+      if ((j * k) % 3 === 0) {
+        await prisma.sketchClap.upsert({
+          where: { workId_userId: { workId: work.id, userId: rater } },
+          create: { workId: work.id, userId: rater },
+          update: {},
+        });
+      }
+    }
+    n++;
+  }
+  return n;
+}
+
+export async function seedPracticeLibrary(
+  prisma: PrismaClient,
+  ids: { adminId: string; studentId: string; mentorId: string },
+): Promise<string> {
+  const adminId = ids.adminId;
   const media = new Media(prisma, adminId);
   const bank = await seedBank(prisma, media, adminId);
   const backfilled = await backfillExplanations(prisma, media);
+  const rubrics = await seedRubrics(prisma);
+  const workspace = await seedDemoWorkspace(prisma, media, ids.studentId, ids.mentorId);
+  const peers = await seedSketchCommunity(prisma, media, ids.studentId);
 
   let tests = 0;
   const nid = await prisma.course.findUnique({ where: { id: NID_COURSE }, select: { id: true } });
@@ -1969,7 +2565,7 @@ export async function seedPracticeLibrary(prisma: PrismaClient, adminId: string)
       "nid",
       subjectId("mental-ability"),
       NID_CATEGORIES,
-      NID_TESTS,
+      [...NID_TESTS, ...EXTRA_PAPERS],
     );
   }
   for (const c of OTHER_COURSES) {
@@ -1994,5 +2590,5 @@ export async function seedPracticeLibrary(prisma: PrismaClient, adminId: string)
       c.tests,
     );
   }
-  return `${bank} new library questions, ${backfilled} explanations added, ${tests} new practice tests`;
+  return `${bank} new library questions, ${backfilled} explanations added, ${tests} new practice tests, ${rubrics} rating sets${workspace ? ", demo sketch workspace" : ""}, ${peers} classmate sketches`;
 }

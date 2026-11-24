@@ -518,6 +518,13 @@ model User {
   cmsContentVersionsCreated CmsContentVersion[]
   lessonQuestionAnswers     LessonQuestionAnswer[]
   sketchComments            SketchComment[]
+  sketchWorks               SketchWork[]
+  sketchWorkViews           SketchWorkView[]
+  sketchClaps               SketchClap[]
+  sketchWorkComments        SketchWorkComment[]
+  sketchReports             SketchReport[]
+  sketchVersionRatings      SketchVersionRating[]
+  sketchPeerFeedback        SketchPeerFeedback[]
   testShares                TestShare[]
   testShareVisits           TestShareVisit[]
 
@@ -898,6 +905,8 @@ model Question {
   topicId             String?         @map("topic_id") @db.Uuid
   /// UPLOAD questions: the criteria a sketch is rated on, e.g. ["Perspective", "Line quality"].
   criteria            Json?
+  /// Named rating-factor set for sketch questions (replaces criteria when set).
+  rubricId            String?         @map("rubric_id") @db.Uuid
   type                QuestionType
   difficulty          DifficultyLevel @default(MEDIUM)
   text                String
@@ -933,6 +942,8 @@ model Question {
   quizQuestions   QuizQuestion[]
   attemptAnswers  QuizAttemptAnswer[]
   lessonQuestions LessonQuestion[]
+  rubric          SketchRubric?       @relation(fields: [rubricId], references: [id], onDelete: SetNull)
+  sketchWorks     SketchWork[]
 
   @@index([subjectId])
   @@index([topicId])
@@ -990,6 +1001,13 @@ model Quiz {
   unlockAfterQuizId      String?          @map("unlock_after_quiz_id") @db.Uuid
   /// Every question must be opened at least once before the attempt can be submitted.
   requireAllVisited      Boolean          @default(false) @map("require_all_visited")
+  /// Extra XP once, the first time an attempt scores 100% (practice tests).
+  perfectBonusXp         Int              @default(0) @map("perfect_bonus_xp")
+  /// Past papers: which exam and year the paper follows, e.g. "UCEED" 2024.
+  exam                   String?
+  paperYear              Int?             @map("paper_year")
+  /// Short note shown on the test page, e.g. "Questions recalled by students".
+  note                   String?
   publishedAt            DateTime?        @map("published_at")
   createdById            String?          @map("created_by_id") @db.Uuid
   version                Int              @default(1)
@@ -1016,13 +1034,15 @@ model Quiz {
 }
 
 model QuizSection {
-  id          String   @id @default(uuid()) @db.Uuid
-  quizId      String   @map("quiz_id") @db.Uuid
-  title       String
-  description String?
-  position    Int      @default(0)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id               String   @id @default(uuid()) @db.Uuid
+  quizId           String   @map("quiz_id") @db.Uuid
+  title            String
+  description      String?
+  /// Own time limit for this section (real exams time Part A and Part B separately).
+  timeLimitMinutes Int?     @map("time_limit_minutes")
+  position         Int      @default(0)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
   quiz          Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
   quizQuestions QuizQuestion[]
@@ -1076,9 +1096,13 @@ model QuizAttempt {
   negativeMarksPerWrong  Decimal @map("negative_marks_per_wrong") @db.Decimal(5, 2)
   totalMarks             Decimal @map("total_marks") @db.Decimal(8, 2)
 
-  startedAt   DateTime  @default(now()) @map("started_at")
-  expiresAt   DateTime? @map("expires_at")
-  submittedAt DateTime? @map("submitted_at")
+  startedAt        DateTime  @default(now()) @map("started_at")
+  expiresAt        DateTime? @map("expires_at")
+  /// Timed-by-section attempts: [{ id, title, minutes }] frozen at start; sections run in order.
+  sectionPlan      Json?     @map("section_plan")
+  currentSection   Int       @default(0) @map("current_section")
+  sectionStartedAt DateTime? @map("section_started_at")
+  submittedAt      DateTime? @map("submitted_at")
 
   obtainedMarks   Decimal? @map("obtained_marks") @db.Decimal(8, 2)
   percentage      Decimal? @db.Decimal(5, 2)
@@ -1129,6 +1153,7 @@ model QuizAttemptAnswer {
   sketchReview   SketchReview?
   peerRatings    SketchPeerRating[]
   sketchComments SketchComment[]
+  sketchVersion  SketchVersion?
 
   @@unique([attemptId, questionId])
   @@index([attemptId])
@@ -2541,7 +2566,9 @@ model LessonQuestionAnswer {
 /// A comment pinned to a spot on a sketch (x, y are 0..1 of the image's width/height).
 model SketchComment {
   id        String    @id @default(uuid()) @db.Uuid
-  answerId  String    @map("answer_id") @db.Uuid
+  /// Pins on the test upload keep the attempt answer; pins on revisions use versionId.
+  answerId  String?   @map("answer_id") @db.Uuid
+  versionId String?   @map("version_id") @db.Uuid
   authorId  String    @map("author_id") @db.Uuid
   x         Float
   y         Float
@@ -2549,10 +2576,12 @@ model SketchComment {
   createdAt DateTime  @default(now()) @map("created_at")
   deletedAt DateTime? @map("deleted_at")
 
-  answer QuizAttemptAnswer @relation(fields: [answerId], references: [id], onDelete: Cascade)
-  author User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  answer  QuizAttemptAnswer? @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  version SketchVersion?     @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  author  User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([answerId])
+  @@index([versionId])
   @@map("sketch_comments")
 }
 
@@ -2584,4 +2613,167 @@ model TestShareVisit {
 
   @@unique([shareId, visitorId])
   @@map("test_share_visits")
+}
+
+/// A named set of rating factors for sketch questions, e.g. "Observation drawing".
+model SketchRubric {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String
+  /// [{ title, description }] in order.
+  factors   Json
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  questions Question[]
+
+  @@map("sketch_rubrics")
+}
+
+/// A student's sketch for one question: the test upload plus revisions (max 4 uploads).
+model SketchWork {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  questionId String   @map("question_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question            @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  versions SketchVersion[]
+  views    SketchWorkView[]
+  claps    SketchClap[]
+  comments SketchWorkComment[]
+  reports  SketchReport[]
+
+  @@unique([userId, questionId])
+  @@index([questionId])
+  @@map("sketch_works")
+}
+
+enum SketchVersionKind {
+  TEST
+  REVISION
+
+  @@map("sketch_version_kind")
+}
+
+model SketchVersion {
+  id          String            @id @default(uuid()) @db.Uuid
+  workId      String            @map("work_id") @db.Uuid
+  kind        SketchVersionKind
+  /// TEST versions are the upload from a timed attempt (its expert marks feed the test score).
+  answerId    String?           @unique @map("answer_id") @db.Uuid
+  assetId     String            @map("asset_id") @db.Uuid
+  description String?
+  createdAt   DateTime          @default(now()) @map("created_at")
+  deletedAt   DateTime?         @map("deleted_at")
+
+  work         SketchWork            @relation(fields: [workId], references: [id], onDelete: Cascade)
+  answer       QuizAttemptAnswer?    @relation(fields: [answerId], references: [id], onDelete: SetNull)
+  pins         SketchComment[]
+  ratings      SketchVersionRating[]
+  peerFeedback SketchPeerFeedback[]
+
+  @@index([workId])
+  @@map("sketch_versions")
+}
+
+model SketchWorkView {
+  workId    String   @map("work_id") @db.Uuid
+  viewerId  String   @map("viewer_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  work   SketchWork @relation(fields: [workId], references: [id], onDelete: Cascade)
+  viewer User       @relation(fields: [viewerId], references: [id], onDelete: Cascade)
+
+  @@id([workId, viewerId])
+  @@map("sketch_work_views")
+}
+
+model SketchClap {
+  workId    String   @map("work_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  work SketchWork @relation(fields: [workId], references: [id], onDelete: Cascade)
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([workId, userId])
+  @@map("sketch_claps")
+}
+
+/// General comments on a sketch (pins on the image are SketchComment).
+model SketchWorkComment {
+  id        String    @id @default(uuid()) @db.Uuid
+  workId    String    @map("work_id") @db.Uuid
+  authorId  String    @map("author_id") @db.Uuid
+  body      String
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  work   SketchWork @relation(fields: [workId], references: [id], onDelete: Cascade)
+  author User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([workId])
+  @@map("sketch_work_comments")
+}
+
+model SketchReport {
+  id         String   @id @default(uuid()) @db.Uuid
+  workId     String   @map("work_id") @db.Uuid
+  reporterId String   @map("reporter_id") @db.Uuid
+  reason     String
+  status     String   @default("OPEN")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  work     SketchWork @relation(fields: [workId], references: [id], onDelete: Cascade)
+  reporter User       @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@unique([workId, reporterId])
+  @@map("sketch_reports")
+}
+
+enum SketchRatingKind {
+  SELF
+  EXPERT
+
+  @@map("sketch_rating_kind")
+}
+
+/// 1–5 per factor on one version, by the owner (SELF, once, locked) or a reviewer (EXPERT).
+model SketchVersionRating {
+  id        String           @id @default(uuid()) @db.Uuid
+  versionId String           @map("version_id") @db.Uuid
+  raterId   String           @map("rater_id") @db.Uuid
+  kind      SketchRatingKind
+  scores    Json
+  comment   String?
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  version SketchVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  rater   User          @relation(fields: [raterId], references: [id], onDelete: Cascade)
+
+  @@unique([versionId, raterId])
+  @@index([versionId])
+  @@map("sketch_version_ratings")
+}
+
+/// A classmate's feedback on one version: the factors they liked plus a comment.
+model SketchPeerFeedback {
+  id           String   @id @default(uuid()) @db.Uuid
+  versionId    String   @map("version_id") @db.Uuid
+  raterId      String   @map("rater_id") @db.Uuid
+  likedFactors String[] @default([]) @map("liked_factors")
+  comment      String?
+  /// Whether this feedback earned XP (max 10 a day per student).
+  xpAwarded    Boolean  @default(false) @map("xp_awarded")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  version SketchVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  rater   User          @relation(fields: [raterId], references: [id], onDelete: Cascade)
+
+  @@unique([versionId, raterId])
+  @@index([raterId, createdAt])
+  @@map("sketch_peer_feedback")
 }

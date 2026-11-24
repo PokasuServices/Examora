@@ -2,12 +2,22 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { AlertTriangle, ChevronRight, Clock, Lock, ListChecks, TrendingUp } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Lock,
+  ListChecks,
+  TrendingUp,
+} from "lucide-react";
 import type { PracticeTestItem, WeakTopicAction } from "@examora/types";
 import { cn } from "@examora/ui";
 import { ProgressBar } from "@/components/progress-bar";
 import { RequireAuth } from "@/components/require-auth";
 import { ErrorPanel, LoadingPanel } from "@/components/student/load-panels";
+import { TestPerformanceChart } from "@/components/student/test-performance-chart";
+import { sectionTime, TestSections } from "@/components/student/test-sections";
 import { useLicensedCourse } from "@/components/student/use-licensed-course";
 import { useLoad } from "@/components/student/use-load";
 import { Card } from "@/components/ui/card";
@@ -17,72 +27,179 @@ import { PageHeader } from "@/components/ui/page-header";
 import { SelectField } from "@/components/ui/select-field";
 import { useStudentApi } from "@/lib/student-api";
 
+/** Sections, instructions and marking scheme, loaded when a row is expanded. */
+function TestDetails({ id }: { id: string }) {
+  const api = useStudentApi();
+  const detail = useLoad(() => api.practiceTest(id), id);
+  if (detail.errorStatus !== null)
+    return <p className="text-sm text-danger-600">Couldn&rsquo;t load the details.</p>;
+  if (!detail.data) return <p className="text-sm text-neutral-500">Loading details…</p>;
+  return <TestSections sections={detail.data.sections} />;
+}
+
 function TestRow({ test }: { test: PracticeTestItem }) {
+  const [open, setOpen] = React.useState(false);
   const locked = test.lockedBy !== null;
+  const detailsId = React.useId();
   const pct =
     test.lastScore && test.lastScore.total > 0
       ? Math.max(0, Math.round((test.lastScore.obtained / test.lastScore.total) * 100))
       : null;
-  const body = (
-    <div className="grid gap-3 px-4 py-4 sm:grid-cols-[1fr_14rem_auto] sm:items-center">
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-neutral-800 dark:text-white/90">
-            {test.title}
-          </span>
-          {test.inProgressAttemptId ? <Chip tone="warning">In progress</Chip> : null}
-          {pct !== null ? <Chip tone="success">Attempted</Chip> : null}
-        </div>
-        {test.description ? (
-          <p className="mt-1 line-clamp-2 text-xs text-neutral-500 dark:text-neutral-400">
-            {test.description}
-          </p>
-        ) : null}
-        <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
-          <Chip tone="neutral">{test.questionCount} questions</Chip>
-          {test.timeLimitMinutes ? (
-            <Chip tone="neutral">
-              <Clock size={12} aria-hidden="true" className="mr-1 inline" />
-              {test.timeLimitMinutes} min
-            </Chip>
-          ) : null}
-          {test.sectionCount > 1 ? <Chip tone="neutral">{test.sectionCount} sections</Chip> : null}
-          {test.xpReward > 0 ? <Chip tone="warning">+{test.xpReward} XP</Chip> : null}
-        </div>
-        {locked ? (
-          <p className="mt-2 flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400">
-            <Lock size={12} aria-hidden="true" /> Finish &ldquo;{test.lockedBy!.title}&rdquo; to
-            unlock
-          </p>
-        ) : null}
-      </div>
-      <div>
-        {pct !== null ? (
-          <>
-            <ProgressBar percent={pct} />
-            <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-              Last score {test.lastScore!.obtained} / {test.lastScore!.total}
-            </p>
-          </>
-        ) : (
-          <p className="text-xs text-neutral-400">Not attempted</p>
-        )}
-      </div>
-      <ChevronRight size={16} aria-hidden="true" className="hidden text-neutral-400 sm:block" />
-    </div>
-  );
+  const paperLabel = [test.exam, test.paperYear].filter(Boolean).join(" · ");
   return (
-    <li>
-      <Link
-        href={`/practice/tests/${test.id}`}
-        className={cn(
-          "block hover:bg-neutral-50 focus-visible:bg-neutral-50 focus-visible:outline-none dark:hover:bg-white/[0.03] dark:focus-visible:bg-white/[0.03]",
-          locked && "opacity-70",
-        )}
-      >
-        {body}
-      </Link>
+    <li className={cn(locked && "bg-neutral-50/60 dark:bg-white/[0.01]")}>
+      <div className="grid gap-3 px-4 py-4 sm:grid-cols-[1fr_14rem_auto] sm:items-center">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            {paperLabel ? <Chip tone="primary">{paperLabel}</Chip> : null}
+            <Link
+              href={`/practice/tests/${test.id}`}
+              className="rounded text-sm font-medium text-neutral-800 hover:text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-white/90 dark:hover:text-primary-400"
+            >
+              {test.title}
+            </Link>
+            {test.inProgressAttemptId ? <Chip tone="warning">In progress</Chip> : null}
+            {pct !== null ? <Chip tone="success">Attempted</Chip> : null}
+          </div>
+          {test.description ? (
+            <p className="mt-1 line-clamp-2 text-xs text-neutral-500 dark:text-neutral-400">
+              {test.description}
+            </p>
+          ) : null}
+          {test.note ? (
+            <p className="mt-1 text-xs italic text-neutral-500 dark:text-neutral-400">
+              {test.note}
+            </p>
+          ) : null}
+          <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
+            <Chip tone="neutral">{test.questionCount} questions</Chip>
+            {test.timeLimitMinutes ? (
+              <Chip tone="neutral">
+                <Clock size={12} aria-hidden="true" className="mr-1 inline" />
+                {sectionTime(test.timeLimitMinutes)}
+              </Chip>
+            ) : (
+              <Chip tone="neutral">Untimed</Chip>
+            )}
+            {test.sectionCount > 1 ? (
+              <Chip tone="neutral">{test.sectionCount} sections</Chip>
+            ) : null}
+            {test.xpReward > 0 ? <Chip tone="warning">+{test.xpReward} XP</Chip> : null}
+            {test.perfectBonusXp > 0 ? (
+              <Chip tone="warning">+{test.perfectBonusXp} XP for 100%</Chip>
+            ) : null}
+          </div>
+          {locked ? (
+            <p className="mt-2 flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400">
+              <Lock size={12} aria-hidden="true" /> Finish &ldquo;{test.lockedBy!.title}&rdquo; to
+              unlock
+            </p>
+          ) : null}
+        </div>
+        <div>
+          {pct !== null ? (
+            <>
+              <ProgressBar percent={pct} />
+              <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                Last score {test.lastScore!.obtained} / {test.lastScore!.total}
+              </p>
+            </>
+          ) : (
+            <p className="text-xs text-neutral-400">Not attempted</p>
+          )}
+        </div>
+        <div className="flex items-center gap-1 sm:justify-end">
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls={detailsId}
+            onClick={() => setOpen((o) => !o)}
+            className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-xs font-medium text-neutral-600 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-neutral-300 dark:hover:bg-white/5"
+          >
+            Details
+            <ChevronDown
+              size={14}
+              aria-hidden="true"
+              className={cn("transition-transform", open && "rotate-180")}
+            />
+          </button>
+          <Link
+            href={`/practice/tests/${test.id}`}
+            aria-label={`Open ${test.title}`}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:hover:bg-white/5"
+          >
+            <ChevronRight size={16} aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+      {open ? (
+        <div
+          id={detailsId}
+          className="border-t border-neutral-100 px-4 pb-4 pt-3 dark:border-neutral-800"
+        >
+          <TestDetails id={test.id} />
+        </div>
+      ) : null}
     </li>
+  );
+}
+
+/** Exam / year filters for tabs that hold past papers. */
+function PaperFilters({
+  tests,
+  exam,
+  year,
+  onExam,
+  onYear,
+}: {
+  tests: PracticeTestItem[];
+  exam: string;
+  year: string;
+  onExam: (v: string) => void;
+  onYear: (v: string) => void;
+}) {
+  const exams = [...new Set(tests.map((t) => t.exam).filter((e): e is string => !!e))].sort();
+  const years = [...new Set(tests.map((t) => t.paperYear).filter((y): y is number => !!y))].sort(
+    (a, b) => b - a,
+  );
+  if (exams.length === 0 && years.length === 0) return null;
+  return (
+    <div className="flex flex-wrap items-end gap-3 px-4 pt-3">
+      {exams.length > 1 ? (
+        <div role="group" aria-label="Filter by exam" className="flex flex-wrap gap-1.5">
+          {["", ...exams].map((e) => (
+            <button
+              key={e || "all"}
+              type="button"
+              aria-pressed={exam === e}
+              onClick={() => onExam(e)}
+              className={cn(
+                "h-8 rounded-full border px-3 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                exam === e
+                  ? "border-primary-300 bg-primary-50 text-primary-700 dark:border-primary-500/40 dark:bg-primary-500/15 dark:text-primary-300"
+                  : "border-neutral-200 text-neutral-600 hover:bg-neutral-50 dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-white/[0.03]",
+              )}
+            >
+              {e || "All exams"}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      {years.length > 1 ? (
+        <div className="w-36">
+          <SelectField
+            id="paper-year-filter"
+            label="Year"
+            value={year}
+            options={[
+              { value: "", label: "All years" },
+              ...years.map((y) => ({ value: String(y), label: String(y) })),
+            ]}
+            onChange={onYear}
+          />
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -157,11 +274,17 @@ function PracticeContent() {
   const overview = useLoad(() => api.practice(courseId!), courseId);
   const [tab, setTab] = React.useState<string | null>(null);
   const [studied, setStudied] = React.useState<Set<string>>(new Set());
+  const [examFilter, setExamFilter] = React.useState("");
+  const [yearFilter, setYearFilter] = React.useState("");
 
   React.useEffect(() => {
     setTab(null);
     setStudied(new Set());
   }, [courseId]);
+  React.useEffect(() => {
+    setExamFilter("");
+    setYearFilter("");
+  }, [tab, courseId]);
 
   if (courses.loading && !courses.data) return <LoadingPanel />;
   if (courses.errorStatus !== null)
@@ -247,22 +370,45 @@ function PracticeContent() {
                   );
                 })}
               </div>
-              {active ? (
+              {active && courseId ? (
                 <div role="tabpanel">
+                  <TestPerformanceChart
+                    courseId={courseId}
+                    categoryId={active.id}
+                    categoryTitle={active.title}
+                  />
                   {active.description ? (
                     <p className="px-4 pt-3 text-sm text-neutral-500 dark:text-neutral-400">
                       {active.description}
                     </p>
                   ) : null}
-                  {active.tests.length === 0 ? (
-                    <EmptyState icon={ListChecks} heading="No tests in this category yet" />
-                  ) : (
-                    <ul className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                      {active.tests.map((t) => (
-                        <TestRow key={t.id} test={t} />
-                      ))}
-                    </ul>
-                  )}
+                  <PaperFilters
+                    tests={active.tests}
+                    exam={examFilter}
+                    year={yearFilter}
+                    onExam={setExamFilter}
+                    onYear={setYearFilter}
+                  />
+                  {(() => {
+                    const shown = active.tests.filter(
+                      (t) =>
+                        (!examFilter || t.exam === examFilter) &&
+                        (!yearFilter || String(t.paperYear) === yearFilter),
+                    );
+                    if (active.tests.length === 0)
+                      return (
+                        <EmptyState icon={ListChecks} heading="No tests in this category yet" />
+                      );
+                    if (shown.length === 0)
+                      return <EmptyState heading="No papers match these filters" />;
+                    return (
+                      <ul className="mt-2 divide-y divide-neutral-200 dark:divide-neutral-800">
+                        {shown.map((t) => (
+                          <TestRow key={t.id} test={t} />
+                        ))}
+                      </ul>
+                    );
+                  })()}
                 </div>
               ) : null}
             </Card>

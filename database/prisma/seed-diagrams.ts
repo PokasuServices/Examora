@@ -250,3 +250,51 @@ export function aspectSvg(caption: string) {
     caption,
   );
 }
+
+/** A pencil-style practice sketch of a bus terminus seen from above (varies with `seed`). */
+export function terminusSketchSvg(seed: number, refined = false): string {
+  const rnd = (n: number) => {
+    const x = Math.sin(seed * 9301 + n * 49297) * 233280;
+    return x - Math.floor(x);
+  };
+  const pencil = refined ? "#334155" : "#64748b";
+  const vpX = 200 + rnd(1) * 80;
+  const vpY = 80 + rnd(2) * 30;
+  let lines = "";
+  // Platform edges and roof lines towards the vanishing point.
+  for (const [x, y] of [
+    [0, 300],
+    [480, 300],
+    [0, 220],
+    [480, 230],
+    [60, 0],
+    [430, 0],
+  ] as const) {
+    lines += `<line x1="${x}" y1="${y}" x2="${vpX}" y2="${vpY}" stroke="${pencil}" stroke-width="${refined ? 1.6 : 1}" stroke-dasharray="${refined ? "" : "6 3"}"/>`;
+  }
+  // A bus pulling in.
+  const bx = 250 + rnd(3) * 60;
+  lines += `<path d="M ${bx} 170 L ${bx + 130} 200 L ${bx + 130} 260 L ${bx} 240 Z" fill="none" stroke="${pencil}" stroke-width="2"/>`;
+  lines += `<line x1="${bx + 20}" y1="185" x2="${bx + 110}" y2="205" stroke="${pencil}" stroke-width="1"/>`;
+  // People waiting at three depths.
+  for (let i = 0; i < (refined ? 7 : 4); i++) {
+    const depth = 0.4 + rnd(10 + i) * 0.6;
+    const px = 40 + rnd(20 + i) * 190;
+    const py = 150 + depth * 120;
+    const h = 22 + depth * 34;
+    lines += `<circle cx="${px}" cy="${py - h}" r="${h * 0.12}" fill="none" stroke="${pencil}" stroke-width="1.4"/>`;
+    lines += `<line x1="${px}" y1="${py - h * 0.88}" x2="${px}" y2="${py - h * 0.4}" stroke="${pencil}" stroke-width="1.4"/>`;
+    lines += `<line x1="${px}" y1="${py - h * 0.4}" x2="${px - h * 0.15}" y2="${py}" stroke="${pencil}" stroke-width="1.4"/>`;
+    lines += `<line x1="${px}" y1="${py - h * 0.4}" x2="${px + h * 0.15}" y2="${py}" stroke="${pencil}" stroke-width="1.4"/>`;
+    if (refined) {
+      lines += `<ellipse cx="${px + 4}" cy="${py + 2}" rx="${h * 0.25}" ry="${h * 0.05}" fill="#cbd5e1"/>`;
+    }
+  }
+  // A sign board.
+  lines += `<rect x="${60 + rnd(4) * 40}" y="40" width="110" height="28" fill="none" stroke="${pencil}" stroke-width="1.5"/>`;
+  lines += `<text x="${72 + rnd(4) * 40}" y="59" font-family="${FONT}" font-size="13" fill="${pencil}">BAY ${1 + Math.floor(rnd(5) * 9)}</text>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="300" viewBox="0 0 480 300">
+<rect width="480" height="300" fill="#fbfaf7"/>
+${lines}
+</svg>`;
+}

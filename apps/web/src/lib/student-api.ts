@@ -23,6 +23,11 @@ import type {
   SketchCommentView,
   SketchGalleryItem,
   SketchView,
+  SketchWorkView,
+  SketchChallenge,
+  SketchCommunityPage,
+  SketchRatingResult,
+  SketchWorkspace,
   SubmissionHistoryItem,
   TestShareInfo,
   TestShareVisitResult,
@@ -72,6 +77,67 @@ export function useStudentApi() {
           body: { fileName: file.name, mimeType: file.type, sizeBytes: file.size },
         },
       ),
+    // Sketch workspace (test upload + revisions)
+    sketchWorkspace: (quizId: string) => get<SketchWorkspace>(`/sketch-works/tests/${quizId}`),
+    sketchWork: (workId: string) => get<SketchWorkView>(`/sketch-works/${workId}`),
+    presignRevision: (questionId: string, file: File) =>
+      request<PresignedUpload>(`/sketch-works/questions/${questionId}/versions/presign`, {
+        method: "POST",
+        body: { fileName: file.name, mimeType: file.type, sizeBytes: file.size },
+      }),
+    saveRevision: (questionId: string, file: File, storageKey: string, description: string) =>
+      request<SketchWorkView>(`/sketch-works/questions/${questionId}/versions`, {
+        method: "POST",
+        body: {
+          fileName: file.name,
+          mimeType: file.type,
+          sizeBytes: file.size,
+          storageKey,
+          description: description.trim() || null,
+        },
+      }),
+    describeVersion: (versionId: string, description: string) =>
+      request<SketchWorkView>(`/sketch-works/versions/${versionId}`, {
+        method: "PATCH",
+        body: { description: description.trim() || null },
+      }),
+    deleteVersion: (versionId: string) =>
+      request<SketchWorkView>(`/sketch-works/versions/${versionId}`, { method: "DELETE" }),
+    versionPins: (versionId: string) =>
+      get<SketchCommentView[]>(`/sketch-works/versions/${versionId}/pins`),
+    addVersionPin: (versionId: string, body: { x: number; y: number; body: string }) =>
+      request<SketchCommentView[]>(`/sketch-works/versions/${versionId}/pins`, {
+        method: "POST",
+        body,
+      }),
+    clapWork: (workId: string) =>
+      request<{ clapped: boolean; claps: number }>(`/sketch-works/${workId}/clap`, {
+        method: "PUT",
+      }),
+    commentOnWork: (workId: string, body: string) =>
+      request<SketchWorkView>(`/sketch-works/${workId}/comments`, {
+        method: "POST",
+        body: { body },
+      }),
+    deleteWorkComment: (commentId: string) =>
+      request<void>(`/sketch-works/comments/${commentId}`, { method: "DELETE" }),
+    rateVersionSelf: (versionId: string, scores: Record<string, number>) =>
+      request<SketchRatingResult>(`/sketch-works/versions/${versionId}/self`, {
+        method: "PUT",
+        body: { scores },
+      }),
+    giveVersionFeedback: (versionId: string, likedFactors: string[], comment: string) =>
+      request<SketchRatingResult>(`/sketch-works/versions/${versionId}/feedback`, {
+        method: "POST",
+        body: { likedFactors, comment: comment.trim() || null },
+      }),
+    sketchCommunity: (questionId: string, opts: { sort: string; filter: string; page: number }) =>
+      get<SketchCommunityPage>(
+        `/sketch-works/questions/${questionId}/community?sort=${opts.sort}&filter=${opts.filter}&page=${opts.page}`,
+      ),
+    sketchChallenges: () => get<SketchChallenge[]>("/sketch-works/challenges"),
+    reportWork: (workId: string, reason: string) =>
+      request<void>(`/sketch-works/${workId}/report`, { method: "POST", body: { reason } }),
     confirmSketch: (attemptId: string, questionId: string, file: File, storageKey: string) =>
       request<{ ref: string }>(
         `/quiz-attempts/${attemptId}/questions/${questionId}/upload/confirm`,

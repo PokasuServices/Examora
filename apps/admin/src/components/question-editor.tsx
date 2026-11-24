@@ -8,9 +8,11 @@ import {
   type DifficultyLevel,
   type Question,
   type QuestionType,
+  type SketchRubricView,
 } from "@examora/types";
 import { Button, FieldError, Input, Label } from "@examora/ui";
 import { MediaField } from "@/components/media-field";
+import { useStudentAdminApi } from "@/lib/student-admin-api";
 import { TopicPicker } from "@/components/topic-picker";
 import { SelectField } from "@/components/ui/select-field";
 import { useAssessmentApi, type QuestionInput } from "@/lib/assessment-api";
@@ -114,6 +116,19 @@ export function QuestionEditor({
   const [subjectId, setSubjectId] = React.useState<string | null>(initial?.subjectId ?? null);
   const [topicId, setTopicId] = React.useState<string | null>(initial?.topicId ?? null);
   const [criteria, setCriteria] = React.useState((initial?.criteria ?? []).join("\n"));
+  const [rubricId, setRubricId] = React.useState<string>(initial?.rubricId ?? "");
+  const [rubrics, setRubrics] = React.useState<SketchRubricView[]>([]);
+  const studentAdmin = useStudentAdminApi();
+  const studentAdminRef = React.useRef(studentAdmin);
+  studentAdminRef.current = studentAdmin;
+  React.useEffect(() => {
+    if (type !== "UPLOAD") return;
+    studentAdminRef.current
+      .rubrics()
+      .then(setRubrics)
+      .catch(() => setRubrics([]));
+  }, [type]);
+  const rubric = rubrics.find((r) => r.id === rubricId) ?? null;
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [saved, setSaved] = React.useState(false);
@@ -204,6 +219,7 @@ export function QuestionEditor({
       subjectId: subjectId ?? undefined,
       topicId,
       criteria: upload ? criteriaList : [],
+      rubricId: upload ? rubricId || null : null,
       tags: tags
         .split(",")
         .map((t) => t.trim())
@@ -283,17 +299,48 @@ export function QuestionEditor({
 
       {type === "UPLOAD" ? (
         <Section title="Rating criteria">
-          <p className="text-xs text-neutral-500 dark:text-neutral-400">
-            One per line. Students rate their own sketch on these, reviewers mark it on them, and
-            the marks come from Assessment → Sketch review.
-          </p>
-          <textarea
-            aria-label="Rating criteria, one per line"
-            className={`${TEXTAREA} min-h-24`}
-            value={criteria}
-            onChange={(e) => setCriteria(e.target.value)}
-            placeholder={"Observation\nComposition\nPerspective"}
+          <SelectField
+            id="question-rubric"
+            label="Rating set"
+            value={rubricId}
+            options={[
+              { value: "", label: "— my own list (below) —" },
+              ...rubrics.map((r) => ({
+                value: r.id,
+                label: `${r.title} (${r.factors.length} factors)`,
+              })),
+            ]}
+            onChange={(v) => {
+              setRubricId(v);
+              const picked = rubrics.find((r) => r.id === v);
+              if (picked) setCriteria(picked.factors.map((f) => f.title).join("\n"));
+            }}
           />
+          {rubric ? (
+            <ol className="flex list-decimal flex-col gap-1 pl-5 text-sm text-neutral-700 dark:text-neutral-300">
+              {rubric.factors.map((f) => (
+                <li key={f.title}>
+                  <span className="font-medium">{f.title}</span>
+                  {f.description ? (
+                    <span className="text-neutral-500"> · {f.description}</span>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          ) : null}
+          <div className={rubric ? "hidden" : "flex flex-col gap-2"}>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              One per line. Students rate their own sketch on these, reviewers mark it on them, and
+              the marks come from Assessment → Sketch review.
+            </p>
+            <textarea
+              aria-label="Rating criteria, one per line"
+              className={`${TEXTAREA} min-h-24`}
+              value={criteria}
+              onChange={(e) => setCriteria(e.target.value)}
+              placeholder={"Observation\nComposition\nPerspective"}
+            />
+          </div>
         </Section>
       ) : type === "NUMERIC" ? (
         <Section title="Accepted answer">

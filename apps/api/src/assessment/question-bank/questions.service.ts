@@ -223,6 +223,7 @@ export class QuestionsService {
               ? undefined
               : (dto.resources as unknown as Prisma.InputJsonValue),
           topicId: dto.topicId,
+          rubricId: dto.rubricId,
           criteria:
             dto.criteria === undefined
               ? undefined
@@ -335,6 +336,7 @@ export class QuestionsService {
       explanationSteps: cleanSteps(dto.explanationSteps ?? []) as unknown as Prisma.InputJsonValue,
       resources: (dto.resources ?? []) as unknown as Prisma.InputJsonValue,
       topicId: dto.topicId ?? null,
+      rubricId: dto.type === "UPLOAD" ? (dto.rubricId ?? null) : null,
       criteria: (dto.type === "UPLOAD"
         ? (dto.criteria ?? []).map((c) => c.trim()).filter(Boolean)
         : []) as unknown as Prisma.InputJsonValue,

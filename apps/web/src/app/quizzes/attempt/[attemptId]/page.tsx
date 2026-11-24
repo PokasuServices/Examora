@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Flag,
   HelpCircle,
+  Lock,
   MessageSquareWarning,
   SkipForward,
 } from "lucide-react";
@@ -102,6 +103,66 @@ function ReportDialog({
   );
 }
 
+/** Confirm finishing a section early: the next one starts with its full time and this one closes. */
+function SectionConfirmDialog({
+  from,
+  to,
+  minutes,
+  busy,
+  onCancel,
+  onConfirm,
+}: {
+  from: string;
+  to: string;
+  minutes: number;
+  busy: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const stayRef = React.useRef<HTMLButtonElement>(null);
+  // Focus the safe choice first.
+  React.useEffect(() => stayRef.current?.focus(), []);
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onCancel();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onCancel]);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-neutral-900/40" onClick={onCancel} aria-hidden="true" />
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="section-confirm-title"
+        aria-describedby="section-confirm-body"
+        className="relative w-full max-w-md rounded-card border border-neutral-200 bg-white p-6 shadow-soft-hover dark:border-neutral-800 dark:bg-neutral-900"
+      >
+        <h2
+          id="section-confirm-title"
+          className="text-lg font-medium text-neutral-800 dark:text-white/90"
+        >
+          Finish {from}?
+        </h2>
+        <p
+          id="section-confirm-body"
+          className="mt-2 text-sm text-neutral-600 dark:text-neutral-400"
+        >
+          You can&rsquo;t come back to {from} after this. {to} starts now with its full {minutes}{" "}
+          minutes.
+        </p>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button ref={stayRef} variant="ghost" onClick={onCancel} disabled={busy}>
+            Stay in {from}
+          </Button>
+          <Button onClick={onConfirm} disabled={busy}>
+            {busy ? "Moving on…" : `Start ${to}`}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type Tone = "current" | "answered" | "seen" | "unseen";
 
 const TONE_CLASS: Record<Tone, string> = {
@@ -120,6 +181,7 @@ function Navigator({
   toneOf,
   flagged,
   onSelect,
+  sectionStatus,
 }: {
   questions: AttemptQuestion[];
   sections: { id: string; title: string }[];
@@ -127,52 +189,69 @@ function Navigator({
   toneOf: (q: AttemptQuestion) => Tone;
   flagged: (q: AttemptQuestion) => boolean;
   onSelect: (i: number) => void;
+  /** Timed-by-section tests: only the open section can be visited. */
+  sectionStatus?: (sectionId: string | null) => "DONE" | "CURRENT" | "UPCOMING" | null;
 }) {
   const indexed = questions.map((q, i) => ({ q, i }));
   const groups =
     sections.length > 0
       ? sections
-          .map((s) => ({ title: s.title, items: indexed.filter(({ q }) => q.sectionId === s.id) }))
+          .map((s) => ({
+            id: s.id as string | null,
+            title: s.title,
+            items: indexed.filter(({ q }) => q.sectionId === s.id),
+          }))
           .filter((g) => g.items.length > 0)
-      : [{ title: "", items: indexed }];
+      : [{ id: null as string | null, title: "", items: indexed }];
   const ungrouped = sections.length > 0 ? indexed.filter(({ q }) => !q.sectionId) : [];
-  if (ungrouped.length > 0) groups.push({ title: "Other", items: ungrouped });
+  if (ungrouped.length > 0) groups.push({ id: null, title: "Other", items: ungrouped });
 
   return (
     <nav aria-label="Questions" className="flex flex-col gap-4">
-      {groups.map((g) => (
-        <div key={g.title || "all"}>
-          {g.title ? (
-            <p className="mb-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">
-              {g.title}
-            </p>
-          ) : null}
-          <ol className="grid grid-cols-6 gap-1.5">
-            {g.items.map(({ q, i }) => (
-              <li key={q.questionId}>
-                <button
-                  type="button"
-                  onClick={() => onSelect(i)}
-                  aria-current={i === activeIndex ? "step" : undefined}
-                  aria-label={`Question ${i + 1}${flagged(q) ? ", flagged" : ""}`}
-                  className={cn(
-                    "relative flex h-9 w-full items-center justify-center rounded-md text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
-                    TONE_CLASS[i === activeIndex ? "current" : toneOf(q)],
-                  )}
-                >
-                  {i + 1}
-                  {flagged(q) ? (
-                    <span
-                      aria-hidden="true"
-                      className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-warning-500 ring-2 ring-white dark:ring-neutral-900"
-                    />
-                  ) : null}
-                </button>
-              </li>
-            ))}
-          </ol>
-        </div>
-      ))}
+      {groups.map((g) => {
+        const status = sectionStatus?.(g.id) ?? null;
+        const locked = status === "DONE" || status === "UPCOMING";
+        return (
+          <div key={g.title || "all"} className={cn(locked && "opacity-60")}>
+            {g.title ? (
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                {locked ? <Lock size={12} aria-hidden="true" /> : null}
+                {g.title}
+                {status === "DONE" ? <span className="font-normal">· closed</span> : null}
+                {status === "UPCOMING" ? <span className="font-normal">· starts later</span> : null}
+                {status === "CURRENT" ? (
+                  <span className="font-normal text-primary-600 dark:text-primary-400">· now</span>
+                ) : null}
+              </p>
+            ) : null}
+            <ol className="grid grid-cols-6 gap-1.5">
+              {g.items.map(({ q, i }) => (
+                <li key={q.questionId}>
+                  <button
+                    type="button"
+                    onClick={() => onSelect(i)}
+                    disabled={locked}
+                    aria-current={i === activeIndex ? "step" : undefined}
+                    aria-label={`Question ${i + 1}${flagged(q) ? ", flagged" : ""}${locked ? (status === "DONE" ? ", section closed" : ", section not started") : ""}`}
+                    className={cn(
+                      "relative flex h-9 w-full items-center justify-center rounded-md text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                      TONE_CLASS[i === activeIndex ? "current" : toneOf(q)],
+                    )}
+                  >
+                    {i + 1}
+                    {flagged(q) ? (
+                      <span
+                        aria-hidden="true"
+                        className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-warning-500 ring-2 ring-white dark:ring-neutral-900"
+                      />
+                    ) : null}
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </div>
+        );
+      })}
       <ul className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-neutral-500 dark:text-neutral-400">
         <li className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded bg-primary-600" aria-hidden="true" /> Answered
@@ -203,6 +282,10 @@ function AttemptContent() {
     numeric,
     isAnswered,
     remainingSeconds,
+    sectionRemaining,
+    nextSection,
+    movingSection,
+    sectionError,
     activeIndex,
     setActiveIndex,
     autosaveStatus,
@@ -221,6 +304,17 @@ function AttemptContent() {
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [reportOpen, setReportOpen] = React.useState(false);
   const [askMethod, setAskMethod] = React.useState(false);
+  const [sectionConfirmOpen, setSectionConfirmOpen] = React.useState(false);
+  const timing = attempt?.timing ?? null;
+  /** Indexes the student may visit: the open section when timed by section, else all. */
+  const scope = React.useMemo(
+    () =>
+      questions
+        .map((q, i) => ({ q, i }))
+        .filter(({ q }) => !timing || q.sectionId === timing.currentSectionId)
+        .map(({ i }) => i),
+    [questions, timing],
+  );
 
   React.useEffect(() => setAskMethod(false), [activeIndex]);
 
@@ -232,8 +326,12 @@ function AttemptContent() {
 
   const navigate = React.useCallback(
     (direction: -1 | 1) =>
-      setActiveIndex((i) => Math.min(questions.length - 1, Math.max(0, i + direction))),
-    [questions.length, setActiveIndex],
+      setActiveIndex((i) => {
+        const pos = scope.indexOf(i);
+        if (pos < 0) return scope[0] ?? i;
+        return scope[Math.min(scope.length - 1, Math.max(0, pos + direction))] ?? i;
+      }),
+    [scope, setActiveIndex],
   );
   const handleToggle = React.useCallback(
     (optionId: string) => {
@@ -266,10 +364,17 @@ function AttemptContent() {
 
   const current = question;
   const qMeta = meta[current.questionId];
-  const isLast = activeIndex === questions.length - 1;
+  const isLast = activeIndex === scope[scope.length - 1];
+  const isFirst = activeIndex === scope[0];
   const seenCount = questions.filter((q) => meta[q.questionId]?.visited).length;
-  const unseen = questions.length - seenCount;
+  const scopeUnseen = scope.filter((i) => !meta[questions[i]!.questionId]?.visited).length;
+  const unseen = scopeUnseen;
   const mustVisit = attempt.requireAllVisited === true && unseen > 0;
+  const openIndex = timing ? timing.sections.findIndex((x) => x.status === "CURRENT") : -1;
+  const openSection = timing ? timing.sections[openIndex] : undefined;
+  const nextTimed = timing ? timing.sections[openIndex + 1] : undefined;
+  const statusOf = (sectionId: string | null) =>
+    timing ? (timing.sections.find((x) => x.id === sectionId)?.status ?? null) : null;
   const answeredCount = questions.filter(answered).length;
   const sectionTitle = attempt.sections?.find((s) => s.id === current.sectionId)?.title;
 
@@ -284,7 +389,8 @@ function AttemptContent() {
       <AttemptHeader
         quizId={attempt.quizId}
         quizTitle={attempt.quizTitle}
-        remainingSeconds={remainingSeconds}
+        remainingSeconds={timing ? sectionRemaining : remainingSeconds}
+        timerLabel={openSection?.title}
         answeredCount={answeredCount}
         totalCount={questions.length}
         autosaveStatus={autosaveStatus}
@@ -292,7 +398,20 @@ function AttemptContent() {
 
       <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_19rem]">
         <main className="flex min-w-0 flex-col gap-4">
-          {sectionTitle ? (
+          {openSection ? (
+            <div className="rounded-card border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-neutral-700 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-neutral-300">
+              <p className="font-medium text-neutral-900 dark:text-white/90">
+                {openSection.title}: section {openIndex + 1} of {timing!.sections.length}
+              </p>
+              <p className="text-xs">
+                This section has its own time ({openSection.minutes} min).
+                {openIndex > 0 ? " Earlier sections are closed." : ""}
+                {nextTimed
+                  ? ` When it ends you move to ${nextTimed.title} automatically.`
+                  : " When it ends the test is submitted."}
+              </p>
+            </div>
+          ) : sectionTitle ? (
             <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
               {sectionTitle}
             </p>
@@ -363,12 +482,7 @@ function AttemptContent() {
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={activeIndex === 0}
-                onClick={() => navigate(-1)}
-              >
+              <Button variant="ghost" size="sm" disabled={isFirst} onClick={() => navigate(-1)}>
                 <ArrowLeft size={16} aria-hidden="true" /> Previous
               </Button>
               <Button
@@ -420,14 +534,32 @@ function AttemptContent() {
               }
               flagged={(q) => meta[q.questionId]?.flagged ?? false}
               onSelect={setActiveIndex}
+              sectionStatus={timing ? statusOf : undefined}
             />
           </div>
-          <Button onClick={() => setConfirmOpen(true)} disabled={mustVisit}>
-            Submit test
-          </Button>
+          {nextTimed ? (
+            <Button
+              onClick={() => setSectionConfirmOpen(true)}
+              disabled={mustVisit || movingSection}
+            >
+              {movingSection
+                ? "Moving on…"
+                : `Finish ${openSection!.title} and start ${nextTimed.title}`}
+            </Button>
+          ) : (
+            <Button onClick={() => setConfirmOpen(true)} disabled={mustVisit}>
+              Submit test
+            </Button>
+          )}
           {mustVisit ? (
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              Open the remaining {unseen} question{unseen === 1 ? "" : "s"} to enable submit.
+              Open the remaining {unseen} question{unseen === 1 ? "" : "s"}
+              {timing ? " in this section" : ""} to continue.
+            </p>
+          ) : null}
+          {sectionError ? (
+            <p role="alert" className="text-xs text-danger-600">
+              {sectionError}
             </p>
           ) : null}
         </aside>
@@ -442,6 +574,19 @@ function AttemptContent() {
         onConfirm={() => void submit()}
         onCancel={() => setConfirmOpen(false)}
       />
+      {sectionConfirmOpen && openSection && nextTimed ? (
+        <SectionConfirmDialog
+          from={openSection.title}
+          to={nextTimed.title}
+          minutes={nextTimed.minutes}
+          busy={movingSection}
+          onCancel={() => setSectionConfirmOpen(false)}
+          onConfirm={async () => {
+            const ok = await nextSection();
+            if (ok) setSectionConfirmOpen(false);
+          }}
+        />
+      ) : null}
       <ReportDialog
         open={reportOpen}
         onClose={() => setReportOpen(false)}

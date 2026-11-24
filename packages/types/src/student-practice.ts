@@ -12,6 +12,12 @@ export const ANSWER_METHODS = ["KNOWLEDGE", "ELIMINATION", "GUESS"] as const;
 export type AnswerMethod = (typeof ANSWER_METHODS)[number];
 
 export interface PracticeTestItem {
+  /** Past papers: exam and year the paper follows. */
+  exam: string | null;
+  paperYear: number | null;
+  note: string | null;
+  /** Extra XP once for a 100% score. */
+  perfectBonusXp: number;
   id: string;
   title: string;
   description: string | null;
@@ -69,6 +75,8 @@ export interface PracticeTestSection {
   description: string | null;
   questionCount: number;
   totalMarks: number;
+  /** Own time for this section in minutes (null = shares the test's time). */
+  timeLimitMinutes: number | null;
   marking: MarkingRow[];
 }
 
@@ -472,4 +480,182 @@ export interface TestShareVisitResult {
   quizId: string;
   /** True when this visit was new (and may have earned the sharer XP). */
   counted: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Sketch workspace (practice): test upload + revisions, pins, claps, comments
+// ---------------------------------------------------------------------------
+
+/** One rating factor of a sketch question, e.g. "Perspective" with what it means. */
+export interface RubricFactor {
+  title: string;
+  description: string | null;
+}
+
+export interface SketchVersionView {
+  id: string;
+  kind: "TEST" | "REVISION";
+  /** "Test upload", "Revision 1", … */
+  label: string;
+  imageRef: string;
+  description: string | null;
+  createdAt: string;
+  pinCount: number;
+  /** Owner can delete revisions (never the test upload). */
+  canDelete: boolean;
+  /** Test upload only: the reviewer's marks, which count toward the test score. */
+  expert: { marks: number | null; maxMarks: number; comment: string | null } | null;
+  ratings: SketchVersionRatings;
+}
+
+/** Scores are 1–5 per factor; totals are scaled to the question's marks. */
+export interface SketchVersionRatings {
+  self: { scores: Record<string, number>; total: number } | null;
+  expert: {
+    /** Average per factor across reviewers. */
+    scores: Record<string, number>;
+    total: number;
+    count: number;
+    comments: { authorName: string; body: string; createdAt: string }[];
+  } | null;
+  community: {
+    count: number;
+    /** How many classmates liked each factor. */
+    likes: Record<string, number>;
+    total: number;
+    comments: { authorName: string; body: string; likedFactors: string[]; createdAt: string }[];
+  };
+  /** The viewer's own peer feedback on this version (other people's sketches only). */
+  myFeedback: { likedFactors: string[]; comment: string | null } | null;
+}
+
+export interface SketchWorkCommentView {
+  id: string;
+  body: string;
+  authorName: string;
+  authorKind: "OWNER" | "EXPERT" | "PEER";
+  mine: boolean;
+  createdAt: string;
+}
+
+export interface SketchWorkView {
+  id: string;
+  questionId: string;
+  questionText: string;
+  rubricTitle: string | null;
+  factors: RubricFactor[];
+  /** Marks the question carries in the test (totals are scaled to this). */
+  maxMarks: number;
+  ownerName: string;
+  isMine: boolean;
+  versions: SketchVersionView[];
+  /** Uploads allowed in total, including the test upload. */
+  maxVersions: number;
+  canUpload: boolean;
+  views: number;
+  claps: number;
+  clappedByMe: boolean;
+  reportedByMe: boolean;
+  comments: SketchWorkCommentView[];
+}
+
+export interface SketchWorkspaceQuestion {
+  questionId: string;
+  text: string;
+  marks: number;
+  sectionTitle: string | null;
+  rubricTitle: string | null;
+  factors: RubricFactor[];
+  /** Null until the student has uploaded something for this question. */
+  work: SketchWorkView | null;
+  canUpload: boolean;
+}
+
+export interface SketchWorkspace {
+  quiz: { id: string; title: string };
+  /** The workspace opens once the student has finished the test. */
+  finished: boolean;
+  maxVersions: number;
+  questions: SketchWorkspaceQuestion[];
+}
+
+/** Admin: a named rating-factor set. */
+export interface SketchRubricView {
+  id: string;
+  title: string;
+  factors: RubricFactor[];
+  questionCount: number;
+}
+
+/** Admin: a sketch reported by another student. */
+export interface SketchReportView {
+  id: string;
+  workId: string;
+  reason: string;
+  status: "OPEN" | "RESOLVED";
+  reporterName: string;
+  ownerName: string;
+  questionText: string;
+  imageRef: string | null;
+  createdAt: string;
+}
+
+/** Result of rating your own version or giving feedback on someone else's. */
+export interface SketchRatingResult {
+  work: SketchWorkView;
+  xpAwarded: number;
+  /** Peer feedback only: XP-earning feedback left today (max 10). */
+  peerXpLeftToday?: number;
+}
+
+/** A card in the community grid: one classmate's latest version of a sketch. */
+export interface SketchCommunityCard {
+  workId: string;
+  ownerName: string;
+  imageRef: string;
+  versionLabel: string;
+  versionCount: number;
+  description: string | null;
+  views: number;
+  claps: number;
+  /** Average community score scaled to the question's marks, null until rated. */
+  communityTotal: number | null;
+  feedbackCount: number;
+  ratedByMe: boolean;
+  updatedAt: string;
+}
+
+export interface SketchCommunityPage {
+  /** False until the viewer has uploaded and rated their own sketch for this question. */
+  unlocked: boolean;
+  maxMarks: number;
+  items: SketchCommunityCard[];
+  nextPage: number | null;
+}
+
+/** A sketch question the student can practise and compare (Community challenges). */
+export interface SketchChallenge {
+  questionId: string;
+  text: string;
+  courseTitle: string;
+  test: { id: string; title: string };
+  uploads: number;
+  myWorkId: string | null;
+  myVersions: number;
+  unlocked: boolean;
+}
+
+/** Admin: a revision waiting for (or with) expert feedback. */
+export interface SketchRevisionQueueItem {
+  versionId: string;
+  workId: string;
+  studentName: string;
+  questionText: string;
+  label: string;
+  imageRef: string;
+  description: string | null;
+  factors: RubricFactor[];
+  createdAt: string;
+  myScores: Record<string, number> | null;
+  myComment: string | null;
 }

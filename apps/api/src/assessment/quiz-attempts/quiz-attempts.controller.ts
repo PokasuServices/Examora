@@ -102,6 +102,19 @@ export class QuizAttemptsController {
     return toAttemptState(await this.attemptsService.getAttemptState(id, actor.id));
   }
 
+  @Post(":id/sections/next")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Finish the current section early and start the next (timed-by-section tests)",
+  })
+  async nextSection(
+    @CurrentUser() actor: RequestUser,
+    @Param("id", ParseUUIDPipe) id: string,
+  ): Promise<AttemptState> {
+    await this.attemptsService.nextSection(id, actor.id);
+    return toAttemptState(await this.attemptsService.getAttemptState(id, actor.id));
+  }
+
   @Patch(":id/answers")
   // One request per answered question: the global 100/min-per-IP default is
   // easily exceeded by several students on a shared connection (classroom,

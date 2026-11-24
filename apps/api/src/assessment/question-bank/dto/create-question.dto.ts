@@ -115,6 +115,12 @@ export class CreateQuestionDto {
   @Type(() => QuestionResourceDto)
   resources?: QuestionResourceDto[];
 
+  @ApiPropertyOptional({ nullable: true, description: "Sketch questions: named rating-factor set" })
+  @IsOptional()
+  @ValidateIf((o: CreateQuestionDto) => o.rubricId !== null)
+  @IsUUID("4")
+  rubricId?: string | null;
+
   @ApiPropertyOptional({ nullable: true, description: "Topic the question tests" })
   @IsOptional()
   @IsUUID("4")

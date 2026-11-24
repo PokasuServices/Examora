@@ -14,6 +14,7 @@ import { XpService } from "../../gamification/xp.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { QuizCatalogService } from "../quiz-catalog/quiz-catalog.service";
 import type { OptionOrder, QuestionSnapshot } from "./attempt-snapshot.types";
+import { advanceSections, attemptDeadline, planFor, readPlan } from "./section-timing";
 import { computeScore } from "./scoring.util";
 
 @Injectable()
@@ -95,9 +96,18 @@ export class QuizAttemptsService {
     const totalMarks = questionSnapshot.reduce((sum, q) => sum + q.marks, 0);
 
     const startedAt = new Date();
-    const expiresAt = quiz.timeLimitMinutes
-      ? new Date(startedAt.getTime() + quiz.timeLimitMinutes * 60_000)
-      : null;
+    const sections = await this.prisma.quizSection.findMany({
+      where: { quizId },
+      orderBy: { position: "asc" },
+      select: { id: true, title: true, timeLimitMinutes: true },
+    });
+    // Every section timed: sections run one after another on their own clocks.
+    const plan = planFor(sections);
+    const expiresAt = plan
+      ? attemptDeadline(plan, 0, startedAt)
+      : quiz.timeLimitMinutes
+        ? new Date(startedAt.getTime() + quiz.timeLimitMinutes * 60_000)
+        : null;
 
     const attempt = await this.prisma.quizAttempt.create({
       data: {
@@ -111,6 +121,13 @@ export class QuizAttemptsService {
         totalMarks,
         startedAt,
         expiresAt,
+        ...(plan
+          ? {
+              sectionPlan: plan as unknown as Prisma.InputJsonValue,
+              currentSection: 0,
+              sectionStartedAt: startedAt,
+            }
+          : {}),
       },
     });
     return { attempt, created: true };
@@ -152,7 +169,79 @@ export class QuizAttemptsService {
       answerByQuestion,
       requireAllVisited: quiz.requireAllVisited,
       sections: quiz.sections,
+      plan: readPlan(attempt.sectionPlan),
     };
+  }
+
+  /**
+   * Timed-by-section attempts: close sections whose time has run out and
+   * open the next one. Guarded on the old section index so concurrent
+   * requests can't double-advance.
+   */
+  private async advanceSectionsIfDue(attempt: QuizAttempt): Promise<QuizAttempt> {
+    const plan = readPlan(attempt.sectionPlan);
+    if (!plan || attempt.status !== "IN_PROGRESS" || !attempt.sectionStartedAt) return attempt;
+    const next = advanceSections(
+      plan,
+      attempt.currentSection,
+      attempt.sectionStartedAt,
+      new Date(),
+    );
+    if (next.current === attempt.currentSection) return attempt;
+    await this.prisma.quizAttempt.updateMany({
+      where: { id: attempt.id, status: "IN_PROGRESS", currentSection: attempt.currentSection },
+      data: {
+        currentSection: next.current,
+        sectionStartedAt: next.sectionStartedAt,
+        expiresAt: attemptDeadline(plan, next.current, next.sectionStartedAt),
+      },
+    });
+    return this.prisma.quizAttempt.findUniqueOrThrow({ where: { id: attempt.id } });
+  }
+
+  /** Answers can only change in the section that is currently open. */
+  private assertQuestionInOpenSection(attempt: QuizAttempt, questionId: string): void {
+    const plan = readPlan(attempt.sectionPlan);
+    if (!plan) return;
+    const snapshot = attempt.questionSnapshot as unknown as QuestionSnapshot;
+    const sectionId = snapshot.find((s) => s.questionId === questionId)?.sectionId;
+    const index = plan.findIndex((p) => p.id === sectionId);
+    if (index === attempt.currentSection) return;
+    throw new ConflictException(
+      index < attempt.currentSection
+        ? "This section is closed. Answers in it can no longer change."
+        : "This section hasn't started yet.",
+    );
+  }
+
+  /**
+   * Finish the current section early and start the next one now (it gets its
+   * full time). Not available in the last section: submit the test instead.
+   */
+  async nextSection(attemptId: string, userId: string): Promise<QuizAttempt> {
+    let attempt = await this.findOwnedAttemptOrThrow(attemptId, userId);
+    attempt = await this.finalizeIfExpired(attempt);
+    if (attempt.status !== "IN_PROGRESS") {
+      throw new ConflictException("This attempt is already finalized");
+    }
+    const plan = readPlan(attempt.sectionPlan);
+    if (!plan) throw new BadRequestException("This test isn't timed by section");
+    if (attempt.currentSection >= plan.length - 1) {
+      throw new BadRequestException("This is the last section. Submit the test to finish.");
+    }
+    await this.assertAllVisitedIfRequired(attempt);
+    const now = new Date();
+    const next = attempt.currentSection + 1;
+    const { count } = await this.prisma.quizAttempt.updateMany({
+      where: { id: attempt.id, status: "IN_PROGRESS", currentSection: attempt.currentSection },
+      data: {
+        currentSection: next,
+        sectionStartedAt: now,
+        expiresAt: attemptDeadline(plan, next, now),
+      },
+    });
+    if (count === 0) throw new ConflictException("The section already changed. Reload the test.");
+    return this.prisma.quizAttempt.findUniqueOrThrow({ where: { id: attempt.id } });
   }
 
   /**
@@ -241,6 +330,7 @@ export class QuizAttemptsService {
     if (!snapshot.some((s) => s.questionId === questionId)) {
       throw new BadRequestException("questionId is not part of this attempt");
     }
+    this.assertQuestionInOpenSection(attempt, questionId);
     return attempt;
   }
 
@@ -263,6 +353,7 @@ export class QuizAttemptsService {
     if (!snapshot.some((s) => s.questionId === questionId)) {
       throw new BadRequestException("questionId is not part of this attempt");
     }
+    this.assertQuestionInOpenSection(attempt, questionId);
     const validOptionIds = new Set(optionOrder[questionId] ?? []);
     if (selectedOptionIds.some((id) => !validOptionIds.has(id))) {
       throw new BadRequestException(
@@ -320,13 +411,22 @@ export class QuizAttemptsService {
       select: { requireAllVisited: true },
     });
     if (!quiz?.requireAllVisited) return;
-    const snapshot = attempt.questionSnapshot as unknown as QuestionSnapshot;
+    const plan = readPlan(attempt.sectionPlan);
+    const all = attempt.questionSnapshot as unknown as QuestionSnapshot;
+    // Timed by section: only the open section counts (closed ones can't be revisited).
+    const snapshot = plan
+      ? all.filter((s) => s.sectionId === plan[attempt.currentSection]?.id)
+      : all;
     const visited = await this.prisma.quizAttemptAnswer.count({
-      where: { attemptId: attempt.id, visitedAt: { not: null } },
+      where: {
+        attemptId: attempt.id,
+        visitedAt: { not: null },
+        questionId: { in: snapshot.map((s) => s.questionId) },
+      },
     });
     if (visited < snapshot.length) {
       throw new BadRequestException(
-        `Open every question before submitting (${snapshot.length - visited} not seen yet)`,
+        `Open every question ${plan ? "in this section " : ""}before moving on (${snapshot.length - visited} not seen yet)`,
       );
     }
   }
@@ -389,7 +489,8 @@ export class QuizAttemptsService {
   }
 
   /** Closes an expired IN_PROGRESS attempt out as AUTO_SUBMITTED; a no-op otherwise. */
-  async finalizeIfExpired(attempt: QuizAttempt): Promise<QuizAttempt> {
+  async finalizeIfExpired(input: QuizAttempt): Promise<QuizAttempt> {
+    const attempt = await this.advanceSectionsIfDue(input);
     if (attempt.status !== "IN_PROGRESS" || !attempt.expiresAt || new Date() <= attempt.expiresAt) {
       return attempt;
     }
@@ -502,9 +603,11 @@ export class QuizAttemptsService {
     if (!this.xp) return;
     const quiz = await this.prisma.quiz.findUnique({
       where: { id: attempt.quizId },
-      select: { id: true, xpReward: true, topicId: true },
+      select: { id: true, xpReward: true, topicId: true, perfectBonusXp: true },
     });
-    if (!quiz || quiz.xpReward <= 0) return;
+    if (!quiz) return;
+    await this.awardPerfectBonus(attempt, quiz);
+    if (quiz.xpReward <= 0) return;
     const base = {
       userId: attempt.userId,
       amount: quiz.xpReward,
@@ -515,6 +618,25 @@ export class QuizAttemptsService {
     if (quiz.topicId && attempt.percentage !== null && decToNum(attempt.percentage) >= 100) {
       await this.xp.award({ ...base, reason: "QUIZ_PERFECT_BONUS" });
     }
+  }
+
+  /**
+   * A test's perfect-score bonus, once per student. Also called after a
+   * reviewer marks a sketch, since that can lift an attempt to 100%.
+   */
+  async awardPerfectBonus(
+    attempt: Pick<QuizAttempt, "userId" | "percentage">,
+    quiz: { id: string; perfectBonusXp: number },
+  ): Promise<void> {
+    if (!this.xp || quiz.perfectBonusXp <= 0) return;
+    if (attempt.percentage === null || decToNum(attempt.percentage) < 100) return;
+    await this.xp.award({
+      userId: attempt.userId,
+      amount: quiz.perfectBonusXp,
+      reason: "TEST_PERFECT_BONUS",
+      sourceType: "Quiz",
+      sourceId: quiz.id,
+    });
   }
 
   private async findOwnedAttemptOrThrow(attemptId: string, userId: string): Promise<QuizAttempt> {

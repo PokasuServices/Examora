@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { CheckCircle2, Info, Lock } from "lucide-react";
+import { Brush, CheckCircle2, Info, Lock } from "lucide-react";
 import { Button } from "@examora/ui";
 import { RequireAuth } from "@/components/require-auth";
 import { ErrorPanel, LoadingPanel } from "@/components/student/load-panels";
@@ -11,6 +11,7 @@ import { ShareTestCard } from "@/components/student/share-test-card";
 import { TestSections } from "@/components/student/test-sections";
 import { useLoad } from "@/components/student/use-load";
 import { Card } from "@/components/ui/card";
+import { Chip } from "@/components/ui/chip";
 import { IconBadge } from "@/components/ui/icon-badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { useQuizApi } from "@/lib/quiz-api";
@@ -138,8 +139,18 @@ function TestContent() {
       ) : null}
 
       <Card>
+        {data.exam || data.paperYear ? (
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            <Chip tone="primary">{[data.exam, data.paperYear].filter(Boolean).join(" · ")}</Chip>
+          </div>
+        ) : null}
         {data.description ? (
           <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">{data.description}</p>
+        ) : null}
+        {data.note ? (
+          <p className="mb-4 rounded-md bg-warning-50 px-3 py-2 text-sm text-warning-800 dark:bg-warning-500/10 dark:text-warning-200">
+            {data.note}
+          </p>
         ) : null}
         <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Stat label="Questions" value={data.questionCount} hint={`${data.totalMarks} marks`} />
@@ -159,7 +170,11 @@ function TestContent() {
           <Stat
             label="XP"
             value={data.xpReward > 0 ? `+${data.xpReward}` : "—"}
-            hint="on your first finish"
+            hint={
+              data.perfectBonusXp > 0
+                ? `on your first finish, +${data.perfectBonusXp} more for 100%`
+                : "on your first finish"
+            }
           />
         </dl>
 
@@ -178,6 +193,30 @@ function TestContent() {
           </p>
         ) : null}
       </Card>
+
+      {data.sections.some((sec) => sec.marking.some((m) => m.type === "UPLOAD")) ? (
+        <Card density="compact" className="flex flex-wrap items-center gap-4">
+          <IconBadge icon={Brush} tone="primary" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-neutral-800 dark:text-white/90">
+              Sketch workspace
+            </p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              {data.lastScore
+                ? "See your test sketch, upload revised versions (up to 4 in total) and read comments."
+                : "Opens after you finish the test: revise your sketches and get feedback."}
+            </p>
+          </div>
+          {data.lastScore ? (
+            <Link
+              href={`/practice/tests/${id}/sketches`}
+              className="inline-flex h-9 items-center rounded-md bg-primary-600 px-4 text-sm font-medium text-white hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+            >
+              Open workspace
+            </Link>
+          ) : null}
+        </Card>
+      ) : null}
 
       <ShareTestCard quizId={id} title={data.title} />
 

@@ -438,5 +438,15 @@ export class SketchesService {
         },
       });
     });
+    // A marked sketch can lift the attempt to 100%: award the test's perfect-score bonus.
+    const updated = await this.prisma.quizAttempt.findUnique({
+      where: { id: row.attemptId },
+      select: {
+        userId: true,
+        percentage: true,
+        quiz: { select: { id: true, perfectBonusXp: true } },
+      },
+    });
+    if (updated) await this.attempts.awardPerfectBonus(updated, updated.quiz);
   }
 }

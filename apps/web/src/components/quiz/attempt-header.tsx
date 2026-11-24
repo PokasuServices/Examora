@@ -15,6 +15,7 @@ export function AttemptHeader({
   quizId,
   quizTitle,
   remainingSeconds,
+  timerLabel,
   answeredCount,
   totalCount,
   autosaveStatus,
@@ -22,6 +23,8 @@ export function AttemptHeader({
   quizId: string;
   quizTitle: string;
   remainingSeconds: number | null;
+  /** e.g. the open section's name, shown before the clock. */
+  timerLabel?: string;
   answeredCount: number;
   totalCount: number;
   autosaveStatus: AutosaveStatus;
@@ -53,6 +56,9 @@ export function AttemptHeader({
             )}
             aria-live="polite"
           >
+            {timerLabel ? (
+              <span className="mr-1.5 font-normal opacity-80">{timerLabel}</span>
+            ) : null}
             {formatClock(remainingSeconds)}
           </span>
         ) : null}

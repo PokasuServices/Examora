@@ -5,6 +5,7 @@ import { Brush, MessageSquarePlus } from "lucide-react";
 import type { SketchReviewQueueItem } from "@examora/types";
 import { Button, FieldError, Input, Label, cn } from "@examora/ui";
 import { RequirePermission } from "@/components/require-permission";
+import { RevisionReview } from "@/components/revision-review";
 import { SketchPinsDialog } from "@/components/sketch-pins";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
@@ -167,6 +168,7 @@ function ReviewForm({ item, onDone }: { item: SketchReviewQueueItem; onDone: () 
 
 function SketchesContent() {
   const api = useStudentAdminApi();
+  const [view, setView] = React.useState<"tests" | "revisions">("tests");
   const [status, setStatus] = React.useState<"pending" | "reviewed">("pending");
   const [items, setItems] = React.useState<SketchReviewQueueItem[] | null>(null);
   const [error, setError] = React.useState(false);
@@ -185,36 +187,65 @@ function SketchesContent() {
     <main className="flex flex-col gap-6">
       <PageHeader
         title="Sketch review"
-        subtitle="Rate students' sketch answers on each criterion and award marks; the test score updates."
+        subtitle="Mark test uploads (the test score updates) and give feedback on the revisions students upload afterwards."
       />
-      <div className="flex gap-2">
-        {(["pending", "reviewed"] as const).map((s) => (
-          <Button
-            key={s}
-            variant={status === s ? "primary" : "outline"}
-            size="sm"
-            onClick={() => setStatus(s)}
+      <div
+        role="tablist"
+        aria-label="What to review"
+        className="flex gap-1 border-b border-neutral-200 dark:border-neutral-800"
+      >
+        {(["tests", "revisions"] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            role="tab"
+            aria-selected={view === v}
+            onClick={() => setView(v)}
+            className={
+              "-mb-px border-b-2 px-3 py-2 text-sm font-medium " +
+              (view === v
+                ? "border-primary-600 text-primary-700 dark:text-primary-300"
+                : "border-transparent text-neutral-500 hover:text-neutral-800 dark:text-neutral-400")
+            }
           >
-            {s === "pending" ? "Waiting for marks" : "Marked"}
-          </Button>
+            {v === "tests" ? "Test uploads (marks)" : "Revisions (feedback)"}
+          </button>
         ))}
-        {items ? <Chip tone="neutral">{items.length}</Chip> : null}
       </div>
-      {error ? (
-        <Card>
-          <RetryInline message="Couldn't load sketches" onRetry={load} />
-        </Card>
-      ) : items === null ? (
-        <p className="text-sm text-neutral-500">Loading…</p>
-      ) : items.length === 0 ? (
-        <Card>
-          <EmptyState
-            icon={Brush}
-            heading={status === "pending" ? "Nothing to mark" : "No marked sketches yet"}
-          />
-        </Card>
+      {view === "revisions" ? (
+        <RevisionReview />
       ) : (
-        items.map((i) => <ReviewForm key={i.answerId} item={i} onDone={load} />)
+        <>
+          <div className="flex gap-2">
+            {(["pending", "reviewed"] as const).map((s) => (
+              <Button
+                key={s}
+                variant={status === s ? "primary" : "outline"}
+                size="sm"
+                onClick={() => setStatus(s)}
+              >
+                {s === "pending" ? "Waiting for marks" : "Marked"}
+              </Button>
+            ))}
+            {items ? <Chip tone="neutral">{items.length}</Chip> : null}
+          </div>
+          {error ? (
+            <Card>
+              <RetryInline message="Couldn't load sketches" onRetry={load} />
+            </Card>
+          ) : items === null ? (
+            <p className="text-sm text-neutral-500">Loading…</p>
+          ) : items.length === 0 ? (
+            <Card>
+              <EmptyState
+                icon={Brush}
+                heading={status === "pending" ? "Nothing to mark" : "No marked sketches yet"}
+              />
+            </Card>
+          ) : (
+            items.map((i) => <ReviewForm key={i.answerId} item={i} onDone={load} />)
+          )}
+        </>
       )}
     </main>
   );

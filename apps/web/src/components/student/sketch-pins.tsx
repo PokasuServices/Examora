@@ -26,23 +26,22 @@ const clamp = (v: number) => Math.min(1, Math.max(0, v));
  * A sketch with comments pinned to spots on it. Click (or press Enter, then
  * use the arrow keys) to place a pin, then write the comment.
  */
-export function SketchPinsDialog({
-  title,
+export function PinBoard({
   imageRef,
   imageAlt,
   load,
   add,
   remove,
-  onClose,
+  imageClassName = "max-h-[70vh]",
 }: {
-  title: string;
   imageRef: string;
   imageAlt: string;
   load: () => Promise<SketchCommentView[]>;
   add: (c: { x: number; y: number; body: string }) => Promise<SketchCommentView[]>;
   remove: (id: string) => Promise<void>;
-  onClose: () => void;
+  imageClassName?: string;
 }) {
+  const ids = React.useId();
   const loadRef = React.useRef(load);
   loadRef.current = load;
   const [comments, setComments] = React.useState<SketchCommentView[] | null>(null);
@@ -64,12 +63,6 @@ export function SketchPinsDialog({
       });
   }, []);
   React.useEffect(() => refresh(), [refresh]);
-
-  React.useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   function place(e: React.MouseEvent<HTMLDivElement>) {
     const box = e.currentTarget.getBoundingClientRect();
@@ -117,6 +110,174 @@ export function SketchPinsDialog({
   }
 
   return (
+    <div className="grid min-h-0 flex-1 gap-0 overflow-hidden rounded-md border border-neutral-200 dark:border-neutral-800 lg:grid-cols-[1fr_20rem]">
+      <div className="flex flex-col items-center gap-2 bg-neutral-50 p-4 dark:bg-white/[0.02]">
+        <p id={`${ids}-help`} className="text-xs text-neutral-500 dark:text-neutral-400">
+          Click a spot on the sketch to comment on it. Keyboard: Enter, then arrow keys.
+        </p>
+        {url ? (
+          <div
+            role="button"
+            tabIndex={0}
+            aria-describedby={`${ids}-help`}
+            aria-label="Sketch. Place a comment pin"
+            onClick={place}
+            onKeyDown={onSurfaceKey}
+            className="relative inline-block cursor-crosshair select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          >
+            <img
+              src={url}
+              alt={imageAlt}
+              className={cn("block max-w-full rounded-md", imageClassName)}
+              draggable={false}
+            />
+            {(comments ?? []).map((c, i) => (
+              <span
+                key={c.id}
+                aria-hidden="true"
+                style={{ left: `${c.x * 100}%`, top: `${c.y * 100}%` }}
+                className={cn(
+                  "absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-xs font-semibold shadow ring-2 ring-white transition-transform dark:ring-neutral-900",
+                  PIN_CLASS[c.authorKind],
+                  active === c.id && "scale-125",
+                )}
+              >
+                {i + 1}
+              </span>
+            ))}
+            {draft ? (
+              <span
+                aria-hidden="true"
+                style={{ left: `${draft.x * 100}%`, top: `${draft.y * 100}%` }}
+                className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full border-2 border-dashed border-primary-600 bg-primary-100/70"
+              />
+            ) : null}
+          </div>
+        ) : (
+          <p className="text-sm text-neutral-500">
+            The image appears once its safety scan finishes.
+          </p>
+        )}
+      </div>
+      <div className="flex flex-col gap-4 border-t border-neutral-200 p-4 lg:border-l lg:border-t-0 dark:border-neutral-800">
+        {draft ? (
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor={`${ids}-body`}
+              className="text-sm font-medium text-neutral-800 dark:text-white/90"
+            >
+              Comment on this spot
+            </label>
+            <textarea
+              id={`${ids}-body`}
+              ref={textRef}
+              rows={3}
+              maxLength={500}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder="e.g. The vanishing point drifts here"
+              className="w-full rounded-md border border-neutral-300 bg-white p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            />
+            <div className="flex gap-2">
+              <Button size="sm" disabled={!body.trim() || saving} onClick={() => void save()}>
+                {saving ? "Saving…" : "Add comment"}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setDraft(null);
+                  setBody("");
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : null}
+        <FieldError>{error}</FieldError>
+        <div>
+          <h3 className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+            Comments {comments ? `(${comments.length})` : ""}
+          </h3>
+          {comments === null ? (
+            <p className="mt-2 text-sm text-neutral-500">Loading…</p>
+          ) : comments.length === 0 ? (
+            <p className="mt-2 text-sm text-neutral-500">No comments yet.</p>
+          ) : (
+            <ol className="mt-2 flex flex-col gap-2">
+              {comments.map((c, i) => (
+                <li
+                  key={c.id}
+                  onMouseEnter={() => setActive(c.id)}
+                  onMouseLeave={() => setActive(null)}
+                  className="rounded-md border border-neutral-200 p-2.5 text-sm dark:border-neutral-800"
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
+                        PIN_CLASS[c.authorKind],
+                      )}
+                    >
+                      {i + 1}
+                    </span>
+                    <span className="sr-only">Pin {i + 1}:</span>
+                    <span className="min-w-0 flex-1 truncate font-medium text-neutral-800 dark:text-white/90">
+                      {c.mine ? "You" : c.authorName}
+                    </span>
+                    <Chip tone={KIND_TONE[c.authorKind]}>{KIND_LABEL[c.authorKind]}</Chip>
+                    {c.mine ? (
+                      <button
+                        type="button"
+                        aria-label="Delete comment"
+                        onClick={async () => {
+                          await remove(c.id).catch(() => undefined);
+                          refresh();
+                        }}
+                        className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-danger-600 dark:hover:bg-white/5"
+                      >
+                        <Trash2 size={14} aria-hidden="true" />
+                      </button>
+                    ) : null}
+                  </div>
+                  <p className="mt-1 whitespace-pre-wrap text-neutral-700 dark:text-neutral-300">
+                    {c.body}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The pin board in a dialog (My sketches, admin review). The workspace shows
+ * the same board inline.
+ */
+export function SketchPinsDialog({
+  title,
+  onClose,
+  ...board
+}: {
+  title: string;
+  imageRef: string;
+  imageAlt: string;
+  load: () => Promise<SketchCommentView[]>;
+  add: (c: { x: number; y: number; body: string }) => Promise<SketchCommentView[]>;
+  remove: (id: string) => Promise<void>;
+  onClose: () => void;
+}) {
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-neutral-900/50" onClick={onClose} aria-hidden="true" />
       <div
@@ -141,147 +302,8 @@ export function SketchPinsDialog({
             <X size={18} aria-hidden="true" />
           </button>
         </div>
-        <div className="grid min-h-0 flex-1 gap-0 overflow-y-auto lg:grid-cols-[1fr_20rem]">
-          <div className="flex flex-col items-center gap-2 bg-neutral-50 p-4 dark:bg-white/[0.02]">
-            <p id="pins-help" className="text-xs text-neutral-500 dark:text-neutral-400">
-              Click a spot on the sketch to comment on it. Keyboard: Enter, then arrow keys.
-            </p>
-            {url ? (
-              <div
-                role="button"
-                tabIndex={0}
-                aria-describedby="pins-help"
-                aria-label="Sketch. Place a comment pin"
-                onClick={place}
-                onKeyDown={onSurfaceKey}
-                className="relative inline-block cursor-crosshair select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-              >
-                <img
-                  src={url}
-                  alt={imageAlt}
-                  className="block max-h-[70vh] max-w-full rounded-md"
-                  draggable={false}
-                />
-                {(comments ?? []).map((c, i) => (
-                  <span
-                    key={c.id}
-                    aria-hidden="true"
-                    style={{ left: `${c.x * 100}%`, top: `${c.y * 100}%` }}
-                    className={cn(
-                      "absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-xs font-semibold shadow ring-2 ring-white transition-transform dark:ring-neutral-900",
-                      PIN_CLASS[c.authorKind],
-                      active === c.id && "scale-125",
-                    )}
-                  >
-                    {i + 1}
-                  </span>
-                ))}
-                {draft ? (
-                  <span
-                    aria-hidden="true"
-                    style={{ left: `${draft.x * 100}%`, top: `${draft.y * 100}%` }}
-                    className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full border-2 border-dashed border-primary-600 bg-primary-100/70"
-                  />
-                ) : null}
-              </div>
-            ) : (
-              <p className="text-sm text-neutral-500">
-                The image appears once its safety scan finishes.
-              </p>
-            )}
-          </div>
-          <div className="flex flex-col gap-4 border-t border-neutral-200 p-4 lg:border-l lg:border-t-0 dark:border-neutral-800">
-            {draft ? (
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="pin-body"
-                  className="text-sm font-medium text-neutral-800 dark:text-white/90"
-                >
-                  Comment on this spot
-                </label>
-                <textarea
-                  id="pin-body"
-                  ref={textRef}
-                  rows={3}
-                  maxLength={500}
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  placeholder="e.g. The vanishing point drifts here"
-                  className="w-full rounded-md border border-neutral-300 bg-white p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-                />
-                <div className="flex gap-2">
-                  <Button size="sm" disabled={!body.trim() || saving} onClick={() => void save()}>
-                    {saving ? "Saving…" : "Add comment"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => {
-                      setDraft(null);
-                      setBody("");
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            ) : null}
-            <FieldError>{error}</FieldError>
-            <div>
-              <h3 className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-                Comments {comments ? `(${comments.length})` : ""}
-              </h3>
-              {comments === null ? (
-                <p className="mt-2 text-sm text-neutral-500">Loading…</p>
-              ) : comments.length === 0 ? (
-                <p className="mt-2 text-sm text-neutral-500">No comments yet.</p>
-              ) : (
-                <ol className="mt-2 flex flex-col gap-2">
-                  {comments.map((c, i) => (
-                    <li
-                      key={c.id}
-                      onMouseEnter={() => setActive(c.id)}
-                      onMouseLeave={() => setActive(null)}
-                      className="rounded-md border border-neutral-200 p-2.5 text-sm dark:border-neutral-800"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          aria-hidden="true"
-                          className={cn(
-                            "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
-                            PIN_CLASS[c.authorKind],
-                          )}
-                        >
-                          {i + 1}
-                        </span>
-                        <span className="sr-only">Pin {i + 1}:</span>
-                        <span className="min-w-0 flex-1 truncate font-medium text-neutral-800 dark:text-white/90">
-                          {c.mine ? "You" : c.authorName}
-                        </span>
-                        <Chip tone={KIND_TONE[c.authorKind]}>{KIND_LABEL[c.authorKind]}</Chip>
-                        {c.mine ? (
-                          <button
-                            type="button"
-                            aria-label="Delete comment"
-                            onClick={async () => {
-                              await remove(c.id).catch(() => undefined);
-                              refresh();
-                            }}
-                            className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-danger-600 dark:hover:bg-white/5"
-                          >
-                            <Trash2 size={14} aria-hidden="true" />
-                          </button>
-                        ) : null}
-                      </div>
-                      <p className="mt-1 whitespace-pre-wrap text-neutral-700 dark:text-neutral-300">
-                        {c.body}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
-          </div>
+        <div className="min-h-0 flex-1 overflow-y-auto p-3">
+          <PinBoard {...board} />
         </div>
       </div>
     </div>

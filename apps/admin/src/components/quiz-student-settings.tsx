@@ -29,6 +29,10 @@ export function QuizStudentSettings({ quiz, onSaved }: { quiz: QuizDetail; onSav
   const [categoryId, setCategoryId] = React.useState(quiz.practiceCategoryId ?? "");
   const [unlockAfterId, setUnlockAfterId] = React.useState(quiz.unlockAfterQuizId ?? "");
   const [requireAllVisited, setRequireAllVisited] = React.useState(quiz.requireAllVisited);
+  const [perfectBonusXp, setPerfectBonusXp] = React.useState(String(quiz.perfectBonusXp ?? 0));
+  const [exam, setExam] = React.useState(quiz.exam ?? "");
+  const [paperYear, setPaperYear] = React.useState(quiz.paperYear?.toString() ?? "");
+  const [note, setNote] = React.useState(quiz.note ?? "");
   const [categories, setCategories] = React.useState<PracticeCategoryRow[]>([]);
   const [otherQuizzes, setOtherQuizzes] = React.useState<Quiz[]>([]);
   const { request } = useAuth();
@@ -77,6 +81,16 @@ export function QuizStudentSettings({ quiz, onSaved }: { quiz: QuizDetail; onSav
       setError("XP must be a whole number of 0 or more.");
       return;
     }
+    const bonus = Number(perfectBonusXp || 0);
+    if (!Number.isInteger(bonus) || bonus < 0) {
+      setError("Perfect-score bonus must be a whole number of 0 or more.");
+      return;
+    }
+    const year = paperYear.trim() === "" ? null : Number(paperYear);
+    if (year !== null && (!Number.isInteger(year) || year < 1990 || year > 2100)) {
+      setError("Paper year must be a year such as 2024, or blank.");
+      return;
+    }
     setSaving(true);
     try {
       await api.updateQuiz(quiz.id, {
@@ -87,6 +101,10 @@ export function QuizStudentSettings({ quiz, onSaved }: { quiz: QuizDetail; onSav
         practiceCategoryId: categoryId || null,
         unlockAfterQuizId: unlockAfterId || null,
         requireAllVisited,
+        perfectBonusXp: bonus,
+        exam: exam.trim() || null,
+        paperYear: year,
+        note: note.trim() || null,
       });
       setSaved(true);
       onSaved();
@@ -179,6 +197,50 @@ export function QuizStudentSettings({ quiz, onSaved }: { quiz: QuizDetail; onSav
             ]}
             onChange={setUnlockAfterId}
           />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="perfect-bonus">Bonus XP for a perfect score</Label>
+            <Input
+              id="perfect-bonus"
+              inputMode="numeric"
+              value={perfectBonusXp}
+              onChange={(e) => setPerfectBonusXp(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="paper-exam">Past paper: exam</Label>
+            <Input
+              id="paper-exam"
+              placeholder="e.g. UCEED"
+              maxLength={40}
+              value={exam}
+              onChange={(e) => setExam(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="paper-year">Past paper: year</Label>
+            <Input
+              id="paper-year"
+              inputMode="numeric"
+              placeholder="e.g. 2024"
+              value={paperYear}
+              onChange={(e) => setPaperYear(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="quiz-note">Note for students (optional)</Label>
+          <Input
+            id="quiz-note"
+            maxLength={500}
+            placeholder="e.g. Questions recalled by students; may differ slightly from the actual paper."
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Exam and year let students filter past papers; papers list newest year first.
+          </p>
         </div>
         <label className="flex items-start gap-2 text-sm text-neutral-700 dark:text-neutral-300">
           <input

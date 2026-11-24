@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, ForbiddenException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
+import { Prisma } from "@examora/database";
 import { QuizCatalogService } from "../assessment/quiz-catalog/quiz-catalog.service";
 import { QuizAttemptsService } from "../assessment/quiz-attempts/quiz-attempts.service";
 import { DailyQuizService, todayInIndia } from "../daily-quiz/daily-quiz.service";
@@ -157,6 +158,16 @@ describe("Practice, attempt rules and daily quiz (integration)", () => {
     const overview = await practice.overview(userId, courseId);
     expect(overview.categories[0]!.tests[1]!.lockedBy).toBeNull();
     await expect(attempts.start(secondQuiz, userId)).resolves.toBeDefined();
+  });
+
+  it("gives a test's perfect-score bonus once, and only at 100%", async () => {
+    const quiz = { id: secondQuiz, perfectBonusXp: 40 };
+    const before = await xp.getTotal(userId);
+    await attempts.awardPerfectBonus({ userId, percentage: new Prisma.Decimal(99.5) }, quiz);
+    expect(await xp.getTotal(userId)).toBe(before);
+    await attempts.awardPerfectBonus({ userId, percentage: new Prisma.Decimal(100) }, quiz);
+    await attempts.awardPerfectBonus({ userId, percentage: new Prisma.Decimal(100) }, quiz);
+    expect(await xp.getTotal(userId)).toBe(before + 40);
   });
 
   it("daily quiz: one try, XP once, time capped by real elapsed time", async () => {

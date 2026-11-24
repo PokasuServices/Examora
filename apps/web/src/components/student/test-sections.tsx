@@ -12,6 +12,14 @@ const TYPE_LABEL: Record<QuestionType, string> = {
   UPLOAD: "Sketch upload",
 };
 
+/** "2 hours", "1 h 30 min", "45 min" */
+export function sectionTime(min: number): string {
+  if (min < 60) return `${min} min`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return m ? `${h} h ${m} min` : `${h} ${h === 1 ? "hour" : "hours"}`;
+}
+
 const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/0$/, ""));
 
 /** A practice test's sections as tabs: instructions plus a marking-scheme table each. */
@@ -58,6 +66,11 @@ export function TestSections({ sections }: { sections: PracticeTestSection[] }) 
               )}
             >
               {s.title}
+              {s.timeLimitMinutes ? (
+                <span className="ml-1.5 text-xs font-normal text-neutral-400">
+                  {sectionTime(s.timeLimitMinutes)}
+                </span>
+              ) : null}
             </button>
           ))}
         </div>
@@ -74,6 +87,13 @@ export function TestSections({ sections }: { sections: PracticeTestSection[] }) 
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
           {section.questionCount} {section.questionCount === 1 ? "question" : "questions"} ·{" "}
           {fmt(section.totalMarks)} marks
+          {section.timeLimitMinutes ? (
+            <>
+              {" "}
+              · <strong className="font-medium">{sectionTime(section.timeLimitMinutes)}</strong> for
+              this section
+            </>
+          ) : null}
         </p>
         {section.description ? (
           <p className="whitespace-pre-line text-sm text-neutral-700 dark:text-neutral-300">

@@ -107,6 +107,7 @@ export function toQuestion(row: Question & { options: QuestionOption[] }): Quest
     explanationSteps: toExplanationSteps(row.explanationSteps),
     explanationVideoUrl: row.explanationVideoUrl,
     resources: toResources(row.resources),
+    rubricId: row.rubricId,
     tags: row.tags,
     status: row.status,
     position: row.position,
@@ -127,6 +128,10 @@ export function toQuiz(row: Quiz): QuizDto {
     practiceCategoryId: row.practiceCategoryId,
     unlockAfterQuizId: row.unlockAfterQuizId,
     requireAllVisited: row.requireAllVisited,
+    perfectBonusXp: row.perfectBonusXp,
+    exam: row.exam,
+    paperYear: row.paperYear,
+    note: row.note,
     title: row.title,
     slug: row.slug,
     description: row.description,
@@ -151,6 +156,7 @@ export function toQuizSection(row: QuizSection): QuizSectionDto {
     title: row.title,
     description: row.description,
     position: row.position,
+    timeLimitMinutes: row.timeLimitMinutes,
   };
 }
 
@@ -250,7 +256,16 @@ export function toAttemptState(params: {
   answerByQuestion: Map<string, SelectedOptionsHolder>;
   requireAllVisited?: boolean;
   sections?: { id: string; title: string }[];
+  plan?: { id: string; title: string; minutes: number }[] | null;
 }): AttemptState {
+  const plan = params.plan ?? null;
+  const current = params.attempt.currentSection ?? 0;
+  const sectionIndex = (sectionId: string | null) =>
+    plan ? plan.findIndex((p) => p.id === sectionId) : -1;
+  const sectionEndsAt =
+    plan && params.attempt.sectionStartedAt
+      ? new Date(params.attempt.sectionStartedAt.getTime() + plan[current]!.minutes * 60_000)
+      : null;
   const remainingSeconds = params.attempt.expiresAt
     ? Math.max(0, Math.round((params.attempt.expiresAt.getTime() - Date.now()) / 1000))
     : null;
@@ -263,6 +278,27 @@ export function toAttemptState(params: {
       .filter((o): o is QuestionOption => o !== undefined)
       .map((o) => ({ id: o.id, text: o.text, imageUrl: o.imageUrl }));
     const answer = params.answerByQuestion.get(s.questionId);
+    // Questions in sections that haven't started stay hidden.
+    if (plan && sectionIndex(s.sectionId) > current) {
+      return {
+        questionId: s.questionId,
+        sectionId: s.sectionId,
+        type: question?.type ?? "SINGLE_CHOICE",
+        text: "",
+        imageUrl: null,
+        marks: s.marks,
+        options: [],
+        selectedOptionIds: [],
+        numericAnswer: null,
+        meta: {
+          visited: false,
+          flagged: false,
+          method: null,
+          timeSpentSeconds: 0,
+          uploadRef: null,
+        },
+      };
+    }
 
     return {
       questionId: s.questionId,
@@ -297,6 +333,23 @@ export function toAttemptState(params: {
     questions,
     requireAllVisited: params.requireAllVisited ?? false,
     sections: params.sections ?? [],
+    timing:
+      plan && sectionEndsAt
+        ? {
+            currentSectionId: plan[current]!.id,
+            sectionEndsAt: sectionEndsAt.toISOString(),
+            sectionRemainingSeconds: Math.max(
+              0,
+              Math.round((sectionEndsAt.getTime() - Date.now()) / 1000),
+            ),
+            sections: plan.map((p, i) => ({
+              id: p.id,
+              title: p.title,
+              minutes: p.minutes,
+              status: i < current ? "DONE" : i === current ? "CURRENT" : "UPCOMING",
+            })),
+          }
+        : null,
   };
 }
 
