@@ -25,10 +25,19 @@ export function useQuizApi() {
       request<AttemptState>("/quiz-attempts", { method: "POST", body: { quizId } }),
     getAttempt: (attemptId: string) =>
       request<AttemptState>(`/quiz-attempts/${attemptId}`, { method: "GET" }),
-    autosaveAnswer: (attemptId: string, questionId: string, selectedOptionIds: string[]) =>
+    /** numericAnswer is sent only for NUMERIC questions (null clears it). */
+    autosaveAnswer: (
+      attemptId: string,
+      questionId: string,
+      selectedOptionIds: string[],
+      numericAnswer?: number | null,
+    ) =>
       request<void>(`/quiz-attempts/${attemptId}/answers`, {
         method: "PATCH",
-        body: { questionId, selectedOptionIds },
+        body:
+          numericAnswer === undefined
+            ? { questionId, selectedOptionIds }
+            : { questionId, selectedOptionIds, numericAnswer },
       }),
     submitAttempt: (attemptId: string) =>
       request<AttemptResult>(`/quiz-attempts/${attemptId}/submit`, { method: "POST" }),

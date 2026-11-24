@@ -5,6 +5,7 @@ import { BookOpen } from "lucide-react";
 import { ApiError } from "@examora/auth-client";
 import type { Enrollment, EnrollmentStatus } from "@examora/types";
 import { Button, FieldError, Input, Label } from "@examora/ui";
+import { BulkLicencePanel } from "@/components/bulk-licence-panel";
 import { RequirePermission } from "@/components/require-permission";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
@@ -132,6 +133,8 @@ function EnrollmentsContent() {
           </div>
         </form>
       ) : null}
+
+      <BulkLicencePanel onChanged={load} />
 
       <Card density="compact">
         <div className="max-w-xs">

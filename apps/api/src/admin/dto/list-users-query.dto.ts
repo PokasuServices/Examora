@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { ROLE_NAMES, type RoleName } from "@examora/types";
-import { IsIn, IsOptional } from "class-validator";
+import { IsIn, IsOptional, IsString, MaxLength } from "class-validator";
 import { PaginationQueryDto } from "../../common/dto/pagination-query.dto";
 
 export class ListUsersQueryDto extends PaginationQueryDto {
@@ -8,4 +8,10 @@ export class ListUsersQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsIn(ROLE_NAMES)
   role?: RoleName;
+
+  @ApiPropertyOptional({ description: "Case-insensitive match on email, first or last name" })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  search?: string;
 }

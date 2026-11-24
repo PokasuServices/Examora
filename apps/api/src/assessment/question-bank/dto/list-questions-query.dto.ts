@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsIn, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
 import {
   CONTENT_STATUSES,
   DIFFICULTY_LEVELS,
@@ -35,4 +35,10 @@ export class ListQuestionsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   tag?: string;
+
+  @ApiPropertyOptional({ description: "Match words in the question text (case-insensitive)" })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  search?: string;
 }

@@ -16,6 +16,7 @@
     "@examora/shared": "workspace:*",
     "@examora/types": "workspace:*",
     "@examora/ui": "workspace:*",
+    "@examora/utils": "workspace:^",
     "lucide-react": "^1.28.0",
     "next": "15.1.4",
     "react": "19.0.0",

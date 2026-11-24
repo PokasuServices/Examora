@@ -27,6 +27,7 @@ import { Public } from "../common/decorators/public.decorator";
 // imports, not `import type` — see TD-011.
 import { AuthService } from "./auth.service";
 import type { AuthResponseDto } from "./dto/auth-response.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
@@ -160,6 +161,25 @@ export class AuthController {
   ): Promise<{ status: string }> {
     await this.authService.resetPassword(dto.token, dto.newPassword, this.requestMeta(req));
     return { status: "reset" };
+  }
+
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Post("change-password")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Change your password; signs out your other sessions" })
+  async changePassword(
+    @CurrentUser() user: RequestUser,
+    @Body() dto: ChangePasswordDto,
+    @Req() req: Request,
+  ): Promise<{ status: string }> {
+    await this.authService.changePassword(
+      user.id,
+      dto.currentPassword,
+      dto.newPassword,
+      this.requestMeta(req),
+      this.readRefreshCookie(req),
+    );
+    return { status: "changed" };
   }
 
   // ---------------------------------------------------------------------

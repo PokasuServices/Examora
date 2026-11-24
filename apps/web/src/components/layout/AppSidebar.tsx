@@ -8,8 +8,9 @@ import type { PermissionCode, RoleName } from "@examora/types";
 import { ChevronDown, ExternalLink, MoreHorizontal } from "lucide-react";
 import { cn } from "@examora/ui";
 import { AppLogo } from "@/components/common/AppLogo";
-import { MENU_GROUPS, type MenuItem, type MenuSubItem } from "@/config/menu";
+import { MENU_GROUPS, STUDENT_MENU_GROUPS, type MenuItem, type MenuSubItem } from "@/config/menu";
 import { useSidebar } from "@/context/SidebarContext";
+import { STUDENT_HOME, isStudentView } from "@/lib/student-view";
 
 function matches(pathname: string | null, path: string, exact?: boolean): boolean {
   if (!pathname) return false;
@@ -82,7 +83,9 @@ export function AppSidebar() {
     if (isMobileOpen) closeMobileSidebar();
   }
 
-  const groups = MENU_GROUPS.filter((group) => hasAccess(group.permission))
+  const student = isStudentView(user);
+  const groups = (student ? STUDENT_MENU_GROUPS : MENU_GROUPS)
+    .filter((group) => hasAccess(group.permission))
     .map((group) => ({
       ...group,
       items: group.items.filter(
@@ -106,7 +109,7 @@ export function AppSidebar() {
       <div
         className={cn("hidden py-6 lg:flex", showLabels ? "justify-start px-2" : "justify-center")}
       >
-        <Link href="/dashboard" aria-label="Examora home">
+        <Link href={student ? STUDENT_HOME : "/dashboard"} aria-label="Examora home">
           <AppLogo variant={showLabels ? "full" : "icon"} />
         </Link>
       </div>
@@ -219,7 +222,11 @@ export function AppSidebar() {
                     }
 
                     if (!item.path) return null;
-                    const active = !item.external && matches(pathname, item.path, item.exact);
+                    const active =
+                      !item.external &&
+                      [item.path, ...(item.also ?? [])].some((p) =>
+                        matches(pathname, p, item.exact),
+                      );
                     const linkClass = cn(
                       "menu-item group",
                       active ? "menu-item-active" : "menu-item-inactive",

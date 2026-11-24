@@ -9,6 +9,8 @@ import { MentorFeedbackService } from "./feedback/mentor-feedback.service";
 import { MentorMeetingsService } from "./meetings/mentor-meetings.service";
 import { MentorDashboardController } from "./mentor-dashboard/mentor-dashboard.controller";
 import { MentorDashboardService } from "./mentor-dashboard/mentor-dashboard.service";
+import { MentorCoursesController } from "./mentor-courses/mentor-courses.controller";
+import { MentorCoursesService } from "./mentor-courses/mentor-courses.service";
 import { MentorProfilesController } from "./mentor-profiles/mentor-profiles.controller";
 import { MentorProfilesService } from "./mentor-profiles/mentor-profiles.service";
 import { MentorWorkflowController } from "./mentor-workflow.controller";
@@ -36,10 +38,12 @@ import { MentorTasksService } from "./tasks/mentor-tasks.service";
     MentorProfilesController,
     MentorAssignmentController,
     MentorDashboardController,
+    MentorCoursesController,
     Student360Controller,
     MentorWorkflowController,
   ],
   providers: [
+    MentorCoursesService,
     MentorProfilesService,
     MentorAssignmentService,
     MentorDashboardService,

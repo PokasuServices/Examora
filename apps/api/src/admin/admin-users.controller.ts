@@ -26,7 +26,12 @@ export class AdminUsersController {
   @Get()
   @ApiOperation({ summary: "List users, optionally filtered by role (admin only)" })
   async list(@Query() query: ListUsersQueryDto): Promise<PaginatedData<UserProfile>> {
-    const { items, total } = await this.usersService.list(query.page, query.pageSize, query.role);
+    const { items, total } = await this.usersService.list(
+      query.page,
+      query.pageSize,
+      query.role,
+      query.search,
+    );
     const profiles = await Promise.all(items.map((item) => this.toProfile(item)));
     return { items: profiles, page: query.page, pageSize: query.pageSize, total };
   }

@@ -9,12 +9,13 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
   Req,
 } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
-import type { Course, PaginatedData } from "@examora/types";
+import type { Course, PaginatedData, PastPaperStatRow } from "@examora/types";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { RequirePermissions } from "../../common/decorators/require-permissions.decorator";
 import { requestAuditMeta } from "../../common/request-meta";
@@ -26,6 +27,7 @@ import { CoursesService } from "./courses.service";
 import { ChangeStatusDto } from "./dto/change-status.dto";
 import { CreateCourseDto } from "./dto/create-course.dto";
 import { ListCoursesQueryDto } from "./dto/list-courses-query.dto";
+import { ReplacePastPaperStatsDto } from "./dto/replace-past-paper-stats.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
 
 @ApiTags("content: courses")
@@ -85,6 +87,32 @@ export class CoursesController {
       after: { orderedIds: dto.orderedIds },
       ...requestAuditMeta(req),
     });
+  }
+
+  @Get(":id/past-paper-stats")
+  @ApiOperation({ summary: "Syllabus heatmap rows: questions per subject per past-paper year" })
+  getPastPaperStats(@Param("id", ParseUUIDPipe) id: string): Promise<PastPaperStatRow[]> {
+    return this.coursesService.getPastPaperStats(id);
+  }
+
+  @Put(":id/past-paper-stats")
+  @ApiOperation({ summary: "Replace the course's syllabus heatmap rows" })
+  async replacePastPaperStats(
+    @CurrentUser() actor: RequestUser,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: ReplacePastPaperStatsDto,
+    @Req() req: Request,
+  ): Promise<PastPaperStatRow[]> {
+    const rows = await this.coursesService.replacePastPaperStats(id, dto.rows);
+    await this.auditService.record({
+      actorId: actor.id,
+      action: "content.course_past_paper_stats_replaced",
+      entityType: "Course",
+      entityId: id,
+      after: { rows: rows.length },
+      ...requestAuditMeta(req),
+    });
+    return rows;
   }
 
   @Get(":id")

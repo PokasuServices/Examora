@@ -10,6 +10,7 @@ import {
 import * as argon2 from "argon2";
 import { PrismaClient } from "../generated/client/index.js";
 import { deterministicUuid } from "./seed-id.js";
+import { seedStudentModule } from "./seed-student-module.js";
 
 const prisma = new PrismaClient();
 
@@ -2951,6 +2952,11 @@ async function main(): Promise<void> {
     await seedNotifications(demoIds);
     await seedCms(demoIds);
     await seedCommerce(demoIds);
+    await seedStudentModule(prisma, {
+      studentId: demoIds.studentId,
+      adminId: demoIds.adminId,
+      mentorId: demoIds.mentorId,
+    });
   }
 
   // eslint-disable-next-line no-console -- seed script CLI output, not application logging

@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import type { ContentStatus } from "@examora/types";
+import type { ContentStatus, PastPaperStatRow } from "@examora/types";
 import type { Prisma } from "@examora/database";
 import { slugify } from "@examora/utils";
 import { PrismaService } from "../../prisma/prisma.service";
@@ -36,6 +36,7 @@ export class CoursesService {
         // status defaults to DRAFT (schema default).
         priceAmount: dto.priceAmount,
         priceCurrency: dto.priceCurrency ?? "INR",
+        nextExamDate: dto.nextExamDate ? new Date(dto.nextExamDate) : null,
       },
     });
   }
@@ -65,6 +66,53 @@ export class CoursesService {
     ]);
 
     return { items, total };
+  }
+
+  /** The course's syllabus heatmap rows (student Learn page). */
+  async getPastPaperStats(courseId: string): Promise<PastPaperStatRow[]> {
+    await this.findByIdOrThrow(courseId);
+    const rows = await this.prisma.pastPaperStat.findMany({
+      where: { courseId },
+      orderBy: [{ examLabel: "asc" }, { year: "asc" }],
+    });
+    return rows.map(({ examLabel, subjectId, year, questionCount }) => ({
+      examLabel,
+      subjectId,
+      year,
+      questionCount,
+    }));
+  }
+
+  /** Replaces every heatmap row for the course in one transaction. Subjects must belong to it. */
+  async replacePastPaperStats(
+    courseId: string,
+    rows: PastPaperStatRow[],
+  ): Promise<PastPaperStatRow[]> {
+    await this.findByIdOrThrow(courseId);
+    const subjectIds = [...new Set(rows.map((r) => r.subjectId))];
+    if (subjectIds.length > 0) {
+      const owned = await this.prisma.subject.count({
+        where: { id: { in: subjectIds }, courseId, deletedAt: null },
+      });
+      if (owned !== subjectIds.length) {
+        throw new BadRequestException("Every subjectId must be a subject of this course");
+      }
+    }
+    const seen = new Set<string>();
+    for (const r of rows) {
+      const key = `${r.examLabel.trim()}|${r.subjectId}|${r.year}`;
+      if (seen.has(key)) {
+        throw new BadRequestException(`Duplicate row: ${r.examLabel} / ${r.year}`);
+      }
+      seen.add(key);
+    }
+    await this.prisma.$transaction([
+      this.prisma.pastPaperStat.deleteMany({ where: { courseId } }),
+      this.prisma.pastPaperStat.createMany({
+        data: rows.map((r) => ({ ...r, examLabel: r.examLabel.trim(), courseId })),
+      }),
+    ]);
+    return this.getPastPaperStats(courseId);
   }
 
   async findByIdOrThrow(id: string) {
@@ -98,6 +146,12 @@ export class CoursesService {
         position: dto.position,
         priceAmount: dto.isFree ? null : dto.priceAmount,
         priceCurrency: dto.priceCurrency,
+        nextExamDate:
+          dto.nextExamDate === undefined
+            ? undefined
+            : dto.nextExamDate === null
+              ? null
+              : new Date(dto.nextExamDate),
       },
     });
   }

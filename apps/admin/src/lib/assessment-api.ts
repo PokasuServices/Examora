@@ -20,6 +20,26 @@ import type {
 const BASE = "/admin/assessment";
 
 /** Thin, typed wrappers over the authenticated request helper for assessment endpoints. */
+/** Create/update payload for a question (numeric, image and explanation fields included). */
+export interface QuestionInput {
+  type: QuestionType;
+  difficulty?: DifficultyLevel;
+  text: string;
+  imageUrl?: string | null;
+  explanation?: string;
+  explanationImageUrl?: string | null;
+  explanationVideoUrl?: string | null;
+  resources?: { label: string; url: string }[];
+  tags?: string[];
+  options: { text: string; imageUrl?: string | null; isCorrect: boolean }[];
+  numericMin?: number | null;
+  numericMax?: number | null;
+  partialMarking?: boolean;
+  subjectId?: string;
+  topicId?: string | null;
+  criteria?: string[];
+}
+
 export function useAssessmentApi() {
   const { request } = useAuth();
 
@@ -34,15 +54,9 @@ export function useAssessmentApi() {
       });
     },
     getQuestion: (id: string) => request<Question>(`${BASE}/questions/${id}`, { method: "GET" }),
-    createQuestion: (body: {
-      type: QuestionType;
-      difficulty?: DifficultyLevel;
-      text: string;
-      explanation?: string;
-      tags?: string[];
-      options: { text: string; isCorrect: boolean }[];
-    }) => request<Question>(`${BASE}/questions`, { method: "POST", body }),
-    updateQuestion: (id: string, body: Record<string, unknown>) =>
+    createQuestion: (body: QuestionInput) =>
+      request<Question>(`${BASE}/questions`, { method: "POST", body }),
+    updateQuestion: (id: string, body: Partial<QuestionInput>) =>
       request<Question>(`${BASE}/questions/${id}`, { method: "PATCH", body }),
     setQuestionStatus: (id: string, status: ContentStatus) =>
       request<Question>(`${BASE}/questions/${id}/status`, { method: "PATCH", body: { status } }),
@@ -82,10 +96,25 @@ export function useAssessmentApi() {
     // Question assignment
     assignQuestion: (
       quizId: string,
-      body: { questionId: string; sectionId?: string; marks?: number },
+      body: {
+        questionId: string;
+        sectionId?: string;
+        marks?: number;
+        /** Marks lost for a wrong answer; overrides the quiz rule. */
+        negativeMarks?: number | null;
+      },
     ) =>
       request<QuizQuestionAssignment>(`${BASE}/quizzes/${quizId}/questions`, {
         method: "POST",
+        body,
+      }),
+    updateAssignment: (
+      quizId: string,
+      id: string,
+      body: { marks?: number; negativeMarks?: number | null; sectionId?: string },
+    ) =>
+      request<QuizQuestionAssignment>(`${BASE}/quizzes/${quizId}/questions/${id}`, {
+        method: "PATCH",
         body,
       }),
     unassignQuestion: (quizId: string, id: string) =>

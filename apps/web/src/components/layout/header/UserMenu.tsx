@@ -4,18 +4,33 @@ import * as React from "react";
 import Link from "next/link";
 import { useAuth } from "@examora/auth-client";
 import {
+  BarChart3,
+  Bell,
   ChevronDown,
   CircleHelp,
+  ListChecks,
   LogOut,
   Settings,
+  Sparkles,
   User as UserIcon,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@examora/ui";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { isStudentView } from "@/lib/student-view";
 
 const MENU_ITEMS: { href: string; icon: LucideIcon; text: string }[] = [
   { href: "/profile", icon: UserIcon, text: "Edit profile" },
+  { href: "/profile", icon: Settings, text: "Account settings" },
+  { href: "/faq", icon: CircleHelp, text: "Support" },
+];
+
+/** Students' extra pages (not in their sidebar). Assignments moved to the sidebar. */
+const STUDENT_MENU_ITEMS: { href: string; icon: LucideIcon; text: string }[] = [
+  { href: "/quizzes", icon: ListChecks, text: "My quizzes" },
+  { href: "/analytics", icon: BarChart3, text: "My analytics" },
+  { href: "/notifications", icon: Bell, text: "Notifications" },
+  { href: "/recommendations", icon: Sparkles, text: "Recommendations" },
   { href: "/profile", icon: Settings, text: "Account settings" },
   { href: "/faq", icon: CircleHelp, text: "Support" },
 ];
@@ -82,7 +97,7 @@ export function UserMenu() {
           </div>
 
           <ul className="flex flex-col gap-1 border-b border-neutral-200 pb-3 pt-4 dark:border-neutral-800">
-            {MENU_ITEMS.map((item) => {
+            {(isStudentView(user) ? STUDENT_MENU_ITEMS : MENU_ITEMS).map((item) => {
               const Icon = item.icon;
               return (
                 <li key={item.text}>

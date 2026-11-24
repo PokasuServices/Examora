@@ -6,7 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { ApiError } from "@examora/auth-client";
 import type { ContentStatus, Question } from "@examora/types";
-import { Button, FieldError, Label } from "@examora/ui";
+import { Button, FieldError } from "@examora/ui";
+import { QuestionEditor } from "@/components/question-editor";
 import { RequirePermission } from "@/components/require-permission";
 import { StatusActions } from "@/components/status-actions";
 import { Card } from "@/components/ui/card";
@@ -31,10 +32,7 @@ function QuestionDetailContent() {
   const api = useAssessmentApi();
   const [status, setStatus] = React.useState<"loading" | "ready" | "error">("loading");
   const [question, setQuestion] = React.useState<Question | null>(null);
-  const [text, setText] = React.useState("");
-  const [explanation, setExplanation] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
-  const [saved, setSaved] = React.useState(false);
   const [pending, setPending] = React.useState<PendingAction>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
@@ -44,8 +42,6 @@ function QuestionDetailContent() {
       .getQuestion(id)
       .then((q) => {
         setQuestion(q);
-        setText(q.text);
-        setExplanation(q.explanation ?? "");
         setStatus("ready");
       })
       .catch(() => setStatus("error"));
@@ -55,19 +51,6 @@ function QuestionDetailContent() {
   React.useEffect(() => {
     load();
   }, [load]);
-
-  async function saveDetails(event: React.FormEvent): Promise<void> {
-    event.preventDefault();
-    setError(null);
-    setSaved(false);
-    try {
-      const updated = await api.updateQuestion(id, { text, explanation: explanation || undefined });
-      setQuestion(updated);
-      setSaved(true);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Save failed");
-    }
-  }
 
   async function confirmPending(): Promise<void> {
     if (!pending) return;
@@ -142,55 +125,7 @@ function QuestionDetailContent() {
       <FieldError>{error}</FieldError>
 
       <Card>
-        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Details</h2>
-        <form onSubmit={saveDetails} className="mt-4 flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="text">Question text</Label>
-            <textarea
-              id="text"
-              className="min-h-16 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="explanation">Explanation</Label>
-            <textarea
-              id="explanation"
-              className="min-h-12 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900"
-              value={explanation}
-              onChange={(e) => setExplanation(e.target.value)}
-            />
-          </div>
-          {saved ? <p className="text-sm text-success-600 dark:text-success-400">Saved.</p> : null}
-          <div>
-            <Button type="submit">Save details</Button>
-          </div>
-        </form>
-      </Card>
-
-      <Card>
-        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Options</h2>
-        <ul className="mt-4 flex flex-col gap-2">
-          {question.options.map((o) => (
-            <li
-              key={o.id}
-              className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm ${
-                o.isCorrect
-                  ? "border-success-500/30 bg-success-50 dark:bg-success-500/15"
-                  : "border-neutral-200 dark:border-neutral-800"
-              }`}
-            >
-              <span className="text-neutral-800 dark:text-white/90">{o.text}</span>
-              {o.isCorrect ? <Chip tone="success">Correct</Chip> : null}
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
-          To change options, edit via the question bank list — options are not editable inline here
-          this sprint.
-        </p>
+        <QuestionEditor key={question.updatedAt} initial={question} onSaved={setQuestion} />
       </Card>
 
       <Card density="compact">

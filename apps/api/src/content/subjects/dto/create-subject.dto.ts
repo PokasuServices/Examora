@@ -1,5 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsInt, IsOptional, IsString, IsUUID, Matches, MaxLength, Min } from "class-validator";
+import { SUBJECT_COLORS, SUBJECT_ICONS } from "@examora/types";
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Matches,
+  MaxLength,
+  Min,
+} from "class-validator";
 
 export class CreateSubjectDto {
   @ApiProperty({ description: "Owning course id" })
@@ -29,4 +39,19 @@ export class CreateSubjectDto {
   @IsInt()
   @Min(0)
   position?: number;
+
+  @ApiPropertyOptional({ enum: ["SUBJECT", "ESSENTIALS"], default: "SUBJECT" })
+  @IsOptional()
+  @IsIn(["SUBJECT", "ESSENTIALS"])
+  kind?: "SUBJECT" | "ESSENTIALS";
+
+  @ApiPropertyOptional({ enum: SUBJECT_ICONS, nullable: true })
+  @IsOptional()
+  @IsIn(SUBJECT_ICONS)
+  icon?: string | null;
+
+  @ApiPropertyOptional({ enum: SUBJECT_COLORS, nullable: true })
+  @IsOptional()
+  @IsIn(SUBJECT_COLORS)
+  color?: string | null;
 }

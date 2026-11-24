@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { EnrollmentModule } from "../enrollment/enrollment.module";
+import { GamificationModule } from "../gamification/gamification.module";
 import { AdminQuizAttemptsController } from "./admin-monitoring/admin-quiz-attempts.controller";
 import { AdminQuizAttemptsService } from "./admin-monitoring/admin-quiz-attempts.service";
 import { QuestionsController } from "./question-bank/questions.controller";
@@ -8,6 +9,7 @@ import { QuizCatalogController } from "./quiz-catalog/quiz-catalog.controller";
 import { QuizCatalogService } from "./quiz-catalog/quiz-catalog.service";
 import { QuizAttemptsController } from "./quiz-attempts/quiz-attempts.controller";
 import { QuizAttemptsService } from "./quiz-attempts/quiz-attempts.service";
+import { AttemptAnalysisService } from "./quiz-attempts/attempt-analysis.service";
 import { QuizQuestionsController } from "./quizzes/quiz-questions.controller";
 import { QuizQuestionsService } from "./quizzes/quiz-questions.service";
 import { QuizzesController } from "./quizzes/quizzes.controller";
@@ -22,7 +24,7 @@ import { QuizSectionsService } from "./quizzes/sections.service";
  * result dashboards (admin).
  */
 @Module({
-  imports: [EnrollmentModule],
+  imports: [EnrollmentModule, GamificationModule],
   controllers: [
     QuestionsController,
     QuizzesController,
@@ -33,6 +35,7 @@ import { QuizSectionsService } from "./quizzes/sections.service";
     AdminQuizAttemptsController,
   ],
   providers: [
+    AttemptAnalysisService,
     QuestionsService,
     QuizzesService,
     QuizSectionsService,
@@ -46,6 +49,6 @@ import { QuizSectionsService } from "./quizzes/sections.service";
   // so no new quiz-history query logic is needed. QuizCatalogService is
   // reused by CommunityModule (ADR-0017) to validate a thread's optional
   // related-quiz link.
-  exports: [AdminQuizAttemptsService, QuizCatalogService],
+  exports: [AdminQuizAttemptsService, QuizCatalogService, QuizAttemptsService],
 })
 export class AssessmentModule {}

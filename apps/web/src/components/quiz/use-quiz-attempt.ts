@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { AttemptQuestion, AttemptState } from "@examora/types";
 import { useQuizApi } from "@/lib/quiz-api";
 import type { AutosaveStatus } from "@/components/ui/autosave-indicator";
-import type { AnswersMap } from "./types";
+import { parseNumeric, type AnswersMap, type NumericMap } from "./types";
 
 type LoadState = "loading" | "ready" | "not-found";
 
@@ -46,6 +46,7 @@ export function useQuizAttempt(attemptId: string) {
   const [loadState, setLoadState] = React.useState<LoadState>("loading");
   const [attempt, setAttempt] = React.useState<AttemptState | null>(null);
   const [answers, setAnswers] = React.useState<AnswersMap>({});
+  const [numeric, setNumeric] = React.useState<NumericMap>({});
   const [remainingSeconds, setRemainingSeconds] = React.useState<number | null>(null);
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [autosaveStatus, setAutosaveStatus] = React.useState<AutosaveStatus>("idle");
@@ -55,6 +56,8 @@ export function useQuizAttempt(attemptId: string) {
 
   // Autosave bookkeeping lives in refs: it changes far more often than it needs to render.
   const latest = React.useRef<AnswersMap>({});
+  const latestNumeric = React.useRef<NumericMap>({});
+  const numericIds = React.useRef(new Set<string>());
   const unsynced = React.useRef(new Set<string>());
   const failed = React.useRef(new Set<string>());
   const timers = React.useRef(new Map<string, ReturnType<typeof setTimeout>>());
@@ -81,17 +84,26 @@ export function useQuizAttempt(attemptId: string) {
       const run = previous.then(async () => {
         if (!unsynced.current.has(questionId)) return true; // an earlier save already covered it
         const value = latest.current[questionId] ?? [];
+        const raw = latestNumeric.current[questionId];
+        const isNumeric = numericIds.current.has(questionId);
         unsynced.current.delete(questionId);
         inFlight.current++;
         refreshStatus();
         try {
-          await apiRef.current.autosaveAnswer(attemptId, questionId, value);
+          await apiRef.current.autosaveAnswer(
+            attemptId,
+            questionId,
+            isNumeric ? [] : value,
+            isNumeric ? parseNumeric(raw) : undefined,
+          );
           failed.current.delete(questionId);
           retries.current.delete(questionId);
           return true;
         } catch {
           // Only mark as unsynced if nothing newer replaced it meanwhile.
-          if (latest.current[questionId] === value) unsynced.current.add(questionId);
+          if (latest.current[questionId] === value && latestNumeric.current[questionId] === raw) {
+            unsynced.current.add(questionId);
+          }
           failed.current.add(questionId);
           const attempts = (retries.current.get(questionId) ?? 0) + 1;
           retries.current.set(questionId, attempts);
@@ -138,12 +150,18 @@ export function useQuizAttempt(attemptId: string) {
         }
         try {
           await apiRef.current.submitAttempt(attemptId);
-        } catch {
+        } catch (err) {
           // The attempt may already be closed (e.g. the server auto-submitted it
           // when time ran out) — then the result page is the right place to go.
           const state = await apiRef.current.getAttempt(attemptId).catch(() => null);
           if (state?.status === "IN_PROGRESS") {
-            setSubmitError("Submitting failed — your answers are saved. Please try again.");
+            // A 400 explains itself (e.g. "Open every question before submitting").
+            const status = (err as { status?: number })?.status;
+            setSubmitError(
+              status === 400 && err instanceof Error
+                ? err.message
+                : "Submitting failed — your answers are saved. Please try again.",
+            );
             return;
           }
         }
@@ -169,9 +187,18 @@ export function useQuizAttempt(attemptId: string) {
         setAttempt(state);
         setRemainingSeconds(state.remainingSeconds);
         const initial: AnswersMap = {};
-        for (const q of state.questions) initial[q.questionId] = q.selectedOptionIds;
+        const initialNumeric: NumericMap = {};
+        for (const q of state.questions) {
+          initial[q.questionId] = q.selectedOptionIds;
+          if (q.type === "NUMERIC") {
+            numericIds.current.add(q.questionId);
+            initialNumeric[q.questionId] = q.numericAnswer === null ? "" : String(q.numericAnswer);
+          }
+        }
         latest.current = initial;
+        latestNumeric.current = initialNumeric;
         setAnswers(initial);
+        setNumeric(initialNumeric);
         setLoadState("ready");
       })
       .catch(() => {
@@ -233,14 +260,37 @@ export function useQuizAttempt(attemptId: string) {
     setAutosaveStatus("saving");
   }
 
+  /** NUMERIC questions: store the typed text and autosave its parsed value (debounced). */
+  function setNumericAnswer(question: AttemptQuestion, raw: string): void {
+    latestNumeric.current = { ...latestNumeric.current, [question.questionId]: raw };
+    setNumeric(latestNumeric.current);
+    unsynced.current.add(question.questionId);
+    retries.current.delete(question.questionId);
+    setSubmitError(null);
+
+    const existing = timers.current.get(question.questionId);
+    if (existing) clearTimeout(existing);
+    timers.current.set(
+      question.questionId,
+      setTimeout(() => void saveNow(question.questionId), AUTOSAVE_DEBOUNCE_MS * 2),
+    );
+    setAutosaveStatus("saving");
+  }
+
   const questions = attempt?.questions ?? [];
-  const answeredCount = Object.values(answers).filter((v) => v.length > 0).length;
+  const isAnswered = (q: AttemptQuestion) =>
+    q.type === "NUMERIC"
+      ? parseNumeric(numeric[q.questionId]) !== null
+      : (answers[q.questionId]?.length ?? 0) > 0;
+  const answeredCount = questions.filter(isAnswered).length;
 
   return {
     loadState,
     attempt,
     questions,
     answers,
+    numeric,
+    isAnswered,
     answeredCount,
     remainingSeconds,
     activeIndex,
@@ -249,6 +299,7 @@ export function useQuizAttempt(attemptId: string) {
     submitting,
     submitError,
     toggleOption,
+    setNumericAnswer,
     submit,
   };
 }

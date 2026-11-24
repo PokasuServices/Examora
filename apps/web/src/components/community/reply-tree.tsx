@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CheckCircle2, Flag, MessageSquare, ThumbsUp } from "lucide-react";
+import { CheckCircle2, Flag, MessageSquare } from "lucide-react";
 import type { Reply } from "@examora/types";
 import { cn } from "@examora/ui";
 import { authorDisplayName, timeAgo } from "@/lib/format";
@@ -75,13 +75,14 @@ function ReplyNode({
               type="button"
               onClick={() => void actions.onToggleLike(reply.id)}
               aria-pressed={reply.isLikedByViewer}
+              aria-label={`${reply.isLikedByViewer ? "Clapped" : "Clap"}, ${reply.likeCount} ${reply.likeCount === 1 ? "clap" : "claps"}`}
               className={cn(
                 "flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded",
                 reply.isLikedByViewer && "text-primary-600 dark:text-primary-400",
               )}
             >
-              <ThumbsUp size={13} strokeWidth={1.75} aria-hidden="true" />
-              {reply.likeCount > 0 ? reply.likeCount : "Like"}
+              <span aria-hidden="true">👏</span>
+              {reply.likeCount > 0 ? reply.likeCount : "Clap"}
             </button>
             {!actions.threadLocked ? (
               <button

@@ -6,6 +6,11 @@ export interface SnapshotQuestion {
   questionId: string;
   sectionId: string | null;
   marks: number;
+  /**
+   * Marks lost for a wrong answer, frozen from QuizQuestion.negativeMarks at
+   * start; absent (older attempts) or null = use the quiz-wide rule.
+   */
+  negativeMarks?: number | null;
 }
 
 export type QuestionSnapshot = SnapshotQuestion[];

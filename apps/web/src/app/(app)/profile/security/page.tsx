@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { ApiError } from "@examora/auth-client";
+import { Button, FieldError, Input, Label } from "@examora/ui";
 import { CheckCircle2, KeyRound, Mail, Monitor, ShieldCheck } from "lucide-react";
 import { RequireAuth } from "@/components/require-auth";
 import { Card } from "@/components/ui/card";
@@ -91,18 +92,41 @@ function SecurityStatusCard({
 
 function PasswordCard({ email }: { email: string }) {
   const api = useSettingsApi();
+  const [current, setCurrent] = React.useState("");
+  const [next, setNext] = React.useState("");
+  const [confirm, setConfirm] = React.useState("");
   const [status, setStatus] = React.useState<AutosaveStatus>("idle");
   const [error, setError] = React.useState<string | null>(null);
+  const [resetStatus, setResetStatus] = React.useState<AutosaveStatus>("idle");
 
-  async function sendReset(): Promise<void> {
+  const mismatch = confirm.length > 0 && next !== confirm;
+  const tooShort = next.length > 0 && next.length < 8;
+  const canSave = current.length > 0 && next.length >= 8 && next === confirm;
+
+  async function change(e: React.FormEvent): Promise<void> {
+    e.preventDefault();
+    if (!canSave) return;
     setStatus("saving");
     setError(null);
     try {
-      await api.requestPasswordReset(email);
+      await api.changePassword({ currentPassword: current, newPassword: next });
       setStatus("saved");
+      setCurrent("");
+      setNext("");
+      setConfirm("");
     } catch (err) {
       setStatus("error");
-      setError(err instanceof ApiError ? err.message : "Could not send the reset email.");
+      setError(err instanceof ApiError ? err.message : "Could not change your password.");
+    }
+  }
+
+  async function sendReset(): Promise<void> {
+    setResetStatus("saving");
+    try {
+      await api.requestPasswordReset(email);
+      setResetStatus("saved");
+    } catch {
+      setResetStatus("error");
     }
   }
 
@@ -110,23 +134,72 @@ function PasswordCard({ email }: { email: string }) {
     <Card>
       <div className="flex items-center gap-2">
         <IconBadge icon={KeyRound} tone="primary" />
-        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Password</h2>
+        <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">Change password</h2>
       </div>
-      <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-        We&rsquo;ll email a reset link to{" "}
-        <span className="font-medium text-neutral-700 dark:text-neutral-300">{email}</span> —
-        there&rsquo;s no in-app form for changing your password directly.
+      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+        Changing it signs you out on every other device.
       </p>
-      <div className="mt-4 flex items-center gap-3">
+      <form onSubmit={(e) => void change(e)} className="mt-4 grid gap-4 sm:max-w-md">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="pw-current">Current password</Label>
+          <Input
+            id="pw-current"
+            type="password"
+            autoComplete="current-password"
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="pw-new">New password</Label>
+          <Input
+            id="pw-new"
+            type="password"
+            autoComplete="new-password"
+            value={next}
+            aria-invalid={tooShort || undefined}
+            aria-describedby="pw-new-hint"
+            onChange={(e) => setNext(e.target.value)}
+          />
+          <p id="pw-new-hint" className="text-xs text-neutral-500 dark:text-neutral-400">
+            At least 8 characters.
+          </p>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="pw-confirm">Confirm new password</Label>
+          <Input
+            id="pw-confirm"
+            type="password"
+            autoComplete="new-password"
+            value={confirm}
+            aria-invalid={mismatch || undefined}
+            onChange={(e) => setConfirm(e.target.value)}
+          />
+          {mismatch ? <FieldError>The two new passwords don&rsquo;t match.</FieldError> : null}
+        </div>
+        {status === "error" && error ? <FieldError>{error}</FieldError> : null}
+        <div className="flex items-center gap-3">
+          <Button type="submit" disabled={!canSave || status === "saving"}>
+            {status === "saving" ? "Changing…" : "Change password"}
+          </Button>
+          {status === "saved" ? (
+            <span role="status" className="text-sm text-success-600 dark:text-success-400">
+              Password changed
+            </span>
+          ) : null}
+        </div>
+      </form>
+      <div className="mt-5 border-t border-neutral-100 pt-4 text-sm text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
+        Forgot your current password?{" "}
         <button
           type="button"
           onClick={() => void sendReset()}
-          disabled={status === "saving"}
-          className="flex h-10 items-center rounded-md border border-neutral-200 dark:border-neutral-800 px-4 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-60"
+          disabled={resetStatus === "saving"}
+          className="font-medium text-primary-600 hover:underline disabled:opacity-60 dark:text-primary-400"
         >
-          {status === "saving" ? "Sending…" : "Send password reset email"}
+          Email me a reset link
         </button>
-        <AutosaveIndicator status={status} errorLabel={error ?? "Couldn't send — try again"} />
+        <AutosaveIndicator status={resetStatus} errorLabel="Couldn't send — try again" />
       </div>
     </Card>
   );

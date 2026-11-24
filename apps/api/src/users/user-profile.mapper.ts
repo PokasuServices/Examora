@@ -20,6 +20,8 @@ export function toUserProfile(user: UserWithRoles, permissions: PermissionCode[]
     dateOfBirth: user.dateOfBirth ? user.dateOfBirth.toISOString().slice(0, 10) : null,
     guardianName: user.guardianName,
     guardianEmail: user.guardianEmail,
+    guardianPhone: user.guardianPhone,
+    examYear: user.examYear,
     consentVersion: user.consentVersion,
     consentedAt: user.consentedAt ? user.consentedAt.toISOString() : null,
     createdAt: user.createdAt.toISOString(),

@@ -55,5 +55,7 @@ import { CmsSearchService } from "./search/cms-search.service";
     CmsAssetsService,
     CmsSearchService,
   ],
+  // Study media (question/lesson images) reuses the asset table and malware-scan queue.
+  exports: [CmsAssetScanQueueService],
 })
 export class CmsModule {}

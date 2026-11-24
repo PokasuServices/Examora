@@ -4,7 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { MENU_GROUPS } from "@/config/menu";
+import { useAuth } from "@examora/auth-client";
+import { MENU_GROUPS, STUDENT_MENU_GROUPS } from "@/config/menu";
+import { STUDENT_HOME, isStudentView } from "@/lib/student-view";
 
 export interface BreadcrumbCrumb {
   label: string;
@@ -27,9 +29,11 @@ function textOf(node: React.ReactNode): string {
  */
 function useMenuTrail(title: string): BreadcrumbCrumb[] {
   const pathname = usePathname() ?? "";
+  const { user } = useAuth();
+  const groups = isStudentView(user) ? STUDENT_MENU_GROUPS : MENU_GROUPS;
   const hit = (path: string) => pathname === path || pathname.startsWith(`${path}/`);
   let best: { section?: string; name: string; path: string } | null = null;
-  for (const group of MENU_GROUPS) {
+  for (const group of groups) {
     for (const item of group.items) {
       const candidates = item.subItems
         ? item.subItems.map((sub) => ({ section: item.name, name: sub.name, path: sub.path }))
@@ -41,7 +45,7 @@ function useMenuTrail(title: string): BreadcrumbCrumb[] {
       }
     }
   }
-  if (!best || best.path === "/dashboard") return [];
+  if (!best || best.path === "/dashboard" || best.path === STUDENT_HOME) return [];
   const trail: BreadcrumbCrumb[] = [];
   if (best.section && best.section !== best.name) trail.push({ label: best.section });
   if (pathname !== best.path || best.name !== title)
@@ -53,13 +57,15 @@ function useMenuTrail(title: string): BreadcrumbCrumb[] {
 export function BreadcrumbTrail({
   pageTitle,
   trail = [],
-  homeHref = "/dashboard",
+  homeHref,
 }: {
   pageTitle: string;
   trail?: BreadcrumbCrumb[];
   homeHref?: string;
 }) {
-  const crumbs: BreadcrumbCrumb[] = [{ label: "Home", href: homeHref }, ...trail];
+  const { user } = useAuth();
+  const home = homeHref ?? (isStudentView(user) ? STUDENT_HOME : "/dashboard");
+  const crumbs: BreadcrumbCrumb[] = [{ label: "Home", href: home }, ...trail];
   return (
     <nav aria-label="Breadcrumb">
       <ol className="flex flex-wrap items-center gap-1.5">

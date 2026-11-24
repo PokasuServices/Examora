@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { EnrollmentModule } from "../enrollment/enrollment.module";
+import { GamificationModule } from "../gamification/gamification.module";
 import { AdminProgressController } from "./admin-progress.controller";
 import { AdminProgressService } from "./admin-progress.service";
 import { CatalogController } from "./catalog.controller";
@@ -14,7 +15,7 @@ import { ProgressService } from "./progress.service";
  * priceAmount) remains learnable by any authenticated student, unchanged.
  */
 @Module({
-  imports: [EnrollmentModule],
+  imports: [EnrollmentModule, GamificationModule],
   controllers: [CatalogController, ProgressController, AdminProgressController],
   providers: [CatalogService, ProgressService, AdminProgressService],
   // ProgressService is reused by MentoringModule's Student 360 aggregator

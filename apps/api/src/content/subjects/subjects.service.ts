@@ -27,6 +27,9 @@ export class SubjectsService {
         title: dto.title,
         slug,
         description: dto.description,
+        kind: dto.kind ?? "SUBJECT",
+        icon: dto.icon ?? null,
+        color: dto.color ?? null,
         position,
         createdById: actorId,
       },
@@ -74,7 +77,15 @@ export class SubjectsService {
 
     return this.prisma.subject.update({
       where: { id },
-      data: { title: dto.title, slug, description: dto.description, position: dto.position },
+      data: {
+        title: dto.title,
+        slug,
+        description: dto.description,
+        position: dto.position,
+        kind: dto.kind,
+        icon: dto.icon,
+        color: dto.color,
+      },
     });
   }
 

@@ -70,6 +70,8 @@ module.exports = {
       },
       spacing: {
         "sidebar-max": "255px",
+        // Student shell rail (student module redesign) — fixed, never collapses.
+        "student-sidebar": "232px",
         "sidebar-min": "60px",
       },
       boxShadow: {

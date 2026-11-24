@@ -94,6 +94,7 @@ type ThreadSummaryRow = {
   author: CommunityAuthorRow;
   _count: { replies: number };
   likeCount: number;
+  isLikedByViewer?: boolean;
 };
 
 export function toThreadSummary(row: ThreadSummaryRow): ThreadSummary {
@@ -111,6 +112,7 @@ export function toThreadSummary(row: ThreadSummaryRow): ThreadSummary {
     viewCount: row.viewCount,
     replyCount: row._count.replies,
     likeCount: row.likeCount,
+    isLikedByViewer: row.isLikedByViewer ?? false,
     author: toCommunityAuthor(row.author),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),

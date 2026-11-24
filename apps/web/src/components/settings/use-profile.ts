@@ -8,7 +8,10 @@ import { useSettingsApi, type UpdateProfilePayload } from "@/lib/settings-api";
 type Status = "loading" | "ready" | "error";
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
-function toForm(profile: UserProfile): UpdateProfilePayload {
+/** Editable draft: every field as text (the exam year is converted on save). */
+export type ProfileForm = Omit<UpdateProfilePayload, "examYear"> & { examYear?: string };
+
+function toForm(profile: UserProfile): ProfileForm {
   return {
     firstName: profile.firstName ?? "",
     lastName: profile.lastName ?? "",
@@ -16,6 +19,8 @@ function toForm(profile: UserProfile): UpdateProfilePayload {
     dateOfBirth: profile.dateOfBirth ?? "",
     guardianName: profile.guardianName ?? "",
     guardianEmail: profile.guardianEmail ?? "",
+    guardianPhone: profile.guardianPhone ?? "",
+    examYear: profile.examYear?.toString() ?? "",
   };
 }
 
@@ -25,7 +30,7 @@ export function useProfile() {
   const { refetchUser } = useAuth();
   const [status, setStatus] = React.useState<Status>("loading");
   const [profile, setProfile] = React.useState<UserProfile | null>(null);
-  const [form, setForm] = React.useState<UpdateProfilePayload>({});
+  const [form, setForm] = React.useState<ProfileForm>({});
   const [saveStatus, setSaveStatus] = React.useState<SaveStatus>("idle");
   const [saveError, setSaveError] = React.useState<string | null>(null);
 
@@ -49,12 +54,12 @@ export function useProfile() {
   const dirty = React.useMemo(() => {
     if (!profile) return false;
     const baseline = toForm(profile);
-    return (Object.keys(baseline) as (keyof UpdateProfilePayload)[]).some(
+    return (Object.keys(baseline) as (keyof ProfileForm)[]).some(
       (key) => (form[key] ?? "") !== (baseline[key] ?? ""),
     );
   }, [form, profile]);
 
-  function patch(update: Partial<UpdateProfilePayload>): void {
+  function patch(update: Partial<ProfileForm>): void {
     setForm((prev) => ({ ...prev, ...update }));
     setSaveStatus("idle");
   }
@@ -70,6 +75,8 @@ export function useProfile() {
         dateOfBirth: form.dateOfBirth || undefined,
         guardianName: form.guardianName || undefined,
         guardianEmail: form.guardianEmail || undefined,
+        guardianPhone: form.guardianPhone || undefined,
+        examYear: form.examYear ? Number(form.examYear) : undefined,
       });
       setProfile(updated);
       setForm(toForm(updated));

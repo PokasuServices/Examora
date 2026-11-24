@@ -39,6 +39,15 @@ import { CommerceModule } from "./commerce/commerce.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 import { RecommendationsModule } from "./recommendations/recommendations.module";
 import { CmsModule } from "./cms/cms.module";
+import { GamificationModule } from "./gamification/gamification.module";
+import { StudentLearnModule } from "./student-learn/student-learn.module";
+import { StudyMediaModule } from "./study-media/study-media.module";
+import { StudentProfileModule } from "./student-profile/student-profile.module";
+import { CollegesModule } from "./colleges/colleges.module";
+import { DailyQuizModule } from "./daily-quiz/daily-quiz.module";
+import { SketchesModule } from "./sketches/sketches.module";
+import { QuestionFeedbackModule } from "./question-feedback/question-feedback.module";
+import { PracticeModule } from "./practice/practice.module";
 
 @Module({
   imports: [
@@ -104,6 +113,15 @@ import { CmsModule } from "./cms/cms.module";
     AnalyticsModule,
     RecommendationsModule,
     CmsModule,
+    GamificationModule,
+    StudentLearnModule,
+    StudyMediaModule,
+    StudentProfileModule,
+    CollegesModule,
+    DailyQuizModule,
+    SketchesModule,
+    QuestionFeedbackModule,
+    PracticeModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

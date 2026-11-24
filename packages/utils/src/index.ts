@@ -3,3 +3,4 @@ export * from "./assert-never";
 export * from "./sleep";
 export * from "./slug";
 export * from "./shuffle";
+export * from "./video-embed";

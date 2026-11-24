@@ -67,6 +67,31 @@ export class EnrollmentService {
     await this.assertCourseAccess(userId, subject.courseId);
   }
 
+  /**
+   * Licence check (student module redesign): students don't buy courses, an
+   * admin assigns them, so a quiz that belongs to a course needs an ACTIVE,
+   * unexpired enrollment whatever the course's price. Quizzes without a
+   * subject (standalone) are open.
+   */
+  async assertLicenceForSubject(userId: string, subjectId: string | null): Promise<void> {
+    if (!subjectId) return;
+    const subject = await this.prisma.subject.findUnique({
+      where: { id: subjectId },
+      select: { courseId: true },
+    });
+    if (!subject) return;
+    const enrollment = await this.prisma.enrollment.findUnique({
+      where: { userId_courseId: { userId, courseId: subject.courseId } },
+      select: { status: true, expiresAt: true },
+    });
+    const active =
+      enrollment?.status === "ACTIVE" &&
+      (enrollment.expiresAt === null || enrollment.expiresAt > new Date());
+    if (!active) {
+      throw new ForbiddenException("You don't have a licence for this course");
+    }
+  }
+
   async getActiveEnrollment(userId: string, courseId: string) {
     return this.prisma.enrollment.findUnique({
       where: { userId_courseId: { userId, courseId } },
@@ -150,6 +175,101 @@ export class EnrollmentService {
     });
     await this.notifyEnrollmentGranted(enrollment);
     return enrollment;
+  }
+
+  /**
+   * Resolves a bulk-licence target to student ids: every STUDENT, or the
+   * given ids (unknown ids are dropped). Exactly one form must be used.
+   */
+  private async resolveLicenceTargets(target: {
+    allStudents?: boolean;
+    userIds?: string[];
+    cohortId?: string;
+  }): Promise<string[]> {
+    const hasList = (target.userIds?.length ?? 0) > 0;
+    const chosen = [Boolean(target.allStudents), hasList, Boolean(target.cohortId)].filter(Boolean);
+    if (chosen.length !== 1) {
+      throw new BadRequestException("Choose exactly one of allStudents, userIds or cohortId");
+    }
+    if (target.cohortId) {
+      const members = await this.prisma.cohortMember.findMany({
+        where: { cohortId: target.cohortId, user: { deletedAt: null } },
+        select: { userId: true },
+      });
+      return members.map((m) => m.userId);
+    }
+    const users = await this.prisma.user.findMany({
+      where: target.allStudents
+        ? { deletedAt: null, roles: { some: { role: { name: "STUDENT" } } } }
+        : { deletedAt: null, id: { in: target.userIds } },
+      select: { id: true },
+    });
+    return users.map((u) => u.id);
+  }
+
+  private async resolveCourses(courseIds: string[]): Promise<string[]> {
+    const courses = await this.prisma.course.findMany({
+      where: { id: { in: courseIds }, deletedAt: null },
+      select: { id: true },
+    });
+    if (courses.length === 0) {
+      throw new NotFoundException("None of the given courses exist");
+    }
+    return courses.map((c) => c.id);
+  }
+
+  /**
+   * Grants every (student, course) pair. New pairs are inserted; revoked or
+   * expired ones are reactivated; already-active ones are left alone. No
+   * per-grant notification is sent, so a bulk run doesn't flood inboxes.
+   */
+  async adminBulkGrant(target: {
+    courseIds: string[];
+    allStudents?: boolean;
+    userIds?: string[];
+    cohortId?: string;
+  }) {
+    const userIds = await this.resolveLicenceTargets(target);
+    const courseIds = await this.resolveCourses(target.courseIds);
+    if (userIds.length === 0) return { students: 0, courses: courseIds.length, changed: 0 };
+
+    const now = new Date();
+    const { count: created } = await this.prisma.enrollment.createMany({
+      data: userIds.flatMap((userId) =>
+        courseIds.map((courseId) => ({
+          userId,
+          courseId,
+          status: "ACTIVE" as const,
+          source: "ADMIN_GRANT" as const,
+        })),
+      ),
+      skipDuplicates: true,
+    });
+    const { count: reactivated } = await this.prisma.enrollment.updateMany({
+      where: {
+        userId: { in: userIds },
+        courseId: { in: courseIds },
+        OR: [{ status: { not: "ACTIVE" } }, { expiresAt: { lte: now } }],
+      },
+      data: { status: "ACTIVE", source: "ADMIN_GRANT", revokedAt: null, expiresAt: null },
+    });
+    return { students: userIds.length, courses: courseIds.length, changed: created + reactivated };
+  }
+
+  /** Revokes every active (student, course) pair in the target. */
+  async adminBulkRevoke(target: {
+    courseIds: string[];
+    allStudents?: boolean;
+    userIds?: string[];
+    cohortId?: string;
+  }) {
+    const userIds = await this.resolveLicenceTargets(target);
+    const courseIds = await this.resolveCourses(target.courseIds);
+    const { count } = await this.prisma.enrollment.updateMany({
+      where: { userId: { in: userIds }, courseId: { in: courseIds }, status: "ACTIVE" },
+      data: { status: "REVOKED", revokedAt: new Date() },
+    });
+    return { students: userIds.length, courses: courseIds.length, changed: count };
   }
 
   async adminRevoke(enrollmentId: string) {

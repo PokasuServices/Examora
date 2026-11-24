@@ -2,6 +2,7 @@
 
 import { useAuth } from "@examora/auth-client";
 import type {
+  BulkLicenceResult,
   Coupon,
   CouponDiscountType,
   Enrollment,
@@ -38,6 +39,14 @@ export function useCommerceAdminApi() {
       request<Enrollment>("/admin/enrollments", { method: "POST", body: { userId, courseId } }),
     revokeEnrollment: (id: string) =>
       request<void>(`/admin/enrollments/${id}`, { method: "DELETE" }),
+    /** Licences in bulk: every student (`allStudents`) or the listed users. */
+    bulkGrantLicences: (body: { courseIds: string[]; allStudents?: boolean; userIds?: string[] }) =>
+      request<BulkLicenceResult>("/admin/enrollments/bulk-grant", { method: "POST", body }),
+    bulkRevokeLicences: (body: {
+      courseIds: string[];
+      allStudents?: boolean;
+      userIds?: string[];
+    }) => request<BulkLicenceResult>("/admin/enrollments/bulk-revoke", { method: "POST", body }),
 
     // Coupons
     listCoupons: () =>

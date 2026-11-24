@@ -19,6 +19,9 @@ export interface UpdateProfilePayload {
   dateOfBirth?: string;
   guardianName?: string;
   guardianEmail?: string;
+  guardianPhone?: string;
+  /** Year of the entrance exam. */
+  examYear?: number;
 }
 
 /** Typed wrappers over the caller's own /users/me, /auth/sessions and /auth password/verification endpoints. */
@@ -40,6 +43,8 @@ export function useSettingsApi() {
     revokeSession: (id: string) => request<void>(`/auth/sessions/${id}`, { method: "DELETE" }),
     revokeAllSessions: () => request<void>("/auth/sessions", { method: "DELETE" }),
 
+    changePassword: (body: { currentPassword?: string; newPassword: string }) =>
+      request<{ status: string }>("/auth/change-password", { method: "POST", body }),
     requestPasswordReset: (email: string) =>
       request<void>("/auth/forgot-password", { method: "POST", body: { email } }),
     resendVerification: (email: string) =>

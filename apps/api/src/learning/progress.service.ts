@@ -1,5 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Optional } from "@nestjs/common";
 import type { CourseProgress, LearningDashboard, RecentLesson } from "@examora/types";
+import { XpService } from "../gamification/xp.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { CatalogService } from "./catalog.service";
 
@@ -10,6 +11,8 @@ export class ProgressService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly catalog: CatalogService,
+    // Optional so service-level tests that don't wire gamification still compile; the app always provides it.
+    @Optional() private readonly xp?: XpService,
   ) {}
 
   /** Records/refreshes a view. Verifies the lesson is student-visible first (ADR-0013). */
@@ -27,10 +30,15 @@ export class ProgressService {
   async complete(
     userId: string,
     lessonId: string,
-  ): Promise<{ courseId: string; alreadyComplete: boolean }> {
-    const { courseId, progress } = await this.catalog.getLessonForStudent(lessonId, userId);
+  ): Promise<{ courseId: string; alreadyComplete: boolean; xpAwarded: number }> {
+    const { lesson, courseId, progress } = await this.catalog.getLessonForStudent(lessonId, userId);
     if (progress?.completedAt) {
-      return { courseId, alreadyComplete: true };
+      // Still try the award: lessons completed before XP existed get theirs on the next visit.
+      return {
+        courseId,
+        alreadyComplete: true,
+        xpAwarded: await this.awardLessonXp(userId, lesson),
+      };
     }
 
     const now = new Date();
@@ -46,7 +54,27 @@ export class ProgressService {
         completedAt: now,
       },
     });
-    return { courseId, alreadyComplete: false };
+    return {
+      courseId,
+      alreadyComplete: false,
+      xpAwarded: await this.awardLessonXp(userId, lesson),
+    };
+  }
+
+  /** Lesson XP is paid once per lesson (the XP ledger's unique key makes repeats a no-op). */
+  private async awardLessonXp(
+    userId: string,
+    lesson: { id: string; xpReward: number },
+  ): Promise<number> {
+    if (!this.xp || lesson.xpReward <= 0) return 0;
+    const awarded = await this.xp.award({
+      userId,
+      amount: lesson.xpReward,
+      reason: "LESSON_COMPLETED",
+      sourceType: "Lesson",
+      sourceId: lesson.id,
+    });
+    return awarded ? lesson.xpReward : 0;
   }
 
   /** Per-course progress: totals, %, last activity, and the next incomplete lesson. */

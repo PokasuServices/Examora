@@ -3,10 +3,9 @@
 import * as React from "react";
 import Link from "next/link";
 import { HelpCircle } from "lucide-react";
-import { ApiError } from "@examora/auth-client";
-import type { ContentStatus, Question, QuestionType } from "@examora/types";
-import { QUESTION_TYPES } from "@examora/types";
-import { Button, FieldError, Input, Label } from "@examora/ui";
+import type { ContentStatus, Question } from "@examora/types";
+import { Button } from "@examora/ui";
+import { QuestionEditor } from "@/components/question-editor";
 import { RequirePermission } from "@/components/require-permission";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
@@ -26,144 +25,21 @@ const STATUS_TONE: Record<ContentStatus, ChipTone> = {
   ARCHIVED: "warning",
 };
 
-interface OptionDraft {
-  text: string;
-  isCorrect: boolean;
-}
-
 function CreateQuestionForm({ onCreated }: { onCreated: () => void }) {
-  const api = useAssessmentApi();
-  const [type, setType] = React.useState<QuestionType>("SINGLE_CHOICE");
-  const [text, setText] = React.useState("");
-  const [explanation, setExplanation] = React.useState("");
-  const [options, setOptions] = React.useState<OptionDraft[]>([
-    { text: "", isCorrect: true },
-    { text: "", isCorrect: false },
-  ]);
-  const [error, setError] = React.useState<string | null>(null);
-
-  function setOptionText(index: number, value: string): void {
-    setOptions((prev) => prev.map((o, i) => (i === index ? { ...o, text: value } : o)));
-  }
-
-  function setOptionCorrect(index: number, value: boolean): void {
-    setOptions((prev) =>
-      prev.map((o, i) =>
-        type === "SINGLE_CHOICE" || type === "TRUE_FALSE"
-          ? { ...o, isCorrect: i === index ? value : false } // single-answer types: one at a time
-          : i === index
-            ? { ...o, isCorrect: value }
-            : o,
-      ),
-    );
-  }
-
-  async function create(event: React.FormEvent): Promise<void> {
-    event.preventDefault();
-    setError(null);
-    try {
-      await api.createQuestion({
-        type,
-        text,
-        explanation: explanation || undefined,
-        options: options.filter((o) => o.text.trim().length > 0),
-      });
-      setText("");
-      setExplanation("");
-      setOptions([
-        { text: "", isCorrect: true },
-        { text: "", isCorrect: false },
-      ]);
-      onCreated();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not create question");
-    }
-  }
-
+  // Remount the editor after each create so the form starts empty again.
+  const [formKey, setFormKey] = React.useState(0);
   return (
     <Card>
       <h2 className="text-lg font-medium text-neutral-800 dark:text-white/90">New question</h2>
-      <form onSubmit={create} className="mt-4 flex flex-col gap-4">
-        <div className="w-full sm:w-56">
-          <SelectField
-            id="q-type"
-            label="Type"
-            value={type}
-            options={QUESTION_TYPES.map((t) => ({ value: t, label: statusLabel(t) }))}
-            onChange={(v) => setType(v as QuestionType)}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="q-text">Question text</Label>
-          <textarea
-            id="q-text"
-            className="min-h-16 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="q-explanation">Explanation (shown in post-submit review)</Label>
-          <textarea
-            id="q-explanation"
-            className="min-h-12 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 text-sm text-neutral-900 dark:text-white/90 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900"
-            value={explanation}
-            onChange={(e) => setExplanation(e.target.value)}
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label>Options (mark the correct one{type === "MULTIPLE_CHOICE" ? "s" : ""})</Label>
-          {options.map((option, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <input
-                type={type === "MULTIPLE_CHOICE" ? "checkbox" : "radio"}
-                name="correct-option"
-                checked={option.isCorrect}
-                onChange={(e) => setOptionCorrect(i, e.target.checked)}
-                className={`h-4 w-4 border-neutral-300 dark:border-neutral-700 text-primary-600 dark:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-                  type === "MULTIPLE_CHOICE" ? "rounded" : "rounded-full"
-                }`}
-              />
-              <Input
-                value={option.text}
-                onChange={(e) => setOptionText(i, e.target.value)}
-                placeholder={`Option ${i + 1}`}
-              />
-              {options.length > 2 ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setOptions((prev) => prev.filter((_, idx) => idx !== i))}
-                >
-                  Remove
-                </Button>
-              ) : null}
-            </div>
-          ))}
-          {options.length < 10 ? (
-            <div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setOptions((prev) => [...prev, { text: "", isCorrect: false }])}
-              >
-                + Add option
-              </Button>
-            </div>
-          ) : null}
-        </div>
-
-        <FieldError>{error}</FieldError>
-        <div>
-          <Button type="submit">Create question</Button>
-        </div>
-      </form>
+      <div className="mt-4">
+        <QuestionEditor
+          key={formKey}
+          onSaved={() => {
+            setFormKey((k) => k + 1);
+            onCreated();
+          }}
+        />
+      </div>
     </Card>
   );
 }

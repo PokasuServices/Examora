@@ -85,6 +85,7 @@ export class QuestionsController {
       type: query.type,
       difficulty: query.difficulty,
       tag: query.tag,
+      search: query.search,
     });
     return { items: items.map(toQuestion), page: query.page, pageSize: query.pageSize, total };
   }

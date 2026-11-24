@@ -15,6 +15,7 @@ import { ProfileAvatar } from "@/components/settings/profile-avatar";
 import { profileCompletion, roleLabel } from "@/components/settings/format";
 import { authorDisplayName } from "@/lib/format";
 import { useProfile } from "@/components/settings/use-profile";
+import { MyCoursesCard } from "@/components/student/my-courses-card";
 
 const GUARDIAN_EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -151,6 +152,8 @@ function ProfileContent() {
         </div>
       </Card>
 
+      <MyCoursesCard />
+
       {/* ---------- Personal Information ---------- */}
       <Card id="personal-information">
         <div className="flex items-center justify-between gap-3">
@@ -246,6 +249,38 @@ function ProfileContent() {
                   onChange={(e) => patch({ guardianEmail: e.target.value })}
                 />
                 {!guardianEmailValid ? <FieldError>Enter a valid email address.</FieldError> : null}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="guardianPhone">Guardian mobile (optional)</Label>
+                <Input
+                  id="guardianPhone"
+                  inputMode="tel"
+                  maxLength={20}
+                  value={form.guardianPhone ?? ""}
+                  onChange={(e) => patch({ guardianPhone: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-neutral-800 dark:text-white/90">Your exam</p>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="examYear">Exam year</Label>
+                <select
+                  id="examYear"
+                  value={form.examYear ?? ""}
+                  onChange={(e) => patch({ examYear: e.target.value })}
+                  className="h-11 rounded-md border border-neutral-300 bg-white px-3 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                >
+                  <option value="">Not set</option>
+                  {Array.from({ length: 6 }, (_, i) => new Date().getFullYear() + i).map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

@@ -2,7 +2,9 @@ import type { PermissionCode } from "@examora/types";
 import {
   Activity,
   Bell,
+  BookOpen,
   ClipboardList,
+  GraduationCap,
   Globe,
   LayoutDashboard,
   ListChecks,
@@ -103,6 +105,23 @@ export const MENU_GROUPS: MenuGroup[] = [
           { name: "Quizzes", path: "/assessment/quizzes", permission: "quiz:manage" },
           { name: "Questions", path: "/assessment/questions", permission: "question:manage" },
           { name: "Attempts", path: "/assessment/attempts", permission: "quiz:attempts:read" },
+          { name: "Question reports", path: "/assessment/reports", permission: "question:manage" },
+          { name: "Sketch review", path: "/assessment/sketches", permission: "assignment:review" },
+        ],
+      },
+      {
+        name: "Content",
+        icon: BookOpen,
+        subItems: [{ name: "Courses", path: "/content/courses", permission: "content:manage" }],
+      },
+      {
+        name: "Students",
+        icon: GraduationCap,
+        subItems: [
+          { name: "Colleges", path: "/colleges", permission: "content:manage", exact: true },
+          { name: "Webinars", path: "/colleges/webinars", permission: "content:manage" },
+          { name: "Enquiries", path: "/colleges/enquiries", permission: "content:manage" },
+          { name: "Cohorts", path: "/cohorts", permission: "users:manage" },
         ],
       },
       {

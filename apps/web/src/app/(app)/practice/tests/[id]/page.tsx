@@ -1,0 +1,223 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { CheckCircle2, Info, Lock } from "lucide-react";
+import { Button } from "@examora/ui";
+import { RequireAuth } from "@/components/require-auth";
+import { ErrorPanel, LoadingPanel } from "@/components/student/load-panels";
+import { ShareTestCard } from "@/components/student/share-test-card";
+import { useLoad } from "@/components/student/use-load";
+import { Card } from "@/components/ui/card";
+import { IconBadge } from "@/components/ui/icon-badge";
+import { PageHeader } from "@/components/ui/page-header";
+import { useQuizApi } from "@/lib/quiz-api";
+import { useStudentApi } from "@/lib/student-api";
+
+function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
+  return (
+    <div className="rounded-md border border-neutral-200 px-4 py-3 dark:border-neutral-800">
+      <dt className="text-xs text-neutral-500 dark:text-neutral-400">{label}</dt>
+      <dd className="mt-1 text-lg font-semibold text-neutral-800 dark:text-white/90">{value}</dd>
+      {hint ? <dd className="text-xs text-neutral-500 dark:text-neutral-400">{hint}</dd> : null}
+    </div>
+  );
+}
+
+function TestContent() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const api = useStudentApi();
+  const quizApi = useQuizApi();
+  const { data, errorStatus, loading, reload } = useLoad(() => api.practiceTest(id), id);
+  const [starting, setStarting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  // Opened from a classmate's share link: count the visit once, then tidy the URL.
+  const apiRef = React.useRef(api);
+  apiRef.current = api;
+  React.useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    if (!ref) return;
+    void apiRef.current.visitTestShare(ref).catch(() => undefined);
+    window.history.replaceState(null, "", window.location.pathname);
+  }, []);
+
+  if (errorStatus !== null) return <ErrorPanel status={errorStatus} onRetry={reload} />;
+  if (loading || !data) return <LoadingPanel />;
+
+  const attemptsLeft =
+    data.maxAttempts === null ? null : Math.max(0, data.maxAttempts - data.attemptsUsed);
+  const locked = data.lockedBy !== null;
+  const canStart =
+    !locked && (data.inProgressAttemptId !== null || attemptsLeft === null || attemptsLeft > 0);
+
+  async function start() {
+    if (data?.inProgressAttemptId) {
+      router.push(`/quizzes/attempt/${data.inProgressAttemptId}`);
+      return;
+    }
+    setStarting(true);
+    setError(null);
+    try {
+      const attempt = await quizApi.startAttempt(id);
+      router.push(`/quizzes/attempt/${attempt.id}`);
+    } catch (err) {
+      const status = (err as { status?: number })?.status;
+      setError(
+        status === 409
+          ? "You've used all your attempts for this test."
+          : status === 403
+            ? "This test is locked or not assigned to you."
+            : "Couldn't start the test. Please try again.",
+      );
+      setStarting(false);
+    }
+  }
+
+  const rules = [
+    data.timeLimitMinutes
+      ? `The timer runs for ${data.timeLimitMinutes} minutes and the test submits itself when it ends.`
+      : null,
+    "After each answer, say how you got it: you knew it, ruled options out, or guessed.",
+    data.requireAllVisited ? "Open every question at least once before you can submit." : null,
+    data.negativeMarking
+      ? "Wrong answers lose marks, so skip questions you can't narrow down."
+      : null,
+    "Flag questions to come back to; your answers save as you go.",
+  ].filter((r): r is string => r !== null);
+
+  return (
+    <main className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+      <PageHeader
+        title={data.title}
+        trail={[
+          { label: "Practice", href: "/practice" },
+          ...(data.crumbs.category ? [{ label: data.crumbs.category.title }] : []),
+        ]}
+        actions={
+          <div className="flex flex-col items-end gap-1">
+            <Button onClick={() => void start()} disabled={!canStart || starting}>
+              {starting
+                ? "Starting…"
+                : locked
+                  ? "Locked"
+                  : data.inProgressAttemptId
+                    ? "Resume test"
+                    : canStart
+                      ? data.attemptsUsed > 0
+                        ? "Take again"
+                        : "Start test"
+                      : "No attempts left"}
+            </Button>
+            {error ? (
+              <p role="alert" className="text-xs text-danger-600">
+                {error}
+              </p>
+            ) : null}
+          </div>
+        }
+      />
+
+      {locked ? (
+        <Card density="compact" className="flex items-center gap-3">
+          <IconBadge icon={Lock} tone="warning" />
+          <p className="text-sm text-neutral-700 dark:text-neutral-300">
+            Finish{" "}
+            <Link
+              href={`/practice/tests/${data.lockedBy!.id}`}
+              className="font-medium text-primary-600 hover:underline"
+            >
+              {data.lockedBy!.title}
+            </Link>{" "}
+            to unlock this test.
+          </p>
+        </Card>
+      ) : null}
+
+      <Card>
+        {data.description ? (
+          <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">{data.description}</p>
+        ) : null}
+        <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <Stat label="Questions" value={data.questionCount} hint={`${data.totalMarks} marks`} />
+          <Stat
+            label="Time"
+            value={data.timeLimitMinutes ? `${data.timeLimitMinutes} min` : "Untimed"}
+          />
+          <Stat
+            label="Attempts"
+            value={
+              data.maxAttempts === null
+                ? `${data.attemptsUsed} used`
+                : `${data.attemptsUsed} / ${data.maxAttempts}`
+            }
+            hint={attemptsLeft === null ? "Unlimited" : `${attemptsLeft} left`}
+          />
+          <Stat
+            label="XP"
+            value={data.xpReward > 0 ? `+${data.xpReward}` : "—"}
+            hint="on your first finish"
+          />
+        </dl>
+
+        {data.sections.length > 0 ? (
+          <div className="mt-5">
+            <h2 className="text-sm font-medium text-neutral-800 dark:text-white/90">Sections</h2>
+            <ul className="mt-2 divide-y divide-neutral-200 rounded-md border border-neutral-200 text-sm dark:divide-neutral-800 dark:border-neutral-800">
+              {data.sections.map((s) => (
+                <li key={s.id} className="flex justify-between px-3 py-2">
+                  <span className="text-neutral-700 dark:text-neutral-300">{s.title}</span>
+                  <span className="text-neutral-500">{s.questionCount} questions</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {data.lastScore ? (
+          <p className="mt-4 text-sm">
+            <Link
+              href={`/quizzes/attempts/${data.lastScore.attemptId}/result`}
+              className="font-medium text-primary-600 hover:underline dark:text-primary-400"
+            >
+              Open your last report ({data.lastScore.obtained} / {data.lastScore.total}) →
+            </Link>
+          </p>
+        ) : null}
+      </Card>
+
+      <ShareTestCard quizId={id} title={data.title} />
+
+      <Card density="compact" className="flex items-start gap-3">
+        <IconBadge icon={Info} tone="primary" />
+        <div>
+          <p className="text-sm font-medium text-neutral-800 dark:text-white/90">
+            Before you start
+          </p>
+          <ul className="mt-2 flex flex-col gap-1.5 text-sm text-neutral-600 dark:text-neutral-400">
+            {rules.map((r) => (
+              <li key={r} className="flex items-start gap-2">
+                <CheckCircle2
+                  size={14}
+                  aria-hidden="true"
+                  className="mt-0.5 shrink-0 text-success-600"
+                />
+                {r}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Card>
+    </main>
+  );
+}
+
+export default function PracticeTestPage() {
+  return (
+    <RequireAuth>
+      <TestContent />
+    </RequireAuth>
+  );
+}

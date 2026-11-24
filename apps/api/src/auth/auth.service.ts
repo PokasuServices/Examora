@@ -405,6 +405,46 @@ export class AuthService {
     });
   }
 
+  /**
+   * Signed-in password change. Checks the current password (when the account
+   * has one), then signs out every other session but keeps this one.
+   */
+  async changePassword(
+    userId: string,
+    currentPassword: string | undefined,
+    newPassword: string,
+    meta: RequestMeta,
+    keepRefreshTokenPlain?: string,
+  ): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException();
+    if (user.passwordHash) {
+      if (!currentPassword || !(await argon2.verify(user.passwordHash, currentPassword))) {
+        throw new BadRequestException("Your current password is not correct");
+      }
+      if (await argon2.verify(user.passwordHash, newPassword)) {
+        throw new BadRequestException("Choose a password you have not used here before");
+      }
+    }
+    const passwordHash = await argon2.hash(newPassword, { type: argon2.argon2id });
+    const keepHash = keepRefreshTokenPlain ? hashToken(keepRefreshTokenPlain) : undefined;
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: userId }, data: { passwordHash } }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId, revokedAt: null, ...(keepHash ? { tokenHash: { not: keepHash } } : {}) },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
+    await this.auditService.record({
+      actorId: userId,
+      action: "auth.password_changed",
+      entityType: "User",
+      entityId: userId,
+      ipAddress: meta.ipAddress,
+      correlationId: meta.correlationId,
+    });
+  }
+
   // ---------------------------------------------------------------------
   // Session management
   // ---------------------------------------------------------------------

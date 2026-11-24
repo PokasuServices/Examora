@@ -15,7 +15,9 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 import type { Request } from "express";
 import type {
+  AttemptAnalysis,
   AttemptHistoryItem,
+  LeaderboardEntry,
   AttemptResult,
   AttemptReview,
   AttemptState,
@@ -32,7 +34,9 @@ import {
   toAttemptReview,
   toAttemptState,
 } from "../assessment.mappers";
+import { AttemptAnalysisService } from "./attempt-analysis.service";
 import { AutosaveAnswerDto } from "./dto/autosave-answer.dto";
+import { QuestionMetaDto } from "./dto/question-meta.dto";
 import { ListAttemptHistoryQueryDto } from "./dto/list-attempt-history-query.dto";
 import { StartAttemptDto } from "./dto/start-attempt.dto";
 import { QuizAttemptsService } from "./quiz-attempts.service";
@@ -44,6 +48,7 @@ export class QuizAttemptsController {
   constructor(
     private readonly attemptsService: QuizAttemptsService,
     private readonly auditService: AuditService,
+    private readonly analysisService: AttemptAnalysisService,
   ) {}
 
   @Post()
@@ -111,7 +116,45 @@ export class QuizAttemptsController {
     @Param("id", ParseUUIDPipe) id: string,
     @Body() dto: AutosaveAnswerDto,
   ): Promise<void> {
-    await this.attemptsService.autosaveAnswer(id, actor.id, dto.questionId, dto.selectedOptionIds);
+    await this.attemptsService.autosaveAnswer(
+      id,
+      actor.id,
+      dto.questionId,
+      dto.selectedOptionIds,
+      dto.numericAnswer,
+    );
+  }
+
+  @Patch(":id/questions/:questionId/meta")
+  // Sent on every question change and as a heartbeat while a question is open.
+  @Throttle({ default: { limit: 600, ttl: 60_000 } })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Record visit / flag / answer method / time for one question" })
+  async questionMeta(
+    @CurrentUser() actor: RequestUser,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Param("questionId", ParseUUIDPipe) questionId: string,
+    @Body() dto: QuestionMetaDto,
+  ): Promise<void> {
+    await this.attemptsService.updateQuestionMeta(id, actor.id, questionId, dto);
+  }
+
+  @Get(":id/analysis")
+  @ApiOperation({ summary: "Report insights: rank, true score, methods, topics, time usage" })
+  analysis(
+    @CurrentUser() actor: RequestUser,
+    @Param("id", ParseUUIDPipe) id: string,
+  ): Promise<AttemptAnalysis> {
+    return this.analysisService.analyse(id, actor.id);
+  }
+
+  @Get(":id/leaderboard")
+  @ApiOperation({ summary: "Top 5 first attempts of this quiz (plus your own position)" })
+  leaderboard(
+    @CurrentUser() actor: RequestUser,
+    @Param("id", ParseUUIDPipe) id: string,
+  ): Promise<LeaderboardEntry[]> {
+    return this.analysisService.leaderboard(id, actor.id);
   }
 
   @Post(":id/submit")

@@ -86,6 +86,8 @@ export interface ThreadSummary {
   viewCount: number;
   replyCount: number;
   likeCount: number;
+  /** Whether the viewer has clapped (liked) this thread. */
+  isLikedByViewer: boolean;
   author: CommunityAuthorSummary;
   createdAt: string;
   updatedAt: string;

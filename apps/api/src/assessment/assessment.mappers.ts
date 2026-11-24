@@ -1,4 +1,5 @@
 import type {
+  AnswerOutcome,
   AdminAttemptDetail,
   AdminAttemptSummary,
   AttemptHistoryItem,
@@ -13,6 +14,7 @@ import type {
   QuizSection as QuizSectionDto,
   QuizStudentDetail,
   QuizSummary,
+  QuestionResource,
 } from "@examora/types";
 import type {
   Prisma,
@@ -32,7 +34,48 @@ export function decToNum(value: Prisma.Decimal | number | null | undefined): num
 }
 
 export function toQuestionOption(row: QuestionOption): QuestionOptionDto {
-  return { id: row.id, text: row.text, isCorrect: row.isCorrect, position: row.position };
+  return {
+    id: row.id,
+    text: row.text,
+    imageUrl: row.imageUrl,
+    isCorrect: row.isCorrect,
+    position: row.position,
+  };
+}
+
+/** Question.resources is free-form JSON; keep only well-formed { label, url } entries. */
+export function toResources(json: Prisma.JsonValue | null): QuestionResource[] {
+  if (!Array.isArray(json)) return [];
+  return json.flatMap((r) =>
+    r &&
+    typeof r === "object" &&
+    !Array.isArray(r) &&
+    typeof r.label === "string" &&
+    typeof r.url === "string"
+      ? [{ label: r.label, url: r.url }]
+      : [],
+  );
+}
+
+/** Question.criteria is free-form JSON; keep only non-empty strings. */
+export function toCriteria(json: Prisma.JsonValue | null): string[] {
+  return Array.isArray(json)
+    ? json.filter((c): c is string => typeof c === "string" && c.trim() !== "")
+    : [];
+}
+
+function numOrNull(value: Prisma.Decimal | null): number | null {
+  return value === null ? null : Number(value);
+}
+
+/** CORRECT / PARTIAL / WRONG / UNANSWERED for a finalized answer (see scoring.util). */
+export function answerOutcome(
+  answer: Pick<QuizAttemptAnswer, "isCorrect" | "marksAwarded"> | undefined,
+  marks: number,
+): AnswerOutcome {
+  if (!answer || answer.isCorrect === null) return "UNANSWERED";
+  if (!answer.isCorrect) return "WRONG";
+  return decToNum(answer.marksAwarded) < marks ? "PARTIAL" : "CORRECT";
 }
 
 export function toQuestion(row: Question & { options: QuestionOption[] }): QuestionDto {
@@ -43,6 +86,15 @@ export function toQuestion(row: Question & { options: QuestionOption[] }): Quest
     difficulty: row.difficulty,
     text: row.text,
     explanation: row.explanation,
+    imageUrl: row.imageUrl,
+    numericMin: numOrNull(row.numericMin),
+    numericMax: numOrNull(row.numericMax),
+    partialMarking: row.partialMarking,
+    topicId: row.topicId,
+    criteria: toCriteria(row.criteria),
+    explanationImageUrl: row.explanationImageUrl,
+    explanationVideoUrl: row.explanationVideoUrl,
+    resources: toResources(row.resources),
     tags: row.tags,
     status: row.status,
     position: row.position,
@@ -56,6 +108,13 @@ export function toQuiz(row: Quiz): QuizDto {
   return {
     id: row.id,
     subjectId: row.subjectId,
+    topicId: row.topicId,
+    maxAttempts: row.maxAttempts,
+    xpReward: row.xpReward,
+    level: row.level,
+    practiceCategoryId: row.practiceCategoryId,
+    unlockAfterQuizId: row.unlockAfterQuizId,
+    requireAllVisited: row.requireAllVisited,
     title: row.title,
     slug: row.slug,
     description: row.description,
@@ -94,6 +153,7 @@ export function toQuizQuestionAssignment(
     questionId: row.questionId,
     sectionId: row.sectionId,
     marks: decToNum(row.marks),
+    negativeMarks: numOrNull(row.negativeMarks),
     position: row.position,
     question: row.question,
   };
@@ -159,7 +219,15 @@ export function toQuizStudentDetail(params: {
 // ---------------------------------------------------------------------------
 
 type QuestionWithOptions = Question & { options: QuestionOption[] };
-type SelectedOptionsHolder = { selectedOptionIds: Prisma.JsonValue };
+type SelectedOptionsHolder = {
+  selectedOptionIds: Prisma.JsonValue;
+  numericAnswer?: Prisma.Decimal | null;
+  method?: QuizAttemptAnswer["method"];
+  timeSpentSeconds?: number;
+  visitedAt?: Date | null;
+  flagged?: boolean;
+  uploadAssetId?: string | null;
+};
 
 export function toAttemptState(params: {
   attempt: QuizAttempt;
@@ -168,6 +236,8 @@ export function toAttemptState(params: {
   optionOrder: OptionOrder;
   questionById: Map<string, QuestionWithOptions>;
   answerByQuestion: Map<string, SelectedOptionsHolder>;
+  requireAllVisited?: boolean;
+  sections?: { id: string; title: string }[];
 }): AttemptState {
   const remainingSeconds = params.attempt.expiresAt
     ? Math.max(0, Math.round((params.attempt.expiresAt.getTime() - Date.now()) / 1000))
@@ -179,7 +249,7 @@ export function toAttemptState(params: {
     const options = optionIds
       .map((id) => question?.options.find((o) => o.id === id))
       .filter((o): o is QuestionOption => o !== undefined)
-      .map((o) => ({ id: o.id, text: o.text }));
+      .map((o) => ({ id: o.id, text: o.text, imageUrl: o.imageUrl }));
     const answer = params.answerByQuestion.get(s.questionId);
 
     return {
@@ -187,9 +257,19 @@ export function toAttemptState(params: {
       sectionId: s.sectionId,
       type: question?.type ?? "SINGLE_CHOICE",
       text: question?.text ?? "",
+      imageUrl: question?.imageUrl ?? null,
       marks: s.marks,
       options,
       selectedOptionIds: (answer?.selectedOptionIds as string[] | undefined) ?? [],
+      numericAnswer: answer ? numOrNull(answer.numericAnswer ?? null) : null,
+      ...(question?.type === "UPLOAD" ? { criteria: toCriteria(question.criteria) } : {}),
+      meta: {
+        visited: Boolean(answer?.visitedAt),
+        flagged: answer?.flagged ?? false,
+        method: answer?.method ?? null,
+        timeSpentSeconds: answer?.timeSpentSeconds ?? 0,
+        uploadRef: answer?.uploadAssetId ? `media:${answer.uploadAssetId}` : null,
+      },
     };
   });
 
@@ -203,6 +283,8 @@ export function toAttemptState(params: {
     remainingSeconds,
     totalMarks: decToNum(params.attempt.totalMarks),
     questions,
+    requireAllVisited: params.requireAllVisited ?? false,
+    sections: params.sections ?? [],
   };
 }
 
@@ -239,7 +321,10 @@ export function toAttemptReview(params: {
   attempt: QuizAttempt;
   quizTitle: string;
   snapshot: SnapshotQuestion[];
-  questionById: Map<string, QuestionWithOptions>;
+  questionById: Map<
+    string,
+    QuestionWithOptions & { subject?: { title: string } | null; topic?: { title: string } | null }
+  >;
   answerByQuestion: Map<string, QuizAttemptAnswer>;
 }): AttemptReview {
   const questions = params.snapshot.map((s) => {
@@ -249,15 +334,34 @@ export function toAttemptReview(params: {
       questionId: s.questionId,
       text: question?.text ?? "",
       type: question?.type ?? "SINGLE_CHOICE",
+      imageUrl: question?.imageUrl ?? null,
+      marks: s.marks,
       explanation: question?.explanation ?? null,
+      explanationImageUrl: question?.explanationImageUrl ?? null,
+      explanationVideoUrl: question?.explanationVideoUrl ?? null,
+      resources: toResources(question?.resources ?? null),
       options: (question?.options ?? []).map((o) => ({
         id: o.id,
         text: o.text,
+        imageUrl: o.imageUrl,
         isCorrect: o.isCorrect,
       })),
       selectedOptionIds: (answer?.selectedOptionIds as string[] | undefined) ?? [],
+      numericAnswer: answer ? numOrNull(answer.numericAnswer) : null,
+      numericRange:
+        question?.type === "NUMERIC" && question.numericMin !== null && question.numericMax !== null
+          ? { min: Number(question.numericMin), max: Number(question.numericMax) }
+          : null,
       isCorrect: answer?.isCorrect ?? null,
+      outcome: answerOutcome(answer, s.marks),
       marksAwarded: answer?.marksAwarded !== undefined ? decToNum(answer.marksAwarded) : null,
+      method: answer?.method ?? null,
+      timeSpentSeconds: answer?.timeSpentSeconds ?? 0,
+      subjectTitle: question?.subject?.title ?? null,
+      topicTitle: question?.topic?.title ?? null,
+      uploadRef: answer?.uploadAssetId ? `media:${answer.uploadAssetId}` : null,
+      pendingReview:
+        question?.type === "UPLOAD" && Boolean(answer?.uploadAssetId) && answer?.isCorrect === null,
     };
   });
   return {

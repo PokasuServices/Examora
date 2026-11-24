@@ -6,6 +6,9 @@ import { useParams } from "next/navigation";
 import { ApiError } from "@examora/auth-client";
 import type { ContentStatus, Course } from "@examora/types";
 import { Button, FieldError, Input, Label } from "@examora/ui";
+import { CoursePracticeSettings } from "@/components/course-practice-settings";
+import { LessonQuestionsPanel } from "@/components/lesson-questions-panel";
+import { CourseStudentSettings } from "@/components/course-student-settings";
 import { NodeManager, type ContentNode } from "@/components/node-manager";
 import { RequirePermission } from "@/components/require-permission";
 import { StatusActions } from "@/components/status-actions";
@@ -131,6 +134,10 @@ function CourseDetailContent() {
         </div>
       </form>
 
+      <CourseStudentSettings course={course} onCourseSaved={setCourse} />
+
+      <CoursePracticeSettings courseId={course.id} />
+
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Curriculum</h2>
         <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
@@ -160,6 +167,9 @@ function CourseDetailContent() {
                         parentKey="moduleId"
                         parentId={mod.id}
                         label="lesson"
+                        renderChildren={(lesson: ContentNode) => (
+                          <LessonQuestionsPanel lessonId={lesson.id} />
+                        )}
                       />
                     )}
                   />

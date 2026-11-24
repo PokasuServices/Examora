@@ -9,6 +9,7 @@ import { HeaderLogo } from "./header/HeaderLogo";
 import { NotificationMenu } from "./header/NotificationMenu";
 import { SearchBar } from "./header/SearchBar";
 import { UserMenu } from "./header/UserMenu";
+import { XpChip } from "./header/XpChip";
 
 /**
  * TMS `layout/AppHeader.vue` — sticky bar: sidebar toggle (collapses the
@@ -62,6 +63,7 @@ export function AppHeader() {
           )}
         >
           <div className="flex items-center gap-2">
+            <XpChip />
             <ThemeToggler />
             <NotificationMenu />
           </div>

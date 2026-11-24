@@ -55,6 +55,8 @@ export function useContentApi() {
         categoryId: string;
         priceAmount: number;
         priceCurrency: string;
+        /** ISO date (YYYY-MM-DD) shown on the student Learn page; null clears it. */
+        nextExamDate: string | null;
         isFree: boolean;
       }>,
     ) => request<Course>(`${BASE}/courses/${id}`, { method: "PATCH", body }),

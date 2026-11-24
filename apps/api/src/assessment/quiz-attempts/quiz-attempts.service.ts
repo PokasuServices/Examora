@@ -1,13 +1,16 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from "@nestjs/common";
 import type { Prisma, QuizAttempt } from "@examora/database";
 import { shuffle } from "@examora/utils";
 import { decToNum } from "../assessment.mappers";
 import { EnrollmentService } from "../../enrollment/enrollment.service";
+import { XpService } from "../../gamification/xp.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { QuizCatalogService } from "../quiz-catalog/quiz-catalog.service";
 import type { OptionOrder, QuestionSnapshot } from "./attempt-snapshot.types";
@@ -19,6 +22,8 @@ export class QuizAttemptsService {
     private readonly prisma: PrismaService,
     private readonly catalog: QuizCatalogService,
     private readonly enrollmentService: EnrollmentService,
+    // Optional so service-level tests that don't wire gamification still compile; the app always provides it.
+    @Optional() private readonly xp?: XpService,
   ) {}
 
   /**
@@ -29,7 +34,19 @@ export class QuizAttemptsService {
    */
   async start(quizId: string, userId: string): Promise<{ attempt: QuizAttempt; created: boolean }> {
     const quiz = await this.catalog.getPublishedQuizOrThrow(quizId);
-    await this.enrollmentService.assertSubjectCourseAccess(userId, quiz.subjectId);
+    await this.enrollmentService.assertLicenceForSubject(userId, quiz.subjectId);
+    if (quiz.unlockAfterQuizId) {
+      const finished = await this.prisma.quizAttempt.count({
+        where: {
+          quizId: quiz.unlockAfterQuizId,
+          userId,
+          status: { in: ["SUBMITTED", "AUTO_SUBMITTED"] },
+        },
+      });
+      if (finished === 0) {
+        throw new ForbiddenException("Finish the previous test first to unlock this one");
+      }
+    }
 
     const existing = await this.prisma.quizAttempt.findFirst({
       where: { quizId, userId, status: "IN_PROGRESS" },
@@ -39,6 +56,15 @@ export class QuizAttemptsService {
       const finalized = await this.finalizeIfExpired(existing);
       if (finalized.status === "IN_PROGRESS") {
         return { attempt: finalized, created: false };
+      }
+    }
+
+    if (quiz.maxAttempts !== null) {
+      const used = await this.prisma.quizAttempt.count({ where: { quizId, userId } });
+      if (used >= quiz.maxAttempts) {
+        throw new ConflictException(
+          `No attempts left — this quiz allows ${quiz.maxAttempts} attempt${quiz.maxAttempts === 1 ? "" : "s"}`,
+        );
       }
     }
 
@@ -59,6 +85,7 @@ export class QuizAttemptsService {
       questionId: qq.questionId,
       sectionId: qq.sectionId,
       marks: decToNum(qq.marks),
+      negativeMarks: qq.negativeMarks === null ? null : decToNum(qq.negativeMarks),
     }));
     const optionOrder: OptionOrder = {};
     for (const qq of ordered) {
@@ -105,7 +132,11 @@ export class QuizAttemptsService {
       }),
       this.prisma.quiz.findUniqueOrThrow({
         where: { id: attempt.quizId },
-        select: { title: true },
+        select: {
+          title: true,
+          requireAllVisited: true,
+          sections: { orderBy: { position: "asc" }, select: { id: true, title: true } },
+        },
       }),
       this.prisma.quizAttemptAnswer.findMany({ where: { attemptId: attempt.id } }),
     ]);
@@ -119,7 +150,98 @@ export class QuizAttemptsService {
       optionOrder,
       questionById,
       answerByQuestion,
+      requireAllVisited: quiz.requireAllVisited,
+      sections: quiz.sections,
     };
+  }
+
+  /**
+   * Test-screen bookkeeping for one question: mark it visited, flag/unflag it,
+   * record how the student got the answer, and add time spent (capped per call
+   * so a stuck tab can't inflate it).
+   */
+  async updateQuestionMeta(
+    attemptId: string,
+    userId: string,
+    questionId: string,
+    meta: {
+      visited?: boolean;
+      flagged?: boolean;
+      method?: "KNOWLEDGE" | "ELIMINATION" | "GUESS" | null;
+      addSeconds?: number;
+    },
+  ): Promise<void> {
+    const attempt = await this.assertOpenAttemptWithQuestion(attemptId, userId, questionId);
+    const add = Math.max(0, Math.min(600, Math.round(meta.addSeconds ?? 0)));
+    const now = new Date();
+    const existing = await this.prisma.quizAttemptAnswer.findUnique({
+      where: { attemptId_questionId: { attemptId: attempt.id, questionId } },
+      select: { visitedAt: true },
+    });
+    const data = {
+      ...(meta.visited && !existing?.visitedAt ? { visitedAt: now } : {}),
+      ...(meta.flagged !== undefined ? { flagged: meta.flagged } : {}),
+      ...(meta.method !== undefined ? { method: meta.method } : {}),
+    };
+    await this.prisma.quizAttemptAnswer.upsert({
+      where: { attemptId_questionId: { attemptId: attempt.id, questionId } },
+      update: { ...data, timeSpentSeconds: { increment: add } },
+      create: {
+        attemptId: attempt.id,
+        questionId,
+        selectedOptionIds: [] as unknown as Prisma.InputJsonValue,
+        ...data,
+        visitedAt: meta.visited ? now : null,
+        timeSpentSeconds: add,
+      },
+    });
+  }
+
+  /** UPLOAD questions: attach an uploaded sketch (media asset) as the answer. */
+  async attachUpload(
+    attemptId: string,
+    userId: string,
+    questionId: string,
+    assetId: string,
+  ): Promise<void> {
+    const attempt = await this.assertOpenAttemptWithQuestion(attemptId, userId, questionId);
+    const question = await this.prisma.question.findUnique({
+      where: { id: questionId },
+      select: { type: true },
+    });
+    if (question?.type !== "UPLOAD") {
+      throw new BadRequestException("This question doesn't take an upload");
+    }
+    const now = new Date();
+    await this.prisma.quizAttemptAnswer.upsert({
+      where: { attemptId_questionId: { attemptId: attempt.id, questionId } },
+      update: { uploadAssetId: assetId, answeredAt: now, visitedAt: now },
+      create: {
+        attemptId: attempt.id,
+        questionId,
+        selectedOptionIds: [] as unknown as Prisma.InputJsonValue,
+        uploadAssetId: assetId,
+        answeredAt: now,
+        visitedAt: now,
+      },
+    });
+  }
+
+  private async assertOpenAttemptWithQuestion(
+    attemptId: string,
+    userId: string,
+    questionId: string,
+  ): Promise<QuizAttempt> {
+    let attempt = await this.findOwnedAttemptOrThrow(attemptId, userId);
+    attempt = await this.finalizeIfExpired(attempt);
+    if (attempt.status !== "IN_PROGRESS") {
+      throw new ConflictException("This attempt is already finalized");
+    }
+    const snapshot = attempt.questionSnapshot as unknown as QuestionSnapshot;
+    if (!snapshot.some((s) => s.questionId === questionId)) {
+      throw new BadRequestException("questionId is not part of this attempt");
+    }
+    return attempt;
   }
 
   /** Idempotent per-question upsert. Rejects once the attempt is no longer IN_PROGRESS. */
@@ -128,6 +250,7 @@ export class QuizAttemptsService {
     userId: string,
     questionId: string,
     selectedOptionIds: string[],
+    numericAnswer?: number | null,
   ): Promise<void> {
     let attempt = await this.findOwnedAttemptOrThrow(attemptId, userId);
     attempt = await this.finalizeIfExpired(attempt);
@@ -147,17 +270,21 @@ export class QuizAttemptsService {
       );
     }
 
+    // Only touch the numeric column when the caller sent it (undefined = leave as is).
+    const numeric = numericAnswer === undefined ? {} : { numericAnswer };
     const now = new Date();
     await this.prisma.quizAttemptAnswer.upsert({
       where: { attemptId_questionId: { attemptId, questionId } },
       update: {
         selectedOptionIds: selectedOptionIds as unknown as Prisma.InputJsonValue,
+        ...numeric,
         answeredAt: now,
       },
       create: {
         attemptId,
         questionId,
         selectedOptionIds: selectedOptionIds as unknown as Prisma.InputJsonValue,
+        ...numeric,
         answeredAt: now,
       },
     });
@@ -181,8 +308,27 @@ export class QuizAttemptsService {
       const attempt = await this.finalize(initial, "AUTO_SUBMITTED", initial.expiresAt);
       return { attempt, justSubmitted: false };
     }
+    await this.assertAllVisitedIfRequired(initial);
     const { attempt, won } = await this.finalizeAndReport(initial, "SUBMITTED", new Date());
     return { attempt, justSubmitted: won };
+  }
+
+  /** Tests can require every question to be opened before a manual submit (time-out still submits). */
+  private async assertAllVisitedIfRequired(attempt: QuizAttempt): Promise<void> {
+    const quiz = await this.prisma.quiz.findUnique({
+      where: { id: attempt.quizId },
+      select: { requireAllVisited: true },
+    });
+    if (!quiz?.requireAllVisited) return;
+    const snapshot = attempt.questionSnapshot as unknown as QuestionSnapshot;
+    const visited = await this.prisma.quizAttemptAnswer.count({
+      where: { attemptId: attempt.id, visitedAt: { not: null } },
+    });
+    if (visited < snapshot.length) {
+      throw new BadRequestException(
+        `Open every question before submitting (${snapshot.length - visited} not seen yet)`,
+      );
+    }
   }
 
   async getResult(attemptId: string, userId: string) {
@@ -209,7 +355,11 @@ export class QuizAttemptsService {
     const [questions, quiz, answers] = await Promise.all([
       this.prisma.question.findMany({
         where: { id: { in: snapshot.map((s) => s.questionId) } },
-        include: { options: { orderBy: { position: "asc" } } },
+        include: {
+          options: { orderBy: { position: "asc" } },
+          subject: { select: { title: true } },
+          topic: { select: { title: true } },
+        },
       }),
       this.prisma.quiz.findUniqueOrThrow({
         where: { id: attempt.quizId },
@@ -280,10 +430,16 @@ export class QuizAttemptsService {
       answers: answers.map((a) => ({
         questionId: a.questionId,
         selectedOptionIds: a.selectedOptionIds as unknown as string[],
+        numericAnswer: a.numericAnswer === null ? null : decToNum(a.numericAnswer),
+        uploaded: a.uploadAssetId !== null,
       })),
       questions: questions.map((q) => ({
         id: q.id,
+        type: q.type,
         correctOptionIds: q.options.filter((o) => o.isCorrect).map((o) => o.id),
+        partialMarking: q.partialMarking,
+        numericMin: q.numericMin === null ? null : decToNum(q.numericMin),
+        numericMax: q.numericMax === null ? null : decToNum(q.numericMax),
       })),
       totalMarks: decToNum(attempt.totalMarks),
       negativeMarkingEnabled: attempt.negativeMarkingEnabled,
@@ -318,6 +474,7 @@ export class QuizAttemptsService {
             attemptId: attempt.id,
             questionId: a.questionId,
             selectedOptionIds: a.selectedOptionIds as unknown as Prisma.InputJsonValue,
+            numericAnswer: a.numericAnswer,
             isCorrect: a.isCorrect,
             marksAwarded: a.marksAwarded,
           },
@@ -328,11 +485,36 @@ export class QuizAttemptsService {
     });
 
     if (result) {
+      await this.awardQuizXp(result);
       return { attempt: result, won: true };
     }
     // Lost the race — a concurrent call already finalized this attempt; return its result.
     const winner = await this.prisma.quizAttempt.findUniqueOrThrow({ where: { id: attempt.id } });
     return { attempt: winner, won: false };
+  }
+
+  /**
+   * XP for finishing a quiz: its xpReward once (first finished attempt), and
+   * for topic quizzes the same again once on a perfect score. Runs only for
+   * the call that won the finalize race, and the XP ledger is idempotent.
+   */
+  private async awardQuizXp(attempt: QuizAttempt): Promise<void> {
+    if (!this.xp) return;
+    const quiz = await this.prisma.quiz.findUnique({
+      where: { id: attempt.quizId },
+      select: { id: true, xpReward: true, topicId: true },
+    });
+    if (!quiz || quiz.xpReward <= 0) return;
+    const base = {
+      userId: attempt.userId,
+      amount: quiz.xpReward,
+      sourceType: "Quiz",
+      sourceId: quiz.id,
+    };
+    await this.xp.award({ ...base, reason: "QUIZ_COMPLETED" });
+    if (quiz.topicId && attempt.percentage !== null && decToNum(attempt.percentage) >= 100) {
+      await this.xp.award({ ...base, reason: "QUIZ_PERFECT_BONUS" });
+    }
   }
 
   private async findOwnedAttemptOrThrow(attemptId: string, userId: string): Promise<QuizAttempt> {

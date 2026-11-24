@@ -19,4 +19,15 @@ export class UpdateQuizQuestionDto {
   @IsInt()
   @Min(0)
   position?: number;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    minimum: 0,
+    description:
+      "Marks deducted for a wrong answer to this question; overrides the quiz-wide rule. null = use the quiz rule",
+  })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  negativeMarks?: number | null;
 }

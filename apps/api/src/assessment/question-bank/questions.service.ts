@@ -7,12 +7,34 @@ import type { CreateQuestionDto } from "./dto/create-question.dto";
 import type { QuestionOptionInputDto } from "./dto/question-option-input.dto";
 import type { UpdateQuestionDto } from "./dto/update-question.dto";
 
+/** Stored media references: an https URL or "media:<assetId>" (see resolveMediaUrl in @examora/types). */
+const MEDIA_REF = /^media:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function assertMediaRef(field: string, value: string | null | undefined): void {
+  if (value === null || value === undefined || value === "") return;
+  if (!MEDIA_REF.test(value) && !/^https:\/\/\S+$/i.test(value)) {
+    throw new BadRequestException(`${field} must be an https URL or an uploaded media reference`);
+  }
+}
+
+/** Empty strings clear a media field, like null. */
+const mediaOrNull = (v: string | null | undefined) => (v === undefined ? undefined : v || null);
+
+interface QuestionShape {
+  type: QuestionType;
+  criteria?: string[];
+  options: { text: string; isCorrect: boolean; imageUrl?: string | null }[];
+  numericMin: number | null;
+  numericMax: number | null;
+}
+
 @Injectable()
 export class QuestionsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateQuestionDto, actorId: string) {
-    this.assertValidOptions(dto.type, dto.options);
+    this.assertValidQuestion(this.shapeOf(dto));
+    this.assertMedia(dto);
     if (dto.subjectId) {
       await this.assertSubjectExists(dto.subjectId);
     }
@@ -25,12 +47,14 @@ export class QuestionsService {
         difficulty: dto.difficulty ?? "MEDIUM",
         text: dto.text,
         explanation: dto.explanation,
+        ...this.extraFieldsForCreate(dto),
         tags: dto.tags ?? [],
         position,
         createdById: actorId,
         options: {
-          create: dto.options.map((o, index) => ({
+          create: (dto.options ?? []).map((o, index) => ({
             text: o.text,
+            imageUrl: o.imageUrl || null,
             isCorrect: o.isCorrect,
             position: index,
           })),
@@ -42,7 +66,10 @@ export class QuestionsService {
 
   /** Bulk-import foundation (Sprint 4): validates and inserts an array in one transaction. */
   async bulkCreate(dtos: CreateQuestionDto[], actorId: string) {
-    dtos.forEach((dto) => this.assertValidOptions(dto.type, dto.options));
+    dtos.forEach((dto) => {
+      this.assertValidQuestion(this.shapeOf(dto));
+      this.assertMedia(dto);
+    });
 
     const subjectIds = [
       ...new Set(dtos.map((d) => d.subjectId).filter((id): id is string => !!id)),
@@ -69,12 +96,14 @@ export class QuestionsService {
             difficulty: dto.difficulty ?? "MEDIUM",
             text: dto.text,
             explanation: dto.explanation,
+            ...this.extraFieldsForCreate(dto),
             tags: dto.tags ?? [],
             position: startPosition + index,
             createdById: actorId,
             options: {
-              create: dto.options.map((o, i) => ({
+              create: (dto.options ?? []).map((o, i) => ({
                 text: o.text,
+                imageUrl: o.imageUrl || null,
                 isCorrect: o.isCorrect,
                 position: i,
               })),
@@ -93,7 +122,9 @@ export class QuestionsService {
     type?: QuestionType;
     difficulty?: DifficultyLevel;
     tag?: string;
+    search?: string;
   }) {
+    const search = params.search?.trim();
     const where: Prisma.QuestionWhereInput = {
       deletedAt: null,
       ...(params.status ? { status: params.status } : {}),
@@ -101,6 +132,7 @@ export class QuestionsService {
       ...(params.type ? { type: params.type } : {}),
       ...(params.difficulty ? { difficulty: params.difficulty } : {}),
       ...(params.tag ? { tags: { has: params.tag } } : {}),
+      ...(search ? { text: { contains: search, mode: "insensitive" } } : {}),
     };
 
     const [items, total] = await this.prisma.$transaction([
@@ -138,11 +170,25 @@ export class QuestionsService {
   async update(id: string, dto: UpdateQuestionDto) {
     const existing = await this.findByIdOrThrow(id);
     const type = dto.type ?? existing.type;
-    if (dto.options) {
-      this.assertValidOptions(type, dto.options);
-    } else if (dto.type && dto.type !== existing.type) {
-      this.assertValidOptions(type, existing.options);
-    }
+    const keep = (incoming: number | null | undefined, stored: Prisma.Decimal | null) =>
+      type !== "NUMERIC"
+        ? null
+        : incoming !== undefined
+          ? incoming
+          : stored === null
+            ? null
+            : Number(stored);
+    const numericMin = keep(dto.numericMin, existing.numericMin);
+    const numericMax = keep(dto.numericMax, existing.numericMax);
+    const storedCriteria = Array.isArray(existing.criteria) ? (existing.criteria as string[]) : [];
+    this.assertValidQuestion({
+      type,
+      options: dto.options ?? existing.options,
+      numericMin,
+      numericMax,
+      criteria: dto.criteria ?? storedCriteria,
+    });
+    this.assertMedia(dto);
     if (dto.subjectId) {
       await this.assertSubjectExists(dto.subjectId);
     }
@@ -156,6 +202,24 @@ export class QuestionsService {
           difficulty: dto.difficulty,
           text: dto.text,
           explanation: dto.explanation,
+          imageUrl: mediaOrNull(dto.imageUrl),
+          numericMin,
+          numericMax,
+          // Partial marking only means something for multi-select questions.
+          partialMarking: type === "MULTIPLE_CHOICE" ? dto.partialMarking : false,
+          explanationImageUrl: mediaOrNull(dto.explanationImageUrl),
+          explanationVideoUrl: mediaOrNull(dto.explanationVideoUrl),
+          resources:
+            dto.resources === undefined
+              ? undefined
+              : (dto.resources as unknown as Prisma.InputJsonValue),
+          topicId: dto.topicId,
+          criteria:
+            dto.criteria === undefined
+              ? undefined
+              : (dto.criteria
+                  .map((c) => c.trim())
+                  .filter(Boolean) as unknown as Prisma.InputJsonValue),
           tags: dto.tags,
         },
       });
@@ -214,11 +278,22 @@ export class QuestionsService {
       if (match) {
         await tx.questionOption.update({
           where: { id: match.id },
-          data: { text: option.text, isCorrect: option.isCorrect, position: index },
+          data: {
+            text: option.text,
+            imageUrl: option.imageUrl || null,
+            isCorrect: option.isCorrect,
+            position: index,
+          },
         });
       } else {
         await tx.questionOption.create({
-          data: { questionId, text: option.text, isCorrect: option.isCorrect, position: index },
+          data: {
+            questionId,
+            text: option.text,
+            imageUrl: option.imageUrl || null,
+            isCorrect: option.isCorrect,
+            position: index,
+          },
         });
       }
     }
@@ -226,6 +301,72 @@ export class QuestionsService {
       const removeIds = existingOptions.slice(incoming.length).map((o) => o.id);
       await tx.questionOption.deleteMany({ where: { id: { in: removeIds } } });
     }
+  }
+
+  private shapeOf(dto: CreateQuestionDto): QuestionShape {
+    return {
+      type: dto.type,
+      options: dto.options ?? [],
+      numericMin: dto.numericMin ?? null,
+      numericMax: dto.numericMax ?? null,
+      criteria: dto.criteria,
+    };
+  }
+
+  /** Fields added by the question engine, as stored on create. */
+  private extraFieldsForCreate(dto: CreateQuestionDto) {
+    const numeric = dto.type === "NUMERIC";
+    return {
+      imageUrl: dto.imageUrl || null,
+      numericMin: numeric ? (dto.numericMin ?? null) : null,
+      numericMax: numeric ? (dto.numericMax ?? null) : null,
+      partialMarking: dto.type === "MULTIPLE_CHOICE" ? (dto.partialMarking ?? false) : false,
+      explanationImageUrl: dto.explanationImageUrl || null,
+      explanationVideoUrl: dto.explanationVideoUrl || null,
+      resources: (dto.resources ?? []) as unknown as Prisma.InputJsonValue,
+      topicId: dto.topicId ?? null,
+      criteria: (dto.type === "UPLOAD"
+        ? (dto.criteria ?? []).map((c) => c.trim()).filter(Boolean)
+        : []) as unknown as Prisma.InputJsonValue,
+    };
+  }
+
+  private assertMedia(dto: Partial<CreateQuestionDto>): void {
+    assertMediaRef("imageUrl", dto.imageUrl);
+    assertMediaRef("explanationImageUrl", dto.explanationImageUrl);
+    assertMediaRef("explanationVideoUrl", dto.explanationVideoUrl);
+    dto.options?.forEach((o, i) => assertMediaRef(`options[${i}].imageUrl`, o.imageUrl));
+  }
+
+  private assertValidQuestion(q: QuestionShape): void {
+    if (q.type === "UPLOAD") {
+      if (q.options.length > 0) {
+        throw new BadRequestException("UPLOAD questions have no options; send an empty list");
+      }
+      if (!q.criteria || q.criteria.filter((c) => c.trim()).length === 0) {
+        throw new BadRequestException("UPLOAD questions need at least one rating criterion");
+      }
+      return;
+    }
+    if (q.type === "NUMERIC") {
+      if (q.options.length > 0) {
+        throw new BadRequestException("NUMERIC questions have no options; send an empty list");
+      }
+      if (q.numericMin === null || q.numericMax === null) {
+        throw new BadRequestException("NUMERIC questions need numericMin and numericMax");
+      }
+      if (q.numericMin > q.numericMax) {
+        throw new BadRequestException("numericMin must not be greater than numericMax");
+      }
+      return;
+    }
+    if (q.options.length < 2) {
+      throw new BadRequestException("Questions need at least 2 options");
+    }
+    if (q.options.some((o) => !o.text.trim() && !o.imageUrl)) {
+      throw new BadRequestException("Every option needs text or an image");
+    }
+    this.assertValidOptions(q.type, q.options);
   }
 
   private assertValidOptions(type: QuestionType, options: { isCorrect: boolean }[]): void {

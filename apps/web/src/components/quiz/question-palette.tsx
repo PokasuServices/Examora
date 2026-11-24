@@ -6,6 +6,7 @@ const TONE_CLASS: Record<PaletteTone, string> = {
   answered: "bg-primary-100 dark:bg-primary-500/20 text-primary-700 dark:text-primary-300",
   unanswered: "bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-400",
   correct: "bg-success-500/10 text-success-700 dark:text-success-300",
+  partial: "bg-warning-500/15 text-warning-700 dark:text-warning-300",
   wrong: "bg-danger-500/10 text-danger-700 dark:text-danger-300",
 };
 

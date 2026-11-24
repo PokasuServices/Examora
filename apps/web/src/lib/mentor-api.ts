@@ -2,6 +2,8 @@
 
 import { useAuth } from "@examora/auth-client";
 import type {
+  MentorCourseOption,
+  MentorCourseProgress,
   AssignedStudentSummary,
   MentorDashboard,
   MentorFeedback,
@@ -32,6 +34,9 @@ export function useMentorApi() {
   return {
     getDashboard: () => request<MentorDashboard>("/mentor/dashboard", { method: "GET" }),
     listMyStudents: () => request<AssignedStudentSummary[]>("/mentor/students", { method: "GET" }),
+    listMyCourses: () => request<MentorCourseOption[]>("/mentor/courses", { method: "GET" }),
+    getCourseProgress: (courseId: string) =>
+      request<MentorCourseProgress>(`/mentor/courses/${courseId}/progress`, { method: "GET" }),
     getStudent360: (studentId: string) =>
       request<Student360>(`/students/${studentId}/360`, { method: "GET" }),
 

@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ClipboardList } from "lucide-react";
+import { ApiError } from "@examora/auth-client";
 import { RequireAuth } from "@/components/require-auth";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useAssignmentLanding } from "@/components/assignment/use-assignment-landing";
@@ -49,8 +50,12 @@ function AssignmentLandingContent() {
     try {
       const submissionId = await startOrResume();
       router.push(`/assignments/submission/${submissionId}`);
-    } catch {
-      setStartError("Couldn't start the submission. Please try again.");
+    } catch (err) {
+      setStartError(
+        err instanceof ApiError && err.status !== 0
+          ? err.message
+          : "Couldn't reach the server. Check your connection and try again.",
+      );
     }
   }
 

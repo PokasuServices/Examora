@@ -98,6 +98,10 @@ enum QuestionType {
   SINGLE_CHOICE
   MULTIPLE_CHOICE
   TRUE_FALSE
+  /// Typed numeric answer, correct when within [numericMin, numericMax].
+  NUMERIC
+  /// Sketch / drawing upload, marked by a reviewer against criteria (not auto-scored).
+  UPLOAD
 
   @@map("question_type")
 }
@@ -112,6 +116,15 @@ enum DifficultyLevel {
 
 /// A submitted/auto-submitted attempt is permanently closed (ADR-0014) — the
 /// `IN_PROGRESS -> {SUBMITTED, AUTO_SUBMITTED}` transition happens exactly once.
+/// How the student says they reached an answer (asked after each answer in a test).
+enum AnswerMethod {
+  KNOWLEDGE
+  ELIMINATION
+  GUESS
+
+  @@map("answer_method")
+}
+
 enum QuizAttemptStatus {
   IN_PROGRESS
   SUBMITTED
@@ -407,6 +420,9 @@ model User {
   dateOfBirth     DateTime?  @map("date_of_birth") @db.Date
   guardianName    String?    @map("guardian_name")
   guardianEmail   String?    @map("guardian_email")
+  guardianPhone   String?    @map("guardian_phone")
+  /// Year the student plans to sit their entrance exam.
+  examYear        Int?       @map("exam_year")
   // Consent capture per FR-PROFILE-01 acceptance criterion: version, channel, timestamp, actor.
   // Kept as a fast "latest ToS acceptance" cache set at registration; the full
   // auditable history (including later consent changes) lives in ConsentRecord.
@@ -473,16 +489,37 @@ model User {
 
   recommendationFeatureFlagsUpdated RecommendationFeatureFlag[]
 
-  cmsAssetsUploaded    CmsAsset[]
-  cmsPagesCreated      CmsPage[]           @relation("CmsPageCreatedBy")
-  cmsPagesUpdated      CmsPage[]           @relation("CmsPageUpdatedBy")
-  cmsFaqItemsCreated   CmsFaqItem[]        @relation("CmsFaqItemCreatedBy")
-  cmsFaqItemsUpdated   CmsFaqItem[]        @relation("CmsFaqItemUpdatedBy")
-  cmsAnnouncementsCreated CmsAnnouncement[] @relation("CmsAnnouncementCreatedBy")
-  cmsAnnouncementsUpdated CmsAnnouncement[] @relation("CmsAnnouncementUpdatedBy")
-  cmsBannersCreated    CmsBanner[]         @relation("CmsBannerCreatedBy")
-  cmsBannersUpdated    CmsBanner[]         @relation("CmsBannerUpdatedBy")
+  xpEvents     XpEvent[]
+  topicRatings TopicRating[]
+
+  questionReports      QuestionReport[]
+  questionDoubts       QuestionDoubt[]
+  doubtClaps           DoubtClap[]
+  sketchReviewsGiven   SketchReview[]         @relation("SketchExpert")
+  sketchPeerRatings    SketchPeerRating[]
+  dailyQuizAttempts    DailyQuizAttempt[]
+  collegeShortlists    CollegeShortlist[]
+  collegeEnquiries     CollegeEnquiry[]
+  webinarRegistrations WebinarRegistration[]
+  studentGoals         StudentGoal[]
+  checkpointsDone      CheckpointCompletion[]
+  topicStudyMarks      TopicStudyMark[]
+  cohortMemberships    CohortMember[]
+
+  cmsAssetsUploaded         CmsAsset[]
+  cmsPagesCreated           CmsPage[]              @relation("CmsPageCreatedBy")
+  cmsPagesUpdated           CmsPage[]              @relation("CmsPageUpdatedBy")
+  cmsFaqItemsCreated        CmsFaqItem[]           @relation("CmsFaqItemCreatedBy")
+  cmsFaqItemsUpdated        CmsFaqItem[]           @relation("CmsFaqItemUpdatedBy")
+  cmsAnnouncementsCreated   CmsAnnouncement[]      @relation("CmsAnnouncementCreatedBy")
+  cmsAnnouncementsUpdated   CmsAnnouncement[]      @relation("CmsAnnouncementUpdatedBy")
+  cmsBannersCreated         CmsBanner[]            @relation("CmsBannerCreatedBy")
+  cmsBannersUpdated         CmsBanner[]            @relation("CmsBannerUpdatedBy")
   cmsContentVersionsCreated CmsContentVersion[]
+  lessonQuestionAnswers     LessonQuestionAnswer[]
+  sketchComments            SketchComment[]
+  testShares                TestShare[]
+  testShareVisits           TestShareVisit[]
 
   @@index([status])
   @@map("users")
@@ -671,16 +708,21 @@ model Course {
   // plan model this sprint (TD-036).
   priceAmount   Decimal?      @map("price_amount") @db.Decimal(10, 2)
   priceCurrency String        @default("INR") @map("price_currency")
+  /// Shown on the Learn page's syllabus heatmap ("Next Exam Date").
+  nextExamDate  DateTime?     @map("next_exam_date")
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
   deletedAt     DateTime?     @map("deleted_at")
 
-  category       Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  subjects       Subject[]
-  lessonProgress LessonProgress[]
-  relatedThreads Thread[]         @relation("ThreadsByCourse")
-  enrollments    Enrollment[]
-  orders         Order[]
+  category           Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  subjects           Subject[]
+  pastPaperStats     PastPaperStat[]
+  practiceCategories PracticeCategory[]
+  checkpoints        CourseCheckpoint[]
+  lessonProgress     LessonProgress[]
+  relatedThreads     Thread[]           @relation("ThreadsByCourse")
+  enrollments        Enrollment[]
+  orders             Order[]
 
   @@index([categoryId])
   @@index([status])
@@ -696,6 +738,12 @@ model Subject {
   description String?
   status      ContentStatus @default(DRAFT)
   position    Int           @default(0)
+  /// "SUBJECT" or "ESSENTIALS" — the tag on the Learn page's subject card.
+  kind        String        @default("SUBJECT")
+  /// Lucide icon name for the subject card, e.g. "brain"; null = default icon.
+  icon        String?
+  /// Tailwind colour family for the icon badge, e.g. "violet"; null = primary.
+  color       String?
   createdById String?       @map("created_by_id") @db.Uuid
   version     Int           @default(1)
   createdAt   DateTime      @default(now()) @map("created_at")
@@ -707,10 +755,11 @@ model Subject {
 
   // Sprint 4: questions and quizzes optionally classify under a subject
   // (ADR-0014 — reuses the curriculum taxonomy instead of a parallel one).
-  questions   Question[]
-  quizzes     Quiz[]
+  questions      Question[]
+  quizzes        Quiz[]
   // Sprint 5: assignments do the same (ADR-0015).
-  assignments Assignment[]
+  assignments    Assignment[]
+  pastPaperStats PastPaperStat[]
 
   @@unique([courseId, slug])
   @@index([courseId])
@@ -732,8 +781,12 @@ model Topic {
   updatedAt   DateTime      @updatedAt @map("updated_at")
   deletedAt   DateTime?     @map("deleted_at")
 
-  subject Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  modules Module[]
+  subject    Subject          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  modules    Module[]
+  quizzes    Quiz[]
+  ratings    TopicRating[]
+  questions  Question[]
+  studyMarks TopicStudyMark[]
 
   @@unique([subjectId, slug])
   @@index([subjectId])
@@ -778,6 +831,8 @@ model Lesson {
   body            String?
   contentUrl      String?           @map("content_url")
   durationMinutes Int?              @map("duration_minutes")
+  /// XP earned the first time the lesson is completed.
+  xpReward        Int               @default(10) @map("xp_reward")
   status          ContentStatus     @default(DRAFT)
   position        Int               @default(0)
   createdById     String?           @map("created_by_id") @db.Uuid
@@ -789,6 +844,7 @@ model Lesson {
   module         Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   progress       LessonProgress[]
   relatedThreads Thread[]         @relation("ThreadsByLesson")
+  questions      LessonQuestion[]
 
   @@unique([moduleId, slug])
   @@index([moduleId])
@@ -836,27 +892,48 @@ model LessonProgress {
 /// of a parallel "question category" entity (ADR-0014); `tags` is a flat
 /// array rather than a normalized Tag entity for the same reason.
 model Question {
-  id          String          @id @default(uuid()) @db.Uuid
-  subjectId   String?         @map("subject_id") @db.Uuid
-  type        QuestionType
-  difficulty  DifficultyLevel @default(MEDIUM)
-  text        String
-  explanation String?
-  tags        String[]        @default([])
-  status      ContentStatus   @default(DRAFT)
-  position    Int             @default(0)
-  createdById String?         @map("created_by_id") @db.Uuid
-  version     Int             @default(1)
-  createdAt   DateTime        @default(now()) @map("created_at")
-  updatedAt   DateTime        @updatedAt @map("updated_at")
-  deletedAt   DateTime?       @map("deleted_at")
+  id                  String          @id @default(uuid()) @db.Uuid
+  subjectId           String?         @map("subject_id") @db.Uuid
+  /// Topic the question tests (drives topic-level analysis in reports).
+  topicId             String?         @map("topic_id") @db.Uuid
+  /// UPLOAD questions: the criteria a sketch is rated on, e.g. ["Perspective", "Line quality"].
+  criteria            Json?
+  type                QuestionType
+  difficulty          DifficultyLevel @default(MEDIUM)
+  text                String
+  explanation         String?
+  /// Image shown with the question: an https URL or "media:<assetId>".
+  imageUrl            String?         @map("image_url")
+  /// NUMERIC questions: inclusive accepted range (min = max for an exact answer).
+  numericMin          Decimal?        @map("numeric_min") @db.Decimal(14, 4)
+  numericMax          Decimal?        @map("numeric_max") @db.Decimal(14, 4)
+  /// MULTIPLE_CHOICE: award a share of the marks when only some correct options are chosen and no wrong one.
+  partialMarking      Boolean         @default(false) @map("partial_marking")
+  /// Explanation media shown after submit.
+  explanationImageUrl String?         @map("explanation_image_url")
+  explanationVideoUrl String?         @map("explanation_video_url")
+  /// Further reading: [{ label, url }].
+  resources           Json?
+  tags                String[]        @default([])
+  status              ContentStatus   @default(DRAFT)
+  position            Int             @default(0)
+  createdById         String?         @map("created_by_id") @db.Uuid
+  version             Int             @default(1)
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+  deletedAt           DateTime?       @map("deleted_at")
 
-  subject        Subject?            @relation(fields: [subjectId], references: [id], onDelete: SetNull)
-  options        QuestionOption[]
-  quizQuestions  QuizQuestion[]
-  attemptAnswers QuizAttemptAnswer[]
+  subject         Subject?            @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  topic           Topic?              @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  reports         QuestionReport[]
+  doubts          QuestionDoubt[]
+  options         QuestionOption[]
+  quizQuestions   QuizQuestion[]
+  attemptAnswers  QuizAttemptAnswer[]
+  lessonQuestions LessonQuestion[]
 
   @@index([subjectId])
+  @@index([topicId])
   @@index([status])
   @@index([type])
   @@index([difficulty])
@@ -868,6 +945,8 @@ model QuestionOption {
   questionId String   @map("question_id") @db.Uuid
   text       String
   isCorrect  Boolean  @default(false) @map("is_correct")
+  /// Image option: an https URL or "media:<assetId>" (text may then be empty).
+  imageUrl   String?  @map("image_url")
   position   Int      @default(0)
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
@@ -883,33 +962,53 @@ model QuestionOption {
 /// at start (ADR-0014) so editing a quiz never retroactively changes an
 /// attempt already underway or submitted.
 model Quiz {
-  id                     String        @id @default(uuid()) @db.Uuid
-  subjectId              String?       @map("subject_id") @db.Uuid
+  id                     String           @id @default(uuid()) @db.Uuid
+  subjectId              String?          @map("subject_id") @db.Uuid
   title                  String
-  slug                   String        @unique
+  slug                   String           @unique
   description            String?
-  status                 ContentStatus @default(DRAFT)
-  timeLimitMinutes       Int?          @map("time_limit_minutes")
-  passingScorePercent    Decimal       @default(40) @map("passing_score_percent") @db.Decimal(5, 2)
-  negativeMarkingEnabled Boolean       @default(false) @map("negative_marking_enabled")
-  negativeMarksPerWrong  Decimal       @default(0) @map("negative_marks_per_wrong") @db.Decimal(5, 2)
-  shuffleQuestions       Boolean       @default(false) @map("shuffle_questions")
-  shuffleOptions         Boolean       @default(false) @map("shuffle_options")
-  position               Int           @default(0)
-  publishedAt            DateTime?     @map("published_at")
-  createdById            String?       @map("created_by_id") @db.Uuid
-  version                Int           @default(1)
-  createdAt              DateTime      @default(now()) @map("created_at")
-  updatedAt              DateTime      @updatedAt @map("updated_at")
-  deletedAt              DateTime?     @map("deleted_at")
+  status                 ContentStatus    @default(DRAFT)
+  timeLimitMinutes       Int?             @map("time_limit_minutes")
+  passingScorePercent    Decimal          @default(40) @map("passing_score_percent") @db.Decimal(5, 2)
+  negativeMarkingEnabled Boolean          @default(false) @map("negative_marking_enabled")
+  negativeMarksPerWrong  Decimal          @default(0) @map("negative_marks_per_wrong") @db.Decimal(5, 2)
+  shuffleQuestions       Boolean          @default(false) @map("shuffle_questions")
+  shuffleOptions         Boolean          @default(false) @map("shuffle_options")
+  position               Int              @default(0)
+  /// Topic quizzes on the Learn page belong to a topic; tests do not.
+  topicId                String?          @map("topic_id") @db.Uuid
+  /// Attempts allowed per student; null = unlimited.
+  maxAttempts            Int?             @map("max_attempts")
+  /// XP for the first completed attempt (topic quizzes double it on a perfect score).
+  xpReward               Int              @default(0) @map("xp_reward")
+  level                  DifficultyLevel?
+  /// Practice page category (e.g. "Mock tests", "Past papers"); null = not listed on Practice.
+  practiceCategoryId     String?          @map("practice_category_id") @db.Uuid
+  /// Locked until the student has finished an attempt of this other quiz.
+  unlockAfterQuizId      String?          @map("unlock_after_quiz_id") @db.Uuid
+  /// Every question must be opened at least once before the attempt can be submitted.
+  requireAllVisited      Boolean          @default(false) @map("require_all_visited")
+  publishedAt            DateTime?        @map("published_at")
+  createdById            String?          @map("created_by_id") @db.Uuid
+  version                Int              @default(1)
+  createdAt              DateTime         @default(now()) @map("created_at")
+  updatedAt              DateTime         @updatedAt @map("updated_at")
+  deletedAt              DateTime?        @map("deleted_at")
 
-  subject        Subject?       @relation(fields: [subjectId], references: [id], onDelete: SetNull)
-  sections       QuizSection[]
-  quizQuestions  QuizQuestion[]
-  attempts       QuizAttempt[]
-  relatedThreads Thread[]       @relation("ThreadsByQuiz")
+  subject          Subject?          @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  topic            Topic?            @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  practiceCategory PracticeCategory? @relation(fields: [practiceCategoryId], references: [id], onDelete: SetNull)
+  unlockAfter      Quiz?             @relation("QuizUnlockChain", fields: [unlockAfterQuizId], references: [id], onDelete: SetNull)
+  unlocks          Quiz[]            @relation("QuizUnlockChain")
+  sections         QuizSection[]
+  quizQuestions    QuizQuestion[]
+  shares           TestShare[]
+  attempts         QuizAttempt[]
+  relatedThreads   Thread[]          @relation("ThreadsByQuiz")
 
   @@index([subjectId])
+  @@index([topicId])
+  @@index([practiceCategoryId])
   @@index([status])
   @@map("quizzes")
 }
@@ -934,13 +1033,15 @@ model QuizSection {
 /// from the question) so the same question can carry different weight in
 /// different quizzes.
 model QuizQuestion {
-  id         String   @id @default(uuid()) @db.Uuid
-  quizId     String   @map("quiz_id") @db.Uuid
-  questionId String   @map("question_id") @db.Uuid
-  sectionId  String?  @map("section_id") @db.Uuid
-  marks      Decimal  @default(1) @db.Decimal(6, 2)
-  position   Int      @default(0)
-  createdAt  DateTime @default(now()) @map("created_at")
+  id            String   @id @default(uuid()) @db.Uuid
+  quizId        String   @map("quiz_id") @db.Uuid
+  questionId    String   @map("question_id") @db.Uuid
+  sectionId     String?  @map("section_id") @db.Uuid
+  marks         Decimal  @default(1) @db.Decimal(6, 2)
+  /// Marks deducted for a wrong answer to this question; overrides the quiz-wide rule when set.
+  negativeMarks Decimal? @map("negative_marks") @db.Decimal(6, 2)
+  position      Int      @default(0)
+  createdAt     DateTime @default(now()) @map("created_at")
 
   quiz     Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
   question Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
@@ -1000,19 +1101,32 @@ model QuizAttempt {
 }
 
 model QuizAttemptAnswer {
-  id                String    @id @default(uuid()) @db.Uuid
-  attemptId         String    @map("attempt_id") @db.Uuid
-  questionId        String    @map("question_id") @db.Uuid
+  id                String        @id @default(uuid()) @db.Uuid
+  attemptId         String        @map("attempt_id") @db.Uuid
+  questionId        String        @map("question_id") @db.Uuid
   /// string[] of selected QuestionOption ids (supports MULTIPLE_CHOICE).
-  selectedOptionIds Json      @map("selected_option_ids")
-  isCorrect         Boolean?  @map("is_correct")
-  marksAwarded      Decimal?  @map("marks_awarded") @db.Decimal(6, 2)
-  answeredAt        DateTime? @map("answered_at")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
+  selectedOptionIds Json          @map("selected_option_ids")
+  /// NUMERIC questions: the typed answer.
+  numericAnswer     Decimal?      @map("numeric_answer") @db.Decimal(14, 4)
+  /// How the student says they got the answer.
+  method            AnswerMethod?
+  /// Seconds spent on this question across visits.
+  timeSpentSeconds  Int           @default(0) @map("time_spent_seconds")
+  visitedAt         DateTime?     @map("visited_at")
+  flagged           Boolean       @default(false)
+  /// UPLOAD questions: the uploaded sketch (media asset id).
+  uploadAssetId     String?       @map("upload_asset_id") @db.Uuid
+  isCorrect         Boolean?      @map("is_correct")
+  marksAwarded      Decimal?      @map("marks_awarded") @db.Decimal(6, 2)
+  answeredAt        DateTime?     @map("answered_at")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
 
-  attempt  QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  question Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  attempt        QuizAttempt        @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question       Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  sketchReview   SketchReview?
+  peerRatings    SketchPeerRating[]
+  sketchComments SketchComment[]
 
   @@unique([attemptId, questionId])
   @@index([attemptId])
@@ -1827,20 +1941,20 @@ model WebPushSubscription {
 /// summary Notification to `createdBy` — it does not attach the CSV/PDF file
 /// (TD-042); an admin opens the live dashboard or on-demand export for that.
 model ScheduledReport {
-  id          String         @id @default(uuid()) @db.Uuid
-  createdById String         @map("created_by_id") @db.Uuid
+  id          String        @id @default(uuid()) @db.Uuid
+  createdById String        @map("created_by_id") @db.Uuid
   name        String
-  reportType  ReportType     @map("report_type")
-  format      ReportFormat   @default(CSV)
+  reportType  ReportType    @map("report_type")
+  format      ReportFormat  @default(CSV)
   cadence     ReportCadence
   /// Report-type-specific filter params (date range, courseId, etc.) — shape
   /// validated per reportType in ReportBuilderService, not at the DB layer.
   filters     Json?
-  isActive    Boolean        @default(true) @map("is_active")
-  lastRunAt   DateTime?      @map("last_run_at")
-  nextRunAt   DateTime?      @map("next_run_at")
-  createdAt   DateTime       @default(now()) @map("created_at")
-  updatedAt   DateTime       @updatedAt @map("updated_at")
+  isActive    Boolean       @default(true) @map("is_active")
+  lastRunAt   DateTime?     @map("last_run_at")
+  nextRunAt   DateTime?     @map("next_run_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
 
   createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
@@ -1880,7 +1994,7 @@ model CmsAsset {
   uploadedById String         @map("uploaded_by_id") @db.Uuid
   createdAt    DateTime       @default(now()) @map("created_at")
 
-  uploadedBy User             @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  uploadedBy User            @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
   usages     CmsAssetUsage[]
   banners    CmsBanner[]
 
@@ -1906,22 +2020,22 @@ model CmsAssetUsage {
 /// Landing Pages and Static Pages (Sprint 12, ADR-0022 §2) — one model, a
 /// `pageType` discriminator, since both are identically shaped.
 model CmsPage {
-  id                  String            @id @default(uuid()) @db.Uuid
-  pageType            CmsPageType       @map("page_type")
-  slug                String            @unique
-  title               String
-  body                String
-  seoTitle            String?           @map("seo_title")
-  seoDescription      String?           @map("seo_description")
-  status              CmsWorkflowStatus @default(DRAFT)
-  version             Int               @default(1)
-  scheduledPublishAt  DateTime?         @map("scheduled_publish_at")
-  scheduledUnpublishAt DateTime?        @map("scheduled_unpublish_at")
-  publishedAt         DateTime?         @map("published_at")
-  createdById         String            @map("created_by_id") @db.Uuid
-  updatedById         String?           @map("updated_by_id") @db.Uuid
-  createdAt           DateTime          @default(now()) @map("created_at")
-  updatedAt           DateTime          @updatedAt @map("updated_at")
+  id                   String            @id @default(uuid()) @db.Uuid
+  pageType             CmsPageType       @map("page_type")
+  slug                 String            @unique
+  title                String
+  body                 String
+  seoTitle             String?           @map("seo_title")
+  seoDescription       String?           @map("seo_description")
+  status               CmsWorkflowStatus @default(DRAFT)
+  version              Int               @default(1)
+  scheduledPublishAt   DateTime?         @map("scheduled_publish_at")
+  scheduledUnpublishAt DateTime?         @map("scheduled_unpublish_at")
+  publishedAt          DateTime?         @map("published_at")
+  createdById          String            @map("created_by_id") @db.Uuid
+  updatedById          String?           @map("updated_by_id") @db.Uuid
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
 
   createdBy User  @relation("CmsPageCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   updatedBy User? @relation("CmsPageUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
@@ -1931,20 +2045,20 @@ model CmsPage {
 }
 
 model CmsFaqItem {
-  id                  String            @id @default(uuid()) @db.Uuid
-  question            String
-  answer              String
-  category            String?
-  position            Int               @default(0)
-  status              CmsWorkflowStatus @default(DRAFT)
-  version             Int               @default(1)
-  scheduledPublishAt  DateTime?         @map("scheduled_publish_at")
-  scheduledUnpublishAt DateTime?        @map("scheduled_unpublish_at")
-  publishedAt         DateTime?         @map("published_at")
-  createdById         String            @map("created_by_id") @db.Uuid
-  updatedById         String?           @map("updated_by_id") @db.Uuid
-  createdAt           DateTime          @default(now()) @map("created_at")
-  updatedAt           DateTime          @updatedAt @map("updated_at")
+  id                   String            @id @default(uuid()) @db.Uuid
+  question             String
+  answer               String
+  category             String?
+  position             Int               @default(0)
+  status               CmsWorkflowStatus @default(DRAFT)
+  version              Int               @default(1)
+  scheduledPublishAt   DateTime?         @map("scheduled_publish_at")
+  scheduledUnpublishAt DateTime?         @map("scheduled_unpublish_at")
+  publishedAt          DateTime?         @map("published_at")
+  createdById          String            @map("created_by_id") @db.Uuid
+  updatedById          String?           @map("updated_by_id") @db.Uuid
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
 
   createdBy User  @relation("CmsFaqItemCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   updatedBy User? @relation("CmsFaqItemUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
@@ -1954,18 +2068,18 @@ model CmsFaqItem {
 }
 
 model CmsAnnouncement {
-  id                  String            @id @default(uuid()) @db.Uuid
-  title               String
-  body                String
-  status              CmsWorkflowStatus @default(DRAFT)
-  version             Int               @default(1)
-  scheduledPublishAt  DateTime?         @map("scheduled_publish_at")
-  scheduledUnpublishAt DateTime?        @map("scheduled_unpublish_at")
-  publishedAt         DateTime?         @map("published_at")
-  createdById         String            @map("created_by_id") @db.Uuid
-  updatedById         String?           @map("updated_by_id") @db.Uuid
-  createdAt           DateTime          @default(now()) @map("created_at")
-  updatedAt           DateTime          @updatedAt @map("updated_at")
+  id                   String            @id @default(uuid()) @db.Uuid
+  title                String
+  body                 String
+  status               CmsWorkflowStatus @default(DRAFT)
+  version              Int               @default(1)
+  scheduledPublishAt   DateTime?         @map("scheduled_publish_at")
+  scheduledUnpublishAt DateTime?         @map("scheduled_unpublish_at")
+  publishedAt          DateTime?         @map("published_at")
+  createdById          String            @map("created_by_id") @db.Uuid
+  updatedById          String?           @map("updated_by_id") @db.Uuid
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
 
   createdBy User  @relation("CmsAnnouncementCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   updatedBy User? @relation("CmsAnnouncementUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
@@ -1975,7 +2089,7 @@ model CmsAnnouncement {
 }
 
 model CmsBanner {
-  id                  String            @id @default(uuid()) @db.Uuid
+  id                   String            @id @default(uuid()) @db.Uuid
   title                String
   imageAssetId         String?           @map("image_asset_id") @db.Uuid
   linkUrl              String?           @map("link_url")
@@ -1989,7 +2103,7 @@ model CmsBanner {
   createdById          String            @map("created_by_id") @db.Uuid
   updatedById          String?           @map("updated_by_id") @db.Uuid
   createdAt            DateTime          @default(now()) @map("created_at")
-  updatedAt             DateTime         @updatedAt @map("updated_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
 
   imageAsset CmsAsset? @relation(fields: [imageAssetId], references: [id], onDelete: SetNull)
   createdBy  User      @relation("CmsBannerCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
@@ -2018,4 +2132,454 @@ model CmsContentVersion {
   @@unique([contentType, contentId, versionNumber])
   @@index([contentType, contentId])
   @@map("cms_content_versions")
+}
+
+/// Student XP ledger (student module redesign). One row per award; a user's
+/// XP is the sum of their rows. (userId, reason, sourceType, sourceId) is
+/// unique so the same lesson/quiz/test can never pay out twice for the same
+/// reason; a perfect-score bonus is a separate reason on the same source.
+model XpEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  amount     Int
+  /// e.g. LESSON_COMPLETED, QUIZ_COMPLETED, QUIZ_PERFECT_BONUS, TEST_COMPLETED, DAILY_QUIZ
+  reason     String
+  /// e.g. "Lesson", "Quiz", "DailyQuiz"
+  sourceType String   @map("source_type")
+  sourceId   String   @map("source_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reason, sourceType, sourceId])
+  @@index([userId, createdAt])
+  @@map("xp_events")
+}
+
+/// "Rate your understanding of this topic so far" on the Learn topic page (1 = Poor … 5 = Excellent).
+model TopicRating {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  topicId   String   @map("topic_id") @db.Uuid
+  rating    Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, topicId])
+  @@index([topicId])
+  @@map("topic_ratings")
+}
+
+/// Syllabus heatmap data: how many questions each subject had in an exam's
+/// past paper for a given year. examLabel distinguishes exams that share a
+/// course (e.g. "NID B.Des" and "UCEED" under NID UG | UCEED).
+model PastPaperStat {
+  id            String @id @default(uuid()) @db.Uuid
+  courseId      String @map("course_id") @db.Uuid
+  examLabel     String @map("exam_label")
+  subjectId     String @map("subject_id") @db.Uuid
+  year          Int
+  questionCount Int    @map("question_count")
+
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, examLabel, subjectId, year])
+  @@index([courseId])
+  @@map("past_paper_stats")
+}
+
+/// Practice page tabs (e.g. "Mock tests", "Past year papers") within a course.
+model PracticeCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  courseId    String   @map("course_id") @db.Uuid
+  title       String
+  slug        String
+  description String?
+  position    Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  course  Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  quizzes Quiz[]
+
+  @@unique([courseId, slug])
+  @@index([courseId])
+  @@map("practice_categories")
+}
+
+/// "Report question" from a student (wrong answer key, typo, unclear figure…).
+model QuestionReport {
+  id         String    @id @default(uuid()) @db.Uuid
+  questionId String    @map("question_id") @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  attemptId  String?   @map("attempt_id") @db.Uuid
+  message    String
+  /// OPEN or RESOLVED
+  status     String    @default("OPEN")
+  resolvedAt DateTime? @map("resolved_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@map("question_reports")
+}
+
+/// A doubt or explanation posted on a question after an attempt; replies use parentId.
+model QuestionDoubt {
+  id         String    @id @default(uuid()) @db.Uuid
+  questionId String    @map("question_id") @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  parentId   String?   @map("parent_id") @db.Uuid
+  body       String
+  createdAt  DateTime  @default(now()) @map("created_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  question Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent   QuestionDoubt?  @relation("DoubtReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  QuestionDoubt[] @relation("DoubtReplies")
+  claps    DoubtClap[]
+
+  @@index([questionId, createdAt])
+  @@map("question_doubts")
+}
+
+model DoubtClap {
+  doubtId   String   @map("doubt_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  doubt QuestionDoubt @relation(fields: [doubtId], references: [id], onDelete: Cascade)
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([doubtId, userId])
+  @@map("doubt_claps")
+}
+
+/// Ratings of an uploaded sketch (an UPLOAD answer): the student's self-rating
+/// and an expert's rating per criterion (1–5 each), plus the expert's marks.
+model SketchReview {
+  id               String    @id @default(uuid()) @db.Uuid
+  answerId         String    @unique @map("answer_id") @db.Uuid
+  selfScores       Json?     @map("self_scores")
+  selfRatedAt      DateTime? @map("self_rated_at")
+  expertScores     Json?     @map("expert_scores")
+  expertComment    String?   @map("expert_comment")
+  expertId         String?   @map("expert_id") @db.Uuid
+  expertReviewedAt DateTime? @map("expert_reviewed_at")
+
+  answer QuizAttemptAnswer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  expert User?             @relation("SketchExpert", fields: [expertId], references: [id], onDelete: SetNull)
+
+  @@map("sketch_reviews")
+}
+
+/// A fellow student's 1–5 rating of a sketch in the community gallery.
+model SketchPeerRating {
+  id        String   @id @default(uuid()) @db.Uuid
+  answerId  String   @map("answer_id") @db.Uuid
+  raterId   String   @map("rater_id") @db.Uuid
+  score     Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  answer QuizAttemptAnswer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  rater  User              @relation(fields: [raterId], references: [id], onDelete: Cascade)
+
+  @@unique([answerId, raterId])
+  @@map("sketch_peer_ratings")
+}
+
+/// The day's 10 questions, picked once per date from the daily pool.
+model DailyQuiz {
+  id          String   @id @default(uuid()) @db.Uuid
+  date        DateTime @unique @db.Date
+  questionIds Json     @map("question_ids")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  attempts DailyQuizAttempt[]
+
+  @@map("daily_quizzes")
+}
+
+model DailyQuizAttempt {
+  id           String    @id @default(uuid()) @db.Uuid
+  dailyQuizId  String    @map("daily_quiz_id") @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  startedAt    DateTime  @default(now()) @map("started_at")
+  finishedAt   DateTime? @map("finished_at")
+  /// [{ questionId, optionId | null, ms }]
+  answers      Json?
+  correctCount Int?      @map("correct_count")
+  totalMs      Int?      @map("total_ms")
+
+  dailyQuiz DailyQuiz @relation(fields: [dailyQuizId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([dailyQuizId, userId])
+  @@index([dailyQuizId, correctCount, totalMs])
+  @@map("daily_quiz_attempts")
+}
+
+/// A college students can explore, shortlist and enquire about.
+model College {
+  id             String   @id @default(uuid()) @db.Uuid
+  name           String
+  slug           String   @unique
+  city           String
+  /// ARCHITECTURE, DESIGN, FASHION, STUDY_ABROAD
+  categories     String[] @default([])
+  /// https URL or "media:<assetId>"
+  logoUrl        String?  @map("logo_url")
+  /// In rupees; null = not published.
+  applicationFee Int?     @map("application_fee")
+  website        String?
+  /// Markdown: overview, courses, eligibility.
+  description    String?
+  published      Boolean  @default(true)
+  position       Int      @default(0)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  shortlists CollegeShortlist[]
+  enquiries  CollegeEnquiry[]
+  webinars   Webinar[]
+
+  @@index([published, position])
+  @@map("colleges")
+}
+
+model CollegeShortlist {
+  userId    String   @map("user_id") @db.Uuid
+  collegeId String   @map("college_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  college College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, collegeId])
+  @@map("college_shortlists")
+}
+
+model CollegeEnquiry {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  collegeId String   @map("college_id") @db.Uuid
+  message   String?
+  /// NEW or CONTACTED
+  status    String   @default("NEW")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  college College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@map("college_enquiries")
+}
+
+/// An online session (e.g. a college meet) students can register for.
+model Webinar {
+  id          String   @id @default(uuid()) @db.Uuid
+  collegeId   String?  @map("college_id") @db.Uuid
+  title       String
+  slug        String   @unique
+  description String?
+  bannerUrl   String?  @map("banner_url")
+  startsAt    DateTime @map("starts_at")
+  endsAt      DateTime @map("ends_at")
+  /// Shown to registered students only.
+  joinUrl     String?  @map("join_url")
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  college       College?              @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  registrations WebinarRegistration[]
+
+  @@index([published, startsAt])
+  @@map("webinars")
+}
+
+model WebinarRegistration {
+  webinarId String   @map("webinar_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  webinar Webinar @relation(fields: [webinarId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([webinarId, userId])
+  @@map("webinar_registrations")
+}
+
+/// The score a student is aiming for in a course's exam.
+model StudentGoal {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  courseId      String   @map("course_id") @db.Uuid
+  targetPercent Int      @map("target_percent")
+  note          String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("student_goals")
+}
+
+/// A milestone an admin sets for a course ("Finish Mental Ability by 15 Jan").
+model CourseCheckpoint {
+  id        String    @id @default(uuid()) @db.Uuid
+  courseId  String    @map("course_id") @db.Uuid
+  title     String
+  dueDate   DateTime? @map("due_date") @db.Date
+  position  Int       @default(0)
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  course      Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  completions CheckpointCompletion[]
+
+  @@index([courseId])
+  @@map("course_checkpoints")
+}
+
+model CheckpointCompletion {
+  checkpointId String   @map("checkpoint_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  completedAt  DateTime @default(now()) @map("completed_at")
+
+  checkpoint CourseCheckpoint @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([checkpointId, userId])
+  @@map("checkpoint_completions")
+}
+
+/// "Mark as studied" on a weak topic surfaced by the Practice page.
+model TopicStudyMark {
+  userId   String   @map("user_id") @db.Uuid
+  topicId  String   @map("topic_id") @db.Uuid
+  markedAt DateTime @default(now()) @map("marked_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([userId, topicId])
+  @@map("topic_study_marks")
+}
+
+/// A batch / classroom of students (e.g. "2026 NID UCEED – Online"); licences can be assigned per cohort.
+model Cohort {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  batch     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  members CohortMember[]
+
+  @@map("cohorts")
+}
+
+model CohortMember {
+  cohortId String   @map("cohort_id") @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([cohortId, userId])
+  @@map("cohort_members")
+}
+
+// ---------------------------------------------------------------------------
+// Practice questions inside a lesson (e.g. "Examples – past paper"): picked
+// from the question bank, answered once inline, with the explanation shown
+// right after. Not part of any quiz score.
+// ---------------------------------------------------------------------------
+model LessonQuestion {
+  id         String   @id @default(uuid()) @db.Uuid
+  lessonId   String   @map("lesson_id") @db.Uuid
+  questionId String   @map("question_id") @db.Uuid
+  position   Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  lesson   Lesson                 @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  question Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers  LessonQuestionAnswer[]
+
+  @@unique([lessonId, questionId])
+  @@index([lessonId])
+  @@map("lesson_questions")
+}
+
+model LessonQuestionAnswer {
+  id                String        @id @default(uuid()) @db.Uuid
+  userId            String        @map("user_id") @db.Uuid
+  lessonQuestionId  String        @map("lesson_question_id") @db.Uuid
+  selectedOptionIds String[]      @default([]) @map("selected_option_ids")
+  numericValue      Decimal?      @map("numeric_value") @db.Decimal(14, 4)
+  method            AnswerMethod?
+  correct           Boolean
+  createdAt         DateTime      @default(now()) @map("created_at")
+
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonQuestion LessonQuestion @relation(fields: [lessonQuestionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonQuestionId])
+  @@map("lesson_question_answers")
+}
+
+/// A comment pinned to a spot on a sketch (x, y are 0..1 of the image's width/height).
+model SketchComment {
+  id        String    @id @default(uuid()) @db.Uuid
+  answerId  String    @map("answer_id") @db.Uuid
+  authorId  String    @map("author_id") @db.Uuid
+  x         Float
+  y         Float
+  body      String
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  answer QuizAttemptAnswer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  author User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([answerId])
+  @@map("sketch_comments")
+}
+
+/// A student's share link for a practice test. The sharer earns XP when other
+/// signed-in students open it (one reward per person, capped per share).
+model TestShare {
+  id        String   @id @default(uuid()) @db.Uuid
+  sharerId  String   @map("sharer_id") @db.Uuid
+  quizId    String   @map("quiz_id") @db.Uuid
+  code      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sharer User             @relation(fields: [sharerId], references: [id], onDelete: Cascade)
+  quiz   Quiz             @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  visits TestShareVisit[]
+
+  @@unique([sharerId, quizId])
+  @@map("test_shares")
+}
+
+model TestShareVisit {
+  id        String   @id @default(uuid()) @db.Uuid
+  shareId   String   @map("share_id") @db.Uuid
+  visitorId String   @map("visitor_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  share   TestShare @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  visitor User      @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+
+  @@unique([shareId, visitorId])
+  @@map("test_share_visits")
 }

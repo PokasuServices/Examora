@@ -13,12 +13,13 @@ import {
 } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
-import type { Enrollment, PaginatedData } from "@examora/types";
+import type { BulkLicenceResult, Enrollment, PaginatedData } from "@examora/types";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { RequirePermissions } from "../common/decorators/require-permissions.decorator";
 import { requestAuditMeta } from "../common/request-meta";
 import { AuditService } from "../audit/audit.service";
 import type { RequestUser } from "../auth/types/request-user";
+import { BulkLicenceDto } from "./dto/bulk-licence.dto";
 import { GrantEnrollmentDto } from "./dto/grant-enrollment.dto";
 import { ListEnrollmentsQueryDto } from "./dto/list-enrollments-query.dto";
 import { toEnrollment } from "./enrollment.mappers";
@@ -64,6 +65,44 @@ export class AdminEnrollmentController {
       ...requestAuditMeta(req),
     });
     return toEnrollment(enrollment);
+  }
+
+  @Post("bulk-grant")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Assign course licences to all students or selected students" })
+  async bulkGrant(
+    @CurrentUser() actor: RequestUser,
+    @Body() dto: BulkLicenceDto,
+    @Req() req: Request,
+  ): Promise<BulkLicenceResult> {
+    const result = await this.enrollmentService.adminBulkGrant(dto);
+    await this.auditService.record({
+      actorId: actor.id,
+      action: "enrollment.admin_bulk_granted",
+      entityType: "Enrollment",
+      after: { ...result, courseIds: dto.courseIds, allStudents: Boolean(dto.allStudents) },
+      ...requestAuditMeta(req),
+    });
+    return result;
+  }
+
+  @Post("bulk-revoke")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Remove course licences from all students or selected students" })
+  async bulkRevoke(
+    @CurrentUser() actor: RequestUser,
+    @Body() dto: BulkLicenceDto,
+    @Req() req: Request,
+  ): Promise<BulkLicenceResult> {
+    const result = await this.enrollmentService.adminBulkRevoke(dto);
+    await this.auditService.record({
+      actorId: actor.id,
+      action: "enrollment.admin_bulk_revoked",
+      entityType: "Enrollment",
+      after: { ...result, courseIds: dto.courseIds, allStudents: Boolean(dto.allStudents) },
+      ...requestAuditMeta(req),
+    });
+    return result;
   }
 
   @Delete(":id")

@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Bookmark, Check, Link2, ThumbsUp } from "lucide-react";
+import { Bookmark, Check } from "lucide-react";
 import type { ThreadDetail } from "@examora/types";
 import { cn } from "@examora/ui";
+import { ClapButton, ShareMenu } from "./clap-share";
 
 function ReactionButton({
   pressed,
@@ -39,7 +40,7 @@ function ReactionButton({
   );
 }
 
-/** Like/Bookmark/Follow/Share — Share is frontend-only (copy link), no backend concept of "shares" exists (ADR-0017). */
+/** Clap/Bookmark/Follow/Share. Share is frontend-only (social links, copy link); there is no backend "share" concept (ADR-0017). */
 export function ReactionBar({
   thread,
   onToggleLike,
@@ -51,27 +52,12 @@ export function ReactionBar({
   onToggleBookmark: () => void;
   onToggleFollow: () => void;
 }) {
-  const [copied, setCopied] = React.useState(false);
-
-  async function handleShare() {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard API can be unavailable (permissions/older browsers) — silently ignored, link stays copyable manually from the address bar.
-    }
-  }
-
   return (
     <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Thread reactions">
-      <ReactionButton
-        pressed={thread.isLikedByViewer}
-        onClick={onToggleLike}
-        icon={ThumbsUp}
-        label="Like"
-        pressedLabel="Liked"
+      <ClapButton
+        clapped={thread.isLikedByViewer}
         count={thread.likeCount}
+        onToggle={onToggleLike}
       />
       <ReactionButton
         pressed={thread.isBookmarkedByViewer}
@@ -87,14 +73,7 @@ export function ReactionBar({
         label="Follow"
         pressedLabel="Following"
       />
-      <button
-        type="button"
-        onClick={() => void handleShare()}
-        className="flex h-10 items-center gap-2 rounded-full border border-neutral-200 dark:border-neutral-800 px-4 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-      >
-        <Link2 size={16} strokeWidth={1.75} aria-hidden />
-        {copied ? "Link copied!" : "Share"}
-      </button>
+      <ShareMenu path={`/community/threads/${thread.id}`} title={thread.title} />
     </div>
   );
 }

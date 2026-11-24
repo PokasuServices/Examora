@@ -226,16 +226,20 @@ export class ThreadsService {
     return this.getByIdOrThrow(actor, threadId);
   }
 
-  /** List view enrichment: aggregate like counts only (no viewer-scoped flags — cheaper for pagination). */
+  /** List view enrichment: like (clap) counts plus whether the viewer clapped each thread. */
   async listSummaries(actor: RequestUser, params: Parameters<ThreadsService["list"]>[1]) {
     const { items, total } = await this.list(actor, params);
-    const likeCounts = await countLikesByTarget(
-      this.prisma,
-      "THREAD",
-      items.map((item) => item.id),
-    );
+    const ids = items.map((item) => item.id);
+    const [likeCounts, likedSet] = await Promise.all([
+      countLikesByTarget(this.prisma, "THREAD", ids),
+      getLikedTargetIdSet(this.prisma, actor.id, "THREAD", ids),
+    ]);
     return {
-      items: items.map((item) => ({ ...item, likeCount: likeCounts.get(item.id) ?? 0 })),
+      items: items.map((item) => ({
+        ...item,
+        likeCount: likeCounts.get(item.id) ?? 0,
+        isLikedByViewer: likedSet.has(item.id),
+      })),
       total,
     };
   }

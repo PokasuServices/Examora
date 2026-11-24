@@ -4,7 +4,7 @@ import type { ThreadType } from "@examora/types";
 import { PrismaService } from "../../prisma/prisma.service";
 import type { RequestUser } from "../../auth/types/request-user";
 import { CommunityAccessService } from "../common/community-access.service";
-import { countLikesByTarget } from "../common/community-reactions.util";
+import { countLikesByTarget, getLikedTargetIdSet } from "../common/community-reactions.util";
 import { THREAD_LIST_INCLUDE } from "../threads/threads.service";
 
 /**
@@ -46,13 +46,17 @@ export class CommunitySearchService {
       this.prisma.thread.count({ where }),
     ]);
 
-    const likeCounts = await countLikesByTarget(
-      this.prisma,
-      "THREAD",
-      items.map((item) => item.id),
-    );
+    const ids = items.map((item) => item.id);
+    const [likeCounts, likedSet] = await Promise.all([
+      countLikesByTarget(this.prisma, "THREAD", ids),
+      getLikedTargetIdSet(this.prisma, actor.id, "THREAD", ids),
+    ]);
     return {
-      items: items.map((item) => ({ ...item, likeCount: likeCounts.get(item.id) ?? 0 })),
+      items: items.map((item) => ({
+        ...item,
+        likeCount: likeCounts.get(item.id) ?? 0,
+        isLikedByViewer: likedSet.has(item.id),
+      })),
       total,
     };
   }

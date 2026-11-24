@@ -281,7 +281,7 @@ function ThreadDetailContent() {
         </div>
 
         {!repliesDisabled ? (
-          <div className="mt-6">
+          <div id="reply" className="mt-6 scroll-mt-24">
             <ReplyComposer submitting={data.postingReply} onSubmit={data.postTopLevelReply} />
           </div>
         ) : (

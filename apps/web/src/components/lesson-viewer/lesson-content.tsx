@@ -10,7 +10,7 @@ import type { LessonWithProgress } from "@examora/types";
 // markdown, so rendering it as markdown is honoring the real schema
 // contract, not inventing structure. Plain text with no markdown syntax
 // renders identically to itself either way.
-const markdownComponents: Components = {
+export const markdownComponents: Components = {
   h1: ({ children }) => (
     <h2 className="mt-8 font-heading text-xl font-bold text-neutral-900 dark:text-white/90 first:mt-0">
       {children}

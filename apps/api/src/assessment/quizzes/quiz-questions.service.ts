@@ -46,6 +46,7 @@ export class QuizQuestionsService {
         questionId: dto.questionId,
         sectionId: dto.sectionId,
         marks: dto.marks ?? 1,
+        negativeMarks: dto.negativeMarks ?? null,
         position,
       },
       include: QUESTION_PREVIEW,
@@ -59,7 +60,12 @@ export class QuizQuestionsService {
     }
     return this.prisma.quizQuestion.update({
       where: { id: existing.id },
-      data: { sectionId: dto.sectionId, marks: dto.marks, position: dto.position },
+      data: {
+        sectionId: dto.sectionId,
+        marks: dto.marks,
+        negativeMarks: dto.negativeMarks,
+        position: dto.position,
+      },
       include: QUESTION_PREVIEW,
     });
   }

@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { ApiError } from "@examora/auth-client";
 import type { ContentStatus, Question, QuizDetail, QuizResultDashboard } from "@examora/types";
 import { Button, FieldError, Input, Label } from "@examora/ui";
+import { QuizStudentSettings } from "@/components/quiz-student-settings";
 import { RequirePermission } from "@/components/require-permission";
 import { StatusActions } from "@/components/status-actions";
 import { Card } from "@/components/ui/card";
@@ -41,6 +42,7 @@ function QuizDetailContent() {
   const [selectedQuestionId, setSelectedQuestionId] = React.useState("");
   const [selectedSectionId, setSelectedSectionId] = React.useState("");
   const [marks, setMarks] = React.useState("1");
+  const [negativeMarks, setNegativeMarks] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [pending, setPending] = React.useState<PendingAction>(null);
   const [submitting, setSubmitting] = React.useState(false);
@@ -97,12 +99,30 @@ function QuizDetailContent() {
         questionId: selectedQuestionId,
         sectionId: selectedSectionId || undefined,
         marks: Number(marks),
+        negativeMarks: negativeMarks.trim() === "" ? null : Number(negativeMarks),
       });
       setSelectedQuestionId("");
       setMarks("1");
+      setNegativeMarks("");
       load();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Could not assign question");
+    }
+  }
+
+  /** Saves a row's negative marks when its input loses focus (blank = use the quiz rule). */
+  async function saveNegativeMarks(assignmentId: string, raw: string): Promise<void> {
+    const value = raw.trim() === "" ? null : Number(raw);
+    if (value !== null && (!Number.isFinite(value) || value < 0)) {
+      setError("Negative marks must be 0 or more, or blank to use the quiz rule");
+      return;
+    }
+    setError(null);
+    try {
+      await api.updateAssignment(id, assignmentId, { negativeMarks: value });
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not save negative marks");
     }
   }
 
@@ -190,6 +210,8 @@ function QuizDetailContent() {
         </p>
       </div>
       <FieldError>{error}</FieldError>
+
+      <QuizStudentSettings key={quiz.updatedAt} quiz={quiz} onSaved={load} />
 
       {dashboard ? (
         <Card>
@@ -302,6 +324,19 @@ function QuizDetailContent() {
               className="w-24"
             />
           </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="negativeMarks">Wrong answer −</Label>
+            <Input
+              id="negativeMarks"
+              type="number"
+              min={0}
+              step={0.01}
+              placeholder="Quiz rule"
+              value={negativeMarks}
+              onChange={(e) => setNegativeMarks(e.target.value)}
+              className="w-28"
+            />
+          </div>
           <Button type="submit">Assign</Button>
         </form>
 
@@ -317,6 +352,24 @@ function QuizDetailContent() {
                   <span className="text-neutral-400 dark:text-neutral-500">
                     ({assignment.marks} marks)
                   </span>
+                </span>
+                <span className="flex shrink-0 items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+                  <span aria-hidden="true">Wrong −</span>
+                  <Input
+                    aria-label="Negative marks for a wrong answer"
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    placeholder="rule"
+                    defaultValue={assignment.negativeMarks ?? ""}
+                    onBlur={(e) => {
+                      const before = assignment.negativeMarks?.toString() ?? "";
+                      if (e.target.value.trim() !== before) {
+                        void saveNegativeMarks(assignment.id, e.target.value);
+                      }
+                    }}
+                    className="h-8 w-20 text-xs"
+                  />
                 </span>
                 <Button
                   variant="ghost"

@@ -34,6 +34,7 @@ export function toCourse(row: Course): CourseDto {
     position: row.position,
     priceAmount: row.priceAmount === null ? null : Number(row.priceAmount),
     priceCurrency: row.priceCurrency,
+    nextExamDate: row.nextExamDate ? row.nextExamDate.toISOString() : null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -43,6 +44,9 @@ export function toSubject(row: Subject): SubjectDto {
   return {
     id: row.id,
     courseId: row.courseId,
+    kind: row.kind === "ESSENTIALS" ? "ESSENTIALS" : "SUBJECT",
+    icon: row.icon,
+    color: row.color,
     title: row.title,
     slug: row.slug,
     description: row.description,

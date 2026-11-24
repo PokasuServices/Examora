@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
+  IsDateString,
   IsInt,
   IsNumber,
   IsOptional,
@@ -46,6 +47,15 @@ export class CreateCourseDto {
   @IsInt()
   @Min(0)
   position?: number;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    example: "2027-01-17",
+    description: "Next exam date shown on the student Learn page (ISO date); null clears it",
+  })
+  @IsOptional()
+  @IsDateString()
+  nextExamDate?: string | null;
 
   @ApiPropertyOptional({
     description: "Sprint 8 (ADR-0018): omit or leave unset for a free course",

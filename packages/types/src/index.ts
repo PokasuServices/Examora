@@ -15,3 +15,8 @@ export * from "./audit";
 export * from "./analytics";
 export * from "./recommendations";
 export * from "./cms";
+export * from "./gamification";
+export * from "./student-learn";
+export * from "./media";
+export * from "./student-practice";
+export * from "./mentor-course";

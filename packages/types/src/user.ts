@@ -27,6 +27,9 @@ export interface UserProfile extends AuthenticatedUser {
   dateOfBirth: string | null;
   guardianName: string | null;
   guardianEmail: string | null;
+  guardianPhone: string | null;
+  /** Year the student plans to sit their entrance exam. */
+  examYear: number | null;
   consentVersion: string | null;
   consentedAt: string | null;
   createdAt: string;

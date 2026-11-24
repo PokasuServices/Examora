@@ -2,6 +2,12 @@ import type { PermissionCode } from "@examora/types";
 import {
   BarChart3,
   BookOpen,
+  Brush,
+  CalendarCheck,
+  UserRound,
+  GraduationCap,
+  Landmark,
+  Trophy,
   ClipboardList,
   HelpCircle,
   LayoutDashboard,
@@ -34,6 +40,8 @@ export interface MenuItem {
   name: string;
   icon: LucideIcon;
   path?: string;
+  /** Other route prefixes that belong to this item (they highlight it too). */
+  also?: string[];
   permission?: PermissionCode;
   exact?: boolean;
   external?: boolean;
@@ -74,6 +82,7 @@ export const MENU_GROUPS: MenuGroup[] = [
         subItems: [
           { name: "Mentor Dashboard", path: "/mentor/dashboard" },
           { name: "My Students", path: "/mentor/students" },
+          { name: "Course Progress", path: "/mentor/courses" },
           { name: "Mentor Analytics", path: "/mentor/analytics" },
         ],
       },
@@ -102,6 +111,38 @@ export const MENU_GROUPS: MenuGroup[] = [
   {
     title: "Others",
     items: [
+      { name: "Settings", icon: Settings, path: "/profile" },
+      { name: "Help", icon: HelpCircle, path: "/faq" },
+    ],
+  },
+];
+
+/**
+ * Student menu (student module redesign). Same shell and components as the
+ * rest of Examora, with the student's own groups. Quizzes,
+ * Analytics, Notifications and Recommendations live in the account menu.
+ */
+export const STUDENT_MENU_GROUPS: MenuGroup[] = [
+  {
+    title: "Study",
+    items: [
+      { name: "Learn", icon: GraduationCap, path: "/learn", also: ["/courses"] },
+      { name: "Practice", icon: ListChecks, path: "/practice", also: ["/quizzes"] },
+      { name: "Daily Quiz", icon: CalendarCheck, path: "/daily-quiz" },
+      { name: "Assignments", icon: ClipboardList, path: "/assignments" },
+      { name: "Discuss", icon: MessageSquare, path: "/community" },
+    ],
+  },
+  {
+    title: "Explore",
+    items: [{ name: "Colleges", icon: Landmark, path: "/colleges", also: ["/webinars"] }],
+  },
+  {
+    title: "Me",
+    items: [
+      { name: "My profile", icon: UserRound, path: "/me" },
+      { name: "My sketches", icon: Brush, path: "/sketches" },
+      { name: "Rewards", icon: Trophy, path: "/rewards" },
       { name: "Settings", icon: Settings, path: "/profile" },
       { name: "Help", icon: HelpCircle, path: "/faq" },
     ],

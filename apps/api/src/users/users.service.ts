@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { ConsentType, RoleName, UserStatus } from "@examora/types";
+import type { Prisma } from "@examora/database";
 // NOTE: PrismaService is constructor-injected — must stay a VALUE import, see TD-011.
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -120,6 +121,8 @@ export class UsersService {
       dateOfBirth?: string;
       guardianName?: string;
       guardianEmail?: string;
+      guardianPhone?: string;
+      examYear?: number;
     },
   ) {
     return this.prisma.user.update({
@@ -131,6 +134,8 @@ export class UsersService {
         dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
         guardianName: data.guardianName,
         guardianEmail: data.guardianEmail,
+        guardianPhone: data.guardianPhone,
+        examYear: data.examYear,
       },
       include: USER_WITH_ROLES_INCLUDE,
     });
@@ -189,8 +194,20 @@ export class UsersService {
     return this.findByIdWithRoles(userId);
   }
 
-  async list(page: number, pageSize: number, role?: RoleName) {
-    const where = role ? { roles: { some: { role: { name: role } } } } : {};
+  async list(page: number, pageSize: number, role?: RoleName, search?: string) {
+    const q = search?.trim();
+    const where: Prisma.UserWhereInput = {
+      ...(role ? { roles: { some: { role: { name: role } } } } : {}),
+      ...(q
+        ? {
+            OR: [
+              { email: { contains: q, mode: "insensitive" } },
+              { firstName: { contains: q, mode: "insensitive" } },
+              { lastName: { contains: q, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    };
     const [items, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
         where,

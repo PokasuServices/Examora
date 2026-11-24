@@ -24,6 +24,9 @@ export class QuizzesService {
     if (dto.subjectId) {
       await this.assertSubjectExists(dto.subjectId);
     }
+    if (dto.topicId) {
+      await this.assertTopicInSubject(dto.topicId, dto.subjectId ?? null);
+    }
     const slug = await this.resolveUniqueSlug(dto.slug ?? slugify(dto.title));
     const position = dto.position ?? (await this.nextPosition());
 
@@ -39,6 +42,13 @@ export class QuizzesService {
         negativeMarksPerWrong: dto.negativeMarksPerWrong ?? 0,
         shuffleQuestions: dto.shuffleQuestions ?? false,
         shuffleOptions: dto.shuffleOptions ?? false,
+        topicId: dto.topicId ?? null,
+        maxAttempts: dto.maxAttempts ?? null,
+        xpReward: dto.xpReward ?? 0,
+        level: dto.level ?? null,
+        practiceCategoryId: dto.practiceCategoryId ?? null,
+        unlockAfterQuizId: dto.unlockAfterQuizId ?? null,
+        requireAllVisited: dto.requireAllVisited ?? false,
         position,
         createdById: actorId,
       },
@@ -97,6 +107,15 @@ export class QuizzesService {
     if (dto.subjectId) {
       await this.assertSubjectExists(dto.subjectId);
     }
+    if (dto.topicId) {
+      await this.assertTopicInSubject(dto.topicId, dto.subjectId ?? existing.subjectId);
+    }
+    if (dto.unlockAfterQuizId === id) {
+      throw new BadRequestException("A quiz can't unlock itself");
+    }
+    if (dto.practiceCategoryId) {
+      await this.assertCategoryExists(dto.practiceCategoryId);
+    }
     const slug =
       dto.slug !== undefined || dto.title !== undefined
         ? await this.resolveUniqueSlug(dto.slug ?? slugify(dto.title ?? existing.title), id)
@@ -115,6 +134,13 @@ export class QuizzesService {
         negativeMarksPerWrong: dto.negativeMarksPerWrong,
         shuffleQuestions: dto.shuffleQuestions,
         shuffleOptions: dto.shuffleOptions,
+        topicId: dto.topicId,
+        maxAttempts: dto.maxAttempts,
+        xpReward: dto.xpReward,
+        level: dto.level,
+        practiceCategoryId: dto.practiceCategoryId,
+        unlockAfterQuizId: dto.unlockAfterQuizId,
+        requireAllVisited: dto.requireAllVisited,
         position: dto.position,
       },
     });
@@ -161,6 +187,28 @@ export class QuizzesService {
       throw new BadRequestException("Archive the quiz before deleting it");
     }
     await this.prisma.quiz.update({ where: { id }, data: { deletedAt: new Date() } });
+  }
+
+  private async assertCategoryExists(id: string): Promise<void> {
+    const found = await this.prisma.practiceCategory.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!found) throw new BadRequestException("practiceCategoryId does not reference a category");
+  }
+
+  /** A topic quiz's topic must belong to the quiz's subject (so the Learn page and access checks agree). */
+  private async assertTopicInSubject(topicId: string, subjectId: string | null): Promise<void> {
+    const topic = await this.prisma.topic.findFirst({
+      where: { id: topicId, deletedAt: null },
+      select: { subjectId: true },
+    });
+    if (!topic) {
+      throw new BadRequestException("topicId does not reference an existing topic");
+    }
+    if (topic.subjectId !== subjectId) {
+      throw new BadRequestException("The topic must belong to the quiz's subject");
+    }
   }
 
   private async assertSubjectExists(subjectId: string): Promise<void> {
