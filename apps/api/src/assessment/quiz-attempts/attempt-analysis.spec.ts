@@ -49,6 +49,23 @@ describe("analyseAnswers", () => {
     expect(r.opportunityTopics.find((t) => t.topicTitle === "Part")?.gain).toBe(3);
   });
 
+  it("splits each topic by answer method and keeps its question numbers", () => {
+    const r = analyseAnswers([
+      row({ topicId: "t1" }),
+      row({ topicId: "other", topicTitle: "Other" }),
+      row({ topicId: "t1", correct: false, awarded: 0 }),
+      row({ topicId: "t1", method: "GUESS" }),
+      row({ topicId: "t1", method: "ELIMINATION", correct: null, awarded: 0 }),
+    ]);
+    const t1 = r.weakTopics.find((t) => t.topicId === "t1");
+    expect(t1?.questionNumbers).toEqual([1, 3, 4, 5]);
+    expect(t1?.byMethod).toEqual({
+      KNOWLEDGE: { answered: 2, correct: 1 },
+      ELIMINATION: { answered: 0, correct: 0 },
+      GUESS: { answered: 1, correct: 1 },
+    });
+  });
+
   it("splits time into wisely used (correct ≤ 90 s), over spent, and lost (wrong)", () => {
     const r = analyseAnswers([
       row({ seconds: 30 }),

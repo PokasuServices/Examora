@@ -14,6 +14,7 @@ import {
 import type { ExplanationStep, QuestionResource } from "@examora/types";
 import { cn } from "@examora/ui";
 import { markdownComponents } from "@/components/lesson-viewer/lesson-content";
+import { rehypePlugins, remarkPlugins } from "@/lib/markdown-plugins";
 import { mediaUrl, studyUrlTransform } from "@/lib/media";
 import { StudyImage } from "./study-image";
 import { VideoPlayer } from "./video-player";
@@ -143,7 +144,12 @@ export function QuestionExplanation({
           <PartHeading icon={FileText}>Solution</PartHeading>
           {explanation ? (
             <div className="leading-relaxed">
-              <Markdown components={markdownComponents} urlTransform={studyUrlTransform}>
+              <Markdown
+                components={markdownComponents}
+                urlTransform={studyUrlTransform}
+                remarkPlugins={remarkPlugins}
+                rehypePlugins={rehypePlugins}
+              >
                 {explanation}
               </Markdown>
             </div>

@@ -29,12 +29,15 @@ export function NodeManager({
   parentId,
   label,
   renderChildren,
+  renderExtra,
 }: {
   collection: string;
   parentKey: string;
   parentId: string;
   label: string;
   renderChildren?: (node: ContentNode) => React.ReactNode;
+  /** Always-visible extra controls under a node (e.g. a topic's exam tags). */
+  renderExtra?: (node: ContentNode) => React.ReactNode;
 }) {
   const api = useContentApi();
   const [nodes, setNodes] = React.useState<ContentNode[]>([]);
@@ -132,6 +135,7 @@ export function NodeManager({
                 </Button>
               </div>
             </div>
+            {renderExtra ? renderExtra(node) : null}
             {renderChildren && expanded[node.id] ? (
               <div className="mt-3 border-l-2 border-neutral-100 dark:border-neutral-800 pl-4">
                 {renderChildren(node)}

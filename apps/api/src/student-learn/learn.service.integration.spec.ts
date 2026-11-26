@@ -202,6 +202,40 @@ describe("LearnService + XP + licences (integration)", () => {
     expect(info.quiz).toMatchObject({ maxAttempts: 2, doublesOnPerfect: true, questionCount: 1 });
   });
 
+  it("builds the Learn dashboard: topic states, next lesson, marks and shared topics", async () => {
+    await prisma.topic.update({ where: { id: topicId }, data: { examTags: ["NID", "UCEED"] } });
+    const before = (await learn.getCourseOverview(studentId, courseId)).dashboard;
+    // 2 lessons done + the quiz attempted = 3 of 4.
+    expect(before.topics[0]).toMatchObject({
+      status: "IN_PROGRESS",
+      done: 3,
+      total: 4,
+      examTags: ["NID", "UCEED"],
+      favourite: false,
+      onHold: false,
+    });
+    expect(before.counts).toMatchObject({ subjects: 1, topics: 1, inProgress: 1, shared: 1 });
+    expect(before.continueWith).toMatchObject({ kind: "lesson", id: lessonIds[2] });
+
+    expect(await learn.markTopic(studentId, topicId, { favourite: true })).toEqual({
+      favourite: true,
+      onHold: false,
+    });
+    await learn.markTopic(studentId, topicId, { onHold: true });
+    const marked = (await learn.getCourseOverview(studentId, courseId)).dashboard;
+    expect(marked.counts).toMatchObject({ favourite: 1, onHold: 1 });
+    // A topic on hold is never suggested as "continue".
+    expect(marked.continueWith).toBeNull();
+    expect((await learn.getTopic(studentId, topicId)).mark).toEqual({
+      favourite: true,
+      onHold: true,
+    });
+
+    // Clearing both labels removes the row.
+    await learn.markTopic(studentId, topicId, { favourite: false, onHold: false });
+    expect(await prisma.topicMark.count({ where: { userId: studentId, topicId } })).toBe(0);
+  });
+
   it("bulk-revoke closes the course again", async () => {
     const result = await enrollment.adminBulkRevoke({
       courseIds: [courseId],

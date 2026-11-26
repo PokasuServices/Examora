@@ -10,6 +10,7 @@ import { CoursePracticeSettings } from "@/components/course-practice-settings";
 import { LessonQuestionsPanel } from "@/components/lesson-questions-panel";
 import { CourseStudentSettings } from "@/components/course-student-settings";
 import { NodeManager, type ContentNode } from "@/components/node-manager";
+import { TopicExamTags } from "@/components/topic-exam-tags";
 import { RequirePermission } from "@/components/require-permission";
 import { StatusActions } from "@/components/status-actions";
 import { StatusBadge } from "@/components/status-badge";
@@ -155,6 +156,12 @@ function CourseDetailContent() {
                 parentKey="subjectId"
                 parentId={subject.id}
                 label="topic"
+                renderExtra={(topic: ContentNode) => (
+                  <TopicExamTags
+                    topicId={topic.id}
+                    initial={(topic as ContentNode & { examTags?: string[] }).examTags ?? []}
+                  />
+                )}
                 renderChildren={(topic: ContentNode) => (
                   <NodeManager
                     collection="modules"

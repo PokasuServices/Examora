@@ -12,6 +12,7 @@ import { RetryInline } from "@/components/ui/retry-inline";
 import { ThreadCard } from "@/components/community/thread-card";
 import { ThreadCardSkeletonList } from "@/components/community/skeletons";
 import { useCommunityHome } from "@/components/community/use-community-home";
+import { DiscussDashboard } from "@/components/student/discuss-dashboard";
 
 function CommunityHomeContent() {
   const router = useRouter();
@@ -85,6 +86,8 @@ function CommunityHomeContent() {
           Advanced search
         </Link>
       </div>
+
+      <DiscussDashboard />
 
       {data.status === "error" ? (
         <RetryInline message="Couldn't load the community" onRetry={data.retry} />

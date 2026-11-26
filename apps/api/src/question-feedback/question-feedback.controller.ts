@@ -13,8 +13,24 @@ import {
 } from "@nestjs/common";
 import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
-import { IsIn, IsOptional, IsString, IsUUID, MaxLength, MinLength } from "class-validator";
-import type { QuestionDoubtView, QuestionReportView } from "@examora/types";
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  Min,
+  MinLength,
+} from "class-validator";
+import {
+  DOUBT_BODY_MAX,
+  DOUBT_IMAGE_TYPES,
+  type DoubtKind,
+  type PresignedUpload,
+  type QuestionDoubtView,
+  type QuestionReportView,
+} from "@examora/types";
 import type { RequestUser } from "../auth/types/request-user";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { RequirePermissions } from "../common/decorators/require-permissions.decorator";
@@ -37,13 +53,50 @@ export class PostDoubtDto {
   @ApiProperty()
   @IsString()
   @MinLength(2)
-  @MaxLength(2000)
+  @MaxLength(DOUBT_BODY_MAX)
   body!: string;
+
+  @ApiPropertyOptional({ enum: ["DOUBT", "EXPLANATION"], description: "Top-level posts only" })
+  @IsOptional()
+  @IsIn(["DOUBT", "EXPLANATION"])
+  kind?: DoubtKind;
 
   @ApiPropertyOptional({ description: "Reply to this doubt" })
   @IsOptional()
   @IsUUID("4")
   parentId?: string;
+}
+
+export class DoubtImagePresignDto {
+  @ApiProperty({ example: "family-tree.png" })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(200)
+  fileName!: string;
+
+  @ApiProperty({ enum: DOUBT_IMAGE_TYPES })
+  @IsIn([...DOUBT_IMAGE_TYPES])
+  mimeType!: string;
+
+  @ApiProperty({ description: "Bytes, at most 1 MB" })
+  @IsInt()
+  @Min(1)
+  sizeBytes!: number;
+}
+
+export class DoubtImageConfirmDto extends DoubtImagePresignDto {
+  @ApiProperty()
+  @IsString()
+  @MaxLength(400)
+  storageKey!: string;
+}
+
+export class ReportDoubtDto {
+  @ApiProperty({ example: "Spam" })
+  @IsString()
+  @MinLength(3)
+  @MaxLength(300)
+  reason!: string;
 }
 
 export class ReportStatusDto {
@@ -88,7 +141,40 @@ export class QuestionFeedbackController {
     @Param("id", ParseUUIDPipe) id: string,
     @Body() dto: PostDoubtDto,
   ): Promise<void> {
-    await this.feedback.postDoubt(user.id, id, dto.body, dto.parentId);
+    await this.feedback.postDoubt(user.id, id, dto.body, dto.parentId, dto.kind);
+  }
+
+  @Post(":id/doubts/images/presign")
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @ApiOperation({ summary: "Upload URL for an image in a discussion post (1 MB max)" })
+  presignImage(
+    @CurrentUser() user: RequestUser,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: DoubtImagePresignDto,
+  ): Promise<PresignedUpload> {
+    return this.feedback.presignImage(user.id, id, dto);
+  }
+
+  @Post("doubts/images/confirm")
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @ApiOperation({ summary: "Record an uploaded discussion image (scanned before it's shown)" })
+  confirmImage(
+    @CurrentUser() user: RequestUser,
+    @Body() dto: DoubtImageConfirmDto,
+  ): Promise<{ id: string; ref: string }> {
+    return this.feedback.confirmImage(user.id, dto);
+  }
+
+  @Post("doubts/:doubtId/report")
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Report someone else's discussion post to moderators" })
+  async reportDoubt(
+    @CurrentUser() user: RequestUser,
+    @Param("doubtId", ParseUUIDPipe) doubtId: string,
+    @Body() dto: ReportDoubtDto,
+  ): Promise<void> {
+    await this.feedback.reportDoubt(user.id, doubtId, dto.reason.trim());
   }
 
   @Post("doubts/:doubtId/clap")

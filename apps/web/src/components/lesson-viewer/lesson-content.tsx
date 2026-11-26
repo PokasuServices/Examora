@@ -1,5 +1,6 @@
 import Markdown from "react-markdown";
 import type { Components } from "react-markdown";
+import { rehypePlugins, remarkPlugins } from "@/lib/markdown-plugins";
 import { FileText, Image as ImageIcon, PlayCircle } from "lucide-react";
 import type { LessonWithProgress } from "@examora/types";
 
@@ -54,6 +55,26 @@ export const markdownComponents: Components = {
       {children}
     </pre>
   ),
+  table: ({ children }) => (
+    <div className="mt-4 overflow-x-auto">
+      <table className="w-full border-collapse text-left text-[0.95em]">{children}</table>
+    </div>
+  ),
+  th: ({ children }) => (
+    <th className="border-b border-neutral-300 bg-neutral-50 px-3 py-2 font-semibold text-neutral-800 dark:border-neutral-700 dark:bg-white/[0.04] dark:text-white/90">
+      {children}
+    </th>
+  ),
+  td: ({ children }) => (
+    <td className="border-b border-neutral-200 px-3 py-2 dark:border-neutral-800">{children}</td>
+  ),
+  del: ({ children }) => <del className="text-neutral-500">{children}</del>,
+  mark: ({ children }) => (
+    <mark className="rounded bg-amber-100 px-0.5 text-inherit dark:bg-amber-400/25">
+      {children}
+    </mark>
+  ),
+  u: ({ children }) => <u className="underline decoration-1 underline-offset-2">{children}</u>,
   hr: () => <hr className="my-6 border-neutral-100 dark:border-neutral-800" />,
   img: ({ src, alt }) => (
     // Plain <img>, not next/image — lesson image URLs are arbitrary external hosts, not part of any configured image domain allowlist.
@@ -77,7 +98,13 @@ export function LessonContent({ lesson }: { lesson: LessonWithProgress }) {
     return (
       <div className="max-w-none text-base leading-relaxed text-neutral-700 dark:text-neutral-300 sm:text-lg sm:leading-relaxed">
         {lesson.body ? (
-          <Markdown components={markdownComponents}>{lesson.body}</Markdown>
+          <Markdown
+            components={markdownComponents}
+            remarkPlugins={remarkPlugins}
+            rehypePlugins={rehypePlugins}
+          >
+            {lesson.body}
+          </Markdown>
         ) : (
           <p className="text-neutral-400 dark:text-neutral-500">
             No content has been added to this lesson yet.

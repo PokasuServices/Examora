@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { AuthenticatedUser } from "@examora/types";
-import { apiRequest, type ApiRequestOptions } from "./api-client";
+import { ApiError, apiRequest, type ApiRequestOptions } from "./api-client";
 
 export interface RegisterPayload {
   email: string;
@@ -144,10 +144,63 @@ export function AuthProvider({
     [fetchMe],
   );
 
+  // Latest token for retries, and one shared in-flight refresh so parallel
+  // 401s don't each rotate the refresh cookie.
+  const tokenRef = React.useRef<string | null>(accessToken);
+  tokenRef.current = accessToken;
+  const refreshingRef = React.useRef<Promise<string | null> | null>(null);
+
+  const refreshAccessToken = React.useCallback((): Promise<string | null> => {
+    if (!refreshingRef.current) {
+      refreshingRef.current = apiRequest<{ accessToken: string }>("/auth/refresh", {
+        baseUrl,
+        method: "POST",
+      })
+        .then((result) => {
+          tokenRef.current = result.accessToken;
+          setAccessToken(result.accessToken);
+          return result.accessToken;
+        })
+        .catch(() => {
+          tokenRef.current = null;
+          setAccessToken(null);
+          setUser(null);
+          setStatus("unauthenticated");
+          return null;
+        })
+        .finally(() => {
+          refreshingRef.current = null;
+        });
+    }
+    return refreshingRef.current;
+  }, [baseUrl]);
+
+  /**
+   * Access tokens are short-lived (15 min), so a tab left open expires. On a
+   * 401 we refresh once from the HttpOnly cookie and retry the request.
+   */
   const requestFn = React.useCallback(
-    <T,>(path: string, options: Omit<ApiRequestOptions, "baseUrl" | "accessToken"> = {}) =>
-      apiRequest<T>(path, { ...options, baseUrl, accessToken }),
-    [baseUrl, accessToken],
+    async <T,>(
+      path: string,
+      options: Omit<ApiRequestOptions, "baseUrl" | "accessToken"> = {},
+    ): Promise<T> => {
+      const sentToken = tokenRef.current ?? accessToken;
+      try {
+        return await apiRequest<T>(path, { ...options, baseUrl, accessToken: sentToken });
+      } catch (err) {
+        if (!(err instanceof ApiError) || err.status !== 401 || path.startsWith("/auth/")) {
+          throw err;
+        }
+        // Another request may already have refreshed while this one was in flight.
+        const fresh =
+          tokenRef.current && tokenRef.current !== sentToken
+            ? tokenRef.current
+            : await refreshAccessToken();
+        if (!fresh) throw err;
+        return apiRequest<T>(path, { ...options, baseUrl, accessToken: fresh });
+      }
+    },
+    [baseUrl, accessToken, refreshAccessToken],
   );
 
   const value = React.useMemo<AuthContextValue>(

@@ -15,6 +15,9 @@ import { deterministicUuid } from "./seed-id.js";
 import { seedRotationQuiz } from "./seed-question-engine.js";
 import { seedPracticeAndExtras } from "./seed-practice.js";
 import { seedPracticeLibrary } from "./seed-practice-library.js";
+import { seedDailyHistory } from "./seed-daily.js";
+import { seedLiveAssignments } from "./seed-assignments-live.js";
+import { seedLearnTags } from "./seed-learn-tags.js";
 import {
   SAMPLE_COURSE,
   SAMPLE_PAST_PAPER_STATS,
@@ -452,10 +455,13 @@ export async function seedStudentModule(
   const rotation = await seedRotationQuiz(prisma, ids.adminId);
   const extras = await seedPracticeAndExtras(prisma, ids);
   const library = await seedPracticeLibrary(prisma, ids);
+  const daily = await seedDailyHistory(prisma, ids.studentId);
+  const live = await seedLiveAssignments(prisma, ids.studentId, ids.mentorId);
+  const tags = await seedLearnTags(prisma, ids.studentId);
   // eslint-disable-next-line no-console -- seed script CLI output
   console.log(
     `Student module sample data: ${xpRows} new XP rows, the "${SAMPLE_COURSE.title}" course, ` +
-      `${licences} new licences (every student × every course), demo-student progress; ${rotation}; ${extras}; ${library}.`,
+      `${licences} new licences (every student × every course), demo-student progress; ${rotation}; ${extras}; ${library}; ${daily}; ${live}; ${tags}.`,
   );
 }
 

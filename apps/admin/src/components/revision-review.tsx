@@ -12,7 +12,7 @@ import { RetryInline } from "@/components/ui/retry-inline";
 import { adminMediaUrl } from "@/lib/media-api";
 import { useStudentAdminApi } from "@/lib/student-admin-api";
 
-/** Feedback on one revision: 1–5 per factor plus a comment (doesn't change the test score). */
+/** Expert rating of one Part B upload: 1–5 per factor plus a comment. */
 function RevisionForm({ item, onDone }: { item: SketchRevisionQueueItem; onDone: () => void }) {
   const api = useStudentAdminApi();
   const [scores, setScores] = React.useState<Record<string, number>>(item.myScores ?? {});
@@ -124,7 +124,7 @@ function RevisionForm({ item, onDone }: { item: SketchRevisionQueueItem; onDone:
   );
 }
 
-/** Revisions students uploaded after a test, waiting for (or with) reviewer feedback. */
+/** Part B sketches (originals and revisions), waiting for or with expert ratings. */
 export function RevisionReview() {
   const api = useStudentAdminApi();
   const apiRef = React.useRef(api);
@@ -157,13 +157,13 @@ export function RevisionReview() {
         ))}
         {items ? <Chip tone="neutral">{items.length}</Chip> : null}
         <p className="w-full text-xs text-neutral-500">
-          Revisions are for learning: your feedback shows to the student but doesn&rsquo;t change
-          their test score.
+          Part B sketches from practice papers: originals and revisions. Your rating on the original
+          is the student&rsquo;s Part B score; revision feedback is for learning.
         </p>
       </div>
       {error ? (
         <Card>
-          <RetryInline message="Couldn't load revisions" onRetry={load} />
+          <RetryInline message="Couldn't load Part B sketches" onRetry={load} />
         </Card>
       ) : items === null ? (
         <p className="text-sm text-neutral-500">Loading…</p>
@@ -171,9 +171,7 @@ export function RevisionReview() {
         <Card>
           <EmptyState
             icon={Brush}
-            heading={
-              status === "pending" ? "No revisions waiting" : "No revisions with feedback yet"
-            }
+            heading={status === "pending" ? "No sketches waiting" : "No sketches rated yet"}
           />
         </Card>
       ) : (

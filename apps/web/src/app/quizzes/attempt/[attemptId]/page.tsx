@@ -5,6 +5,10 @@ import { useParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
+  Brain,
+  CheckCircle2,
+  Dices,
+  Filter,
   Flag,
   HelpCircle,
   Lock,
@@ -21,10 +25,29 @@ import { useAttemptKeyboardShortcuts } from "@/components/quiz/use-attempt-keybo
 import { AttemptHeader } from "@/components/quiz/attempt-header";
 import { QuizQuestionCard } from "@/components/quiz/quiz-question-card";
 import { SketchUpload } from "@/components/quiz/sketch-upload";
-import { SubmitConfirmDialog } from "@/components/quiz/submit-confirm-dialog";
+import { FinishSummaryDialog, type FinishItem } from "@/components/quiz/finish-summary-dialog";
 import { METHOD_LABEL, useStudentApi } from "@/lib/student-api";
 
 const METHODS: AnswerMethod[] = ["KNOWLEDGE", "ELIMINATION", "GUESS"];
+
+/** The three answer methods, in the same colours as the report. */
+const METHOD_STYLE: Record<AnswerMethod, { icon: typeof Brain; on: string; hint: string }> = {
+  KNOWLEDGE: {
+    icon: Brain,
+    on: "border-blue-500 bg-blue-50 text-blue-800 ring-1 ring-blue-500 dark:bg-blue-500/15 dark:text-blue-200",
+    hint: "I knew the concept or formula",
+  },
+  ELIMINATION: {
+    icon: Filter,
+    on: "border-amber-500 bg-amber-50 text-amber-800 ring-1 ring-amber-500 dark:bg-amber-500/15 dark:text-amber-200",
+    hint: "I ruled out the wrong options",
+  },
+  GUESS: {
+    icon: Dices,
+    on: "border-rose-500 bg-rose-50 text-rose-800 ring-1 ring-rose-500 dark:bg-rose-500/15 dark:text-rose-200",
+    hint: "I wasn't sure, I guessed",
+  },
+};
 
 function ReportDialog({
   open,
@@ -163,13 +186,14 @@ function SectionConfirmDialog({
   );
 }
 
-type Tone = "current" | "answered" | "seen" | "unseen";
+type Tone = "current" | "answered" | "skipped" | "unseen";
 
 const TONE_CLASS: Record<Tone, string> = {
   current:
     "ring-2 ring-primary-500 ring-offset-1 bg-white text-primary-700 dark:bg-neutral-900 dark:text-primary-300",
-  answered: "bg-primary-600 text-white",
-  seen: "bg-neutral-200 text-neutral-700 dark:bg-white/10 dark:text-neutral-300",
+  answered: "bg-emerald-500 text-white",
+  skipped:
+    "bg-amber-100 text-amber-800 ring-1 ring-inset ring-amber-300 dark:bg-amber-500/20 dark:text-amber-200 dark:ring-amber-500/40",
   unseen:
     "border border-neutral-300 text-neutral-500 dark:border-neutral-700 dark:text-neutral-400",
 };
@@ -242,7 +266,7 @@ function Navigator({
                     {flagged(q) ? (
                       <span
                         aria-hidden="true"
-                        className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-warning-500 ring-2 ring-white dark:ring-neutral-900"
+                        className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-violet-500 ring-2 ring-white dark:ring-neutral-900"
                       />
                     ) : null}
                   </button>
@@ -254,17 +278,24 @@ function Navigator({
       })}
       <ul className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-neutral-500 dark:text-neutral-400">
         <li className="flex items-center gap-1.5">
-          <span className="h-3 w-3 rounded bg-primary-600" aria-hidden="true" /> Answered
+          <span className="h-3 w-3 rounded bg-emerald-500" aria-hidden="true" /> Answered
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="h-3 w-3 rounded bg-neutral-200 dark:bg-white/10" aria-hidden="true" />{" "}
-          Seen
+          <span
+            className="h-3 w-3 rounded bg-amber-100 ring-1 ring-inset ring-amber-300"
+            aria-hidden="true"
+          />{" "}
+          Skipped
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="h-3 w-3 rounded border border-neutral-300" aria-hidden="true" /> Not seen
+          <span className="h-3 w-3 rounded border border-neutral-300" aria-hidden="true" /> Not
+          visited
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-warning-500" aria-hidden="true" /> Flagged
+          <span className="h-2.5 w-2.5 rounded-full bg-violet-500" aria-hidden="true" /> Flagged
+        </li>
+        <li className="flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded ring-2 ring-primary-500" aria-hidden="true" /> Current
         </li>
       </ul>
     </nav>
@@ -303,7 +334,8 @@ function AttemptContent() {
   );
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [reportOpen, setReportOpen] = React.useState(false);
-  const [askMethod, setAskMethod] = React.useState(false);
+  /** Set when the student tries to leave an answered question without saying how they got it. */
+  const [methodNudge, setMethodNudge] = React.useState(false);
   const [sectionConfirmOpen, setSectionConfirmOpen] = React.useState(false);
   const timing = attempt?.timing ?? null;
   /** Indexes the student may visit: the open section when timed by section, else all. */
@@ -316,7 +348,7 @@ function AttemptContent() {
     [questions, timing],
   );
 
-  React.useEffect(() => setAskMethod(false), [activeIndex]);
+  React.useEffect(() => setMethodNudge(false), [activeIndex]);
 
   const answered = React.useCallback(
     (q: AttemptQuestion) =>
@@ -324,14 +356,35 @@ function AttemptContent() {
     [meta, isAnswered],
   );
 
+  /** Answered (not a sketch) but "how did you get it" not chosen yet. */
+  const needsMethod = React.useCallback(
+    (q: AttemptQuestion | undefined) =>
+      Boolean(q && q.type !== "UPLOAD" && isAnswered(q) && !meta[q.questionId]?.method),
+    [isAnswered, meta],
+  );
+  const blocked = React.useCallback(() => {
+    if (!needsMethod(question)) return false;
+    setMethodNudge(true);
+    return true;
+  }, [needsMethod, question]);
+
   const navigate = React.useCallback(
-    (direction: -1 | 1) =>
+    (direction: -1 | 1) => {
+      if (blocked()) return;
       setActiveIndex((i) => {
         const pos = scope.indexOf(i);
         if (pos < 0) return scope[0] ?? i;
         return scope[Math.min(scope.length - 1, Math.max(0, pos + direction))] ?? i;
-      }),
-    [scope, setActiveIndex],
+      });
+    },
+    [scope, setActiveIndex, blocked],
+  );
+  const goTo = React.useCallback(
+    (index: number) => {
+      if (index !== activeIndex && blocked()) return;
+      setActiveIndex(index);
+    },
+    [activeIndex, blocked, setActiveIndex],
   );
   const handleToggle = React.useCallback(
     (optionId: string) => {
@@ -378,11 +431,29 @@ function AttemptContent() {
   const answeredCount = questions.filter(answered).length;
   const sectionTitle = attempt.sections?.find((s) => s.id === current.sectionId)?.title;
 
+  const currentNeedsMethod = needsMethod(current);
+  const currentAnswered = answered(current);
+
   function chooseMethod(method: AnswerMethod) {
     setMethod(current.questionId, method);
-    setAskMethod(false);
-    if (!isLast) navigate(1);
+    setMethodNudge(false);
   }
+
+  function openFinish() {
+    if (blocked()) return;
+    if (nextTimed) setSectionConfirmOpen(true);
+    else setConfirmOpen(true);
+  }
+
+  const stateOf = (q: AttemptQuestion): FinishItem["state"] =>
+    answered(q) ? "answered" : meta[q.questionId]?.visited ? "skipped" : "unseen";
+  const finishItems: FinishItem[] = questions.map((q, i) => ({
+    index: i,
+    state: stateOf(q),
+    flagged: meta[q.questionId]?.flagged ?? false,
+    sectionTitle: attempt.sections?.find((s) => s.id === q.sectionId)?.title ?? null,
+    reachable: scope.includes(i),
+  }));
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-white/[0.03]">
@@ -445,39 +516,76 @@ function AttemptContent() {
             />
           )}
 
-          {askMethod ? (
+          {current.type !== "UPLOAD" ? (
             <div
-              role="group"
+              role="radiogroup"
               aria-labelledby="method-q"
-              className="rounded-card border border-primary-200 bg-primary-50 p-4 dark:border-primary-500/30 dark:bg-primary-500/10"
+              aria-describedby="method-help"
+              className={cn(
+                "rounded-card border p-4 transition-colors motion-reduce:transition-none",
+                !currentAnswered
+                  ? "border-dashed border-neutral-300 bg-white/60 dark:border-neutral-700 dark:bg-white/[0.02]"
+                  : methodNudge
+                    ? "border-rose-300 bg-rose-50/70 dark:border-rose-500/40 dark:bg-rose-500/10"
+                    : "border-primary-200 bg-primary-50/70 dark:border-primary-500/30 dark:bg-primary-500/10",
+              )}
             >
-              <p id="method-q" className="text-sm font-medium text-neutral-800 dark:text-white/90">
-                How did you get this answer?
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {METHODS.map((m) => (
-                  <Button
-                    key={m}
-                    variant={qMeta?.method === m ? "primary" : "outline"}
-                    size="sm"
-                    onClick={() => chooseMethod(m)}
-                  >
-                    {METHOD_LABEL[m]}
-                  </Button>
-                ))}
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p
+                  id="method-q"
+                  className="text-sm font-medium text-neutral-800 dark:text-white/90"
+                >
+                  How did you get this answer?
+                </p>
+                <p
+                  id="method-help"
+                  aria-live="polite"
+                  className={cn(
+                    "text-xs",
+                    methodNudge
+                      ? "font-medium text-rose-700 dark:text-rose-300"
+                      : "text-neutral-500",
+                  )}
+                >
+                  {!currentAnswered
+                    ? "Pick an answer first, or skip the question."
+                    : methodNudge
+                      ? "Choose one to continue."
+                      : qMeta?.method
+                        ? "Saved. You can change it."
+                        : "Required before you move on."}
+                </p>
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                {METHODS.map((m) => {
+                  const style = METHOD_STYLE[m];
+                  const Icon = style.icon;
+                  const selected = qMeta?.method === m && currentAnswered;
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      disabled={!currentAnswered}
+                      onClick={() => chooseMethod(m)}
+                      className={cn(
+                        "flex items-start gap-2 rounded-md border px-3 py-2 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none",
+                        selected
+                          ? style.on
+                          : "border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300",
+                      )}
+                    >
+                      <Icon size={18} aria-hidden="true" className="mt-0.5 shrink-0" />
+                      <span>
+                        <span className="block font-medium">{METHOD_LABEL[m]}</span>
+                        <span className="block text-xs opacity-75">{style.hint}</span>
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          ) : qMeta?.method && answered(current) ? (
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              You said: <strong>{METHOD_LABEL[qMeta.method]}</strong>{" "}
-              <button
-                type="button"
-                className="text-primary-600 hover:underline"
-                onClick={() => setAskMethod(true)}
-              >
-                change
-              </button>
-            </p>
           ) : null}
 
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -502,17 +610,25 @@ function AttemptContent() {
                 <MessageSquareWarning size={16} aria-hidden="true" /> Report
               </Button>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {!isLast ? (
+            <div className="flex flex-wrap items-center gap-2">
+              {isLast ? (
+                <Button
+                  size="sm"
+                  disabled={currentNeedsMethod || (mustVisit && !nextTimed)}
+                  onClick={openFinish}
+                >
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  {nextTimed ? `Finish ${openSection!.title}` : "Finish"}
+                </Button>
+              ) : currentAnswered ? (
+                <Button size="sm" disabled={currentNeedsMethod} onClick={() => navigate(1)}>
+                  Next <ArrowRight size={16} aria-hidden="true" />
+                </Button>
+              ) : (
                 <Button variant="outline" size="sm" onClick={() => navigate(1)}>
-                  <SkipForward size={16} aria-hidden="true" /> {answered(current) ? "Next" : "Skip"}
+                  <SkipForward size={16} aria-hidden="true" /> Skip
                 </Button>
-              ) : null}
-              {current.type !== "UPLOAD" ? (
-                <Button size="sm" disabled={!answered(current)} onClick={() => setAskMethod(true)}>
-                  Save answer <ArrowRight size={16} aria-hidden="true" />
-                </Button>
-              ) : null}
+              )}
             </div>
           </div>
         </main>
@@ -529,26 +645,21 @@ function AttemptContent() {
               questions={questions}
               sections={attempt.sections ?? []}
               activeIndex={activeIndex}
-              toneOf={(q) =>
-                answered(q) ? "answered" : meta[q.questionId]?.visited ? "seen" : "unseen"
-              }
+              toneOf={stateOf}
               flagged={(q) => meta[q.questionId]?.flagged ?? false}
-              onSelect={setActiveIndex}
+              onSelect={goTo}
               sectionStatus={timing ? statusOf : undefined}
             />
           </div>
           {nextTimed ? (
-            <Button
-              onClick={() => setSectionConfirmOpen(true)}
-              disabled={mustVisit || movingSection}
-            >
+            <Button onClick={openFinish} disabled={mustVisit || movingSection}>
               {movingSection
                 ? "Moving on…"
                 : `Finish ${openSection!.title} and start ${nextTimed.title}`}
             </Button>
           ) : (
-            <Button onClick={() => setConfirmOpen(true)} disabled={mustVisit}>
-              Submit test
+            <Button onClick={openFinish} disabled={mustVisit}>
+              Finish test
             </Button>
           )}
           {mustVisit ? (
@@ -565,14 +676,18 @@ function AttemptContent() {
         </aside>
       </div>
 
-      <SubmitConfirmDialog
+      <FinishSummaryDialog
         open={confirmOpen}
-        answeredCount={answeredCount}
-        totalCount={questions.length}
+        items={finishItems}
+        remainingSeconds={timing ? sectionRemaining : remainingSeconds}
         submitting={submitting}
         error={submitError}
-        onConfirm={() => void submit()}
-        onCancel={() => setConfirmOpen(false)}
+        onJump={(index) => {
+          setConfirmOpen(false);
+          setActiveIndex(index);
+        }}
+        onSubmit={() => void submit()}
+        onClose={() => setConfirmOpen(false)}
       />
       {sectionConfirmOpen && openSection && nextTimed ? (
         <SectionConfirmDialog

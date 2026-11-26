@@ -54,6 +54,10 @@ export class StudyMediaController {
     const url = await this.media.getPublicUrl(id);
     // Shorter than the presigned URL's 5-minute life, so a cached redirect never points at an expired URL.
     res.setHeader("Cache-Control", "private, max-age=240");
+    // helmet() defaults every response to CORP "same-origin", which makes browsers
+    // refuse this redirect when the web/admin apps (another origin) embed it in
+    // <img>/<video>. These files are meant to be embedded, so allow it here only.
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     res.redirect(302, url);
   }
 }

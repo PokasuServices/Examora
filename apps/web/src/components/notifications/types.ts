@@ -2,6 +2,7 @@ import {
   Award,
   Bell,
   BookOpen,
+  CalendarDays,
   ClipboardList,
   MessageSquare,
   Receipt,
@@ -27,6 +28,7 @@ const CATEGORY_META: Record<string, { icon: LucideIcon; tone: ChipTone; label: s
   community: { icon: MessageSquare, tone: "primary", label: "Community" },
   analytics: { icon: Award, tone: "neutral", label: "Reports" },
   platform: { icon: Bell, tone: "neutral", label: "Announcements" },
+  events: { icon: CalendarDays, tone: "accent", label: "Events" },
 };
 
 export function categoryMeta(category: string): {
@@ -56,6 +58,12 @@ export function resolveDeepLink(
   if (!data) return null;
   const str = (key: string): string | null =>
     typeof data[key] === "string" ? (data[key] as string) : null;
+
+  // Student alerts (deadlines, reviews, replies, streak, webinars) carry their own in-app link.
+  if (eventType.startsWith("student.")) {
+    const url = str("url");
+    return url && url.startsWith("/") && !url.startsWith("//") ? url : null;
+  }
 
   switch (eventType) {
     case "enrollment.granted": {

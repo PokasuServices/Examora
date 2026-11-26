@@ -46,7 +46,8 @@ const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 const MAX_BYTES = 10 * 1024 * 1024;
 const IST_OFFSET_MS = 330 * 60_000;
 
-type Viewer = { id: string; roles: string[] };
+/** quizId: the paper being viewed, so totals use that paper's marks for the question. */
+type Viewer = { id: string; roles: string[]; quizId?: string };
 type FactorInput = { title: string; description?: string | null };
 type Scores = Record<string, number>;
 
@@ -133,7 +134,7 @@ const WORK_INCLUDE = {
       text: true,
       criteria: true,
       rubric: { select: { title: true, factors: true } },
-      quizQuestions: { select: { marks: true }, orderBy: { marks: "desc" }, take: 1 },
+      quizQuestions: { select: { marks: true, quizId: true }, orderBy: { marks: "desc" } },
     },
   },
   versions: {
@@ -174,11 +175,11 @@ type WorkRow = Prisma.SketchWorkGetPayload<{ include: typeof WORK_INCLUDE }>;
 type VersionRow = WorkRow["versions"][number];
 
 /**
- * Practice sketch workspace: after a test, each sketch question opens as a
- * "work" holding the test upload plus revisions (max 4 uploads), with pins,
- * claps, views, comments, abuse reports, ratings and peer feedback.
- * Revisions never change the test score; that stays on the test upload's
- * expert marks (Sketch review).
+ * Part B (sketching) of a practice paper: untimed and separate from the Part A
+ * test. Each sketch question opens as a "work" holding the original upload plus
+ * revisions (max 4 uploads), with pins, claps, views, comments, abuse reports,
+ * self/expert ratings and peer feedback. Older in-test uploads (answerId set)
+ * keep their Sketch review marks.
  */
 @Injectable()
 export class SketchWorksService {
@@ -226,7 +227,9 @@ export class SketchWorksService {
     }
   }
 
-  private maxMarksOf(row: WorkRow): number {
+  private maxMarksOf(row: WorkRow, quizId?: string): number {
+    const inPaper = quizId && row.question.quizQuestions.find((qq) => qq.quizId === quizId);
+    if (inPaper) return Number(inPaper.marks);
     for (const v of row.versions) {
       const snap = (v.answer?.attempt.questionSnapshot ?? []) as unknown as QuestionSnapshot;
       const m = snap.find((s) => s.questionId === row.questionId)?.marks;
@@ -335,19 +338,24 @@ export class SketchWorksService {
     const isMine = row.userId === viewer.id;
     const { rubricTitle, factors } = factorsOf(row.question);
     const factorTitles = factors.map((f) => f.title);
-    const maxMarks = this.maxMarksOf(row);
+    const maxMarks = this.maxMarksOf(row, viewer.quizId);
     let revision = 0;
+    const onlyOne = row.versions.length === 1;
     const versions: SketchVersionView[] = row.versions.map((v) => {
       const reviewed = v.answer?.sketchReview?.expertReviewedAt != null;
       return {
         id: v.id,
         kind: v.kind,
-        label: v.kind === "TEST" ? "Test upload" : `Revision ${++revision}`,
+        label: v.kind === "TEST" ? "Original" : `Revision ${++revision}`,
         imageRef: `media:${v.assetId}`,
         description: v.description,
         createdAt: v.createdAt.toISOString(),
         pinCount: v._count.pins,
-        canDelete: isMine && v.kind === "REVISION",
+        // The original can go only while it's the sole upload and nobody has rated it.
+        canDelete:
+          isMine &&
+          (v.kind === "REVISION" ||
+            (!v.answerId && onlyOne && v.ratings.length === 0 && v.peerFeedback.length === 0)),
         expert:
           v.kind === "TEST" && v.answer
             ? {
@@ -410,26 +418,30 @@ export class SketchWorksService {
     return this.toWorkView(row, viewer, Boolean(clap), Boolean(report));
   }
 
-  /** Has the student rated their own sketch (any version) for this question? */
-  private async hasSelfRated(userId: string, questionId: string): Promise<boolean> {
-    const [rated, legacy] = await Promise.all([
-      this.prisma.sketchVersionRating.findFirst({
-        where: { kind: "SELF", raterId: userId, version: { work: { userId, questionId } } },
+  /**
+   * Has the student uploaded their own sketch for this question (Part B
+   * upload or an in-test upload)? That alone unlocks classmates' work;
+   * self-rating is encouraged but not required.
+   */
+  private async hasUploaded(userId: string, questionId: string): Promise<boolean> {
+    const [version, testUpload] = await Promise.all([
+      this.prisma.sketchVersion.findFirst({
+        where: { deletedAt: null, work: { userId, questionId } },
         select: { id: true },
       }),
-      this.prisma.sketchReview.findFirst({
-        where: { selfRatedAt: { not: null }, answer: { questionId, attempt: { userId } } },
+      this.prisma.quizAttemptAnswer.findFirst({
+        where: { questionId, uploadAssetId: { not: null }, attempt: { userId } },
         select: { id: true },
       }),
     ]);
-    return Boolean(rated || legacy);
+    return Boolean(version || testUpload);
   }
 
-  /** Owner, staff, or a student who has uploaded and rated their own sketch for the question. */
+  /** Owner, staff, or a student who has uploaded their own sketch for the question. */
   private async assertCanView(viewer: Viewer, work: { userId: string; questionId: string }) {
     if (work.userId === viewer.id || isSketchStaff(viewer.roles)) return;
-    if (!(await this.hasSelfRated(viewer.id, work.questionId))) {
-      throw new ForbiddenException("Upload and rate your own sketch first to see others' work");
+    if (!(await this.hasUploaded(viewer.id, work.questionId))) {
+      throw new ForbiddenException("Upload your own sketch first to see others' work");
     }
   }
 
@@ -471,6 +483,7 @@ export class SketchWorksService {
       },
     });
     if (!quiz) throw new NotFoundException("Test not found");
+    // Part B is untimed: sketches can be uploaded any time, test or no test.
     const finished = Boolean(
       await this.prisma.quizAttempt.findFirst({
         where: { quizId, userId: viewer.id, status: { in: [...FINISHED] } },
@@ -478,7 +491,7 @@ export class SketchWorksService {
       }),
     );
     const questionIds = quiz.quizQuestions.map((qq) => qq.question.id);
-    if (finished) await this.ensureWorks(viewer.id, questionIds);
+    await this.ensureWorks(viewer.id, questionIds);
     const works = await this.prisma.sketchWork.findMany({
       where: { userId: viewer.id, questionId: { in: questionIds } },
       select: { id: true, questionId: true },
@@ -487,7 +500,7 @@ export class SketchWorksService {
     const questions: SketchWorkspaceQuestion[] = [];
     for (const qq of quiz.quizQuestions) {
       const workId = workBy.get(qq.question.id);
-      const work = workId ? await this.loadWork(workId, viewer) : null;
+      const work = workId ? await this.loadWork(workId, { ...viewer, quizId }) : null;
       questions.push({
         questionId: qq.question.id,
         text: qq.question.text,
@@ -495,7 +508,7 @@ export class SketchWorksService {
         sectionTitle: qq.section?.title ?? null,
         ...factorsOf(qq.question),
         work,
-        canUpload: finished && (work ? work.canUpload : true),
+        canUpload: work ? work.canUpload : true,
       });
     }
     return {
@@ -546,7 +559,12 @@ export class SketchWorksService {
   }
 
   /** Rate your own version, 1–5 per factor. Once per version; it can't be changed afterwards. */
-  async rateSelf(userId: string, versionId: string, scores: Scores): Promise<SketchRatingResult> {
+  async rateSelf(
+    userId: string,
+    versionId: string,
+    scores: Scores,
+    quizId?: string,
+  ): Promise<SketchRatingResult> {
     const v = await this.versionWithWork(versionId);
     if (v.work.userId !== userId) throw new NotFoundException("Sketch version not found");
     const factors = factorsOf(v.work.question).factors.map((f) => f.title);
@@ -577,7 +595,7 @@ export class SketchWorksService {
       sourceId: versionId,
     });
     return {
-      work: await this.loadWork(v.workId, { id: userId, roles: [] }),
+      work: await this.loadWork(v.workId, { id: userId, roles: [], quizId }),
       xpAwarded: awarded ? SELF_RATING_XP : 0,
     };
   }
@@ -648,7 +666,7 @@ export class SketchWorksService {
   ): Promise<void> {
     if (!isSketchStaff(staff.roles)) throw new ForbiddenException("Reviewers only");
     const v = await this.versionWithWork(versionId);
-    if (v.kind === "TEST") {
+    if (v.answerId) {
       throw new BadRequestException(
         "Mark the test upload in Sketch review (it sets the test score)",
       );
@@ -671,7 +689,8 @@ export class SketchWorksService {
   ): Promise<SketchRevisionQueueItem[]> {
     const rows = await this.prisma.sketchVersion.findMany({
       where: {
-        kind: "REVISION",
+        // Part B originals and revisions; in-test uploads are marked in Sketch review.
+        answerId: null,
         deletedAt: null,
         ratings: status === "pending" ? { none: { kind: "EXPERT" } } : { some: { kind: "EXPERT" } },
       },
@@ -708,7 +727,7 @@ export class SketchWorksService {
         workId: v.work.id,
         studentName: nameOf(v.work.user),
         questionText: v.work.question.text,
-        label: `Revision ${n}`,
+        label: v.kind === "TEST" ? "Original" : `Revision ${n}`,
         imageRef: `media:${v.assetId}`,
         description: v.description,
         factors: factorsOf(v.work.question).factors,
@@ -725,16 +744,24 @@ export class SketchWorksService {
   async community(
     viewer: Viewer,
     questionId: string,
-    opts: { sort: "newest" | "claps" | "top"; filter: "all" | "unrated" | "rated"; page: number },
+    opts: {
+      sort: "newest" | "claps" | "top";
+      filter: "all" | "unrated" | "rated";
+      page: number;
+      quizId?: string;
+    },
   ): Promise<SketchCommunityPage> {
     const question = await this.prisma.question.findFirst({
       where: { id: questionId, type: "UPLOAD", deletedAt: null },
-      select: { quizQuestions: { select: { marks: true }, orderBy: { marks: "desc" }, take: 1 } },
+      select: {
+        quizQuestions: { select: { marks: true, quizId: true }, orderBy: { marks: "desc" } },
+      },
     });
     if (!question) throw new NotFoundException("Sketch question not found");
-    const maxMarks = question.quizQuestions[0] ? Number(question.quizQuestions[0].marks) : 10;
-    const unlocked =
-      isSketchStaff(viewer.roles) || (await this.hasSelfRated(viewer.id, questionId));
+    const paperRow =
+      question.quizQuestions.find((qq) => qq.quizId === opts.quizId) ?? question.quizQuestions[0];
+    const maxMarks = paperRow ? Number(paperRow.marks) : 10;
+    const unlocked = isSketchStaff(viewer.roles) || (await this.hasUploaded(viewer.id, questionId));
     if (!unlocked) return { unlocked: false, maxMarks, items: [], nextPage: null };
 
     const rows = await this.prisma.sketchWork.findMany({
@@ -773,7 +800,7 @@ export class SketchWorksService {
         workId: r.id,
         ownerName: nameOf(r.user),
         imageRef: `media:${latest.assetId}`,
-        versionLabel: latest.kind === "TEST" ? "Test upload" : `Revision ${revisionNo}`,
+        versionLabel: latest.kind === "TEST" ? "Original" : `Revision ${revisionNo}`,
         versionCount: r.versions.length,
         description: latest.description,
         views: r._count.views,
@@ -879,7 +906,7 @@ export class SketchWorksService {
         c.myVersions = w._count.versions;
       }
     }
-    for (const c of seen.values()) c.unlocked = await this.hasSelfRated(viewer.id, c.questionId);
+    for (const c of seen.values()) c.unlocked = await this.hasUploaded(viewer.id, c.questionId);
     return [...seen.values()];
   }
 
@@ -892,17 +919,42 @@ export class SketchWorksService {
     if (sizeBytes > MAX_BYTES) throw new BadRequestException("Images must be 10 MB or smaller");
   }
 
-  /** Revisions need a finished test containing the question, and room under the upload limit. */
+  /**
+   * Part B uploads: the question must be a sketch in a published practice test
+   * of a course the student is licensed for (or in a test they've finished),
+   * with room under the upload limit.
+   */
   private async assertCanAddVersion(userId: string, questionId: string) {
-    const finished = await this.prisma.quizAttempt.findFirst({
+    const now = new Date();
+    const allowed = await this.prisma.quizQuestion.findFirst({
       where: {
-        userId,
-        status: { in: [...FINISHED] },
-        quiz: { quizQuestions: { some: { questionId } } },
+        questionId,
+        question: { type: "UPLOAD", deletedAt: null },
+        quiz: {
+          deletedAt: null,
+          OR: [
+            {
+              status: "PUBLISHED",
+              practiceCategoryId: { not: null },
+              subject: {
+                course: {
+                  enrollments: {
+                    some: {
+                      userId,
+                      status: "ACTIVE",
+                      OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+                    },
+                  },
+                },
+              },
+            },
+            { attempts: { some: { userId, status: { in: [...FINISHED] } } } },
+          ],
+        },
       },
       select: { id: true },
     });
-    if (!finished) throw new ForbiddenException("Finish the test first, then add revisions here");
+    if (!allowed) throw new ForbiddenException("You don't have access to this sketch question");
     await this.ensureWorks(userId, [questionId]);
     const count = await this.prisma.sketchVersion.count({
       where: { deletedAt: null, work: { userId, questionId } },
@@ -939,6 +991,7 @@ export class SketchWorksService {
       sizeBytes: number;
       description?: string | null;
     },
+    quizId?: string,
   ): Promise<SketchWorkView> {
     this.assertImage(file.mimeType, file.sizeBytes);
     if (!file.storageKey.startsWith(`sketch-works/${userId}/${questionId}/`)) {
@@ -951,7 +1004,7 @@ export class SketchWorksService {
         fileName: file.fileName,
         mimeType: file.mimeType,
         sizeBytes: file.sizeBytes,
-        altText: "Student sketch (revision)",
+        altText: "Student sketch",
         uploadedById: userId,
       },
     });
@@ -960,17 +1013,18 @@ export class SketchWorksService {
       where: { userId_questionId: { userId, questionId } },
       create: { userId, questionId },
       update: {},
-      select: { id: true },
+      select: { id: true, _count: { select: { versions: { where: { deletedAt: null } } } } },
     });
     await this.prisma.sketchVersion.create({
       data: {
         workId: work.id,
-        kind: "REVISION",
+        // The first upload is the original; later ones are revisions.
+        kind: work._count.versions === 0 ? "TEST" : "REVISION",
         assetId: asset.id,
         description: file.description?.trim() || null,
       },
     });
-    return this.loadWork(work.id, { id: userId, roles: [] });
+    return this.loadWork(work.id, { id: userId, roles: [], quizId });
   }
 
   private async ownVersion(userId: string, versionId: string) {
@@ -982,23 +1036,35 @@ export class SketchWorksService {
     return v;
   }
 
-  async updateDescription(userId: string, versionId: string, description: string | null) {
+  async updateDescription(
+    userId: string,
+    versionId: string,
+    description: string | null,
+    quizId?: string,
+  ) {
     const v = await this.ownVersion(userId, versionId);
     await this.prisma.sketchVersion.update({
       where: { id: versionId },
       data: { description: description?.trim() || null },
     });
-    return this.loadWork(v.workId, { id: userId, roles: [] });
+    return this.loadWork(v.workId, { id: userId, roles: [], quizId });
   }
 
-  async deleteVersion(userId: string, versionId: string) {
+  async deleteVersion(userId: string, versionId: string, quizId?: string) {
     const v = await this.ownVersion(userId, versionId);
-    if (v.kind === "TEST") throw new BadRequestException("The test upload can't be deleted");
+    if (v.kind === "TEST") {
+      const work = await this.loadWork(v.workId, { id: userId, roles: [] });
+      if (!work.versions.find((x) => x.id === versionId)?.canDelete) {
+        throw new BadRequestException(
+          "The original can't be deleted once it has revisions or ratings",
+        );
+      }
+    }
     await this.prisma.sketchVersion.update({
       where: { id: versionId },
       data: { deletedAt: new Date() },
     });
-    return this.loadWork(v.workId, { id: userId, roles: [] });
+    return this.loadWork(v.workId, { id: userId, roles: [], quizId });
   }
 
   // ------------------------------------------------------------ claps, comments, reports

@@ -2,6 +2,10 @@ import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/commo
 import type {
   LearnCourseOption,
   LearnCourseOverview,
+  LearnDashboard,
+  LearnTopicRow,
+  LearnTopicStatus,
+  TopicMarkValue,
   LearnCrumbs,
   LearnLessonDetail,
   LearnQuizInfo,
@@ -12,6 +16,7 @@ import type {
   SyllabusHeatmap,
   TopicRatingValue,
 } from "@examora/types";
+import { todayInIndia, weekStart } from "../daily-quiz/daily-quiz.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { LessonQuestionsService } from "./lesson-questions.service";
 
@@ -23,6 +28,13 @@ const MAX_SUGGESTIONS = 3;
 interface TopicItems {
   lessonIds: string[];
   quizIds: string[];
+}
+
+/** A topic's state from its progress. */
+export function topicStatus(done: number, total: number): LearnTopicStatus {
+  if (total === 0) return "EMPTY";
+  if (done >= total) return "COMPLETED";
+  return done > 0 ? "IN_PROGRESS" : "NOT_STARTED";
 }
 
 /** done / total as a whole percentage; an empty topic counts as 0%. */
@@ -201,7 +213,108 @@ export class LearnService {
         nextExamDate: course.nextExamDate?.toISOString() ?? null,
       },
       subjects,
+      dashboard: await this.buildDashboard(userId, course.subjects, items, completed, finished),
       heatmaps: await this.buildHeatmaps(courseId),
+    };
+  }
+
+  /**
+   * The Learn tab overview: topic states, the student's favourite / on-hold
+   * marks, shared (multi-exam) topics, XP this week and what to open next.
+   */
+  private async buildDashboard(
+    userId: string,
+    subjects: {
+      id: string;
+      title: string;
+      topics: { id: string; title: string; examTags: string[] }[];
+    }[],
+    items: Map<string, TopicItems>,
+    completed: Set<string>,
+    finished: Map<string, number>,
+  ): Promise<LearnDashboard> {
+    const topicIds = subjects.flatMap((s) => s.topics.map((t) => t.id));
+    const [marks, xp] = await Promise.all([
+      this.prisma.topicMark.findMany({
+        where: { userId, topicId: { in: topicIds } },
+        select: { topicId: true, favourite: true, onHold: true },
+      }),
+      this.prisma.xpEvent.aggregate({
+        _sum: { amount: true },
+        // Weeks start on Monday in India (midnight IST = 18:30 UTC the day before).
+        where: {
+          userId,
+          createdAt: { gte: new Date(weekStart(todayInIndia()).getTime() - 330 * 60_000) },
+        },
+      }),
+    ]);
+    const markOf = new Map(marks.map((m) => [m.topicId, m]));
+
+    let done = 0;
+    let total = 0;
+    const topics: LearnTopicRow[] = subjects.flatMap((s) =>
+      s.topics.map((t) => {
+        const p = this.topicProgress(items.get(t.id)!, completed, finished);
+        done += p.done;
+        total += p.total;
+        const m = markOf.get(t.id);
+        return {
+          id: t.id,
+          title: t.title,
+          subjectId: s.id,
+          subjectTitle: s.title,
+          status: topicStatus(p.done, p.total),
+          done: p.done,
+          total: p.total,
+          examTags: t.examTags,
+          favourite: m?.favourite ?? false,
+          onHold: m?.onHold ?? false,
+        };
+      }),
+    );
+
+    const count = (pick: (t: LearnTopicRow) => boolean) => topics.filter(pick).length;
+    // Next up: the first topic already started, else the first not started; never one on hold.
+    const next =
+      topics.find((t) => t.status === "IN_PROGRESS" && !t.onHold) ??
+      topics.find((t) => t.status === "NOT_STARTED" && !t.onHold) ??
+      null;
+    let continueWith: LearnDashboard["continueWith"] = null;
+    if (next) {
+      const lesson = (await this.topicLessons(next.id)).find((l) => !completed.has(l.id));
+      const quizId = lesson
+        ? null
+        : (items.get(next.id)?.quizIds.find((q) => (finished.get(q) ?? 0) === 0) ?? null);
+      const quiz = quizId
+        ? await this.prisma.quiz.findUnique({ where: { id: quizId }, select: { title: true } })
+        : null;
+      if (lesson || (quizId && quiz)) {
+        continueWith = {
+          kind: lesson ? "lesson" : "quiz",
+          id: lesson ? lesson.id : quizId!,
+          title: lesson ? lesson.title : quiz!.title,
+          topicId: next.id,
+          topicTitle: next.title,
+          subjectTitle: next.subjectTitle,
+        };
+      }
+    }
+
+    return {
+      counts: {
+        subjects: subjects.length,
+        topics: topics.length,
+        completed: count((t) => t.status === "COMPLETED"),
+        inProgress: count((t) => t.status === "IN_PROGRESS"),
+        notStarted: count((t) => t.status === "NOT_STARTED"),
+        favourite: count((t) => t.favourite),
+        onHold: count((t) => t.onHold),
+        shared: count((t) => t.examTags.length >= 2),
+      },
+      percent: percentOf(done, total),
+      xpThisWeek: xp._sum.amount ?? 0,
+      continueWith,
+      topics,
     };
   }
 
@@ -324,7 +437,7 @@ export class LearnService {
     const topic = await this.loadTopic(topicId);
     await this.assertLicence(userId, topic.subject.course.id);
 
-    const [lessons, quizzes, rating] = await Promise.all([
+    const [lessons, quizzes, rating, mark] = await Promise.all([
       this.topicLessons(topicId),
       this.prisma.quiz.findMany({
         where: { ...PUBLISHED, topicId },
@@ -334,6 +447,10 @@ export class LearnService {
       this.prisma.topicRating.findUnique({
         where: { userId_topicId: { userId, topicId } },
         select: { rating: true },
+      }),
+      this.prisma.topicMark.findUnique({
+        where: { userId_topicId: { userId, topicId } },
+        select: { favourite: true, onHold: true },
       }),
     ]);
     const [completed, { used, finished }] = await Promise.all([
@@ -363,13 +480,44 @@ export class LearnService {
     ].slice(0, MAX_SUGGESTIONS);
 
     return {
-      topic: { id: topic.id, title: topic.title, description: topic.description },
+      topic: {
+        id: topic.id,
+        title: topic.title,
+        description: topic.description,
+        examTags: topic.examTags,
+      },
+      mark: { favourite: mark?.favourite ?? false, onHold: mark?.onHold ?? false },
       crumbs: this.crumbsFor(topic),
       lessons: lessonRows,
       quizzes: quizRows,
       myRating: (rating?.rating ?? null) as TopicRatingValue | null,
       suggestions,
     };
+  }
+
+  /** Marks a topic as favourite (important) and/or on hold for this student. */
+  async markTopic(
+    userId: string,
+    topicId: string,
+    patch: Partial<TopicMarkValue>,
+  ): Promise<TopicMarkValue> {
+    const topic = await this.loadTopic(topicId);
+    await this.assertLicence(userId, topic.subject.course.id);
+    const row = await this.prisma.topicMark.upsert({
+      where: { userId_topicId: { userId, topicId } },
+      create: {
+        userId,
+        topicId,
+        favourite: patch.favourite ?? false,
+        onHold: patch.onHold ?? false,
+      },
+      update: patch,
+      select: { favourite: true, onHold: true },
+    });
+    if (!row.favourite && !row.onHold) {
+      await this.prisma.topicMark.delete({ where: { userId_topicId: { userId, topicId } } });
+    }
+    return row;
   }
 
   async rateTopic(userId: string, topicId: string, rating: TopicRatingValue): Promise<void> {
@@ -468,7 +616,13 @@ export class LearnService {
     const attempts = await this.prisma.quizAttempt.findMany({
       where: { userId, quizId },
       orderBy: { startedAt: "desc" },
-      select: { id: true, status: true },
+      select: {
+        id: true,
+        status: true,
+        obtainedMarks: true,
+        totalMarks: true,
+        submittedAt: true,
+      },
     });
     const inProgress = attempts.find((a) => a.status === "IN_PROGRESS");
     const lastFinished = attempts.find((a) => a.status !== "IN_PROGRESS");
@@ -488,6 +642,13 @@ export class LearnService {
       attemptsUsed: attempts.length,
       inProgressAttemptId: inProgress?.id ?? null,
       lastFinishedAttemptId: lastFinished?.id ?? null,
+      lastScore: lastFinished
+        ? {
+            obtained: Number(lastFinished.obtainedMarks ?? 0),
+            total: Number(lastFinished.totalMarks ?? 0),
+            submittedAt: lastFinished.submittedAt?.toISOString() ?? null,
+          }
+        : null,
     };
   }
 }

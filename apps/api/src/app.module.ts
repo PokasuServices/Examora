@@ -47,6 +47,7 @@ import { CollegesModule } from "./colleges/colleges.module";
 import { DailyQuizModule } from "./daily-quiz/daily-quiz.module";
 import { SketchesModule } from "./sketches/sketches.module";
 import { QuestionFeedbackModule } from "./question-feedback/question-feedback.module";
+import { StudentDashboardsModule } from "./student-dashboards/student-dashboards.module";
 import { PracticeModule } from "./practice/practice.module";
 
 @Module({
@@ -121,6 +122,7 @@ import { PracticeModule } from "./practice/practice.module";
     DailyQuizModule,
     SketchesModule,
     QuestionFeedbackModule,
+    StudentDashboardsModule,
     PracticeModule,
   ],
   providers: [

@@ -94,6 +94,54 @@ export interface AssignmentSummary {
   criteriaCount: number;
 }
 
+/** Where the student is with one assignment (latest submission). */
+export type StudentAssignmentState =
+  "NOT_STARTED" | "DRAFT" | "WAITING" | "NEEDS_CHANGES" | "REVIEWED";
+
+export interface StudentAssignmentItem {
+  id: string;
+  title: string;
+  brief: string;
+  marksTotal: number;
+  deadline: string | null;
+  publishedAt: string | null;
+  courseTitle: string | null;
+  subjectTitle: string | null;
+  state: StudentAssignmentState;
+  /** Published since the student last opened Assignments. */
+  isNew: boolean;
+  /** Whole days until the deadline (negative = days late); null without a deadline. */
+  dueInDays: number | null;
+  /** Deadline passed and nothing submitted yet (late submissions are still allowed). */
+  overdue: boolean;
+  submissionId: string | null;
+  submittedAt: string | null;
+  /** Published review only. */
+  obtainedMarks: number | null;
+  /** The reviewer's overall comment once the review is published. */
+  reviewerNote: string | null;
+}
+
+export interface StudentAssignmentDashboard {
+  /** When the student last opened Assignments (null = first visit). */
+  lastSeenAt: string | null;
+  counts: {
+    total: number;
+    new: number;
+    /** Not started or in draft. */
+    toDo: number;
+    /** Not submitted, due within 3 days. */
+    dueSoon: number;
+    overdue: number;
+    waiting: number;
+    needsChanges: number;
+    reviewed: number;
+  };
+  /** Average % across reviewed assignments. */
+  averagePercent: number | null;
+  items: StudentAssignmentItem[];
+}
+
 // ---------------------------------------------------------------------------
 // Submissions
 // ---------------------------------------------------------------------------

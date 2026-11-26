@@ -7,6 +7,7 @@ import { AssignmentsAdminController } from "./authoring/assignments-admin.contro
 import { AssignmentsAdminService } from "./authoring/assignments-admin.service";
 import { AssignmentCatalogController } from "./catalog/assignment-catalog.controller";
 import { AssignmentCatalogService } from "./catalog/assignment-catalog.service";
+import { StudentAssignmentsService } from "./catalog/student-assignments.service";
 import { MALWARE_SCAN_QUEUE } from "./malware-scan-queue.service";
 import { MalwareScanQueueService } from "./malware-scan-queue.service";
 import { MalwareScanProcessor } from "./malware-scan.processor";
@@ -42,6 +43,7 @@ import { TemplatesService } from "./templates/templates.service";
     TemplatesService,
     AssignmentsAdminService,
     AssignmentCatalogService,
+    StudentAssignmentsService,
     SubmissionsService,
     ReviewerService,
     AdminSubmissionsService,

@@ -5,12 +5,13 @@ import { ApiError } from "@examora/auth-client";
 import type { SketchWorkView } from "@examora/types";
 import { Button, FieldError, cn } from "@examora/ui";
 import { ImagePlus } from "lucide-react";
+import { useSketchPaper } from "@/components/student/sketch-paper";
 import { putToStorage, useStudentApi } from "@/lib/student-api";
 
 const TYPES = ["image/png", "image/jpeg", "image/webp"];
 const MAX_MB = 10;
 
-/** Upload a revised sketch: drop or browse, preview, add a note, then save. */
+/** Upload a sketch (the original, then revisions): drop or browse, preview, add a note, save. */
 export function RevisionUpload({
   questionId,
   remaining,
@@ -24,6 +25,7 @@ export function RevisionUpload({
   onCancel?: () => void;
 }) {
   const api = useStudentApi();
+  const quizId = useSketchPaper();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [file, setFile] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(null);
@@ -67,7 +69,7 @@ export function RevisionUpload({
     try {
       const presigned = await api.presignRevision(questionId, file);
       await putToStorage(presigned.url, file);
-      const work = await api.saveRevision(questionId, file, presigned.key, description);
+      const work = await api.saveRevision(questionId, file, presigned.key, description, quizId);
       reset();
       onSaved(work);
     } catch (err) {

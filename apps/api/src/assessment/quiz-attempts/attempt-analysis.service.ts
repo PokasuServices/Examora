@@ -94,8 +94,8 @@ export function analyseAnswers(rows: ScoredQuestion[]) {
     string,
     TopicInsight & { knowledgeWrong: number; skipped: number; answered: number }
   >();
-  for (const r of rows) {
-    if (!r.topicId || r.pending) continue;
+  rows.forEach((r, index) => {
+    if (!r.topicId || r.pending) return;
     const t = topics.get(r.topicId) ?? {
       topicId: r.topicId,
       topicTitle: r.topicTitle ?? "Topic",
@@ -107,15 +107,26 @@ export function analyseAnswers(rows: ScoredQuestion[]) {
       timeSeconds: 0,
       gain: 0,
       reason: "",
+      byMethod: {
+        KNOWLEDGE: { answered: 0, correct: 0 },
+        ELIMINATION: { answered: 0, correct: 0 },
+        GUESS: { answered: 0, correct: 0 },
+      },
+      questionNumbers: [],
       knowledgeWrong: 0,
       skipped: 0,
       answered: 0,
     };
     t.total += 1;
+    t.questionNumbers.push(index + 1);
     t.available += r.marks;
     t.timeSeconds += r.seconds;
     if (r.correct === null) t.skipped += 1;
-    else t.answered += 1;
+    else {
+      t.answered += 1;
+      t.byMethod[r.method].answered += 1;
+      if (r.correct) t.byMethod[r.method].correct += 1;
+    }
     const trulyCorrect = r.correct === true && r.method !== "GUESS";
     if (trulyCorrect) {
       t.correct += 1;
@@ -123,7 +134,7 @@ export function analyseAnswers(rows: ScoredQuestion[]) {
     }
     if (r.correct === false && r.method === "KNOWLEDGE") t.knowledgeWrong += 1;
     topics.set(r.topicId, t);
-  }
+  });
   const weak: TopicInsight[] = [];
   const opportunity: TopicInsight[] = [];
   const strong: TopicInsight[] = [];
@@ -220,7 +231,23 @@ export class AttemptAnalysisService {
   private async loadFinished(attemptId: string, userId: string) {
     const attempt = await this.prisma.quizAttempt.findFirst({
       where: { id: attemptId, userId },
-      include: { quiz: { select: { title: true } } },
+      include: {
+        quiz: {
+          select: {
+            title: true,
+            practiceCategoryId: true,
+            topic: {
+              select: {
+                id: true,
+                title: true,
+                subject: { select: { course: { select: { title: true } } } },
+              },
+            },
+            // Practice papers: sketch questions are Part B, reported separately.
+            _count: { select: { quizQuestions: { where: { question: { type: "UPLOAD" } } } } },
+          },
+        },
+      },
     });
     if (!attempt) throw new NotFoundException("Attempt not found");
     if (attempt.status === "IN_PROGRESS") {
@@ -261,6 +288,49 @@ export class AttemptAnalysisService {
 
   private static better(a: FirstAttempt, b: FirstAttempt): boolean {
     return a.obtained > b.obtained || (a.obtained === b.obtained && a.seconds < b.seconds);
+  }
+
+  /**
+   * Which of the student's attempts this is, and the quiz XP awarded while it
+   * was the latest one (XP is recorded per quiz, so we bound it by the next
+   * attempt's start).
+   */
+  private async attemptMeta(attempt: {
+    id: string;
+    userId: string;
+    quizId: string;
+    startedAt: Date;
+  }): Promise<{ attemptNumber: number; xpEarned: number }> {
+    const [earlier, next] = await Promise.all([
+      this.prisma.quizAttempt.count({
+        where: {
+          userId: attempt.userId,
+          quizId: attempt.quizId,
+          OR: [
+            { startedAt: { lt: attempt.startedAt } },
+            { startedAt: attempt.startedAt, id: { lt: attempt.id } },
+          ],
+        },
+      }),
+      this.prisma.quizAttempt.findFirst({
+        where: {
+          userId: attempt.userId,
+          quizId: attempt.quizId,
+          startedAt: { gt: attempt.startedAt },
+        },
+        orderBy: { startedAt: "asc" },
+        select: { startedAt: true },
+      }),
+    ]);
+    const xp = await this.prisma.xpEvent.aggregate({
+      _sum: { amount: true },
+      where: {
+        userId: attempt.userId,
+        sourceId: attempt.quizId,
+        createdAt: { gte: attempt.startedAt, ...(next ? { lt: next.startedAt } : {}) },
+      },
+    });
+    return { attemptNumber: earlier + 1, xpEarned: xp._sum.amount ?? 0 };
   }
 
   async analyse(attemptId: string, userId: string): Promise<AttemptAnalysis> {
@@ -309,22 +379,25 @@ export class AttemptAnalysisService {
       orderBy: { position: "asc" },
       select: { id: true, title: true },
     });
-    const sections: SectionScore[] = sectionRows.map((sec) => {
-      const inSection = snapshot
-        .map((s, i) => ({ s, r: rows[i]! }))
-        .filter(({ s }) => s.sectionId === sec.id);
-      return {
-        sectionId: sec.id,
-        title: sec.title,
-        questionCount: inSection.length,
-        obtained: Math.round(inSection.reduce((t, x) => t + x.r.awarded, 0) * 100) / 100,
-        total: Math.round(inSection.reduce((t, x) => t + x.r.marks, 0) * 100) / 100,
-        correct: inSection.filter((x) => x.r.correct === true).length,
-        wrong: inSection.filter((x) => x.r.correct === false).length,
-        unattempted: inSection.filter((x) => x.r.correct === null && !x.r.pending).length,
-        pending: inSection.filter((x) => x.r.pending).length,
-      };
-    });
+    // Only sections this attempt had questions in (practice Part B is reported separately).
+    const sections: SectionScore[] = sectionRows
+      .filter((sec) => snapshot.some((x) => x.sectionId === sec.id))
+      .map((sec) => {
+        const inSection = snapshot
+          .map((s, i) => ({ s, r: rows[i]! }))
+          .filter(({ s }) => s.sectionId === sec.id);
+        return {
+          sectionId: sec.id,
+          title: sec.title,
+          questionCount: inSection.length,
+          obtained: Math.round(inSection.reduce((t, x) => t + x.r.awarded, 0) * 100) / 100,
+          total: Math.round(inSection.reduce((t, x) => t + x.r.marks, 0) * 100) / 100,
+          correct: inSection.filter((x) => x.r.correct === true).length,
+          wrong: inSection.filter((x) => x.r.correct === false).length,
+          unattempted: inSection.filter((x) => x.r.correct === null && !x.r.pending).length,
+          pending: inSection.filter((x) => x.r.pending).length,
+        };
+      });
 
     const obtained = decToNum(attempt.obtainedMarks);
     const total = decToNum(attempt.totalMarks);
@@ -335,10 +408,25 @@ export class AttemptAnalysisService {
     const others = (await this.firstAttempts(attempt.quizId)).filter((f) => f.userId !== userId);
     const ahead = others.filter((o) => AttemptAnalysisService.better(o, me)).length;
     const below = others.filter((o) => AttemptAnalysisService.better(me, o)).length;
+    const { attemptNumber, xpEarned } = await this.attemptMeta(attempt);
 
     return {
       attemptId,
+      quizId: attempt.quizId,
       quizTitle: attempt.quiz.title,
+      topic: attempt.quiz.topic
+        ? {
+            id: attempt.quiz.topic.id,
+            title: attempt.quiz.topic.title,
+            courseTitle: attempt.quiz.topic.subject?.course?.title ?? null,
+          }
+        : null,
+      isPractice: attempt.quiz.practiceCategoryId !== null,
+      attemptNumber,
+      status: attempt.status === "AUTO_SUBMITTED" ? "AUTO_SUBMITTED" : "SUBMITTED",
+      submittedAt: attempt.submittedAt?.toISOString() ?? null,
+      xpEarned,
+      partBCount: attempt.quiz.practiceCategoryId ? attempt.quiz._count.quizQuestions : 0,
       obtainedMarks: obtained,
       totalMarks: total,
       trueScore: Math.round((obtained - insight.marksFromGuesses) * 100) / 100,

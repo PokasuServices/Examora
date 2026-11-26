@@ -66,6 +66,7 @@ export function toTopic(row: Topic): TopicDto {
     description: row.description,
     status: row.status,
     position: row.position,
+    examTags: row.examTags,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };

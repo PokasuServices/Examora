@@ -18,6 +18,7 @@ describe("SketchWorksService (integration)", () => {
   let courseId: string;
   let quizId: string;
   let questionId: string;
+  let paperId: string | undefined;
   const owner = () => ({ id: ownerId, roles: ["STUDENT"] });
   const peer = () => ({ id: peerId, roles: ["STUDENT"] });
 
@@ -108,7 +109,9 @@ describe("SketchWorksService (integration)", () => {
   });
 
   afterAll(async () => {
-    await prisma.quiz.deleteMany({ where: { id: quizId } });
+    await prisma.quiz.deleteMany({
+      where: { id: { in: [quizId, ...(paperId ? [paperId] : [])] } },
+    });
     await prisma.sketchWork.deleteMany({ where: { userId: { in: userIds } } });
     await prisma.cmsAsset.deleteMany({ where: { uploadedById: { in: userIds } } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
@@ -122,7 +125,7 @@ describe("SketchWorksService (integration)", () => {
     expect(ws.finished).toBe(true);
     const work = ws.questions[0]!.work!;
     expect(work.versions.map((v) => [v.kind, v.label, v.canDelete])).toEqual([
-      ["TEST", "Test upload", false],
+      ["TEST", "Original", false],
     ]);
     expect(work.versions[0]!.expert).toMatchObject({ marks: null, maxMarks: 10 });
   });
@@ -149,7 +152,7 @@ describe("SketchWorksService (integration)", () => {
     const ws = await works.workspaceForTest(owner(), quizId);
     const versions = ws.questions[0]!.work!.versions;
     expect(versions.map((v) => v.label)).toEqual([
-      "Test upload",
+      "Original",
       "Revision 1",
       "Revision 2",
       "Revision 3",
@@ -162,7 +165,7 @@ describe("SketchWorksService (integration)", () => {
     expect(after.canUpload).toBe(true);
   });
 
-  it("keeps other students out until they've rated their own sketch; no self-claps or self-reports", async () => {
+  it("keeps other students out until they've uploaded their own sketch; no self-claps or self-reports", async () => {
     const workId = (await works.workspaceForTest(owner(), quizId)).questions[0]!.work!.id;
     await expect(works.getWork(peer(), workId)).rejects.toBeInstanceOf(ForbiddenException);
     await expect(works.toggleClap(owner(), workId)).rejects.toBeInstanceOf(BadRequestException);
@@ -219,11 +222,11 @@ describe("SketchWorksService (integration)", () => {
       },
     });
 
-    // Locked until the peer rates their own sketch.
+    // Unlocked as soon as the peer has uploaded their own sketch; rating it is optional.
     expect(
       (await works.community(peer(), questionId, { sort: "newest", filter: "all", page: 1 }))
         .unlocked,
-    ).toBe(false);
+    ).toBe(true);
     const peerWork = (await works.workspaceForTest(peer(), quizId)).questions[0]!.work!;
     const before = await xp.getTotal(peerId);
     const rated = await works.rateSelf(peerId, peerWork.versions[0]!.id, { Line: 4 });
@@ -240,7 +243,7 @@ describe("SketchWorksService (integration)", () => {
     });
     expect(page.unlocked).toBe(true);
     // Only the owner's scanned (clean) test upload is shown; pending revisions are hidden.
-    expect(page.items.map((c) => c.versionLabel)).toEqual(["Test upload"]);
+    expect(page.items.map((c) => c.versionLabel)).toEqual(["Original"]);
 
     const ownerWork = await works.getWork(peer(), page.items[0]!.workId);
     const fb = await works.peerFeedback(peer(), ownerWork.versions[0]!.id, {
@@ -282,5 +285,68 @@ describe("SketchWorksService (integration)", () => {
     });
     const queue = await works.revisionQueue(staff, "reviewed");
     expect(queue.some((q) => q.versionId === ownerWork.versions[1]!.id)).toBe(true);
+  });
+
+  it("Part B: in a licensed practice paper the first upload is the original, in that paper's marks", async () => {
+    const student = await prisma.user.create({
+      data: { email: `sw-partb-${suffix}@example.test`, status: "ACTIVE" },
+    });
+    userIds.push(student.id);
+    const me = { id: student.id, roles: ["STUDENT"] };
+    const { subjectId } = await prisma.quiz.findUniqueOrThrow({
+      where: { id: quizId },
+      select: { subjectId: true },
+    });
+    const category = await prisma.practiceCategory.create({
+      data: { courseId, title: "Past papers", slug: `pp-${suffix}` },
+    });
+    paperId = (
+      await prisma.quiz.create({
+        data: {
+          subjectId,
+          practiceCategoryId: category.id,
+          title: "Paper",
+          slug: `swp-${suffix}`,
+          status: "PUBLISHED",
+          quizQuestions: { create: [{ questionId, position: 0, marks: 50 }] },
+        },
+      })
+    ).id;
+    const file = (n: number) => ({
+      storageKey: `sketch-works/${student.id}/${questionId}/p${n}-${suffix}.png`,
+      fileName: `p${n}.png`,
+      mimeType: "image/png",
+      sizeBytes: 10,
+    });
+
+    // No licence for the course: no upload. With one: no test needed (Part B is untimed).
+    await expect(
+      works.confirmVersion(student.id, questionId, file(1), paperId),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await prisma.enrollment.create({ data: { userId: student.id, courseId, status: "ACTIVE" } });
+    const first = await works.confirmVersion(student.id, questionId, file(1), paperId);
+    expect(first.versions.map((v) => [v.kind, v.label, v.canDelete])).toEqual([
+      ["TEST", "Original", true],
+    ]);
+    expect(first.maxMarks).toBe(50);
+    const ws = await works.workspaceForTest(me, paperId);
+    expect(ws.finished).toBe(false);
+    expect(ws.questions[0]).toMatchObject({ marks: 50, canUpload: true });
+    expect(ws.questions[0]!.work!.maxMarks).toBe(50);
+
+    // Experts rate the original directly; once rated it can't be deleted.
+    const staff = { id: peerId, roles: ["MENTOR"] };
+    await works.expertRate(staff, first.versions[0]!.id, { scores: { Line: 4 }, comment: "Good" });
+    const rated = await works.getWork({ ...me, quizId: paperId }, first.id);
+    expect(rated.versions[0]!.ratings.expert).toMatchObject({ count: 1, total: 40 });
+    expect(rated.versions[0]!.canDelete).toBe(false);
+    await expect(works.deleteVersion(student.id, first.versions[0]!.id)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    const queue = await works.revisionQueue(staff, "reviewed");
+    expect(queue.find((q) => q.versionId === first.versions[0]!.id)?.label).toBe("Original");
+
+    const second = await works.confirmVersion(student.id, questionId, file(2), paperId);
+    expect(second.versions.map((v) => v.label)).toEqual(["Original", "Revision 1"]);
   });
 });

@@ -19,6 +19,7 @@ import { Chip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { useStudentApi } from "@/lib/student-api";
+import { CollegesDashboard } from "@/components/student/colleges-dashboard";
 
 function CollegesContent() {
   const api = useStudentApi();
@@ -49,6 +50,8 @@ function CollegesContent() {
         title="Colleges"
         subtitle="Explore colleges, shortlist the ones you like, and ask them questions."
       />
+
+      <CollegesDashboard />
 
       {webinars.data && webinars.data.length > 0 ? (
         <Card>

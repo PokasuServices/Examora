@@ -20,6 +20,8 @@ import { TestPerformanceChart } from "@/components/student/test-performance-char
 import { sectionTime, TestSections } from "@/components/student/test-sections";
 import { useLicensedCourse } from "@/components/student/use-licensed-course";
 import { useLoad } from "@/components/student/use-load";
+import { WeakTopicCards } from "@/components/student/weak-topics";
+import { PracticeDashboard } from "@/components/student/practice-dashboard";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -210,60 +212,19 @@ function WeakTopicsCard({
   topics: WeakTopicAction[];
   onStudied: (id: string) => void;
 }) {
-  const api = useStudentApi();
-  const [busy, setBusy] = React.useState<string | null>(null);
   if (topics.length === 0) return null;
   return (
-    <Card>
+    <Card id="needs-attention" className="scroll-mt-20">
       <div className="flex items-center gap-2">
         <AlertTriangle size={18} aria-hidden="true" className="text-warning-500" />
         <h2 className="text-base font-medium text-neutral-800 dark:text-white/90">
           Needs attention
         </h2>
       </div>
-      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+      <p className="mb-4 mt-1 text-sm text-neutral-500 dark:text-neutral-400">
         Topics where answers you were sure of turned out wrong. Revise them, then mark them studied.
       </p>
-      <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {topics.map((t) => (
-          <li
-            key={t.topicId}
-            className="rounded-md border border-neutral-200 p-3 dark:border-neutral-800"
-          >
-            <p className="text-sm font-medium text-neutral-800 dark:text-white/90">
-              {t.topicTitle}
-            </p>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">{t.subjectTitle}</p>
-            <p className="mt-2 text-xs text-neutral-600 dark:text-neutral-400">
-              {t.wrongFromKnowledge} of {t.answered} answered wrong despite knowing
-            </p>
-            <div className="mt-3 flex items-center gap-3 text-sm">
-              <Link
-                href={`/learn/topics/${t.topicId}`}
-                className="font-medium text-primary-600 hover:underline dark:text-primary-400"
-              >
-                Revise
-              </Link>
-              <button
-                type="button"
-                disabled={busy === t.topicId}
-                onClick={async () => {
-                  setBusy(t.topicId);
-                  try {
-                    await api.markStudied(t.topicId, true);
-                    onStudied(t.topicId);
-                  } finally {
-                    setBusy(null);
-                  }
-                }}
-                className="text-neutral-600 hover:underline disabled:opacity-50 dark:text-neutral-400"
-              >
-                Mark as studied
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <WeakTopicCards topics={topics} onStudied={onStudied} />
     </Card>
   );
 }
@@ -329,6 +290,7 @@ function PracticeContent() {
         <LoadingPanel />
       ) : (
         <>
+          <PracticeDashboard key={data.course.id} overview={data} />
           <WeakTopicsCard
             topics={data.weakTopics.filter((t) => !studied.has(t.topicId))}
             onStudied={(id) => setStudied((prev) => new Set(prev).add(id))}

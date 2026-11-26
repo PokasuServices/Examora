@@ -7,6 +7,7 @@ import type {
   AssignmentSummary,
   PaginatedData,
   PresignedUpload,
+  StudentAssignmentDashboard,
   SubmissionDetail,
   SubmissionFile,
   SubmissionHistoryItem,
@@ -17,6 +18,9 @@ export function useAssignmentApi() {
   const { request } = useAuth();
 
   return {
+    dashboard: () =>
+      request<StudentAssignmentDashboard>("/assignment-catalog/dashboard", { method: "GET" }),
+    markSeen: () => request<void>("/assignment-catalog/dashboard/seen", { method: "POST" }),
     listAssignments: () =>
       request<PaginatedData<AssignmentSummary>>("/assignment-catalog/assignments?pageSize=100", {
         method: "GET",

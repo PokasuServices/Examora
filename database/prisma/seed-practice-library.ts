@@ -12,6 +12,7 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { Prisma, PrismaClient } from "../generated/client/index.js";
 import * as D from "./seed-diagrams.js";
+import { ensureTwoSketches, splitPartB } from "./seed-part-b.js";
 import { deterministicUuid } from "./seed-id.js";
 
 const sid = (label: string) => deterministicUuid("examora-student-module-seed", label);
@@ -240,6 +241,21 @@ for (let i = 1; i <= 6; i++) {
     D.terminusSketchSvg(i, true),
     `Classmate sketch ${i}, revised`,
   ];
+}
+
+const PART_B_PEER_DRAWINGS = {
+  bottle: D.bottleSketchSvg,
+  gate: D.gateSketchSvg,
+  stall: D.stallSketchSvg,
+} as const;
+for (let i = 1; i <= 5; i++) {
+  for (const [kind, draw] of Object.entries(PART_B_PEER_DRAWINGS)) {
+    DIAGRAMS[`peer-${kind}-${i}`] = () => [draw(i), `Classmate's ${kind} sketch ${i}`];
+    DIAGRAMS[`peer-${kind}-${i}-rev`] = () => [
+      draw(i, true),
+      `Classmate's ${kind} sketch ${i}, revised`,
+    ];
+  }
 }
 
 class Media {
@@ -2328,7 +2344,7 @@ async function seedDemoWorkspace(
     select: { id: true, uploadAssetId: true, answeredAt: true },
   });
   const revisionRef = await media.ref("persp-1");
-  if (!answer || !revisionRef) return false;
+  if (!revisionRef) return false;
   const workId = sid("sketch-work:demo");
   await prisma.sketchWork.upsert({
     where: { userId_questionId: { userId: studentId, questionId } },
@@ -2339,11 +2355,12 @@ async function seedDemoWorkspace(
     where: { userId_questionId: { userId: studentId, questionId } },
     select: { id: true },
   });
-  const existingTest = await prisma.sketchVersion.findUnique({
-    where: { answerId: answer.id },
+  const existingTest = await prisma.sketchVersion.findFirst({
+    where: { workId: work.id, kind: "TEST", deletedAt: null },
     select: { id: true },
   });
   if (!existingTest) {
+    if (!answer) return false;
     await prisma.sketchVersion.create({
       data: {
         id: sid("sketch-version:demo/test"),
@@ -2351,7 +2368,7 @@ async function seedDemoWorkspace(
         kind: "TEST",
         answerId: answer.id,
         assetId: answer.uploadAssetId!,
-        description: "Drawn in the test: bus terminus from the first floor.",
+        description: "Original: bus terminus from the first floor.",
         ...(answer.answeredAt ? { createdAt: answer.answeredAt } : {}),
       },
     });
@@ -2439,20 +2456,6 @@ async function seedSketchCommunity(
     const k = i + 1;
     const testRef = await media.ref(`peer-sketch-${k}`);
     if (!testRef) return n;
-    const answer = await prisma.quizAttemptAnswer.upsert({
-      where: { attemptId_questionId: { attemptId: a.id, questionId } },
-      create: {
-        attemptId: a.id,
-        questionId,
-        selectedOptionIds: [],
-        uploadAssetId: testRef.replace("media:", ""),
-        answeredAt: a.submittedAt ?? new Date(),
-        visitedAt: a.submittedAt ?? new Date(),
-      },
-      update: {},
-      select: { id: true, uploadAssetId: true },
-    });
-    if (!answer.uploadAssetId) continue;
     const work = await prisma.sketchWork.upsert({
       where: { userId_questionId: { userId: a.userId, questionId } },
       create: { id: sid(`sketch-work:peer/${k}`), userId: a.userId, questionId },
@@ -2460,8 +2463,8 @@ async function seedSketchCommunity(
       select: { id: true },
     });
     const testVersionId = sid(`sketch-version:peer/${k}/test`);
-    const existingTest = await prisma.sketchVersion.findUnique({
-      where: { answerId: answer.id },
+    const existingTest = await prisma.sketchVersion.findFirst({
+      where: { workId: work.id, kind: "TEST", deletedAt: null },
       select: { id: true },
     });
     const testId = existingTest?.id ?? testVersionId;
@@ -2471,8 +2474,9 @@ async function seedSketchCommunity(
           id: testVersionId,
           workId: work.id,
           kind: "TEST",
-          answerId: answer.id,
-          assetId: answer.uploadAssetId,
+          assetId: testRef.replace("media:", ""),
+          description: "Part B original.",
+          createdAt: a.submittedAt ?? new Date(),
         },
       });
     }
@@ -2481,11 +2485,6 @@ async function seedSketchCommunity(
     await prisma.sketchVersionRating.upsert({
       where: { versionId_raterId: { versionId: testId, raterId: a.userId } },
       create: { versionId: testId, raterId: a.userId, kind: "SELF", scores: selfScores },
-      update: {},
-    });
-    await prisma.sketchReview.upsert({
-      where: { answerId: answer.id },
-      create: { answerId: answer.id, selfScores, selfRatedAt: new Date() },
       update: {},
     });
     // Half of them uploaded a revision; two are left waiting for reviewer feedback.
@@ -2543,6 +2542,180 @@ async function seedSketchCommunity(
   return n;
 }
 
+/** Sample notes classmates wrote with their Part B uploads. */
+const PEER_NOTES: Record<keyof typeof PART_B_PEER_DRAWINGS, string[]> = {
+  bottle: [
+    "Kept the cap lever big enough to flip with mittens on.",
+    "Tried a loop on the side so it clips to a backpack strap.",
+    "Front and side first, then the top view to check the cap.",
+    "The grip bands are rubber so it doesn't slip in the cold.",
+    "Close-up shows the lever with a gloved thumb for scale.",
+  ],
+  gate: [
+    "Drew it from memory: the arch, the name board and the grille.",
+    "Pillars are brick; I added the small side gate for students.",
+    "Not sure about the proportions of the board, feedback welcome.",
+    "Trees on both sides as I remember them from the morning bus.",
+    "Tried to show the gate half open.",
+  ],
+  stall: [
+    "Low eye level: the counter is taller than the child.",
+    "The lamp is the main light, everything else is in shadow.",
+    "Steam from the pot to show it's hot food.",
+    "Only the grown-ups' legs are visible from down here.",
+    "Kept the awning stripes to lead the eye to the lamp.",
+  ],
+};
+
+/**
+ * Sample classmates' work for the Part B questions that had none (water
+ * bottle, school gate, street-food stall), so the "Classmates' sketches"
+ * grid isn't empty: five classmates each, originals (and some revisions)
+ * with their self-ratings, plus likes, comments, claps and views between them.
+ */
+async function seedPartBPeers(
+  prisma: PrismaClient,
+  media: Media,
+  studentId: string,
+): Promise<number> {
+  const questions = [
+    ["sketch-bottle", "bottle"],
+    ["sketch-gate", "gate"],
+    ["sketch-stall", "stall"],
+  ] as const;
+  let n = 0;
+  for (const [qi, [key, kind]] of questions.entries()) {
+    const question = await prisma.question.findUnique({
+      where: { id: bankQ(key) },
+      select: { id: true, criteria: true, rubric: { select: { factors: true } } },
+    });
+    if (!question) continue;
+    const factorJson = question.rubric?.factors;
+    const factors = Array.isArray(factorJson)
+      ? factorJson.flatMap((f) =>
+          f && typeof f === "object" && !Array.isArray(f) && typeof f.title === "string"
+            ? [f.title.trim()]
+            : [],
+        )
+      : Array.isArray(question.criteria)
+        ? question.criteria.filter((c): c is string => typeof c === "string")
+        : [];
+    const peers = await prisma.user.findMany({
+      where: { email: { endsWith: "@bulk.examora.test" }, id: { not: studentId } },
+      orderBy: { email: "asc" },
+      skip: 10 + qi * 5,
+      take: 5,
+      select: { id: true },
+    });
+    const owners = peers.map((p) => p.id);
+    for (const [i, owner] of owners.entries()) {
+      const k = i + 1;
+      const testRef = await media.ref(`peer-${kind}-${k}`);
+      if (!testRef) return n;
+      const work = await prisma.sketchWork.upsert({
+        where: { userId_questionId: { userId: owner, questionId: question.id } },
+        create: {
+          id: sid(`sketch-work:peer-${kind}/${k}`),
+          userId: owner,
+          questionId: question.id,
+        },
+        update: {},
+        select: { id: true },
+      });
+      const existing = await prisma.sketchVersion.findFirst({
+        where: { workId: work.id, kind: "TEST", deletedAt: null },
+        select: { id: true },
+      });
+      const daysAgo = 2 + ((k * 3 + qi) % 9);
+      const testId = existing?.id ?? sid(`sketch-version:peer-${kind}/${k}/test`);
+      if (!existing) {
+        await prisma.sketchVersion.create({
+          data: {
+            id: testId,
+            workId: work.id,
+            kind: "TEST",
+            assetId: testRef.replace("media:", ""),
+            description: PEER_NOTES[kind][i] ?? null,
+            createdAt: new Date(Date.now() - daysAgo * 86_400_000),
+          },
+        });
+      }
+      if (factors.length > 0) {
+        const selfScores = Object.fromEntries(factors.map((f, j) => [f, 2 + ((k + j) % 4)]));
+        await prisma.sketchVersionRating.upsert({
+          where: { versionId_raterId: { versionId: testId, raterId: owner } },
+          create: { versionId: testId, raterId: owner, kind: "SELF", scores: selfScores },
+          update: {},
+        });
+      }
+      let latestId = testId;
+      if (k % 2 === 0) {
+        const revRef = await media.ref(`peer-${kind}-${k}-rev`);
+        if (revRef) {
+          const revId = sid(`sketch-version:peer-${kind}/${k}/rev1`);
+          await prisma.sketchVersion.upsert({
+            where: { id: revId },
+            create: {
+              id: revId,
+              workId: work.id,
+              kind: "REVISION",
+              assetId: revRef.replace("media:", ""),
+              description: "Revision 1: firmer lines, shading and clearer labels.",
+              createdAt: new Date(Date.now() - (daysAgo - 1) * 86_400_000),
+            },
+            update: {},
+          });
+          latestId = revId;
+        }
+      }
+      for (const [j, rater] of owners.entries()) {
+        if (rater === owner) continue;
+        if ((j + k) % 2 === 0 && factors.length > 0) {
+          await prisma.sketchPeerFeedback.upsert({
+            where: { versionId_raterId: { versionId: latestId, raterId: rater } },
+            create: {
+              versionId: latestId,
+              raterId: rater,
+              likedFactors: factors.filter((_, x) => (x + j + k) % 3 !== 0),
+              comment:
+                j % 3 === 0
+                  ? "Clear views. Try a darker line for the main outline."
+                  : j % 3 === 1
+                    ? "Nice idea! Labels could be a bit bigger."
+                    : null,
+              xpAwarded: false,
+            },
+            update: {},
+          });
+        }
+        await prisma.sketchWorkView.upsert({
+          where: { workId_viewerId: { workId: work.id, viewerId: rater } },
+          create: { workId: work.id, viewerId: rater },
+          update: {},
+        });
+        if ((j * k) % 3 === 0) {
+          await prisma.sketchClap.upsert({
+            where: { workId_userId: { workId: work.id, userId: rater } },
+            create: { workId: work.id, userId: rater },
+            update: {},
+          });
+        }
+      }
+      n++;
+    }
+  }
+  return n;
+}
+
+/** Runs only the sample-classmates step (scripts/seed-part-b-peers). */
+export async function seedPartBPeersOnly(
+  prisma: PrismaClient,
+  adminId: string,
+  studentId: string,
+): Promise<number> {
+  return seedPartBPeers(prisma, new Media(prisma, adminId), studentId);
+}
+
 export async function seedPracticeLibrary(
   prisma: PrismaClient,
   ids: { adminId: string; studentId: string; mentorId: string },
@@ -2553,7 +2726,9 @@ export async function seedPracticeLibrary(
   const backfilled = await backfillExplanations(prisma, media);
   const rubrics = await seedRubrics(prisma);
   const workspace = await seedDemoWorkspace(prisma, media, ids.studentId, ids.mentorId);
-  const peers = await seedSketchCommunity(prisma, media, ids.studentId);
+  const peers =
+    (await seedSketchCommunity(prisma, media, ids.studentId)) +
+    (await seedPartBPeers(prisma, media, ids.studentId));
 
   let tests = 0;
   const nid = await prisma.course.findUnique({ where: { id: NID_COURSE }, select: { id: true } });
@@ -2590,5 +2765,12 @@ export async function seedPracticeLibrary(
       c.tests,
     );
   }
-  return `${bank} new library questions, ${backfilled} explanations added, ${tests} new practice tests, ${rubrics} rating sets${workspace ? ", demo sketch workspace" : ""}, ${peers} classmate sketches`;
+  const secondSketches = await ensureTwoSketches(prisma, [
+    sid("question:sketch-platform"),
+    bankQ("sketch-stall"),
+    bankQ("sketch-bottle"),
+    bankQ("sketch-gate"),
+  ]);
+  const split = await splitPartB(prisma);
+  return `Part B: ${secondSketches} papers got a second sketch, ${split} attempts split; ${bank} new library questions, ${backfilled} explanations added, ${tests} new practice tests, ${rubrics} rating sets${workspace ? ", demo sketch workspace" : ""}, ${peers} classmate sketches`;
 }

@@ -28,6 +28,7 @@ export class TopicsService {
         slug,
         description: dto.description,
         position,
+        examTags: dto.examTags ?? [],
         createdById: actorId,
       },
     });
@@ -79,7 +80,13 @@ export class TopicsService {
 
     return this.prisma.topic.update({
       where: { id },
-      data: { title: dto.title, slug, description: dto.description, position: dto.position },
+      data: {
+        title: dto.title,
+        slug,
+        description: dto.description,
+        position: dto.position,
+        examTags: dto.examTags,
+      },
     });
   }
 

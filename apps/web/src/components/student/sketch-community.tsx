@@ -8,6 +8,7 @@ import { Button } from "@examora/ui";
 import { StudyImage } from "@/components/student/study-image";
 import { Chip } from "@/components/ui/chip";
 import { SelectField } from "@/components/ui/select-field";
+import { useSketchPaper } from "@/components/student/sketch-paper";
 import { useStudentApi } from "@/lib/student-api";
 
 const SORTS = [
@@ -30,6 +31,7 @@ export function SketchCommunity({
   refreshKey?: number;
 }) {
   const api = useStudentApi();
+  const quizId = useSketchPaper();
   const apiRef = React.useRef(api);
   apiRef.current = api;
   const [sort, setSort] = React.useState("newest");
@@ -46,7 +48,7 @@ export function SketchCommunity({
     setItems(null);
     setFailed(false);
     apiRef.current
-      .sketchCommunity(questionId, { sort, filter, page: 1 })
+      .sketchCommunity(questionId, { sort, filter, page: 1, quizId })
       .then((page) => {
         setUnlocked(page.unlocked);
         setMaxMarks(page.maxMarks);
@@ -54,13 +56,13 @@ export function SketchCommunity({
         setNextPage(page.nextPage);
       })
       .catch(() => setFailed(true));
-  }, [questionId, sort, filter, refreshKey]);
+  }, [questionId, sort, filter, refreshKey, quizId]);
 
   async function more() {
     if (!nextPage) return;
     setLoadingMore(true);
     try {
-      const page = await api.sketchCommunity(questionId, { sort, filter, page: nextPage });
+      const page = await api.sketchCommunity(questionId, { sort, filter, page: nextPage, quizId });
       setItems((p) => [...(p ?? []), ...page.items]);
       setNextPage(page.nextPage);
     } finally {
@@ -106,8 +108,7 @@ export function SketchCommunity({
       ) : !unlocked ? (
         <p className="flex items-center gap-2 rounded-md bg-success-50 px-3 py-3 text-sm text-success-800 dark:bg-success-500/10 dark:text-success-200">
           <Lock size={16} aria-hidden="true" />
-          Upload your sketch and rate it yourself first to see classmates&rsquo; work and learn from
-          it.
+          Upload your sketch for this question to see classmates&rsquo; work and learn from it.
         </p>
       ) : items === null ? (
         <p className="text-sm text-neutral-500">Loading…</p>
@@ -123,7 +124,7 @@ export function SketchCommunity({
             {items.map((c) => (
               <li key={c.workId}>
                 <Link
-                  href={`/practice/sketches/work/${c.workId}`}
+                  href={`/practice/sketches/work/${c.workId}${quizId ? `?paper=${quizId}` : ""}`}
                   className="flex h-full flex-col overflow-hidden rounded-md border border-neutral-200 bg-white hover:border-primary-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:border-neutral-800 dark:bg-neutral-900"
                 >
                   <StudyImage

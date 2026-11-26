@@ -29,6 +29,7 @@ import {
   MinLength,
   ValidateIf,
   ValidateNested,
+  IsUUID,
 } from "class-validator";
 import type {
   SketchChallenge,
@@ -176,6 +177,19 @@ export class CommunityQueryDto {
   @Min(1)
   @Max(100)
   page?: number;
+
+  @ApiPropertyOptional({ description: "The paper being viewed (its marks are used)" })
+  @IsOptional()
+  @IsUUID()
+  quizId?: string;
+}
+
+/** Optional ?quizId= on routes that return a work: totals use that paper's marks. */
+export class PaperQueryDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  quizId?: string;
 }
 
 export class ReportStatusDto {
@@ -216,6 +230,7 @@ export class SketchWorksController {
       sort: query.sort ?? "newest",
       filter: query.filter ?? "all",
       page: query.page ?? 1,
+      quizId: query.quizId,
     });
   }
 
@@ -225,8 +240,9 @@ export class SketchWorksController {
     @CurrentUser() user: RequestUser,
     @Param("versionId", ParseUUIDPipe) versionId: string,
     @Body() dto: ScoresDto,
+    @Query() paper: PaperQueryDto,
   ): Promise<SketchRatingResult> {
-    return this.works.rateSelf(user.id, versionId, dto.scores);
+    return this.works.rateSelf(user.id, versionId, dto.scores, paper.quizId);
   }
 
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
@@ -236,8 +252,9 @@ export class SketchWorksController {
     @CurrentUser() user: RequestUser,
     @Param("versionId", ParseUUIDPipe) versionId: string,
     @Body() dto: PeerFeedbackDto,
+    @Query() paper: PaperQueryDto,
   ): Promise<SketchRatingResult> {
-    return this.works.peerFeedback(user, versionId, dto);
+    return this.works.peerFeedback({ ...user, quizId: paper.quizId }, versionId, dto);
   }
 
   @Get(":workId")
@@ -245,14 +262,15 @@ export class SketchWorksController {
   work(
     @CurrentUser() user: RequestUser,
     @Param("workId", ParseUUIDPipe) workId: string,
+    @Query() paper: PaperQueryDto,
   ): Promise<SketchWorkView> {
-    return this.works.getWork(user, workId);
+    return this.works.getWork({ ...user, quizId: paper.quizId }, workId);
   }
 
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post("questions/:questionId/versions/presign")
   @ApiOperation({
-    summary: "Upload URL for a revised sketch (max 4 uploads incl. the test upload)",
+    summary: "Upload URL for a Part B sketch (max 4 uploads: the original plus revisions)",
   })
   presign(
     @CurrentUser() user: RequestUser,
@@ -264,13 +282,14 @@ export class SketchWorksController {
 
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post("questions/:questionId/versions")
-  @ApiOperation({ summary: "Save an uploaded revision" })
+  @ApiOperation({ summary: "Save an uploaded sketch (the first is the original)" })
   confirm(
     @CurrentUser() user: RequestUser,
     @Param("questionId", ParseUUIDPipe) questionId: string,
     @Body() dto: ConfirmVersionDto,
+    @Query() paper: PaperQueryDto,
   ): Promise<SketchWorkView> {
-    return this.works.confirmVersion(user.id, questionId, dto);
+    return this.works.confirmVersion(user.id, questionId, dto, paper.quizId);
   }
 
   @Patch("versions/:versionId")
@@ -279,17 +298,19 @@ export class SketchWorksController {
     @CurrentUser() user: RequestUser,
     @Param("versionId", ParseUUIDPipe) versionId: string,
     @Body() dto: DescriptionDto,
+    @Query() paper: PaperQueryDto,
   ): Promise<SketchWorkView> {
-    return this.works.updateDescription(user.id, versionId, dto.description);
+    return this.works.updateDescription(user.id, versionId, dto.description, paper.quizId);
   }
 
   @Delete("versions/:versionId")
-  @ApiOperation({ summary: "Delete one of my revisions (the test upload stays)" })
+  @ApiOperation({ summary: "Delete one of my uploads (the original only while alone and unrated)" })
   deleteVersion(
     @CurrentUser() user: RequestUser,
     @Param("versionId", ParseUUIDPipe) versionId: string,
+    @Query() paper: PaperQueryDto,
   ): Promise<SketchWorkView> {
-    return this.works.deleteVersion(user.id, versionId);
+    return this.works.deleteVersion(user.id, versionId, paper.quizId);
   }
 
   @Get("versions/:versionId/pins")
@@ -328,8 +349,9 @@ export class SketchWorksController {
     @CurrentUser() user: RequestUser,
     @Param("workId", ParseUUIDPipe) workId: string,
     @Body() dto: WorkCommentDto,
+    @Query() paper: PaperQueryDto,
   ): Promise<SketchWorkView> {
-    return this.works.addComment(user, workId, dto.body);
+    return this.works.addComment({ ...user, quizId: paper.quizId }, workId, dto.body);
   }
 
   @Delete("comments/:commentId")

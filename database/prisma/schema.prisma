@@ -527,6 +527,8 @@ model User {
   sketchPeerFeedback        SketchPeerFeedback[]
   testShares                TestShare[]
   testShareVisits           TestShareVisit[]
+  seenMarks                 UserSeen[]
+  topicMarks                TopicMark[]
 
   @@index([status])
   @@map("users")
@@ -782,6 +784,8 @@ model Topic {
   description String?
   status      ContentStatus @default(DRAFT)
   position    Int           @default(0)
+  /// Exams this topic is part of (e.g. ["NID", "UCEED", "NATA"]). Two or more = a shared topic.
+  examTags    String[]      @default([]) @map("exam_tags")
   createdById String?       @map("created_by_id") @db.Uuid
   version     Int           @default(1)
   createdAt   DateTime      @default(now()) @map("created_at")
@@ -794,6 +798,7 @@ model Topic {
   ratings    TopicRating[]
   questions  Question[]
   studyMarks TopicStudyMark[]
+  marks      TopicMark[]
 
   @@unique([subjectId, slug])
   @@index([subjectId])
@@ -2258,11 +2263,22 @@ model QuestionReport {
 }
 
 /// A doubt or explanation posted on a question after an attempt; replies use parentId.
+/// What a top-level discussion post is: a question for others, or the author's own worked answer.
+enum DoubtKind {
+  DOUBT
+  EXPLANATION
+
+  @@map("doubt_kind")
+}
+
 model QuestionDoubt {
   id         String    @id @default(uuid()) @db.Uuid
   questionId String    @map("question_id") @db.Uuid
   userId     String    @map("user_id") @db.Uuid
   parentId   String?   @map("parent_id") @db.Uuid
+  /// Replies are always DOUBT (the kind only matters for top-level posts).
+  kind       DoubtKind @default(DOUBT)
+  /// Markdown (no raw HTML); images are "media:<id>" refs uploaded by the author.
   body       String
   createdAt  DateTime  @default(now()) @map("created_at")
   deletedAt  DateTime? @map("deleted_at")
@@ -2344,6 +2360,8 @@ model DailyQuizAttempt {
   answers      Json?
   correctCount Int?      @map("correct_count")
   totalMs      Int?      @map("total_ms")
+  /// Taken after its day (within the catch-up window): half XP, kept off leaderboards and streaks.
+  catchUp      Boolean   @default(false) @map("catch_up")
 
   dailyQuiz DailyQuiz @relation(fields: [dailyQuizId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -2776,4 +2794,33 @@ model SketchPeerFeedback {
   @@unique([versionId, raterId])
   @@index([raterId, createdAt])
   @@map("sketch_peer_feedback")
+}
+
+/// When a student last looked at a tab ("assignments", …), so dashboards can
+/// flag what is new since then.
+model UserSeen {
+  userId String   @map("user_id") @db.Uuid
+  key    String
+  seenAt DateTime @map("seen_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, key])
+  @@map("user_seen")
+}
+
+/// A student's own labels on a topic on the Learn page: favourite (important) and on hold.
+model TopicMark {
+  userId    String   @map("user_id") @db.Uuid
+  topicId   String   @map("topic_id") @db.Uuid
+  favourite Boolean  @default(false)
+  onHold    Boolean  @default(false) @map("on_hold")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([userId, topicId])
+  @@index([topicId])
+  @@map("topic_marks")
 }

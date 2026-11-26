@@ -9,6 +9,7 @@ import { ProgressBar } from "@/components/progress-bar";
 import { RequireAuth } from "@/components/require-auth";
 import { CoverageChart } from "@/components/student/coverage-chart";
 import { ErrorPanel, LoadingPanel } from "@/components/student/load-panels";
+import { LearnDashboardPanel } from "@/components/student/learn-dashboard";
 import { KindChip, SubjectIcon } from "@/components/student/subject-visual";
 import { SyllabusHeatmap } from "@/components/student/syllabus-heatmap";
 import { useLoad } from "@/components/student/use-load";
@@ -180,6 +181,16 @@ function LearnContent() {
         <LoadingPanel />
       ) : (
         <>
+          {!q ? (
+            <LearnDashboardPanel
+              key={overview.data.course.id}
+              dashboard={overview.data.dashboard}
+              courseTitle={overview.data.course.title}
+            />
+          ) : null}
+          <h2 className="-mb-2 text-base font-semibold text-neutral-800 dark:text-white/90">
+            {q ? "Search results" : "Subjects"}
+          </h2>
           {visible.length === 0 ? (
             <Card>
               <p className="text-center text-sm text-neutral-500 dark:text-neutral-400">

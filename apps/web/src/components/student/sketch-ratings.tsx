@@ -6,6 +6,7 @@ import type { RubricFactor, SketchVersionView, SketchWorkView } from "@examora/t
 import { Button, FieldError, cn } from "@examora/ui";
 import { Check } from "lucide-react";
 import { useXp } from "@/context/XpContext";
+import { useSketchPaper } from "@/components/student/sketch-paper";
 import { useStudentApi } from "@/lib/student-api";
 
 type Tab = "mine" | "expert" | "community";
@@ -56,6 +57,9 @@ function SelfRatingForm({
   const complete = factors.every((f) => scores[f.title] !== undefined);
   return (
     <div className="flex flex-col gap-3">
+      <h4 className="text-sm font-medium text-neutral-800 dark:text-white/90">
+        Evaluate yourself <span className="font-normal text-primary-600">+10 XP</span>
+      </h4>
       <p className="text-xs text-neutral-500 dark:text-neutral-400">
         Rate this version 1 (weak) to 5 (excellent) on each factor. You can rate each version once;
         it can&rsquo;t be changed after saving.
@@ -205,6 +209,7 @@ export function SketchRatingsPanel({
   onSelfRated?: (xp: number) => void;
 }) {
   const api = useStudentApi();
+  const quizId = useSketchPaper();
   const { refresh: refreshXp } = useXp();
   const [tab, setTab] = React.useState<Tab>("mine");
   const [notice, setNotice] = React.useState<string | null>(null);
@@ -212,7 +217,10 @@ export function SketchRatingsPanel({
   const max = work.maxMarks;
   const tabsId = React.useId();
   const tabs: { key: Tab; label: string }[] = [
-    { key: "mine", label: work.isMine ? "My rating" : "Your feedback" },
+    {
+      key: "mine",
+      label: work.isMine ? (r.self ? "Self-evaluation" : "Evaluate yourself") : "Your feedback",
+    },
     { key: "expert", label: `Expert${r.expert ? ` (${r.expert.count})` : ""}` },
     { key: "community", label: `Community (${r.community.count})` },
   ];
@@ -239,7 +247,7 @@ export function SketchRatingsPanel({
       <div
         role="tablist"
         aria-label="Rating views"
-        className="flex gap-1 border-b border-neutral-200 px-2 pt-2 dark:border-neutral-800"
+        className="flex flex-wrap gap-1 border-b border-neutral-200 px-2 pt-2 dark:border-neutral-800"
       >
         {tabs.map((t) => (
           <button
@@ -282,7 +290,7 @@ export function SketchRatingsPanel({
               <SelfRatingForm
                 factors={work.factors}
                 onSave={async (scores) => {
-                  const res = await api.rateVersionSelf(version.id, scores);
+                  const res = await api.rateVersionSelf(version.id, scores, quizId);
                   onWork(res.work);
                   if (res.xpAwarded > 0) void refreshXp();
                   onSelfRated?.(res.xpAwarded);
@@ -313,7 +321,7 @@ export function SketchRatingsPanel({
             <PeerFeedbackForm
               factors={work.factors}
               onSend={async (liked, comment) => {
-                const res = await api.giveVersionFeedback(version.id, liked, comment);
+                const res = await api.giveVersionFeedback(version.id, liked, comment, quizId);
                 onWork(res.work);
                 if (res.xpAwarded > 0) void refreshXp();
                 setNotice(

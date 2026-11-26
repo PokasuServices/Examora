@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import {
@@ -11,7 +11,12 @@ import {
   Min,
   ValidateNested,
 } from "class-validator";
-import type { DailyQuizQuestion, DailyQuizResult, DailyQuizStatus } from "@examora/types";
+import type {
+  DailyQuizDashboard,
+  DailyQuizQuestion,
+  DailyQuizResult,
+  DailyQuizStatus,
+} from "@examora/types";
 import type { RequestUser } from "../auth/types/request-user";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { RequirePermissions } from "../common/decorators/require-permissions.decorator";
@@ -71,6 +76,41 @@ export class DailyQuizController {
         optionId: a.optionId ?? null,
         ms: a.ms,
       })),
+    );
+  }
+
+  @Get("me")
+  @ApiOperation({
+    summary: "My daily quiz dashboard: streaks, calendar, standings (today/week/month), awards",
+  })
+  dashboard(@CurrentUser() user: RequestUser): Promise<DailyQuizDashboard> {
+    return this.daily.dashboard(user.id);
+  }
+
+  @Post("days/:date/start")
+  @ApiOperation({ summary: "Catch up: start a missed quiz from the last 7 days (YYYY-MM-DD)" })
+  startDay(
+    @CurrentUser() user: RequestUser,
+    @Param("date") date: string,
+  ): Promise<DailyQuizQuestion[]> {
+    return this.daily.start(user.id, date);
+  }
+
+  @Post("days/:date/finish")
+  @ApiOperation({ summary: "Catch up: submit a missed quiz (half XP, not on leaderboards)" })
+  finishDay(
+    @CurrentUser() user: RequestUser,
+    @Param("date") date: string,
+    @Body() dto: FinishDailyDto,
+  ): Promise<DailyQuizResult> {
+    return this.daily.finish(
+      user.id,
+      dto.answers.map((a) => ({
+        questionId: a.questionId,
+        optionId: a.optionId ?? null,
+        ms: a.ms,
+      })),
+      date,
     );
   }
 

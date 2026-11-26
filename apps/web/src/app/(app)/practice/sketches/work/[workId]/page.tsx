@@ -7,6 +7,7 @@ import { Lock } from "lucide-react";
 import type { SketchWorkView } from "@examora/types";
 import { RequireAuth } from "@/components/require-auth";
 import { ErrorPanel, LoadingPanel } from "@/components/student/load-panels";
+import { SketchPaperProvider } from "@/components/student/sketch-paper";
 import { SketchWorkPanel } from "@/components/student/sketch-work";
 import { useLoad } from "@/components/student/use-load";
 import { Card } from "@/components/ui/card";
@@ -18,7 +19,16 @@ import { useStudentApi } from "@/lib/student-api";
 function WorkContent() {
   const { workId } = useParams<{ workId: string }>();
   const api = useStudentApi();
-  const { data, errorStatus, loading, reload } = useLoad(() => api.sketchWork(workId), workId);
+  // ?paper=<quizId>: opened from a paper's Part B, so marks match that paper.
+  const [paper] = React.useState(() =>
+    typeof window === "undefined"
+      ? undefined
+      : (new URLSearchParams(window.location.search).get("paper") ?? undefined),
+  );
+  const { data, errorStatus, loading, reload } = useLoad(
+    () => api.sketchWork(workId, paper),
+    `${workId}-${paper ?? ""}`,
+  );
   const [work, setWork] = React.useState<SketchWorkView | null>(null);
   React.useEffect(() => setWork(data), [data]);
 
@@ -27,8 +37,8 @@ function WorkContent() {
       <Card>
         <EmptyState
           icon={Lock}
-          heading="Rate your own sketch first"
-          body="Upload your sketch for this question and rate it yourself to see classmates' work."
+          heading="Upload your own sketch first"
+          body="Upload your sketch for this question to see classmates' work."
           actionLabel="Community challenges"
           actionHref="/practice/sketches"
         />
@@ -44,7 +54,9 @@ function WorkContent() {
         title={work.isMine ? "Your sketch" : `${work.ownerName}'s sketch`}
         trail={[
           { label: "Practice", href: "/practice" },
-          { label: "Community challenges", href: "/practice/sketches" },
+          paper
+            ? { label: "Part B: Sketching", href: `/practice/tests/${paper}?part=b` }
+            : { label: "Community challenges", href: "/practice/sketches" },
         ]}
       />
       <Card>
@@ -57,11 +69,16 @@ function WorkContent() {
         </p>
       </Card>
       <Card>
-        <SketchWorkPanel work={work} questionId={work.questionId} onChange={setWork} />
+        <SketchPaperProvider value={paper}>
+          <SketchWorkPanel work={work} questionId={work.questionId} onChange={setWork} />
+        </SketchPaperProvider>
       </Card>
       <p className="text-sm">
-        <Link href="/practice/sketches" className="font-medium text-primary-600 hover:underline">
-          ← Back to Community challenges
+        <Link
+          href={paper ? `/practice/tests/${paper}?part=b` : "/practice/sketches"}
+          className="font-medium text-primary-600 hover:underline"
+        >
+          ← Back to {paper ? "Part B" : "Community challenges"}
         </Link>
       </p>
     </main>

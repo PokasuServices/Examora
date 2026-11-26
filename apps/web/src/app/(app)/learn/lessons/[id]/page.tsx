@@ -18,6 +18,7 @@ import { Chip } from "@/components/ui/chip";
 import { PageHeader } from "@/components/ui/page-header";
 import { useXp } from "@/context/XpContext";
 import { useLearnApi } from "@/lib/learn-api";
+import { rehypePlugins, remarkPlugins } from "@/lib/markdown-plugins";
 import { mediaUrl, studyUrlTransform } from "@/lib/media";
 
 const NAV_LINK =
@@ -84,7 +85,12 @@ function LessonContent() {
           ) : null}
           {lesson.body ? (
             <div className="text-base leading-relaxed text-neutral-700 dark:text-neutral-300">
-              <Markdown components={markdownComponents} urlTransform={studyUrlTransform}>
+              <Markdown
+                components={markdownComponents}
+                urlTransform={studyUrlTransform}
+                remarkPlugins={remarkPlugins}
+                rehypePlugins={rehypePlugins}
+              >
                 {lesson.body}
               </Markdown>
             </div>

@@ -89,6 +89,8 @@ export interface PastPaperStatRow {
 
 export interface Topic extends DescribedContentNode {
   subjectId: string;
+  /** Exams this topic is part of, e.g. ["NID", "UCEED", "NATA"]. */
+  examTags: string[];
 }
 
 export interface Module extends DescribedContentNode {

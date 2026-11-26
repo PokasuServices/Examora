@@ -141,8 +141,9 @@ export class PracticeService {
       this.prisma.quiz.findMany({
         where: { id: { in: quizIds } },
         include: {
-          quizQuestions: { select: { marks: true } },
-          _count: { select: { sections: true } },
+          quizQuestions: {
+            select: { marks: true, sectionId: true, question: { select: { type: true } } },
+          },
           unlockAfter: { select: { id: true, title: true } },
         },
       }),
@@ -164,6 +165,10 @@ export class PracticeService {
     );
     for (const q of quizzes) {
       const mine = attempts.filter((a) => a.quizId === q.id);
+      // Part B sketch questions are untimed and kept out of the Part A test.
+      const partA = q.quizQuestions.filter((qq) => qq.question.type !== "UPLOAD");
+      const partB = q.quizQuestions.filter((qq) => qq.question.type === "UPLOAD");
+      const marksOf = (list: typeof partA) => list.reduce((sum, qq) => sum + Number(qq.marks), 0);
       const lastFinished = mine.find((a) => a.status !== "IN_PROGRESS");
       items.set(q.id, {
         id: q.id,
@@ -173,13 +178,15 @@ export class PracticeService {
         paperYear: q.paperYear,
         note: q.note,
         perfectBonusXp: q.perfectBonusXp,
-        questionCount: q.quizQuestions.length,
-        totalMarks: q.quizQuestions.reduce((sum, qq) => sum + Number(qq.marks), 0),
+        questionCount: partA.length,
+        totalMarks: marksOf(partA),
+        sketchCount: partB.length,
+        sketchMarks: marksOf(partB),
         timeLimitMinutes: q.timeLimitMinutes,
         xpReward: q.xpReward,
         maxAttempts: q.maxAttempts,
         attemptsUsed: mine.length,
-        sectionCount: q._count.sections,
+        sectionCount: new Set(partA.map((qq) => qq.sectionId ?? "")).size,
         lastScore: lastFinished
           ? {
               obtained: Number(lastFinished.obtainedMarks ?? 0),
@@ -328,19 +335,21 @@ export class PracticeService {
       crumbs: { course, category: quiz.practiceCategory },
       sections: buildSections(
         quiz.sections,
-        quiz.quizQuestions.map((qq) => ({
-          sectionId: qq.sectionId,
-          type: qq.question.type as QuestionType,
-          partialMarking: qq.question.partialMarking,
-          marks: Number(qq.marks),
-          negative:
-            qq.negativeMarks !== null
-              ? Number(qq.negativeMarks)
-              : quiz.negativeMarkingEnabled
-                ? Number(qq.marks) * Number(quiz.negativeMarksPerWrong)
-                : 0,
-        })),
-      ),
+        quiz.quizQuestions
+          .filter((qq) => qq.question.type !== "UPLOAD")
+          .map((qq) => ({
+            sectionId: qq.sectionId,
+            type: qq.question.type as QuestionType,
+            partialMarking: qq.question.partialMarking,
+            marks: Number(qq.marks),
+            negative:
+              qq.negativeMarks !== null
+                ? Number(qq.negativeMarks)
+                : quiz.negativeMarkingEnabled
+                  ? Number(qq.marks) * Number(quiz.negativeMarksPerWrong)
+                  : 0,
+          })),
+      ).filter((sec) => sec.questionCount > 0),
       negativeMarking: quiz.negativeMarkingEnabled,
       requireAllVisited: quiz.requireAllVisited,
     };

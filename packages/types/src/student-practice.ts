@@ -21,8 +21,12 @@ export interface PracticeTestItem {
   id: string;
   title: string;
   description: string | null;
+  /** Part A (the timed test): question count and marks, sketch questions excluded. */
   questionCount: number;
   totalMarks: number;
+  /** Part B (sketching): untimed, done in the paper's Part B tab. */
+  sketchCount: number;
+  sketchMarks: number;
   timeLimitMinutes: number | null;
   xpReward: number;
   maxAttempts: number | null;
@@ -121,6 +125,10 @@ export interface TopicInsight {
   /** Marks still available to gain in this topic. */
   gain: number;
   reason: string;
+  /** Answered and correct questions in this topic, by how the student got the answer. */
+  byMethod: Record<AnswerMethod, { answered: number; correct: number }>;
+  /** 1-based question numbers in the attempt (as shown on My Answers). */
+  questionNumbers: number[];
 }
 
 /** Score in one section of a sectioned test. */
@@ -139,7 +147,20 @@ export interface SectionScore {
 
 export interface AttemptAnalysis {
   attemptId: string;
+  quizId: string;
   quizTitle: string;
+  /** Learn topic quizzes: the topic (for the breadcrumb). */
+  topic: { id: string; title: string; courseTitle: string | null } | null;
+  /** True for a Practice-tab test. */
+  isPractice: boolean;
+  /** 1 = the student's first attempt at this quiz. */
+  attemptNumber: number;
+  status: "SUBMITTED" | "AUTO_SUBMITTED";
+  submittedAt: string | null;
+  /** XP from this quiz awarded during this attempt (first finish, perfect-score bonus). */
+  xpEarned: number;
+  /** Practice papers: sketch questions in Part B (reported in the paper's Part B tab). */
+  partBCount: number;
   obtainedMarks: number;
   totalMarks: number;
   /** obtainedMarks minus marks earned by answers the student said they guessed. */
@@ -202,8 +223,19 @@ export interface AttemptReviewMeta {
 // Doubts & reports (phase 5)
 // ---------------------------------------------------------------------------
 
+export type DoubtKind = "DOUBT" | "EXPLANATION";
+
+/** Discussion image uploads: 1 MB, PNG/JPEG/WebP/GIF. */
+export const DOUBT_IMAGE_MAX_BYTES = 1024 * 1024;
+export const DOUBT_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const;
+/** Longest discussion post (Markdown). */
+export const DOUBT_BODY_MAX = 5000;
+
 export interface QuestionDoubtView {
   id: string;
+  /** Top-level posts: a doubt or an explanation. Replies are always "DOUBT". */
+  kind: DoubtKind;
+  /** Markdown; images are "media:<id>" refs. */
   body: string;
   authorName: string;
   isMine: boolean;
@@ -211,7 +243,7 @@ export interface QuestionDoubtView {
   claps: number;
   clappedByMe: boolean;
   popular: boolean;
-  replies: Omit<QuestionDoubtView, "replies" | "popular">[];
+  replies: Omit<QuestionDoubtView, "replies" | "popular" | "kind">[];
 }
 
 export interface QuestionReportView {
@@ -294,10 +326,15 @@ export interface DailyQuizQuestion {
 }
 
 export interface DailyQuizResult {
+  /** The quiz's day (YYYY-MM-DD). */
+  date: string;
+  /** True for a missed day's quiz taken later (half XP, not on leaderboards). */
+  catchUp: boolean;
   correctCount: number;
   total: number;
   totalMs: number;
   xpAwarded: number;
+  /** On time: rank that day. Catch-up: where this score would have placed. */
   rank: number;
   candidates: number;
   answers: {
@@ -321,6 +358,77 @@ export interface DailyQuizResult {
     totalMs: number;
     isMe: boolean;
   }[];
+}
+
+/** Days back a missed daily quiz can still be taken (catch-up). */
+export const DAILY_CATCH_UP_DAYS = 7;
+
+export type DailyDayStatus = "done" | "catch-up" | "missed" | "today" | "no-quiz";
+
+export interface DailyCalendarDay {
+  date: string;
+  status: DailyDayStatus;
+  correct: number | null;
+  /** Missed and still inside the catch-up window. */
+  canCatchUp: boolean;
+}
+
+export interface DailyBoardRow {
+  rank: number;
+  name: string;
+  correct: number;
+  totalMs: number;
+  /** Days played in the period (week/month boards). */
+  days: number;
+  isMe: boolean;
+}
+
+export interface DailyStanding {
+  /** null when the student hasn't played in the period. */
+  rank: number | null;
+  candidates: number;
+  /** Share of other players this student is ahead of, 0–100. */
+  percentile: number | null;
+  correct: number;
+  days: number;
+  /** Correct answers needed to pass the next player up (null when first or not playing). */
+  toNext: number | null;
+  /** Correct answers needed to reach the top 10 (null when already in it). */
+  toTop10: number | null;
+}
+
+export interface DailyAward {
+  key: string;
+  group: "streak" | "week" | "month" | "score";
+  title: string;
+  description: string;
+  earned: boolean;
+  /** For the progress bar: progress of target. */
+  progress: number;
+  target: number;
+  /** Short current-state note, e.g. "You're #5 this week". */
+  detail: string;
+}
+
+export interface DailyQuizDashboard {
+  today: DailyQuizStatus & { percentile: number | null };
+  stats: {
+    currentStreak: number;
+    bestStreak: number;
+    /** On-time and catch-up days, all time. */
+    daysPlayed: number;
+    daysThisMonth: number;
+    /** % correct over the last 30 days (null if no quizzes taken). */
+    accuracy30: number | null;
+    xpTotal: number;
+  };
+  todayBoard: DailyBoardRow[];
+  week: { start: string; standing: DailyStanding; board: DailyBoardRow[] };
+  month: { start: string; standing: DailyStanding; board: DailyBoardRow[] };
+  /** The last 28 days, oldest first, ending today. */
+  calendar: DailyCalendarDay[];
+  awards: DailyAward[];
+  catchUpDays: number;
 }
 
 // ---------------------------------------------------------------------------

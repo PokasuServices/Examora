@@ -40,6 +40,22 @@ module.exports = {
         md: "6px",
         card: "6px",
       },
+      // Quiet entrance motion for cards and score bars. Always used through
+      // motion-safe: so it is off for people who ask for reduced motion.
+      keyframes: {
+        "fade-up": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "grow-x": {
+          "0%": { transform: "scaleX(0)" },
+          "100%": { transform: "scaleX(1)" },
+        },
+      },
+      animation: {
+        "fade-up": "fade-up 480ms cubic-bezier(0.22, 1, 0.36, 1) both",
+        "grow-x": "grow-x 800ms cubic-bezier(0.22, 1, 0.36, 1) both",
+      },
       boxShadow: {
         // TMS/TailAdmin elevation: cards are flat (border + theme-xs);
         // hover lift uses theme-md.

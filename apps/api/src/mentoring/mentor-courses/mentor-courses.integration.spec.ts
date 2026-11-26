@@ -26,6 +26,7 @@ describe("MentorCoursesService (integration)", () => {
   let unassigned: string;
   let courseId: string;
   let otherCourseId: string;
+  let assignmentId: string | undefined;
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
@@ -86,6 +87,7 @@ describe("MentorCoursesService (integration)", () => {
         status: "PUBLISHED",
       },
     });
+    assignmentId = assignment.id;
     await prisma.assignmentSubmission.createMany({
       data: [
         { assignmentId: assignment.id, studentId: mine, version: 1, status: "REVISION_REQUESTED" },
@@ -107,6 +109,8 @@ describe("MentorCoursesService (integration)", () => {
   });
 
   afterAll(async () => {
+    // Deleting the course only unlinks the assignment (subject SetNull), so remove it explicitly.
+    if (assignmentId) await prisma.assignment.deleteMany({ where: { id: assignmentId } });
     await prisma.mentorAssignment.deleteMany({ where: { mentorId } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
     await prisma.course.deleteMany({ where: { id: { in: [courseId, otherCourseId] } } });

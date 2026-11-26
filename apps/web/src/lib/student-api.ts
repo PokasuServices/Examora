@@ -2,6 +2,8 @@
 
 import { useAuth } from "@examora/auth-client";
 import type {
+  DailyQuizDashboard,
+  DoubtKind,
   AnswerMethod,
   AttemptAnalysis,
   CheckpointView,
@@ -34,6 +36,9 @@ import type {
   WebinarDetail,
   WebinarSummary,
 } from "@examora/types";
+
+/** ?quizId= for sketch routes: totals come back in that paper's marks. */
+const paperQuery = (quizId?: string) => (quizId ? `?quizId=${encodeURIComponent(quizId)}` : "");
 
 /** Typed wrappers over the student module's practice, report, sketch, daily quiz, college and profile endpoints. */
 export function useStudentApi() {
@@ -79,30 +84,42 @@ export function useStudentApi() {
       ),
     // Sketch workspace (test upload + revisions)
     sketchWorkspace: (quizId: string) => get<SketchWorkspace>(`/sketch-works/tests/${quizId}`),
-    sketchWork: (workId: string) => get<SketchWorkView>(`/sketch-works/${workId}`),
+    sketchWork: (workId: string, quizId?: string) =>
+      get<SketchWorkView>(`/sketch-works/${workId}${paperQuery(quizId)}`),
     presignRevision: (questionId: string, file: File) =>
       request<PresignedUpload>(`/sketch-works/questions/${questionId}/versions/presign`, {
         method: "POST",
         body: { fileName: file.name, mimeType: file.type, sizeBytes: file.size },
       }),
-    saveRevision: (questionId: string, file: File, storageKey: string, description: string) =>
-      request<SketchWorkView>(`/sketch-works/questions/${questionId}/versions`, {
-        method: "POST",
-        body: {
-          fileName: file.name,
-          mimeType: file.type,
-          sizeBytes: file.size,
-          storageKey,
-          description: description.trim() || null,
+    saveRevision: (
+      questionId: string,
+      file: File,
+      storageKey: string,
+      description: string,
+      quizId?: string,
+    ) =>
+      request<SketchWorkView>(
+        `/sketch-works/questions/${questionId}/versions${paperQuery(quizId)}`,
+        {
+          method: "POST",
+          body: {
+            fileName: file.name,
+            mimeType: file.type,
+            sizeBytes: file.size,
+            storageKey,
+            description: description.trim() || null,
+          },
         },
-      }),
-    describeVersion: (versionId: string, description: string) =>
-      request<SketchWorkView>(`/sketch-works/versions/${versionId}`, {
+      ),
+    describeVersion: (versionId: string, description: string, quizId?: string) =>
+      request<SketchWorkView>(`/sketch-works/versions/${versionId}${paperQuery(quizId)}`, {
         method: "PATCH",
         body: { description: description.trim() || null },
       }),
-    deleteVersion: (versionId: string) =>
-      request<SketchWorkView>(`/sketch-works/versions/${versionId}`, { method: "DELETE" }),
+    deleteVersion: (versionId: string, quizId?: string) =>
+      request<SketchWorkView>(`/sketch-works/versions/${versionId}${paperQuery(quizId)}`, {
+        method: "DELETE",
+      }),
     versionPins: (versionId: string) =>
       get<SketchCommentView[]>(`/sketch-works/versions/${versionId}/pins`),
     addVersionPin: (versionId: string, body: { x: number; y: number; body: string }) =>
@@ -114,26 +131,37 @@ export function useStudentApi() {
       request<{ clapped: boolean; claps: number }>(`/sketch-works/${workId}/clap`, {
         method: "PUT",
       }),
-    commentOnWork: (workId: string, body: string) =>
-      request<SketchWorkView>(`/sketch-works/${workId}/comments`, {
+    commentOnWork: (workId: string, body: string, quizId?: string) =>
+      request<SketchWorkView>(`/sketch-works/${workId}/comments${paperQuery(quizId)}`, {
         method: "POST",
         body: { body },
       }),
     deleteWorkComment: (commentId: string) =>
       request<void>(`/sketch-works/comments/${commentId}`, { method: "DELETE" }),
-    rateVersionSelf: (versionId: string, scores: Record<string, number>) =>
-      request<SketchRatingResult>(`/sketch-works/versions/${versionId}/self`, {
+    rateVersionSelf: (versionId: string, scores: Record<string, number>, quizId?: string) =>
+      request<SketchRatingResult>(`/sketch-works/versions/${versionId}/self${paperQuery(quizId)}`, {
         method: "PUT",
         body: { scores },
       }),
-    giveVersionFeedback: (versionId: string, likedFactors: string[], comment: string) =>
-      request<SketchRatingResult>(`/sketch-works/versions/${versionId}/feedback`, {
-        method: "POST",
-        body: { likedFactors, comment: comment.trim() || null },
-      }),
-    sketchCommunity: (questionId: string, opts: { sort: string; filter: string; page: number }) =>
+    giveVersionFeedback: (
+      versionId: string,
+      likedFactors: string[],
+      comment: string,
+      quizId?: string,
+    ) =>
+      request<SketchRatingResult>(
+        `/sketch-works/versions/${versionId}/feedback${paperQuery(quizId)}`,
+        {
+          method: "POST",
+          body: { likedFactors, comment: comment.trim() || null },
+        },
+      ),
+    sketchCommunity: (
+      questionId: string,
+      opts: { sort: string; filter: string; page: number; quizId?: string },
+    ) =>
       get<SketchCommunityPage>(
-        `/sketch-works/questions/${questionId}/community?sort=${opts.sort}&filter=${opts.filter}&page=${opts.page}`,
+        `/sketch-works/questions/${questionId}/community?sort=${opts.sort}&filter=${opts.filter}&page=${opts.page}${opts.quizId ? `&quizId=${opts.quizId}` : ""}`,
       ),
     sketchChallenges: () => get<SketchChallenge[]>("/sketch-works/challenges"),
     reportWork: (workId: string, reason: string) =>
@@ -157,10 +185,25 @@ export function useStudentApi() {
         body: { message, attemptId },
       }),
     doubts: (questionId: string) => get<QuestionDoubtView[]>(`/questions/${questionId}/doubts`),
-    postDoubt: (questionId: string, body: string, parentId?: string) =>
+    postDoubt: (questionId: string, body: string, parentId?: string, kind?: DoubtKind) =>
       request<void>(`/questions/${questionId}/doubts`, {
         method: "POST",
-        body: { body, parentId },
+        body: { body, parentId, kind },
+      }),
+    presignDoubtImage: (questionId: string, file: File) =>
+      request<PresignedUpload>(`/questions/${questionId}/doubts/images/presign`, {
+        method: "POST",
+        body: { fileName: file.name, mimeType: file.type, sizeBytes: file.size },
+      }),
+    confirmDoubtImage: (file: File, storageKey: string) =>
+      request<{ id: string; ref: string }>("/questions/doubts/images/confirm", {
+        method: "POST",
+        body: { fileName: file.name, mimeType: file.type, sizeBytes: file.size, storageKey },
+      }),
+    reportDoubt: (doubtId: string, reason: string) =>
+      request<void>(`/questions/doubts/${doubtId}/report`, {
+        method: "POST",
+        body: { reason },
       }),
     clap: (doubtId: string) =>
       request<{ clapped: boolean }>(`/questions/doubts/${doubtId}/clap`, { method: "POST" }),
@@ -188,6 +231,18 @@ export function useStudentApi() {
     dailyFinish: (answers: { questionId: string; optionId: string | null; ms: number }[]) =>
       request<DailyQuizResult>("/daily-quiz/today/finish", { method: "POST", body: { answers } }),
     dailyLeaderboard: () => get<DailyQuizResult["leaderboard"]>("/daily-quiz/today/leaderboard"),
+    dailyDashboard: () => get<DailyQuizDashboard>("/daily-quiz/me"),
+    /** Catch up on a missed day (YYYY-MM-DD, last 7 days). */
+    dailyStartDay: (date: string) =>
+      request<DailyQuizQuestion[]>(`/daily-quiz/days/${date}/start`, { method: "POST" }),
+    dailyFinishDay: (
+      date: string,
+      answers: { questionId: string; optionId: string | null; ms: number }[],
+    ) =>
+      request<DailyQuizResult>(`/daily-quiz/days/${date}/finish`, {
+        method: "POST",
+        body: { answers },
+      }),
 
     // Colleges & webinars
     colleges: (category?: string) =>

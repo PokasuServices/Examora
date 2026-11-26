@@ -8,6 +8,7 @@ import { Eye, Flag, MoreVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { ClapButton } from "@/components/community/clap-share";
 import { RevisionUpload } from "@/components/student/revision-upload";
 import { PinBoard } from "@/components/student/sketch-pins";
+import { useSketchPaper } from "@/components/student/sketch-paper";
 import { SketchRatingsPanel } from "@/components/student/sketch-ratings";
 import { Chip } from "@/components/ui/chip";
 import { useClickOutside } from "@/hooks/useClickOutside";
@@ -60,7 +61,7 @@ function VersionMenu({
               }}
               className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-danger-600 hover:bg-neutral-50 dark:hover:bg-white/5"
             >
-              <Trash2 size={14} aria-hidden="true" /> Delete this revision
+              <Trash2 size={14} aria-hidden="true" /> Delete this upload
             </button>
           ) : null}
           {canReport ? (
@@ -84,7 +85,7 @@ function VersionMenu({
 }
 
 /**
- * One student's sketch for a question: the test upload and revisions as tabs,
+ * One student's sketch for a question: the original and revisions as tabs,
  * the image with pinned comments, description, reviewer marks, views, claps,
  * comments, and (for the owner) uploading a revision.
  */
@@ -101,6 +102,7 @@ export function SketchWorkPanel({
   onSelfRated?: (xp: number) => void;
 }) {
   const api = useStudentApi();
+  const quizId = useSketchPaper();
   const [versionId, setVersionId] = React.useState(
     work.versions[work.versions.length - 1]?.id ?? null,
   );
@@ -173,7 +175,7 @@ export function SketchWorkPanel({
                   : "border-neutral-300 text-neutral-600 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-400",
               )}
             >
-              <Plus size={12} aria-hidden="true" /> Upload revised work
+              <Plus size={12} aria-hidden="true" /> Upload revision
             </button>
           ) : null}
         </div>
@@ -191,7 +193,7 @@ export function SketchWorkPanel({
             setUploading(false);
             onChange(next);
             setVersionId(next.versions[next.versions.length - 1]?.id ?? null);
-            setNotice("Revision uploaded. It appears once the safety scan finishes.");
+            setNotice("Uploaded. It appears once the safety scan finishes.");
           }}
         />
       ) : version ? (
@@ -236,7 +238,10 @@ export function SketchWorkPanel({
                 reported={work.reportedByMe}
                 onDelete={() => {
                   if (window.confirm(`Delete ${version.label}? This frees one upload.`)) {
-                    void run(() => api.deleteVersion(version.id), "Revision deleted.");
+                    void run(
+                      () => api.deleteVersion(version.id, quizId),
+                      `${version.label} deleted.`,
+                    );
                   }
                 }}
                 onReport={() => {
@@ -252,23 +257,26 @@ export function SketchWorkPanel({
             </div>
           </div>
 
-          <PinBoard
-            key={version.id}
-            imageRef={version.imageRef}
-            imageAlt={`${work.isMine ? "Your" : `${work.ownerName}'s`} sketch, ${version.label}`}
-            load={() => api.versionPins(version.id)}
-            add={(c) => api.addVersionPin(version.id, c)}
-            remove={(id) => api.deleteSketchComment(id)}
-            imageClassName="max-h-[60vh]"
-          />
+          {/* Sketch on the left, ratings (self-evaluation first) beside it. */}
+          <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+            <PinBoard
+              key={version.id}
+              imageRef={version.imageRef}
+              imageAlt={`${work.isMine ? "Your" : `${work.ownerName}'s`} sketch, ${version.label}`}
+              load={() => api.versionPins(version.id)}
+              add={(c) => api.addVersionPin(version.id, c)}
+              remove={(id) => api.deleteSketchComment(id)}
+              imageClassName="max-h-[60vh]"
+            />
 
-          <SketchRatingsPanel
-            key={`ratings-${version.id}`}
-            work={work}
-            version={version}
-            onWork={onChange}
-            onSelfRated={onSelfRated}
-          />
+            <SketchRatingsPanel
+              key={`ratings-${version.id}`}
+              work={work}
+              version={version}
+              onWork={onChange}
+              onSelfRated={onSelfRated}
+            />
+          </div>
 
           {version.expert ? (
             <div className="rounded-md bg-neutral-50 px-3 py-2 text-sm dark:bg-white/[0.03]">
@@ -313,7 +321,7 @@ export function SketchWorkPanel({
                   size="sm"
                   onClick={() =>
                     void run(async () => {
-                      const next = await api.describeVersion(version.id, description);
+                      const next = await api.describeVersion(version.id, description, quizId);
                       setEditing(false);
                       return next;
                     })
@@ -421,7 +429,7 @@ export function SketchWorkPanel({
             e.preventDefault();
             if (!comment.trim()) return;
             void run(async () => {
-              const next = await api.commentOnWork(work.id, comment.trim());
+              const next = await api.commentOnWork(work.id, comment.trim(), quizId);
               setComment("");
               return next;
             });

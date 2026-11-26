@@ -8,6 +8,7 @@ import { cn } from "@examora/ui";
 import { RequireAuth } from "@/components/require-auth";
 import { ErrorPanel, LoadingPanel } from "@/components/student/load-panels";
 import { SketchCommunity } from "@/components/student/sketch-community";
+import { SketchPaperProvider } from "@/components/student/sketch-paper";
 import { useLoad } from "@/components/student/use-load";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
@@ -33,15 +34,15 @@ function ChallengeCard({ c }: { c: SketchChallenge }) {
             {c.myWorkId ? (
               <Chip tone="primary">You: {c.myVersions} of 4 uploads</Chip>
             ) : (
-              <Chip tone="warning">Not attempted yet</Chip>
+              <Chip tone="warning">Not uploaded yet</Chip>
             )}
           </div>
         </div>
         <Link
-          href={`/practice/tests/${c.test.id}${c.myWorkId ? "/sketches" : ""}`}
+          href={`/practice/tests/${c.test.id}?part=b`}
           className="inline-flex h-9 shrink-0 items-center rounded-md bg-primary-600 px-4 text-sm font-medium text-white hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
         >
-          {c.myWorkId ? "Open my workspace" : "Take the test"}
+          {c.myWorkId ? "Open in Part B" : "Upload in Part B"}
         </Link>
       </div>
       <button
@@ -61,7 +62,9 @@ function ChallengeCard({ c }: { c: SketchChallenge }) {
       </button>
       {open ? (
         <div id={panelId} className="border-t border-neutral-200 pt-3 dark:border-neutral-800">
-          <SketchCommunity questionId={c.questionId} />
+          <SketchPaperProvider value={c.test.id}>
+            <SketchCommunity questionId={c.questionId} />
+          </SketchPaperProvider>
         </div>
       ) : null}
     </Card>

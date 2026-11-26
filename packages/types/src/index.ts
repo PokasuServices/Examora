@@ -20,3 +20,4 @@ export * from "./student-learn";
 export * from "./media";
 export * from "./student-practice";
 export * from "./mentor-course";
+export * from "./student-dashboards";

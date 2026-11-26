@@ -123,3 +123,10 @@
 .dark .recharts-legend-item-text {
   color: theme("colors.neutral.400") !important;
 }
+
+/* Long formulas scroll sideways instead of overflowing their card. */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;
+}

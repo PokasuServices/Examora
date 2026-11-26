@@ -11,6 +11,7 @@ import type {
   LearnQuizInfo,
   LearnSubjectDetail,
   LearnTopicDetail,
+  TopicMarkValue,
   TopicRatingValue,
 } from "@examora/types";
 
@@ -24,6 +25,8 @@ export function useLearnApi() {
     getSubject: (id: string) =>
       request<LearnSubjectDetail>(`/learn/subjects/${id}`, { method: "GET" }),
     getTopic: (id: string) => request<LearnTopicDetail>(`/learn/topics/${id}`, { method: "GET" }),
+    markTopic: (id: string, patch: Partial<TopicMarkValue>) =>
+      request<TopicMarkValue>(`/learn/topics/${id}/mark`, { method: "PUT", body: patch }),
     rateTopic: (id: string, rating: TopicRatingValue) =>
       request<void>(`/learn/topics/${id}/rating`, { method: "PUT", body: { rating } }),
     getLesson: (id: string) =>

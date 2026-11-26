@@ -22,12 +22,13 @@ const ACTIVITY_LIMIT = 60;
 /** Goals compare against the average of this many most recent test results in the course. */
 const GOAL_RECENT_TESTS = 5;
 
-const XP_REASON_LABEL: Record<string, string> = {
+export const XP_REASON_LABEL: Record<string, string> = {
   LESSON_COMPLETED: "Lesson completed",
   QUIZ_COMPLETED: "Quiz finished",
   QUIZ_PERFECT_BONUS: "Perfect score bonus",
   TEST_COMPLETED: "Test finished",
   DAILY_QUIZ: "Daily quiz",
+  DAILY_QUIZ_CATCH_UP: "Daily quiz (caught up)",
   TEST_SHARED: "A friend opened your shared test",
   TEST_PERFECT_BONUS: "Perfect score bonus",
   SKETCH_SELF_RATING: "Rated your own sketch",

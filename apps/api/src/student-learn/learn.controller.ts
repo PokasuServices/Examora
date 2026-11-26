@@ -14,6 +14,7 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 import type { Request } from "express";
 import type {
+  TopicMarkValue,
   LearnCourseOption,
   LearnCourseOverview,
   LearnLessonCompleteResult,
@@ -31,6 +32,7 @@ import { RequirePermissions } from "../common/decorators/require-permissions.dec
 import { requestAuditMeta } from "../common/request-meta";
 import { ProgressService } from "../learning/progress.service";
 import { LessonAnswerDto } from "./dto/lesson-answer.dto";
+import { MarkTopicDto } from "./dto/mark-topic.dto";
 import { RateTopicDto } from "./dto/rate-topic.dto";
 import { LessonQuestionsService } from "./lesson-questions.service";
 import { LearnService } from "./learn.service";
@@ -78,6 +80,16 @@ export class LearnController {
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<LearnTopicDetail> {
     return this.learn.getTopic(user.id, id);
+  }
+
+  @Put("topics/:id/mark")
+  @ApiOperation({ summary: "Mark a topic as favourite and/or on hold (my own labels)" })
+  markTopic(
+    @CurrentUser() user: RequestUser,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: MarkTopicDto,
+  ): Promise<TopicMarkValue> {
+    return this.learn.markTopic(user.id, id, dto);
   }
 
   @Put("topics/:id/rating")

@@ -168,7 +168,7 @@ function ReviewForm({ item, onDone }: { item: SketchReviewQueueItem; onDone: () 
 
 function SketchesContent() {
   const api = useStudentAdminApi();
-  const [view, setView] = React.useState<"tests" | "revisions">("tests");
+  const [view, setView] = React.useState<"tests" | "revisions">("revisions");
   const [status, setStatus] = React.useState<"pending" | "reviewed">("pending");
   const [items, setItems] = React.useState<SketchReviewQueueItem[] | null>(null);
   const [error, setError] = React.useState(false);
@@ -194,7 +194,7 @@ function SketchesContent() {
         aria-label="What to review"
         className="flex gap-1 border-b border-neutral-200 dark:border-neutral-800"
       >
-        {(["tests", "revisions"] as const).map((v) => (
+        {(["revisions", "tests"] as const).map((v) => (
           <button
             key={v}
             type="button"
@@ -208,7 +208,7 @@ function SketchesContent() {
                 : "border-transparent text-neutral-500 hover:text-neutral-800 dark:text-neutral-400")
             }
           >
-            {v === "tests" ? "Test uploads (marks)" : "Revisions (feedback)"}
+            {v === "tests" ? "In-test uploads (quizzes)" : "Part B sketches (practice papers)"}
           </button>
         ))}
       </div>

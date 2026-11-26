@@ -17,12 +17,16 @@
     "@examora/types": "workspace:*",
     "@examora/ui": "workspace:*",
     "@examora/utils": "workspace:^",
+    "katex": "^0.16.22",
     "lucide-react": "^1.28.0",
     "next": "15.1.4",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-markdown": "^10.1.0",
-    "recharts": "^3.10.1"
+    "recharts": "^3.10.1",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

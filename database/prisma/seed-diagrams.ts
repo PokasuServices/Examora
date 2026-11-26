@@ -293,8 +293,171 @@ export function terminusSketchSvg(seed: number, refined = false): string {
   // A sign board.
   lines += `<rect x="${60 + rnd(4) * 40}" y="40" width="110" height="28" fill="none" stroke="${pencil}" stroke-width="1.5"/>`;
   lines += `<text x="${72 + rnd(4) * 40}" y="59" font-family="${FONT}" font-size="13" fill="${pencil}">BAY ${1 + Math.floor(rnd(5) * 9)}</text>`;
+  return paper(lines);
+}
+
+/** Off-white drawing paper around pencil lines. */
+function paper(lines: string): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="300" viewBox="0 0 480 300">
 <rect width="480" height="300" fill="#fbfaf7"/>
 ${lines}
 </svg>`;
+}
+
+/** Repeatable pseudo-random numbers per classmate, so each sample sketch differs. */
+function seeded(seed: number) {
+  return (n: number) => {
+    const x = Math.sin(seed * 9301 + n * 49297) * 233280;
+    return x - Math.floor(x);
+  };
+}
+
+const label = (x: number, y: number, text: string, colour: string, size = 11) =>
+  `<text x="${x}" y="${y}" font-family="${FONT}" font-size="${size}" fill="${colour}">${esc(text)}</text>`;
+
+/** Sample answer: a trekking bottle in front, side and top views plus a glove-friendly detail. */
+export function bottleSketchSvg(seed: number, refined = false): string {
+  const rnd = seeded(seed);
+  const pencil = refined ? "#334155" : "#64748b";
+  const w = refined ? 1.8 : 1.2;
+  const bw = 52 + rnd(1) * 16; // body width
+  const bh = 150 + rnd(2) * 25; // body height
+  let s = "";
+  // Front view.
+  const fx = 40;
+  const fy = 60;
+  s += `<rect x="${fx}" y="${fy + 22}" width="${bw}" height="${bh}" rx="${14 + rnd(3) * 10}" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  s += `<rect x="${fx + bw * 0.2}" y="${fy}" width="${bw * 0.6}" height="24" rx="5" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  s += `<path d="M ${fx + bw * 0.8} ${fy + 8} q ${20 + rnd(4) * 10} 2 ${16} 26" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  // Grip bands.
+  for (let i = 0; i < 3; i++) {
+    const y = fy + 70 + i * (14 + rnd(5) * 4);
+    s += `<line x1="${fx + 4}" y1="${y}" x2="${fx + bw - 4}" y2="${y}" stroke="${pencil}" stroke-width="${w * 0.7}"/>`;
+  }
+  // Side view (narrower).
+  const sx = 140;
+  s += `<rect x="${sx}" y="${fy + 22}" width="${bw * 0.6}" height="${bh}" rx="${12}" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  s += `<rect x="${sx + bw * 0.1}" y="${fy}" width="${bw * 0.4}" height="24" rx="5" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  // Top view.
+  const tx = 230;
+  const ty = 95;
+  s += `<circle cx="${tx}" cy="${ty}" r="${bw / 2}" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  s += `<circle cx="${tx}" cy="${ty}" r="${bw * 0.3}" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  s += `<rect x="${tx - 6}" y="${ty - bw * 0.3 - 14}" width="12" height="16" rx="3" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  // Close-up: a big flip lever for gloved fingers.
+  const cx = 330;
+  const cy = 70;
+  s += `<circle cx="${cx + 55}" cy="${cy + 60}" r="62" fill="none" stroke="${pencil}" stroke-width="${w * 0.8}" stroke-dasharray="${refined ? "" : "5 4"}"/>`;
+  s += `<rect x="${cx + 18}" y="${cy + 70}" width="74" height="34" rx="8" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  s += `<path d="M ${cx + 22} ${cy + 70} L ${cx + 40 + rnd(6) * 10} ${cy + 26} L ${cx + 96} ${cy + 30} L ${cx + 88} ${cy + 70}" fill="none" stroke="${pencil}" stroke-width="${w * 1.3}"/>`;
+  s += `<path d="M ${cx + 70} ${cy + 18} q 18 -10 26 6" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  if (refined) {
+    // Shading and a hand for scale.
+    for (let i = 0; i < 8; i++) {
+      s += `<line x1="${fx + bw - 12 + i * 1.5}" y1="${fy + 40 + i * 14}" x2="${fx + bw - 4}" y2="${fy + 52 + i * 14}" stroke="#94a3b8" stroke-width="0.8"/>`;
+    }
+    s += `<path d="M ${cx + 100} ${cy + 112} q 20 -6 30 8 q -4 10 -18 10" fill="none" stroke="#94a3b8" stroke-width="1.2"/>`;
+  }
+  s += label(fx + 4, 272, "FRONT", pencil);
+  s += label(sx - 2, 272, "SIDE", pencil);
+  s += label(tx - 14, 160, "TOP", pencil);
+  s += label(cx + 10, 220, refined ? "DETAIL: glove-size flip lever" : "detail - lever", pencil);
+  return paper(s);
+}
+
+/** Sample answer: a school entrance gate drawn from memory. */
+export function gateSketchSvg(seed: number, refined = false): string {
+  const rnd = seeded(seed);
+  const pencil = refined ? "#334155" : "#64748b";
+  const w = refined ? 1.8 : 1.2;
+  const ground = 250 + rnd(1) * 12;
+  const pw = 34 + rnd(2) * 12; // pillar width
+  const left = 70 + rnd(3) * 20;
+  const right = 410 - rnd(4) * 20;
+  const top = 70 + rnd(5) * 20;
+  let s = `<line x1="0" y1="${ground}" x2="480" y2="${ground}" stroke="${pencil}" stroke-width="${w}"/>`;
+  // Pillars with caps.
+  for (const x of [left, right - pw]) {
+    s += `<rect x="${x}" y="${top}" width="${pw}" height="${ground - top}" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+    s += `<rect x="${x - 6}" y="${top - 12}" width="${pw + 12}" height="12" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  }
+  // Arch or flat beam with the name board.
+  if (rnd(6) > 0.5) {
+    s += `<path d="M ${left + pw} ${top + 30} Q 240 ${top - 50} ${right - pw} ${top + 30}" fill="none" stroke="${pencil}" stroke-width="${w * 1.2}"/>`;
+  } else {
+    s += `<rect x="${left + pw}" y="${top + 6}" width="${right - left - 2 * pw}" height="22" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  }
+  s += `<rect x="190" y="${top - 2}" width="100" height="24" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  s += label(204, top + 15, "MY SCHOOL", pencil, 12);
+  // Grille gates: two leaves of vertical bars.
+  const gTop = top + 60;
+  const mid = 240;
+  for (let x = left + pw + 6; x < right - pw - 4; x += 12 + rnd(7) * 4) {
+    s += `<line x1="${x}" y1="${gTop}" x2="${x}" y2="${ground - 4}" stroke="${pencil}" stroke-width="${w * 0.8}"/>`;
+  }
+  s += `<line x1="${left + pw}" y1="${gTop}" x2="${right - pw}" y2="${gTop}" stroke="${pencil}" stroke-width="${w}"/>`;
+  s += `<line x1="${left + pw}" y1="${(gTop + ground) / 2}" x2="${right - pw}" y2="${(gTop + ground) / 2}" stroke="${pencil}" stroke-width="${w}"/>`;
+  s += `<line x1="${mid}" y1="${gTop}" x2="${mid}" y2="${ground}" stroke="${pencil}" stroke-width="${w * 1.4}"/>`;
+  // Trees behind.
+  for (const x of [30, 450]) {
+    const r = 24 + rnd(x) * 10;
+    s += `<circle cx="${x}" cy="${ground - 90}" r="${r}" fill="none" stroke="${pencil}" stroke-width="${w * 0.8}"/>`;
+    s += `<line x1="${x}" y1="${ground - 90 + r}" x2="${x}" y2="${ground}" stroke="${pencil}" stroke-width="${w}"/>`;
+  }
+  if (refined) {
+    // Brick lines on pillars and cast shadows.
+    for (const x of [left, right - pw]) {
+      for (let y = top + 14; y < ground; y += 16) {
+        s += `<line x1="${x}" y1="${y}" x2="${x + pw}" y2="${y}" stroke="#94a3b8" stroke-width="0.7"/>`;
+      }
+      s += `<path d="M ${x + pw} ${ground} l 26 10 l -${pw} 0 Z" fill="#e2e8f0"/>`;
+    }
+  }
+  return paper(s);
+}
+
+/** Sample answer: a street-food stall at night, from a child's low eye level. */
+export function stallSketchSvg(seed: number, refined = false): string {
+  const rnd = seeded(seed);
+  const pencil = refined ? "#334155" : "#64748b";
+  const w = refined ? 1.8 : 1.2;
+  const horizon = 205 + rnd(1) * 20; // low eye level: the stall towers above
+  const cx = 120 + rnd(2) * 60;
+  let s = refined ? `<rect width="480" height="300" fill="#eef2f7"/>` : "";
+  s += `<line x1="0" y1="${horizon}" x2="480" y2="${horizon}" stroke="${pencil}" stroke-width="${w * 0.6}" stroke-dasharray="4 4"/>`;
+  // Counter seen from below, tall and close.
+  s += `<path d="M ${cx} 290 L ${cx + 10} 150 L ${cx + 250} 150 L ${cx + 260} 290" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  s += `<line x1="${cx + 5}" y1="190" x2="${cx + 255}" y2="190" stroke="${pencil}" stroke-width="${w * 0.8}"/>`;
+  // Striped awning.
+  s += `<path d="M ${cx - 20} 60 L ${cx + 280} 60 L ${cx + 260} 100 L ${cx} 100 Z" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  for (let x = cx; x < cx + 260; x += 28) {
+    s += `<line x1="${x - 4}" y1="60" x2="${x}" y2="100" stroke="${pencil}" stroke-width="${w * 0.8}"/>`;
+  }
+  // Hanging lamp with glow.
+  const lx = cx + 120 + rnd(3) * 40;
+  s += `<line x1="${lx}" y1="100" x2="${lx}" y2="118" stroke="${pencil}" stroke-width="${w}"/>`;
+  s += `<circle cx="${lx}" cy="124" r="7" fill="${refined ? "#fde68a" : "none"}" stroke="${pencil}" stroke-width="${w}"/>`;
+  for (let i = 0; i < 8; i++) {
+    const [x1, y1] = pt(lx, 124, 12, i * 45);
+    const [x2, y2] = pt(lx, 124, 22 + rnd(10 + i) * 8, i * 45);
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${refined ? WARN : pencil}" stroke-width="0.9"/>`;
+  }
+  // Big pot with steam.
+  const px = cx + 40 + rnd(4) * 30;
+  s += `<path d="M ${px} 150 q 0 -30 40 -30 q 40 0 40 30" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  for (let i = 0; i < 3; i++) {
+    s += `<path d="M ${px + 25 + i * 15} 112 q -8 -12 0 -24 q 8 -12 0 -24" fill="none" stroke="${pencil}" stroke-width="0.9"/>`;
+  }
+  // Moon and stars.
+  s += `<circle cx="${420 - rnd(5) * 30}" cy="40" r="14" fill="none" stroke="${pencil}" stroke-width="${w}"/>`;
+  for (let i = 0; i < 5; i++) {
+    s += `<circle cx="${30 + rnd(20 + i) * 420}" cy="${10 + rnd(30 + i) * 40}" r="1.6" fill="${pencil}"/>`;
+  }
+  if (refined) {
+    // A grown-up's legs at the counter: the child's eye level sees only these.
+    s += `<line x1="${cx + 200}" y1="290" x2="${cx + 206}" y2="200" stroke="${INK}" stroke-width="3"/>`;
+    s += `<line x1="${cx + 222}" y1="290" x2="${cx + 216}" y2="200" stroke="${INK}" stroke-width="3"/>`;
+    s += label(18, 290, "eye level: 1 m", MUTED, 11);
+  }
+  return paper(s);
 }

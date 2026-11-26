@@ -5,8 +5,26 @@ import Link from "next/link";
 import { Bell, X } from "lucide-react";
 import type { NotificationSummary } from "@examora/types";
 import { cn } from "@examora/ui";
+import { useAuth } from "@examora/auth-client";
+import { resolveDeepLink } from "@/components/notifications/types";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useDashboardsApi } from "@/lib/dashboards-api";
 import { useNotificationsApi } from "@/lib/notifications-api";
+
+const ALERT_SYNC_KEY = "examora:alerts-synced-at";
+const ALERT_SYNC_EVERY_MS = 10 * 60_000;
+
+/** True when this tab hasn't synced student alerts in the last 10 minutes. */
+function syncDue(): boolean {
+  try {
+    const last = Number(window.sessionStorage.getItem(ALERT_SYNC_KEY) ?? 0);
+    if (Date.now() - last < ALERT_SYNC_EVERY_MS) return false;
+    window.sessionStorage.setItem(ALERT_SYNC_KEY, String(Date.now()));
+  } catch {
+    // Storage blocked: sync anyway (the API is idempotent and throttled).
+  }
+  return true;
+}
 
 function timeAgo(iso: string): string {
   const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
@@ -24,6 +42,9 @@ function timeAgo(iso: string): string {
  */
 export function NotificationMenu() {
   const api = useNotificationsApi();
+  const dashboards = useDashboardsApi();
+  const { user } = useAuth();
+  const isStudent = user?.roles.includes("STUDENT") ?? false;
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [open, setOpen] = React.useState(false);
   const [unread, setUnread] = React.useState(0);
@@ -34,12 +55,14 @@ export function NotificationMenu() {
   useClickOutside(rootRef, close, open);
 
   React.useEffect(() => {
-    api
-      .unreadCount()
+    // Students: first create any pending alerts (deadlines, reviews, replies…), then count.
+    const sync = isStudent && syncDue() ? dashboards.syncAlerts().catch(() => null) : null;
+    void Promise.resolve(sync)
+      .then(() => api.unreadCount())
       .then((res) => setUnread(res.unread))
       .catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isStudent]);
 
   function toggle() {
     const next = !open;
@@ -109,8 +132,14 @@ export function NotificationMenu() {
               items.map((n) => (
                 <li key={n.id}>
                   <Link
-                    href="/notifications"
-                    onClick={close}
+                    href={resolveDeepLink(n.eventType, n.data) ?? "/notifications"}
+                    onClick={() => {
+                      close();
+                      if (!n.isRead) {
+                        void api.markRead(n.id).catch(() => undefined);
+                        setUnread((u) => Math.max(0, u - 1));
+                      }
+                    }}
                     className="flex gap-3 rounded-lg border-b border-neutral-100 px-4 py-3 hover:bg-neutral-100 dark:border-neutral-800 dark:hover:bg-white/5"
                   >
                     <span

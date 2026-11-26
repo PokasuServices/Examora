@@ -37,9 +37,58 @@ export interface SyllabusHeatmap {
   rows: { subjectId: string; subjectTitle: string; counts: Record<string, number> }[];
 }
 
+/** Where a student is with one topic. EMPTY = nothing published in it yet. */
+export type LearnTopicStatus = "COMPLETED" | "IN_PROGRESS" | "NOT_STARTED" | "EMPTY";
+
+export interface TopicMarkValue {
+  favourite: boolean;
+  onHold: boolean;
+}
+
+export interface LearnTopicRow extends TopicMarkValue {
+  id: string;
+  title: string;
+  subjectId: string;
+  subjectTitle: string;
+  status: LearnTopicStatus;
+  /** Lessons completed + quizzes attempted, of the topic's total. */
+  done: number;
+  total: number;
+  examTags: string[];
+}
+
+/** The Learn tab overview for one course. */
+export interface LearnDashboard {
+  counts: {
+    subjects: number;
+    topics: number;
+    completed: number;
+    inProgress: number;
+    notStarted: number;
+    favourite: number;
+    onHold: number;
+    /** Topics tagged for two or more exams. */
+    shared: number;
+  };
+  /** 0–100 across every lesson and quiz in the course. */
+  percent: number;
+  xpThisWeek: number;
+  /** The next lesson (or quiz) to open, from the first unfinished topic. */
+  continueWith: {
+    kind: "lesson" | "quiz";
+    id: string;
+    title: string;
+    topicId: string;
+    topicTitle: string;
+    subjectTitle: string;
+  } | null;
+  topics: LearnTopicRow[];
+}
+
 export interface LearnCourseOverview {
   course: { id: string; title: string; examType: string | null; nextExamDate: string | null };
   subjects: LearnSubjectCard[];
+  dashboard: LearnDashboard;
   /** One entry per exam label (the heatmap's exam dropdown). */
   heatmaps: SyllabusHeatmap[];
 }
@@ -85,7 +134,8 @@ export interface LearnTopicQuiz {
 export type TopicRatingValue = 1 | 2 | 3 | 4 | 5;
 
 export interface LearnTopicDetail {
-  topic: { id: string; title: string; description: string | null };
+  topic: { id: string; title: string; description: string | null; examTags: string[] };
+  mark: TopicMarkValue;
   crumbs: LearnCrumbs;
   lessons: LearnTopicLesson[];
   quizzes: LearnTopicQuiz[];
@@ -170,6 +220,8 @@ export interface LearnQuizInfo {
   attemptsUsed: number;
   inProgressAttemptId: string | null;
   lastFinishedAttemptId: string | null;
+  /** Score and finish time of the latest finished attempt. */
+  lastScore: { obtained: number; total: number; submittedAt: string | null } | null;
 }
 
 /** Result of an admin bulk licence grant/revoke. */

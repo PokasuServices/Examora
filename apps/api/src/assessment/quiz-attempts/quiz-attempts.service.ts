@@ -69,8 +69,13 @@ export class QuizAttemptsService {
       }
     }
 
+    // Practice papers: Part B (sketch) questions are untimed and done in the paper's
+    // Part B tab, so the timed test is Part A only.
     const quizQuestions = await this.prisma.quizQuestion.findMany({
-      where: { quizId },
+      where: {
+        quizId,
+        ...(quiz.practiceCategoryId ? { question: { type: { not: "UPLOAD" } } } : {}),
+      },
       include: { question: { include: { options: { orderBy: { position: "asc" } } } } },
       orderBy: { position: "asc" },
     });
@@ -96,11 +101,14 @@ export class QuizAttemptsService {
     const totalMarks = questionSnapshot.reduce((sum, q) => sum + q.marks, 0);
 
     const startedAt = new Date();
-    const sections = await this.prisma.quizSection.findMany({
-      where: { quizId },
-      orderBy: { position: "asc" },
-      select: { id: true, title: true, timeLimitMinutes: true },
-    });
+    const usedSections = new Set(questionSnapshot.map((q) => q.sectionId));
+    const sections = (
+      await this.prisma.quizSection.findMany({
+        where: { quizId },
+        orderBy: { position: "asc" },
+        select: { id: true, title: true, timeLimitMinutes: true },
+      })
+    ).filter((s) => usedSections.has(s.id));
     // Every section timed: sections run one after another on their own clocks.
     const plan = planFor(sections);
     const expiresAt = plan
@@ -168,7 +176,7 @@ export class QuizAttemptsService {
       questionById,
       answerByQuestion,
       requireAllVisited: quiz.requireAllVisited,
-      sections: quiz.sections,
+      sections: quiz.sections.filter((sec) => snapshot.some((x) => x.sectionId === sec.id)),
       plan: readPlan(attempt.sectionPlan),
     };
   }
