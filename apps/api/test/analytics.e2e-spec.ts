@@ -162,10 +162,18 @@ describe("Analytics & Reporting (e2e)", () => {
         .expect(403);
     });
 
-    it("denies a mentor the admin-only analytics routes", async () => {
+    // Mentors have administrator rights except user/role management and deleting (MF0).
+    it("denies a mentor the platform-wide admin analytics (they get mentor analytics)", async () => {
       await request(app.getHttpServer())
         .get("/api/v1/admin/analytics/platform")
         .set(auth(mentorToken))
+        .expect(403);
+    });
+
+    it("denies a student the admin analytics routes", async () => {
+      await request(app.getHttpServer())
+        .get("/api/v1/admin/analytics/platform")
+        .set(auth(studentToken))
         .expect(403);
     });
   });

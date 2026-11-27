@@ -65,7 +65,9 @@ describe("DailyQuizService catch-up (integration)", () => {
       questionIds.push(q.id);
     }
     // Use our own quiz for the missed day unless the shared dev database already has one.
-    const existing = await prisma.dailyQuiz.findUnique({ where: { date: missed } });
+    const existing = await prisma.dailyQuiz.findUnique({
+      where: { date_scope: { date: missed, scope: "" } },
+    });
     if (!existing) {
       createdQuizId = (await prisma.dailyQuiz.create({ data: { date: missed, questionIds } })).id;
     }

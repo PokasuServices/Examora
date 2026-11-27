@@ -82,7 +82,7 @@ function EnquiriesContent() {
 
 export default function EnquiriesPage() {
   return (
-    <RequirePermission permission="content:manage">
+    <RequirePermission permission="colleges:manage">
       <EnquiriesContent />
     </RequirePermission>
   );

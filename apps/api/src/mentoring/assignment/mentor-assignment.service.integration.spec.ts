@@ -4,6 +4,7 @@ import { PrismaService } from "../../prisma/prisma.service";
 import type { RequestUser } from "../../auth/types/request-user";
 import { fakeNotificationsServiceProvider } from "../../../test/support/fake-notifications-service";
 import { MentorAssignmentService } from "./mentor-assignment.service";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 describe("MentorAssignmentService (integration)", () => {
   let service: MentorAssignmentService;
@@ -17,7 +18,12 @@ describe("MentorAssignmentService (integration)", () => {
 
   beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
-      providers: [MentorAssignmentService, PrismaService, fakeNotificationsServiceProvider()],
+      providers: [
+        MentorAssignmentService,
+        StaffScopeService,
+        PrismaService,
+        fakeNotificationsServiceProvider(),
+      ],
     }).compile();
     service = moduleRef.get(MentorAssignmentService);
     prisma = moduleRef.get(PrismaService);

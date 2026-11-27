@@ -24,9 +24,11 @@ import { toQuizSection } from "../assessment.mappers";
 import { CreateQuizSectionDto } from "./dto/create-section.dto";
 import { UpdateQuizSectionDto } from "./dto/update-section.dto";
 import { QuizSectionsService } from "./sections.service";
+import { Scoped } from "../../staff/scoped.decorator";
 
 @ApiTags("assessment: quiz sections")
 @Controller("admin/assessment/quizzes/:quizId/sections")
+@Scoped(["quiz", "params:quizId"])
 @RequirePermissions("quiz:manage")
 export class QuizSectionsController {
   constructor(

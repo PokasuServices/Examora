@@ -27,9 +27,15 @@ import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { ListLessonsQueryDto } from "./dto/list-lessons-query.dto";
 import { LessonsService } from "./lessons.service";
 import { UpdateLessonDto } from "./dto/update-lesson.dto";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
+import { Scoped } from "../../staff/scoped.decorator";
+import { ActorScope, scopeWhere } from "../../staff/scope-where";
+import type { StaffScope } from "../../staff/staff-scope.service";
+import { ReviewableContent } from "../../mentor-desk/content-review.interceptor";
 
 @ApiTags("content: lessons")
 @Controller("admin/content/lessons")
+@Scoped(["lesson", "params:id"], ["module", "body:moduleId"], ["module", "query:moduleId"])
 @RequirePermissions("content:manage")
 export class LessonsController {
   constructor(
@@ -58,8 +64,12 @@ export class LessonsController {
 
   @Get()
   @ApiOperation({ summary: "List lessons in a module" })
-  async list(@Query() query: ListLessonsQueryDto): Promise<PaginatedData<Lesson>> {
+  async list(
+    @ActorScope() actorScope: StaffScope | null,
+    @Query() query: ListLessonsQueryDto,
+  ): Promise<PaginatedData<Lesson>> {
     const { items, total } = await this.lessonsService.list({
+      scope: scopeWhere.lesson(actorScope),
       moduleId: query.moduleId,
       page: query.page,
       pageSize: query.pageSize,
@@ -93,6 +103,7 @@ export class LessonsController {
   }
 
   @Patch(":id")
+  @ReviewableContent("lesson", "update")
   @ApiOperation({ summary: "Update a lesson" })
   async update(
     @CurrentUser() actor: RequestUser,
@@ -138,6 +149,7 @@ export class LessonsController {
   }
 
   @Delete(":id")
+  @ProtectedDelete("lesson")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Soft-delete a lesson" })
   async remove(

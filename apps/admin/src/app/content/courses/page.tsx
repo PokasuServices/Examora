@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ApiError } from "@examora/auth-client";
+import { ApiError, useAuth } from "@examora/auth-client";
 import type { Category, ContentStatus, Course } from "@examora/types";
 import { Button, FieldError, Input, Label } from "@examora/ui";
 import { RequirePermission } from "@/components/require-permission";
@@ -14,6 +14,8 @@ const STATUS_FILTERS: (ContentStatus | "ALL")[] = ["ALL", "DRAFT", "PUBLISHED", 
 
 function CoursesContent() {
   const api = useContentApi();
+  const { user } = useAuth();
+  const canSetUp = user?.permissions.includes("courses:manage") ?? false;
   const [courses, setCourses] = React.useState<Course[]>([]);
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [filter, setFilter] = React.useState<ContentStatus | "ALL">("ALL");
@@ -69,53 +71,61 @@ function CoursesContent() {
     <main>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-neutral-800 dark:text-white/90">Courses</h1>
-        <Link href="/content/categories">
-          <Button variant="secondary">Manage categories</Button>
-        </Link>
+        {canSetUp ? (
+          <Link href="/content/categories">
+            <Button variant="secondary">Manage categories</Button>
+          </Link>
+        ) : null}
       </div>
 
-      <form
-        onSubmit={create}
-        className="mt-6 flex flex-wrap items-end gap-3 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4"
-      >
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="title">Course title</Label>
-          <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="category">Category</Label>
-          <select
-            id="category"
-            className="h-10 rounded-md border border-neutral-300 dark:border-neutral-700 px-3 text-sm"
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-          >
-            <option value="">— none —</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="examType">Exam type</Label>
-          <Input id="examType" value={examType} onChange={(e) => setExamType(e.target.value)} />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="priceAmount">Price (INR, blank = free)</Label>
-          <Input
-            id="priceAmount"
-            type="number"
-            min="0"
-            step="0.01"
-            value={priceAmount}
-            onChange={(e) => setPriceAmount(e.target.value)}
-            className="w-32"
-          />
-        </div>
-        <Button type="submit">Create course</Button>
-      </form>
+      {canSetUp ? (
+        <form
+          onSubmit={create}
+          className="mt-6 flex flex-wrap items-end gap-3 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4"
+        >
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="title">Course title</Label>
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="category">Category</Label>
+            <select
+              id="category"
+              className="h-10 rounded-md border border-neutral-300 dark:border-neutral-700 px-3 text-sm"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+            >
+              <option value="">— none —</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="examType">Exam type</Label>
+            <Input id="examType" value={examType} onChange={(e) => setExamType(e.target.value)} />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="priceAmount">Price (INR, blank = free)</Label>
+            <Input
+              id="priceAmount"
+              type="number"
+              min="0"
+              step="0.01"
+              value={priceAmount}
+              onChange={(e) => setPriceAmount(e.target.value)}
+              className="w-32"
+            />
+          </div>
+          <Button type="submit">Create course</Button>
+        </form>
+      ) : (
+        <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+          Open a course to work on its subjects, topics and lessons. The admin creates courses.
+        </p>
+      )}
       <FieldError>{error}</FieldError>
 
       <div className="mt-6 flex gap-2">
@@ -142,7 +152,7 @@ function CoursesContent() {
               <th className="px-4 py-3 font-medium">Title</th>
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Exam</th>
-              <th className="px-4 py-3 font-medium">Price</th>
+              {canSetUp ? <th className="px-4 py-3 font-medium">Price</th> : null}
               <th className="px-4 py-3 font-medium">Status</th>
             </tr>
           </thead>
@@ -162,11 +172,13 @@ function CoursesContent() {
                 </td>
                 <td className="px-4 py-3">{categoryName(course.categoryId)}</td>
                 <td className="px-4 py-3">{course.examType ?? "—"}</td>
-                <td className="px-4 py-3">
-                  {course.priceAmount === null
-                    ? "Free"
-                    : formatMoney(course.priceAmount, course.priceCurrency)}
-                </td>
+                {canSetUp ? (
+                  <td className="px-4 py-3">
+                    {course.priceAmount === null
+                      ? "Free"
+                      : formatMoney(course.priceAmount, course.priceCurrency)}
+                  </td>
+                ) : null}
                 <td className="px-4 py-3">
                   <StatusBadge status={course.status} />
                 </td>
@@ -175,7 +187,7 @@ function CoursesContent() {
             {courses.length === 0 ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={canSetUp ? 5 : 4}
                   className="px-4 py-6 text-center text-neutral-500 dark:text-neutral-400"
                 >
                   No courses.

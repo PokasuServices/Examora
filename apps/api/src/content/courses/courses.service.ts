@@ -42,6 +42,7 @@ export class CoursesService {
   }
 
   async list(params: {
+    scope?: Prisma.CourseWhereInput;
     page: number;
     pageSize: number;
     status?: ContentStatus;
@@ -49,6 +50,7 @@ export class CoursesService {
     examType?: string;
   }) {
     const where: Prisma.CourseWhereInput = {
+      ...(params.scope ? { AND: [params.scope] } : {}),
       deletedAt: null,
       ...(params.status ? { status: params.status } : {}),
       ...(params.categoryId ? { categoryId: params.categoryId } : {}),

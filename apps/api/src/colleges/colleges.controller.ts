@@ -49,6 +49,7 @@ import type { RequestUser } from "../auth/types/request-user";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { RequirePermissions } from "../common/decorators/require-permissions.decorator";
 import { CollegesService } from "./colleges.service";
+import { ProtectedDelete } from "../common/decorators/protected-delete.decorator";
 
 export class ToggleDto {
   @ApiProperty()
@@ -245,7 +246,7 @@ export class CollegesController {
 
 @ApiTags("admin: colleges & webinars")
 @Controller("admin")
-@RequirePermissions("content:manage")
+@RequirePermissions("colleges:manage")
 export class AdminCollegesController {
   constructor(private readonly colleges: CollegesService) {}
 
@@ -265,6 +266,7 @@ export class AdminCollegesController {
   }
 
   @Delete("colleges/:id")
+  @ProtectedDelete("college")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteCollege(@Param("id", ParseUUIDPipe) id: string): Promise<void> {
     await this.colleges.deleteCollege(id);
@@ -286,6 +288,7 @@ export class AdminCollegesController {
   }
 
   @Delete("webinars/:id")
+  @ProtectedDelete("webinar")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteWebinar(@Param("id", ParseUUIDPipe) id: string): Promise<void> {
     await this.colleges.deleteWebinar(id);

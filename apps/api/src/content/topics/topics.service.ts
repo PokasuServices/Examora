@@ -35,12 +35,14 @@ export class TopicsService {
   }
 
   async list(params: {
+    scope?: Prisma.TopicWhereInput;
     subjectId: string;
     page: number;
     pageSize: number;
     status?: ContentStatus;
   }) {
     const where: Prisma.TopicWhereInput = {
+      ...(params.scope ? { AND: [params.scope] } : {}),
       deletedAt: null,
       subjectId: params.subjectId,
       ...(params.status ? { status: params.status } : {}),

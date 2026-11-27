@@ -26,9 +26,21 @@ import { CreateQuizDto } from "./dto/create-quiz.dto";
 import { ListQuizzesQueryDto } from "./dto/list-quizzes-query.dto";
 import { UpdateQuizDto } from "./dto/update-quiz.dto";
 import { QuizzesService } from "./quizzes.service";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
+import { Scoped } from "../../staff/scoped.decorator";
+import { ActorScope, scopeWhere } from "../../staff/scope-where";
+import type { StaffScope } from "../../staff/staff-scope.service";
+import { ReviewableContent } from "../../mentor-desk/content-review.interceptor";
 
 @ApiTags("assessment: quizzes")
 @Controller("admin/assessment/quizzes")
+@Scoped(
+  ["quiz", "params:id"],
+  ["subject", "body:subjectId"],
+  ["subject", "query:subjectId"],
+  ["topic", "body:topicId"],
+  ["practiceCategory", "body:practiceCategoryId"],
+)
 @RequirePermissions("quiz:manage")
 export class QuizzesController {
   constructor(
@@ -57,8 +69,12 @@ export class QuizzesController {
 
   @Get()
   @ApiOperation({ summary: "List quizzes (filter by status/subject)" })
-  async list(@Query() query: ListQuizzesQueryDto): Promise<PaginatedData<Quiz>> {
+  async list(
+    @ActorScope() actorScope: StaffScope | null,
+    @Query() query: ListQuizzesQueryDto,
+  ): Promise<PaginatedData<Quiz>> {
     const { items, total } = await this.quizzesService.list({
+      scope: scopeWhere.quiz(actorScope),
       page: query.page,
       pageSize: query.pageSize,
       status: query.status,
@@ -74,6 +90,7 @@ export class QuizzesController {
   }
 
   @Patch(":id")
+  @ReviewableContent("quiz", "update")
   @ApiOperation({ summary: "Update a quiz (does not change status)" })
   async update(
     @CurrentUser() actor: RequestUser,
@@ -96,6 +113,7 @@ export class QuizzesController {
   }
 
   @Patch(":id/status")
+  @ReviewableContent("quiz", "status")
   @RequirePermissions("quiz:publish")
   @ApiOperation({ summary: "Change quiz status (publish/unpublish/archive) — quiz:publish" })
   async changeStatus(
@@ -119,6 +137,7 @@ export class QuizzesController {
   }
 
   @Delete(":id")
+  @ProtectedDelete("quiz")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Soft-delete a quiz (must not be PUBLISHED)" })
   async remove(

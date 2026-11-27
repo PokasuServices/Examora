@@ -3,6 +3,7 @@ import type { QuizAttemptStatus } from "@examora/types";
 import { decToNum } from "../assessment.mappers";
 import { PrismaService } from "../../prisma/prisma.service";
 import { QuizAttemptsService } from "../quiz-attempts/quiz-attempts.service";
+import type { Prisma } from "@examora/database";
 
 const ATTEMPT_RELATIONS = {
   quiz: { select: { title: true } },
@@ -22,6 +23,7 @@ export class AdminQuizAttemptsService {
    * the mapper, not auto-finalized on a bulk read.
    */
   async list(params: {
+    scope?: Prisma.QuizAttemptWhereInput;
     page: number;
     pageSize: number;
     quizId?: string;
@@ -29,6 +31,7 @@ export class AdminQuizAttemptsService {
     status?: QuizAttemptStatus;
   }) {
     const where = {
+      ...(params.scope ? { AND: [params.scope] } : {}),
       ...(params.quizId ? { quizId: params.quizId } : {}),
       ...(params.userId ? { userId: params.userId } : {}),
       ...(params.status ? { status: params.status } : {}),

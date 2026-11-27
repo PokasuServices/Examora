@@ -29,6 +29,7 @@ import { SetScheduledReportActiveDto } from "../dto/set-scheduled-report-active.
 import { ReportBuilderService } from "./report-builder.service";
 import { ReportExportService } from "./report-export.service";
 import { ScheduledReportsService } from "./scheduled-reports.service";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
 
 const CONTENT_TYPE: Record<"CSV" | "PDF", string> = {
   CSV: "text/csv; charset=utf-8",
@@ -133,6 +134,7 @@ export class ReportsController {
   }
 
   @Delete("scheduled/:id")
+  @ProtectedDelete(null)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Delete a scheduled report" })
   async remove(

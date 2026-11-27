@@ -47,6 +47,10 @@ import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { RequirePermissions } from "../common/decorators/require-permissions.decorator";
 import { ScoresDto, SketchCommentDto, SketchFileDto } from "./sketches.controller";
 import { SketchWorksService } from "./sketch-works.service";
+import { ProtectedDelete } from "../common/decorators/protected-delete.decorator";
+import { Scoped } from "../staff/scoped.decorator";
+import { ActorScope } from "../staff/scope-where";
+import type { StaffScope } from "../staff/staff-scope.service";
 
 export class ConfirmVersionDto extends SketchFileDto {
   @ApiProperty()
@@ -379,6 +383,7 @@ export class SketchWorksController {
 
 @ApiTags("admin: sketch rating sets & reports")
 @Controller("admin/sketch-works")
+@Scoped(["sketchVersion", "params:versionId"])
 @RequirePermissions("assignment:review")
 export class AdminSketchWorksController {
   constructor(private readonly works: SketchWorksService) {}
@@ -407,6 +412,7 @@ export class AdminSketchWorksController {
   }
 
   @Delete("rubrics/:id")
+  @ProtectedDelete("rubric")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Delete a rating-factor set (questions fall back to their criteria)" })
   async deleteRubric(@Param("id", ParseUUIDPipe) id: string): Promise<void> {
@@ -417,9 +423,14 @@ export class AdminSketchWorksController {
   @ApiOperation({ summary: "Revisions waiting for (or with) reviewer feedback" })
   revisions(
     @CurrentUser() user: RequestUser,
+    @ActorScope() actorScope: StaffScope | null,
     @Query("status") status?: string,
   ): Promise<SketchRevisionQueueItem[]> {
-    return this.works.revisionQueue(user, status === "reviewed" ? "reviewed" : "pending");
+    return this.works.revisionQueue(
+      user,
+      status === "reviewed" ? "reviewed" : "pending",
+      actorScope?.studentIds ?? null,
+    );
   }
 
   @Put("versions/:versionId/expert")

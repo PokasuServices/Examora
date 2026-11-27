@@ -8,6 +8,7 @@ import { ApiError } from "@examora/auth-client";
 import type { ContentStatus, Question, QuizDetail, QuizResultDashboard } from "@examora/types";
 import { Button, FieldError, Input, Label } from "@examora/ui";
 import { QuizStudentSettings } from "@/components/quiz-student-settings";
+import { QuizDeskPanel } from "@/components/quiz-desk-panel";
 import { RequirePermission } from "@/components/require-permission";
 import { StatusActions } from "@/components/status-actions";
 import { Card } from "@/components/ui/card";
@@ -268,6 +269,8 @@ function QuizDetailContent() {
         </p>
       </div>
       <FieldError>{error}</FieldError>
+
+      <QuizDeskPanel quizId={quiz.id} onChanged={load} />
 
       <QuizStudentSettings key={quiz.updatedAt} quiz={quiz} onSaved={load} />
 

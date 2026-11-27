@@ -16,6 +16,7 @@ import { StudentAnalyticsService } from "../student/student-analytics.service";
 import { AdminAcademicAnalyticsService } from "../admin/admin-academic-analytics.service";
 import { AdminEngagementAnalyticsService } from "../admin/admin-engagement-analytics.service";
 import { ReportBuilderService } from "./report-builder.service";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 describe("ReportBuilderService (integration)", () => {
   let service: ReportBuilderService;
@@ -35,6 +36,7 @@ describe("ReportBuilderService (integration)", () => {
         ProgressService,
         CatalogService,
         SubmissionsService,
+        StaffScopeService,
         AssignmentCatalogService,
         EnrollmentService,
         PrismaService,

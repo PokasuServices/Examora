@@ -2,11 +2,20 @@
 
 import * as React from "react";
 import { ApiError } from "@examora/auth-client";
-import type { ContentStatus } from "@examora/types";
+import type { ContentStatus, DeletionTargetType } from "@examora/types";
 import { Button, Input } from "@examora/ui";
 import { StatusActions } from "@/components/status-actions";
 import { StatusBadge } from "@/components/status-badge";
 import { useContentApi } from "@/lib/content-api";
+import { DeleteGate } from "@/components/delete-gate";
+
+/** Which deletion-request type each nested collection is (mentors ask an admin). */
+const NODE_DELETE_TYPE: Record<string, DeletionTargetType | undefined> = {
+  subjects: "subject",
+  topics: "topic",
+  modules: "module",
+  lessons: "lesson",
+};
 
 /** Minimal shape every nested content node shares. */
 export interface ContentNode {
@@ -129,10 +138,23 @@ export function NodeManager({
                 <StatusActions
                   status={node.status}
                   onChange={(s) => void changeStatus(node.id, s)}
+                  permission="content:publish"
+                  review={
+                    NODE_DELETE_TYPE[collection] &&
+                    ["subject", "topic", "module", "lesson"].includes(NODE_DELETE_TYPE[collection]!)
+                      ? {
+                          type: NODE_DELETE_TYPE[collection] as
+                            "subject" | "topic" | "module" | "lesson",
+                          id: node.id,
+                        }
+                      : undefined
+                  }
                 />
-                <Button variant="ghost" onClick={() => void remove(node.id)}>
-                  Delete
-                </Button>
+                <DeleteGate type={NODE_DELETE_TYPE[collection]!} id={node.id}>
+                  <Button variant="ghost" onClick={() => void remove(node.id)}>
+                    Delete
+                  </Button>
+                </DeleteGate>
               </div>
             </div>
             {renderExtra ? renderExtra(node) : null}

@@ -10,6 +10,7 @@ import type {
   WeakTopicAction,
 } from "@examora/types";
 import { PrismaService } from "../prisma/prisma.service";
+import { quizAudience } from "../staff/scope-where";
 
 const PUBLISHED = { status: "PUBLISHED" as const, deletedAt: null };
 const FINISHED = ["SUBMITTED", "AUTO_SUBMITTED"] as const;
@@ -213,7 +214,11 @@ export class PracticeService {
         practiceCategories: {
           orderBy: { position: "asc" },
           include: {
-            quizzes: { where: PUBLISHED, orderBy: { position: "asc" }, select: { id: true } },
+            quizzes: {
+              where: { ...PUBLISHED, ...quizAudience(userId) },
+              orderBy: { position: "asc" },
+              select: { id: true },
+            },
           },
         },
       },
@@ -306,7 +311,7 @@ export class PracticeService {
 
   async testDetail(userId: string, quizId: string): Promise<PracticeTestDetail> {
     const quiz = await this.prisma.quiz.findFirst({
-      where: { id: quizId, ...PUBLISHED },
+      where: { id: quizId, ...PUBLISHED, ...quizAudience(userId) },
       include: {
         practiceCategory: { select: { id: true, title: true } },
         subject: { select: { course: { select: { id: true, title: true } } } },

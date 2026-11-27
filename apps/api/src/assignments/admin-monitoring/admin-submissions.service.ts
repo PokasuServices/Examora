@@ -14,6 +14,7 @@ export class AdminSubmissionsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async list(params: {
+    scope?: Prisma.AssignmentSubmissionWhereInput;
     page: number;
     pageSize: number;
     assignmentId?: string;
@@ -21,6 +22,7 @@ export class AdminSubmissionsService {
     status?: AssignmentSubmissionStatus;
   }) {
     const where: Prisma.AssignmentSubmissionWhereInput = {
+      ...(params.scope ? { AND: [params.scope] } : {}),
       ...(params.assignmentId ? { assignmentId: params.assignmentId } : {}),
       ...(params.reviewerId ? { reviewerId: params.reviewerId } : {}),
       ...(params.status ? { status: params.status } : {}),

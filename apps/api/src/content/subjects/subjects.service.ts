@@ -36,8 +36,15 @@ export class SubjectsService {
     });
   }
 
-  async list(params: { courseId: string; page: number; pageSize: number; status?: ContentStatus }) {
+  async list(params: {
+    scope?: Prisma.SubjectWhereInput;
+    courseId: string;
+    page: number;
+    pageSize: number;
+    status?: ContentStatus;
+  }) {
     const where: Prisma.SubjectWhereInput = {
+      ...(params.scope ? { AND: [params.scope] } : {}),
       deletedAt: null,
       courseId: params.courseId,
       ...(params.status ? { status: params.status } : {}),

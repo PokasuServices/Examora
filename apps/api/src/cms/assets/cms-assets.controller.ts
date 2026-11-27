@@ -24,6 +24,7 @@ import { toCmsAssetDto } from "../cms.mappers";
 import { ConfirmAssetUploadDto } from "../dto/confirm-asset-upload.dto";
 import { PresignAssetUploadDto } from "../dto/presign-asset-upload.dto";
 import { CmsAssetsService } from "./cms-assets.service";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
 
 /** Media Library / Asset Management (ADR-0022 §5), reusing Sprint 5's presigned-upload + malware-scan primitives. */
 @ApiTags("cms: assets")
@@ -80,6 +81,7 @@ export class CmsAssetsController {
   }
 
   @Delete(":id")
+  @ProtectedDelete(null)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Delete an asset (only if unreferenced by any content)" })
   async remove(

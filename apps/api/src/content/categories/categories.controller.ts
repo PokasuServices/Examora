@@ -26,6 +26,7 @@ import { CategoriesService } from "./categories.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 import { ListCategoriesQueryDto } from "./dto/list-categories-query.dto";
 import { UpdateCategoryDto } from "./dto/update-category.dto";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
 
 @ApiTags("content: categories")
 @Controller("admin/content/categories")
@@ -37,6 +38,7 @@ export class CategoriesController {
   ) {}
 
   @Post()
+  @RequirePermissions("courses:manage")
   @ApiOperation({ summary: "Create a category (content:manage)" })
   async create(
     @CurrentUser() actor: RequestUser,
@@ -72,6 +74,7 @@ export class CategoriesController {
   }
 
   @Post("reorder")
+  @RequirePermissions("courses:manage")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Reorder categories by an ordered id list" })
   async reorder(
@@ -96,6 +99,7 @@ export class CategoriesController {
   }
 
   @Patch(":id")
+  @RequirePermissions("courses:manage")
   @ApiOperation({ summary: "Update a category" })
   async update(
     @CurrentUser() actor: RequestUser,
@@ -118,6 +122,7 @@ export class CategoriesController {
   }
 
   @Delete(":id")
+  @ProtectedDelete("category")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Soft-delete a category" })
   async remove(

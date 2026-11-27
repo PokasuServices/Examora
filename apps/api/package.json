@@ -41,6 +41,7 @@
     "class-validator": "^0.14.1",
     "compression": "^1.7.5",
     "cookie-parser": "^1.4.7",
+    "exceljs": "4.4.0",
     "helmet": "^8.0.0",
     "ioredis": "^5.4.2",
     "ms": "^2.1.3",

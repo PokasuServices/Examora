@@ -23,6 +23,7 @@ import { toMentorAssignment } from "../mentoring.mappers";
 import { AssignMentorDto } from "./dto/assign-mentor.dto";
 import { ListMentorAssignmentsQueryDto } from "./dto/list-assignments-query.dto";
 import { MentorAssignmentService } from "./mentor-assignment.service";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
 
 @ApiTags("mentoring: admin assignment")
 @Controller("admin/mentor-assignments")
@@ -73,6 +74,7 @@ export class MentorAssignmentController {
   }
 
   @Delete(":studentId")
+  @ProtectedDelete(null)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Unassign a student's current mentor (no replacement)" })
   async unassign(

@@ -4,7 +4,8 @@ import * as React from "react";
 import { useAuth } from "@examora/auth-client";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { XpProvider } from "@/context/XpContext";
-import { isStudentView } from "@/lib/student-view";
+import { StaffHandoff } from "@/components/staff-handoff";
+import { isStudentView, usesStaffWorkspace } from "@/lib/student-view";
 
 /**
  * Shell for every authenticated page — the TMS AdminLayout (collapsible
@@ -15,6 +16,7 @@ import { isStudentView } from "@/lib/student-view";
  */
 export default function AppShellLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
+  if (usesStaffWorkspace(user)) return <StaffHandoff />;
   if (isStudentView(user)) {
     return (
       <XpProvider>

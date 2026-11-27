@@ -22,7 +22,7 @@ export default function AdminLoginPage() {
     setSubmitting(true);
     try {
       await login({ email, password });
-      router.push("/dashboard");
+      router.push("/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
     } finally {

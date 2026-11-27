@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { RetryInline } from "@/components/ui/retry-inline";
 import { SelectField } from "@/components/ui/select-field";
 import { useStudentAdminApi, type WebinarInput } from "@/lib/student-admin-api";
+import { DeleteGate } from "@/components/delete-gate";
 
 /** ISO → value for <input type="datetime-local"> in the browser's local time. */
 function toLocalInput(iso: string): string {
@@ -229,18 +230,20 @@ function WebinarsContent() {
                   <Button size="sm" variant="outline" onClick={() => setEditing(w)}>
                     Edit
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={async () => {
-                      if (window.confirm(`Delete "${w.title}"?`)) {
-                        await api.deleteWebinar(w.id).catch(() => undefined);
-                        load();
-                      }
-                    }}
-                  >
-                    Delete
-                  </Button>
+                  <DeleteGate type={"webinar"} id={w.id}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={async () => {
+                        if (window.confirm(`Delete "${w.title}"?`)) {
+                          await api.deleteWebinar(w.id).catch(() => undefined);
+                          load();
+                        }
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </DeleteGate>
                 </div>
               </li>
             ))}
@@ -253,7 +256,7 @@ function WebinarsContent() {
 
 export default function AdminWebinarsPage() {
   return (
-    <RequirePermission permission="content:manage">
+    <RequirePermission permission="colleges:manage">
       <WebinarsContent />
     </RequirePermission>
   );

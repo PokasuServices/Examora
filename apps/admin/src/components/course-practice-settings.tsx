@@ -8,6 +8,7 @@ import {
   type CheckpointRow,
   type PracticeCategoryRow,
 } from "@/lib/student-admin-api";
+import { DeleteGate } from "@/components/delete-gate";
 
 const SECTION =
   "rounded-md border border-neutral-200 p-4 dark:border-neutral-800 flex flex-col gap-4";
@@ -105,17 +106,19 @@ export function CoursePracticeSettings({ courseId }: { courseId: string }) {
                   >
                     Rename
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() =>
-                      window.confirm(
-                        `Delete "${c.title}"? Its tests stay but are no longer listed.`,
-                      ) && void run(() => api.deleteCategory(c.id))
-                    }
-                  >
-                    Delete
-                  </Button>
+                  <DeleteGate type={"practice-category"} id={c.id}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        window.confirm(
+                          `Delete "${c.title}"? Its tests stay but are no longer listed.`,
+                        ) && void run(() => api.deleteCategory(c.id))
+                      }
+                    >
+                      Delete
+                    </Button>
+                  </DeleteGate>
                 </span>
               </li>
             ))}
@@ -177,13 +180,15 @@ export function CoursePracticeSettings({ courseId }: { courseId: string }) {
                     {c.completedBy} done
                   </span>
                 </span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => void run(() => api.deleteCheckpoint(courseId, c.id))}
-                >
-                  Delete
-                </Button>
+                <DeleteGate type={"checkpoint"} id={c.id}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => void run(() => api.deleteCheckpoint(courseId, c.id))}
+                  >
+                    Delete
+                  </Button>
+                </DeleteGate>
               </li>
             ))}
           </ul>

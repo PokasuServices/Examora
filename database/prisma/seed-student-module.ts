@@ -18,6 +18,8 @@ import { seedPracticeLibrary } from "./seed-practice-library.js";
 import { seedDailyHistory } from "./seed-daily.js";
 import { seedLiveAssignments } from "./seed-assignments-live.js";
 import { seedLearnTags } from "./seed-learn-tags.js";
+import { seedBatches } from "./seed-batches.js";
+import { seedMentorDesk } from "./seed-mentor-desk.js";
 import {
   SAMPLE_COURSE,
   SAMPLE_PAST_PAPER_STATS,
@@ -458,10 +460,12 @@ export async function seedStudentModule(
   const daily = await seedDailyHistory(prisma, ids.studentId);
   const live = await seedLiveAssignments(prisma, ids.studentId, ids.mentorId);
   const tags = await seedLearnTags(prisma, ids.studentId);
+  const batches = await seedBatches(prisma, ids);
+  const desk = await seedMentorDesk(prisma, ids);
   // eslint-disable-next-line no-console -- seed script CLI output
   console.log(
     `Student module sample data: ${xpRows} new XP rows, the "${SAMPLE_COURSE.title}" course, ` +
-      `${licences} new licences (every student × every course), demo-student progress; ${rotation}; ${extras}; ${library}; ${daily}; ${live}; ${tags}.`,
+      `${licences} new licences (every student × every course), demo-student progress; ${rotation}; ${extras}; ${library}; ${daily}; ${live}; ${tags}; ${batches}; ${desk}.`,
   );
 }
 

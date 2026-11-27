@@ -55,6 +55,11 @@ import { TemplatesService } from "./templates/templates.service";
   // the student-facing history endpoint was written that way in Sprint 5.
   // AssignmentCatalogService is reused by CommunityModule (ADR-0017) to
   // validate a thread's optional related-assignment link.
-  exports: [SubmissionsService, AssignmentCatalogService],
+  exports: [
+    SubmissionsService,
+    AssignmentCatalogService,
+    AssignmentsAdminService,
+    TemplatesService,
+  ],
 })
 export class AssignmentsModule {}

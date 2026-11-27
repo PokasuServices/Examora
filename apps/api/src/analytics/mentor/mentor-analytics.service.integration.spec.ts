@@ -16,6 +16,7 @@ import {
 } from "../../../test/support/fake-notifications-service";
 import { StudentAnalyticsService } from "../student/student-analytics.service";
 import { MentorAnalyticsService } from "./mentor-analytics.service";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 describe("MentorAnalyticsService (integration)", () => {
   let service: MentorAnalyticsService;
@@ -38,6 +39,7 @@ describe("MentorAnalyticsService (integration)", () => {
         AssignmentCatalogService,
         EnrollmentService,
         MentorAssignmentService,
+        StaffScopeService,
         MentorProfilesService,
         PrismaService,
         { provide: STORAGE_PORT, useClass: FakeStorageService },

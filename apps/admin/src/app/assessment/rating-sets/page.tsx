@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { useStudentAdminApi } from "@/lib/student-admin-api";
+import { DeleteGate } from "@/components/delete-gate";
 
 type FactorDraft = { title: string; description: string };
 const blank = (): FactorDraft => ({ title: "", description: "" });
@@ -195,26 +196,28 @@ function RatingSetsContent() {
                     <Button size="sm" variant="ghost" onClick={() => setEditing(r.id)}>
                       Edit
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={async () => {
-                        if (
-                          !window.confirm(
-                            `Delete "${r.title}"? Its questions keep their current criteria.`,
+                    <DeleteGate type={"rubric"} id={r.id}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={async () => {
+                          if (
+                            !window.confirm(
+                              `Delete "${r.title}"? Its questions keep their current criteria.`,
+                            )
                           )
-                        )
-                          return;
-                        try {
-                          await api.deleteRubric(r.id);
-                          setRows((p) => (p ?? []).filter((x) => x.id !== r.id));
-                        } catch (err) {
-                          setError(err instanceof ApiError ? err.message : "Couldn't delete");
-                        }
-                      }}
-                    >
-                      Delete
-                    </Button>
+                            return;
+                          try {
+                            await api.deleteRubric(r.id);
+                            setRows((p) => (p ?? []).filter((x) => x.id !== r.id));
+                          } catch (err) {
+                            setError(err instanceof ApiError ? err.message : "Couldn't delete");
+                          }
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </DeleteGate>
                   </div>
                 </div>
                 <ol className="flex list-decimal flex-col gap-1 pl-5 text-sm text-neutral-700 dark:text-neutral-300">

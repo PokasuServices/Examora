@@ -9,5 +9,6 @@ import { TestSharesService } from "./test-shares.service";
   imports: [GamificationModule],
   controllers: [PracticeController, AdminPracticeController],
   providers: [PracticeService, TestSharesService],
+  exports: [PracticeService],
 })
 export class PracticeModule {}

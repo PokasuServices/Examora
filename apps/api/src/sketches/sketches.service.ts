@@ -362,11 +362,18 @@ export class SketchesService {
 
   // ------------------------------------------------------------ expert marking
 
-  async queue(status: "pending" | "reviewed"): Promise<SketchReviewQueueItem[]> {
+  /** `studentIds` limits the queue to a mentor's own students (null = everyone). */
+  async queue(
+    status: "pending" | "reviewed",
+    studentIds: string[] | null = null,
+  ): Promise<SketchReviewQueueItem[]> {
     const rows = await this.prisma.quizAttemptAnswer.findMany({
       where: {
         uploadAssetId: { not: null },
-        attempt: { status: { in: [...FINISHED] } },
+        attempt: {
+          status: { in: [...FINISHED] },
+          ...(studentIds ? { userId: { in: studentIds } } : {}),
+        },
         ...(status === "pending"
           ? { OR: [{ sketchReview: null }, { sketchReview: { expertReviewedAt: null } }] }
           : { sketchReview: { expertReviewedAt: { not: null } } }),
@@ -381,6 +388,16 @@ export class SketchesService {
       quizTitle: r.attempt.quiz.title,
       submittedAt: r.attempt.submittedAt?.toISOString() ?? null,
     }));
+  }
+
+  /** The marks a sketch answer is out of (from the attempt's frozen question list). */
+  async maxMarks(answerId: string): Promise<number> {
+    const row = await this.prisma.quizAttemptAnswer.findUnique({
+      where: { id: answerId },
+      include: ANSWER_INCLUDE,
+    });
+    if (!row) throw new NotFoundException("Sketch not found");
+    return this.marksFor(row);
   }
 
   /** Saves the expert's rating and marks, then re-totals the attempt's score. */

@@ -12,5 +12,6 @@ import { StudentProfileService } from "./student-profile.service";
   imports: [GamificationModule],
   controllers: [StudentProfileController, AdminCheckpointsController, AdminCohortsController],
   providers: [StudentProfileService],
+  exports: [StudentProfileService],
 })
 export class StudentProfileModule {}

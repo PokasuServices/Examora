@@ -4,6 +4,7 @@ import { PrismaService } from "../../prisma/prisma.service";
 import { fakeNotificationsServiceProvider } from "../../../test/support/fake-notifications-service";
 import { MentorAssignmentService } from "../assignment/mentor-assignment.service";
 import { MentorProfilesService } from "./mentor-profiles.service";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 describe("MentorProfilesService (integration)", () => {
   let service: MentorProfilesService;
@@ -21,6 +22,7 @@ describe("MentorProfilesService (integration)", () => {
       providers: [
         MentorProfilesService,
         MentorAssignmentService,
+        StaffScopeService,
         PrismaService,
         fakeNotificationsServiceProvider(),
       ],

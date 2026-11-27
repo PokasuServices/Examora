@@ -23,9 +23,11 @@ import { toQuizQuestionAssignment } from "../assessment.mappers";
 import { AssignQuestionDto } from "./dto/assign-question.dto";
 import { UpdateQuizQuestionDto } from "./dto/update-quiz-question.dto";
 import { QuizQuestionsService } from "./quiz-questions.service";
+import { Scoped } from "../../staff/scoped.decorator";
 
 @ApiTags("assessment: quiz question assignment")
 @Controller("admin/assessment/quizzes/:quizId/questions")
+@Scoped(["quiz", "params:quizId"], ["question", "body:questionId"])
 @RequirePermissions("quiz:manage")
 export class QuizQuestionsController {
   constructor(

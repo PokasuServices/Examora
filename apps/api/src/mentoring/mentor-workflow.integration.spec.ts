@@ -8,6 +8,7 @@ import { MentorFeedbackService } from "./feedback/mentor-feedback.service";
 import { MentorMeetingsService } from "./meetings/mentor-meetings.service";
 import { MentorNotesService } from "./notes/mentor-notes.service";
 import { MentorTasksService } from "./tasks/mentor-tasks.service";
+import { StaffScopeService } from "../staff/staff-scope.service";
 
 describe("Mentor workflow services (integration)", () => {
   let notes: MentorNotesService;
@@ -35,6 +36,7 @@ describe("Mentor workflow services (integration)", () => {
         MentorFeedbackService,
         MentorMeetingsService,
         MentorAssignmentService,
+        StaffScopeService,
         PrismaService,
         fakeNotificationsServiceProvider(),
       ],

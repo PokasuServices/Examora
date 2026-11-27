@@ -16,6 +16,7 @@ import { RetryInline } from "@/components/ui/retry-inline";
 import { Skeleton } from "@/components/ui/skeleton";
 import { statusLabel } from "@/lib/format";
 import { useAssignmentAdminApi } from "@/lib/assignment-api";
+import { DeleteGate } from "@/components/delete-gate";
 
 const STATUS_TONE: Record<ContentStatus, ChipTone> = {
   DRAFT: "neutral",
@@ -276,9 +277,11 @@ function AssignmentDetailContent() {
       </Card>
 
       <div>
-        <Button variant="ghost" onClick={() => setPending({ kind: "delete" })}>
-          Delete assignment
-        </Button>
+        <DeleteGate type={"assignment"} id={id}>
+          <Button variant="ghost" onClick={() => setPending({ kind: "delete" })}>
+            Delete assignment
+          </Button>
+        </DeleteGate>
       </div>
 
       <ConfirmDialog

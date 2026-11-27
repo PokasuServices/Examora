@@ -28,9 +28,14 @@ import { CreateCriterionDto } from "./dto/create-criterion.dto";
 import { ListAssignmentsQueryDto } from "./dto/list-assignments-query.dto";
 import { UpdateAssignmentDto } from "./dto/update-assignment.dto";
 import { UpdateCriterionDto } from "./dto/update-criterion.dto";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
+import { Scoped } from "../../staff/scoped.decorator";
+import { ActorScope, scopeWhere } from "../../staff/scope-where";
+import type { StaffScope } from "../../staff/staff-scope.service";
 
 @ApiTags("assignments: admin")
 @Controller("admin/assignments")
+@Scoped(["assignment", "params:id"], ["subject", "body:subjectId"], ["subject", "query:subjectId"])
 @RequirePermissions("assignment:manage")
 export class AssignmentsAdminController {
   constructor(
@@ -59,8 +64,12 @@ export class AssignmentsAdminController {
 
   @Get()
   @ApiOperation({ summary: "List assignments (filter by status/subject)" })
-  async list(@Query() query: ListAssignmentsQueryDto): Promise<PaginatedData<Assignment>> {
+  async list(
+    @ActorScope() actorScope: StaffScope | null,
+    @Query() query: ListAssignmentsQueryDto,
+  ): Promise<PaginatedData<Assignment>> {
     const { items, total } = await this.assignmentsService.list({
+      scope: scopeWhere.assignment(actorScope),
       page: query.page,
       pageSize: query.pageSize,
       status: query.status,
@@ -123,6 +132,7 @@ export class AssignmentsAdminController {
   }
 
   @Delete(":id")
+  @ProtectedDelete("assignment")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Soft-delete an assignment (must not be PUBLISHED)" })
   async remove(

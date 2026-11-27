@@ -7,6 +7,7 @@ import {
 import { NotificationsService } from "../../notifications/notifications.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import type { RequestUser } from "../../auth/types/request-user";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 const ASSIGNMENT_RELATIONS = {
   student: { select: { email: true } },
@@ -24,6 +25,7 @@ export class MentorAssignmentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly staffScope: StaffScopeService,
   ) {}
 
   async getActiveAssignment(studentId: string) {
@@ -48,6 +50,9 @@ export class MentorAssignmentService {
    */
   async assertAssignedOrAdmin(actor: RequestUser, studentId: string): Promise<void> {
     if (actor.roles.includes("ADMINISTRATOR")) return;
+    // A student in one of the mentor's batches is theirs (mentor module).
+    const batch = await this.staffScope.mentorScope(actor.id);
+    if (batch.studentIds.includes(studentId)) return;
     const activeMentorId = await this.getActiveMentorId(studentId);
     if (activeMentorId !== actor.id) {
       throw new ForbiddenException("You are not this student's assigned mentor");
@@ -59,7 +64,8 @@ export class MentorAssignmentService {
       where: { mentorId, unassignedAt: null },
       select: { studentId: true },
     });
-    return rows.map((r) => r.studentId);
+    const batch = await this.staffScope.mentorScope(mentorId);
+    return [...new Set([...rows.map((r) => r.studentId), ...batch.studentIds])];
   }
 
   async assign(studentId: string, mentorId: string, assignedById: string) {

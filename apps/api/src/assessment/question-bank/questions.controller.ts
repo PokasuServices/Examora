@@ -27,9 +27,19 @@ import { CreateQuestionDto } from "./dto/create-question.dto";
 import { ListQuestionsQueryDto } from "./dto/list-questions-query.dto";
 import { UpdateQuestionDto } from "./dto/update-question.dto";
 import { QuestionsService } from "./questions.service";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
+import { Scoped } from "../../staff/scoped.decorator";
+import { ActorScope, scopeWhere } from "../../staff/scope-where";
+import type { StaffScope } from "../../staff/staff-scope.service";
 
 @ApiTags("assessment: questions")
 @Controller("admin/assessment/questions")
+@Scoped(
+  ["question", "params:id"],
+  ["subject", "body:subjectId"],
+  ["subject", "query:subjectId"],
+  ["topic", "body:topicId"],
+)
 @RequirePermissions("question:manage")
 export class QuestionsController {
   constructor(
@@ -76,8 +86,12 @@ export class QuestionsController {
 
   @Get()
   @ApiOperation({ summary: "List questions (filter by status/subject/type/difficulty/tag)" })
-  async list(@Query() query: ListQuestionsQueryDto): Promise<PaginatedData<Question>> {
+  async list(
+    @ActorScope() actorScope: StaffScope | null,
+    @Query() query: ListQuestionsQueryDto,
+  ): Promise<PaginatedData<Question>> {
     const { items, total } = await this.questionsService.list({
+      scope: scopeWhere.question(actorScope),
       page: query.page,
       pageSize: query.pageSize,
       status: query.status,
@@ -141,6 +155,7 @@ export class QuestionsController {
   }
 
   @Delete(":id")
+  @ProtectedDelete("question")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Soft-delete a question (must be unassigned from all quizzes)" })
   async remove(

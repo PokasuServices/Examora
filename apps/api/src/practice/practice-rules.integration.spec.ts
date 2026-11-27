@@ -30,6 +30,8 @@ describe("Practice, attempt rules and daily quiz (integration)", () => {
   let firstQuiz: string;
   let secondQuiz: string;
   const questionIds: string[] = [];
+  /** Today's platform daily quiz, if this spec created it (removed afterwards). */
+  let createdDailyId: string | null = null;
   let cohortId: string;
 
   beforeAll(async () => {
@@ -118,6 +120,8 @@ describe("Practice, attempt rules and daily quiz (integration)", () => {
     await prisma.user.deleteMany({ where: { id: userId } });
     await prisma.cohort.deleteMany({ where: { id: cohortId } });
     await prisma.course.deleteMany({ where: { id: courseId } });
+    // Don't leave today's shared daily quiz pointing at deleted questions.
+    if (createdDailyId) await prisma.dailyQuiz.deleteMany({ where: { id: createdDailyId } });
     await prisma.question.deleteMany({ where: { id: { in: questionIds } } });
     await moduleRef.close();
   });
@@ -177,8 +181,12 @@ describe("Practice, attempt rules and daily quiz (integration)", () => {
       data: { tags: ["daily"] },
     });
     const date = todayInIndia();
-    const existing = await prisma.dailyQuiz.findUnique({ where: { date } });
-    if (!existing) await prisma.dailyQuiz.create({ data: { date, questionIds } });
+    const existing = await prisma.dailyQuiz.findUnique({
+      where: { date_scope: { date, scope: "" } },
+    });
+    if (!existing) {
+      createdDailyId = (await prisma.dailyQuiz.create({ data: { date, questionIds } })).id;
+    }
 
     const before = await xp.getTotal(userId);
     const questions = await daily.start(userId);

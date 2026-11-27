@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
+import type { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
@@ -58,7 +59,12 @@ async function bootstrap(): Promise<void> {
   // req.rawBody alongside the parsed JSON body, needed for the payments
   // webhook's HMAC signature verification (re-serializing the parsed JSON
   // would not byte-for-byte match what the gateway actually signed).
-  const app = await NestFactory.create(AppModule, { bufferLogs: true, rawBody: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+    rawBody: true,
+  });
+  // Excel uploads (attendance, questions, marks) arrive as base64 JSON.
+  app.useBodyParser("json", { limit: "6mb" });
   app.useLogger(app.get(Logger));
   app.enableShutdownHooks();
 

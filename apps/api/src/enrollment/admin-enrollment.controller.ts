@@ -24,6 +24,7 @@ import { GrantEnrollmentDto } from "./dto/grant-enrollment.dto";
 import { ListEnrollmentsQueryDto } from "./dto/list-enrollments-query.dto";
 import { toEnrollment } from "./enrollment.mappers";
 import { EnrollmentService } from "./enrollment.service";
+import { ProtectedDelete } from "../common/decorators/protected-delete.decorator";
 
 /** Admin enrollment management (ADR-0018) — manual grant/revoke, cross-student visibility. */
 @ApiTags("commerce: enrollment (admin)")
@@ -106,6 +107,7 @@ export class AdminEnrollmentController {
   }
 
   @Delete(":id")
+  @ProtectedDelete(null)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Revoke an enrollment" })
   async revoke(

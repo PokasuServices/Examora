@@ -19,6 +19,7 @@ import {
 } from "../../../test/support/assignment-seed";
 import { StudentAnalyticsService } from "../student/student-analytics.service";
 import { AdminAcademicAnalyticsService } from "./admin-academic-analytics.service";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 describe("AdminAcademicAnalyticsService (integration)", () => {
   let service: AdminAcademicAnalyticsService;
@@ -38,6 +39,7 @@ describe("AdminAcademicAnalyticsService (integration)", () => {
         ProgressService,
         CatalogService,
         SubmissionsService,
+        StaffScopeService,
         AssignmentCatalogService,
         EnrollmentService,
         PrismaService,

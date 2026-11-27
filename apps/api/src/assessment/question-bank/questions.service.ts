@@ -120,6 +120,7 @@ export class QuestionsService {
   }
 
   async list(params: {
+    scope?: Prisma.QuestionWhereInput;
     page: number;
     pageSize: number;
     status?: ContentStatus;
@@ -131,6 +132,7 @@ export class QuestionsService {
   }) {
     const search = params.search?.trim();
     const where: Prisma.QuestionWhereInput = {
+      ...(params.scope ? { AND: [params.scope] } : {}),
       deletedAt: null,
       ...(params.status ? { status: params.status } : {}),
       ...(params.subjectId ? { subjectId: params.subjectId } : {}),

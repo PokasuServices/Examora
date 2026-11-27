@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { Providers } from "./providers";
 
 // Same typefaces as apps/web (Inter body / Plus Jakarta Sans headings) —
-// one product, one typographic voice.
+// one product, one typographic voice. The heading font is self-hosted (Latin,
+// variable 500–700, OFL): Google now serves it from URLs Turbopack in
+// Next 15.1 can't load, which broke every staff page in dev.
 const bodyFont = Inter({ subsets: ["latin"], variable: "--font-body" });
-const headingFont = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+const headingFont = localFont({
+  src: "./fonts/plus-jakarta-sans-latin.woff2",
+  weight: "500 700",
+  display: "swap",
   variable: "--font-heading",
 });
 

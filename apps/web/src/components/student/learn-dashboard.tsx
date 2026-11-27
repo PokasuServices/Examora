@@ -24,6 +24,7 @@ import type {
 import { cn } from "@examora/ui";
 import { stagger, ToneCard, ToneIcon, toneClasses, type Tone } from "@/components/ui/tone-card";
 import { useLearnApi } from "@/lib/learn-api";
+import { AttendanceCard, BatchNotices } from "@/components/student/mentor-corner";
 
 const STATUS: Record<LearnTopicStatus, { label: string; tone: Tone; icon: typeof Star }> = {
   COMPLETED: { label: "Completed", tone: "emerald", icon: CheckCircle2 },
@@ -452,6 +453,11 @@ export function LearnDashboardPanel({
   return (
     <div className="flex flex-col gap-6">
       <ContinueCard d={d} courseTitle={courseTitle} />
+      {/* Batch students only (mentor module); the row collapses when both are empty. */}
+      <div className="grid gap-6 empty:hidden md:grid-cols-2">
+        <AttendanceCard />
+        <BatchNotices />
+      </div>
       <StatCards d={d} onFilter={chooseFilter} />
       <div ref={boardRef} className="scroll-mt-20">
         <TopicBoard

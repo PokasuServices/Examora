@@ -26,6 +26,7 @@ import { stagger, ToneCard, ToneIcon } from "@/components/ui/tone-card";
 import { useXp } from "@/context/XpContext";
 import { useDashboardsApi } from "@/lib/dashboards-api";
 import { useStudentApi } from "@/lib/student-api";
+import { MentorShoutouts } from "@/components/student/mentor-corner";
 
 const WAYS_TO_EARN: { label: string; href: string; icon: typeof Zap }[] = [
   { label: "Complete a lesson", href: "/learn", icon: BookOpen },
@@ -255,6 +256,8 @@ function RewardsContent() {
           </Card>
         </div>
       </div>
+
+      <MentorShoutouts />
 
       <Card id="badges" className="scroll-mt-20">
         <h2 className="text-base font-medium text-neutral-800 dark:text-white/90">

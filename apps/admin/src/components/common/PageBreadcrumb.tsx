@@ -14,7 +14,7 @@ export interface BreadcrumbCrumb {
 export function BreadcrumbTrail({
   pageTitle,
   trail = [],
-  homeHref = "/dashboard",
+  homeHref = "/",
 }: {
   pageTitle: string;
   trail?: BreadcrumbCrumb[];

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useAuth } from "@examora/auth-client";
 import type { AssignmentSummary } from "@examora/types";
 import { useAssignmentApi } from "@/lib/assignment-api";
 
@@ -21,10 +22,18 @@ export type FetchState<T> =
  */
 export function useUpcomingAssignments(): FetchState<UpcomingAssignment[]> & { retry: () => void } {
   const api = useAssignmentApi();
+  const { user } = useAuth();
+  // Only learners have assignments due. Staff and guardians would otherwise
+  // see every published deadline as their own "overdue" work.
+  const isLearner = user?.roles.includes("STUDENT") ?? false;
   const [state, setState] = React.useState<FetchState<UpcomingAssignment[]>>({ status: "loading" });
   const [attempt, setAttempt] = React.useState(0);
 
   React.useEffect(() => {
+    if (!isLearner) {
+      setState({ status: "ready", data: [] });
+      return;
+    }
     setState({ status: "loading" });
     api
       .listAssignments()
@@ -36,7 +45,7 @@ export function useUpcomingAssignments(): FetchState<UpcomingAssignment[]> & { r
       })
       .catch(() => setState({ status: "error" }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attempt]);
+  }, [attempt, isLearner]);
 
   return { ...state, retry: () => setAttempt((a) => a + 1) } as FetchState<UpcomingAssignment[]> & {
     retry: () => void;

@@ -34,8 +34,15 @@ export class ModulesService {
     });
   }
 
-  async list(params: { topicId: string; page: number; pageSize: number; status?: ContentStatus }) {
+  async list(params: {
+    scope?: Prisma.ModuleWhereInput;
+    topicId: string;
+    page: number;
+    pageSize: number;
+    status?: ContentStatus;
+  }) {
     const where: Prisma.ModuleWhereInput = {
+      ...(params.scope ? { AND: [params.scope] } : {}),
       deletedAt: null,
       topicId: params.topicId,
       ...(params.status ? { status: params.status } : {}),

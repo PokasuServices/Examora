@@ -16,6 +16,8 @@ import type {
 } from "@examora/types";
 import { XpService } from "../gamification/xp.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { StaffScopeService } from "../staff/staff-scope.service";
+import type { Prisma } from "@examora/database";
 
 const FINISHED = ["SUBMITTED", "AUTO_SUBMITTED"] as const;
 const ACTIVITY_LIMIT = 60;
@@ -37,11 +39,26 @@ export const XP_REASON_LABEL: Record<string, string> = {
 };
 
 /** Student profile: overview, activity, performance, revision, goals, checkpoints (phase 8). */
+/** Batch fields an admin or mentor can set (all optional on update). */
+export interface BatchInput {
+  name?: string;
+  batch?: string | null;
+  courseId?: string | null;
+  mode?: "OFFLINE" | "ONLINE" | "HYBRID";
+  schedule?: { day: number; start: string; end: string }[];
+  startsOn?: string | null;
+  endsOn?: string | null;
+  location?: string | null;
+  meetingUrl?: string | null;
+  isActive?: boolean;
+}
+
 @Injectable()
 export class StudentProfileService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly xp: XpService,
+    private readonly staffScope: StaffScopeService,
   ) {}
 
   private async licensedCourses(userId: string) {
@@ -396,21 +413,173 @@ export class StudentProfileService {
     await this.prisma.courseCheckpoint.delete({ where: { id } });
   }
 
-  async listCohorts(): Promise<CohortView[]> {
-    const rows = await this.prisma.cohort.findMany({
-      orderBy: { createdAt: "desc" },
-      include: { _count: { select: { members: true } } },
-    });
-    return rows.map((c) => ({
+  // ------------------------------------------------------------ batches (cohorts)
+
+  private static readonly BATCH_INCLUDE = {
+    _count: { select: { members: true } },
+    course: { select: { id: true, title: true } },
+    mentors: {
+      orderBy: [{ role: "desc" as const }, { addedAt: "asc" as const }],
+      select: {
+        role: true,
+        endsOn: true,
+        mentor: { select: { id: true, firstName: true, lastName: true, email: true } },
+      },
+    },
+  };
+
+  private toBatchView(c: {
+    id: string;
+    name: string;
+    batch: string | null;
+    mode: string;
+    schedule: unknown;
+    startsOn: Date | null;
+    endsOn: Date | null;
+    location: string | null;
+    meetingUrl: string | null;
+    isActive: boolean;
+    course: { id: string; title: string } | null;
+    _count: { members: number };
+    mentors: {
+      role: string;
+      endsOn: Date | null;
+      mentor: { id: string; firstName: string | null; lastName: string | null; email: string };
+    }[];
+  }): CohortView {
+    const day = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : null);
+    return {
       id: c.id,
       name: c.name,
       batch: c.batch,
       memberCount: c._count.members,
-    }));
+      course: c.course,
+      mode: (["OFFLINE", "ONLINE", "HYBRID"].includes(c.mode)
+        ? c.mode
+        : "OFFLINE") as CohortView["mode"],
+      schedule: Array.isArray(c.schedule) ? (c.schedule as CohortView["schedule"]) : [],
+      startsOn: day(c.startsOn),
+      endsOn: day(c.endsOn),
+      location: c.location,
+      meetingUrl: c.meetingUrl,
+      isActive: c.isActive,
+      mentors: c.mentors.map(({ mentor: m, role, endsOn }) => ({
+        id: m.id,
+        name: `${m.firstName ?? ""} ${m.lastName ?? ""}`.trim() || m.email,
+        email: m.email,
+        role: role === "COVER" ? ("COVER" as const) : ("PRIMARY" as const),
+        endsOn: day(endsOn),
+      })),
+    };
   }
 
-  createCohort(name: string, batch?: string) {
-    return this.prisma.cohort.create({ data: { name: name.trim(), batch: batch?.trim() || null } });
+  /** All batches, or only a mentor's own when `where` is their scope filter. */
+  async listCohorts(where?: Prisma.CohortWhereInput): Promise<CohortView[]> {
+    const rows = await this.prisma.cohort.findMany({
+      ...(where ? { where } : {}),
+      orderBy: [{ isActive: "desc" }, { createdAt: "desc" }],
+      include: StudentProfileService.BATCH_INCLUDE,
+    });
+    return rows.map((c) => this.toBatchView(c));
+  }
+
+  private batchData(input: BatchInput) {
+    const date = (d: string | null | undefined) =>
+      d === undefined ? undefined : d ? new Date(`${d}T00:00:00.000Z`) : null;
+    if (input.startsOn && input.endsOn && input.endsOn < input.startsOn) {
+      throw new BadRequestException("The end date must be after the start date");
+    }
+    for (const s of input.schedule ?? []) {
+      if (s.end <= s.start) throw new BadRequestException("Each class must end after it starts");
+    }
+    return {
+      ...(input.name !== undefined ? { name: input.name.trim() } : {}),
+      ...(input.batch !== undefined ? { batch: input.batch?.trim() || null } : {}),
+      ...(input.courseId !== undefined ? { courseId: input.courseId || null } : {}),
+      ...(input.mode !== undefined ? { mode: input.mode } : {}),
+      ...(input.schedule !== undefined
+        ? {
+            schedule: [...input.schedule].sort(
+              (a, b) => a.day - b.day || a.start.localeCompare(b.start),
+            ),
+          }
+        : {}),
+      ...(input.startsOn !== undefined ? { startsOn: date(input.startsOn) } : {}),
+      ...(input.endsOn !== undefined ? { endsOn: date(input.endsOn) } : {}),
+      ...(input.location !== undefined ? { location: input.location?.trim() || null } : {}),
+      ...(input.meetingUrl !== undefined ? { meetingUrl: input.meetingUrl?.trim() || null } : {}),
+      ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
+    };
+  }
+
+  async createCohort(input: BatchInput & { name: string }): Promise<CohortView> {
+    const row = await this.prisma.cohort.create({
+      data: this.batchData(input) as { name: string },
+      include: StudentProfileService.BATCH_INCLUDE,
+    });
+    return this.toBatchView(row);
+  }
+
+  async updateCohort(id: string, input: BatchInput): Promise<CohortView> {
+    const exists = await this.prisma.cohort.findUnique({ where: { id }, select: { id: true } });
+    if (!exists) throw new NotFoundException("Batch not found");
+    const row = await this.prisma.cohort.update({
+      where: { id },
+      data: this.batchData(input),
+      include: StudentProfileService.BATCH_INCLUDE,
+    });
+    return this.toBatchView(row);
+  }
+
+  /**
+   * Sets a batch's mentor (one PRIMARY per batch) and an optional COVER mentor
+   * whose access ends after `coverEndsOn` (mentor module). Both must hold the
+   * MENTOR role; a cover needs an end date.
+   */
+  async setCohortMentors(
+    id: string,
+    input: { mentorId: string | null; coverId?: string | null; coverEndsOn?: string | null },
+  ): Promise<CohortView> {
+    const exists = await this.prisma.cohort.findUnique({ where: { id }, select: { id: true } });
+    if (!exists) throw new NotFoundException("Batch not found");
+    const ids = [input.mentorId, input.coverId].filter((x): x is string => !!x);
+    if (input.coverId && input.coverId === input.mentorId) {
+      throw new BadRequestException("The cover mentor must be someone other than the batch mentor");
+    }
+    if (input.coverId && !input.coverEndsOn) {
+      throw new BadRequestException("Give the cover mentor an end date");
+    }
+    const mentors = await this.prisma.user.findMany({
+      where: { id: { in: ids }, deletedAt: null, roles: { some: { role: { name: "MENTOR" } } } },
+      select: { id: true },
+    });
+    if (mentors.length !== ids.length) {
+      throw new BadRequestException("Every batch mentor must be a user with the Mentor role");
+    }
+    await this.prisma.$transaction([
+      this.prisma.cohortMentor.deleteMany({ where: { cohortId: id } }),
+      this.prisma.cohortMentor.createMany({
+        data: [
+          ...(input.mentorId ? [{ cohortId: id, mentorId: input.mentorId, role: "PRIMARY" }] : []),
+          ...(input.coverId
+            ? [
+                {
+                  cohortId: id,
+                  mentorId: input.coverId,
+                  role: "COVER",
+                  endsOn: new Date(`${input.coverEndsOn}T00:00:00.000Z`),
+                },
+              ]
+            : []),
+        ],
+      }),
+    ]);
+    this.staffScope.invalidate();
+    const row = await this.prisma.cohort.findUniqueOrThrow({
+      where: { id },
+      include: StudentProfileService.BATCH_INCLUDE,
+    });
+    return this.toBatchView(row);
   }
 
   async deleteCohort(id: string): Promise<void> {
@@ -451,11 +620,13 @@ export class StudentProfileService {
       data: users.map((u) => ({ cohortId: id, userId: u.id })),
       skipDuplicates: true,
     });
+    this.staffScope.invalidate();
     const found = new Set(users.map((u) => u.email.toLowerCase()));
     return { added: users.length, notFound: clean.filter((e) => !found.has(e)) };
   }
 
   async removeCohortMember(id: string, userId: string): Promise<void> {
     await this.prisma.cohortMember.deleteMany({ where: { cohortId: id, userId } });
+    this.staffScope.invalidate();
   }
 }

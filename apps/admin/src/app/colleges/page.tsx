@@ -14,6 +14,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { RetryInline } from "@/components/ui/retry-inline";
 import { useStudentAdminApi, type CollegeInput } from "@/lib/student-admin-api";
+import { DeleteGate } from "@/components/delete-gate";
 
 const CATEGORY_LABEL: Record<string, string> = {
   ARCHITECTURE: "Architecture",
@@ -256,9 +257,11 @@ function CollegesContent() {
                   <Button size="sm" variant="outline" onClick={() => setEditing(c)}>
                     Edit
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setDeleting(c)}>
-                    Delete
-                  </Button>
+                  <DeleteGate type={"college"} id={c.id}>
+                    <Button size="sm" variant="ghost" onClick={() => setDeleting(c)}>
+                      Delete
+                    </Button>
+                  </DeleteGate>
                 </div>
               </li>
             ))}
@@ -291,7 +294,7 @@ function CollegesContent() {
 
 export default function AdminCollegesPage() {
   return (
-    <RequirePermission permission="content:manage">
+    <RequirePermission permission="colleges:manage">
       <CollegesContent />
     </RequirePermission>
   );

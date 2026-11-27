@@ -29,9 +29,14 @@ import { CreateCourseDto } from "./dto/create-course.dto";
 import { ListCoursesQueryDto } from "./dto/list-courses-query.dto";
 import { ReplacePastPaperStatsDto } from "./dto/replace-past-paper-stats.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
+import { Scoped } from "../../staff/scoped.decorator";
+import { ActorScope, scopeWhere } from "../../staff/scope-where";
+import type { StaffScope } from "../../staff/staff-scope.service";
 
 @ApiTags("content: courses")
 @Controller("admin/content/courses")
+@Scoped(["course", "params:id"])
 @RequirePermissions("content:manage")
 export class CoursesController {
   constructor(
@@ -40,6 +45,7 @@ export class CoursesController {
   ) {}
 
   @Post()
+  @RequirePermissions("courses:manage")
   @ApiOperation({ summary: "Create a course (starts in DRAFT)" })
   async create(
     @CurrentUser() actor: RequestUser,
@@ -60,8 +66,12 @@ export class CoursesController {
 
   @Get()
   @ApiOperation({ summary: "List courses (filter by status/category/examType)" })
-  async list(@Query() query: ListCoursesQueryDto): Promise<PaginatedData<Course>> {
+  async list(
+    @ActorScope() actorScope: StaffScope | null,
+    @Query() query: ListCoursesQueryDto,
+  ): Promise<PaginatedData<Course>> {
     const { items, total } = await this.coursesService.list({
+      scope: scopeWhere.course(actorScope),
       page: query.page,
       pageSize: query.pageSize,
       status: query.status,
@@ -72,6 +82,7 @@ export class CoursesController {
   }
 
   @Post("reorder")
+  @RequirePermissions("courses:manage")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Reorder courses by an ordered id list" })
   async reorder(
@@ -96,6 +107,7 @@ export class CoursesController {
   }
 
   @Put(":id/past-paper-stats")
+  @RequirePermissions("courses:manage")
   @ApiOperation({ summary: "Replace the course's syllabus heatmap rows" })
   async replacePastPaperStats(
     @CurrentUser() actor: RequestUser,
@@ -122,6 +134,7 @@ export class CoursesController {
   }
 
   @Patch(":id")
+  @RequirePermissions("courses:manage")
   @ApiOperation({ summary: "Update a course (does not change status)" })
   async update(
     @CurrentUser() actor: RequestUser,
@@ -167,6 +180,7 @@ export class CoursesController {
   }
 
   @Delete(":id")
+  @ProtectedDelete("course")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Soft-delete a course (must not be PUBLISHED)" })
   async remove(

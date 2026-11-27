@@ -25,6 +25,7 @@ import { toMentorProfile } from "../mentoring.mappers";
 import { CreateMentorProfileDto } from "./dto/create-mentor-profile.dto";
 import { UpdateMentorProfileDto } from "./dto/update-mentor-profile.dto";
 import { MentorProfilesService } from "./mentor-profiles.service";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
 
 @ApiTags("mentoring: admin mentor management")
 @Controller("admin/mentors")
@@ -123,6 +124,7 @@ export class MentorProfilesController {
   }
 
   @Delete(":id")
+  @ProtectedDelete(null)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Delete a mentor profile (does not unassign existing students)" })
   async remove(

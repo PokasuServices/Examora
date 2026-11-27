@@ -13,6 +13,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { RetryInline } from "@/components/ui/retry-inline";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAssignmentAdminApi } from "@/lib/assignment-api";
+import { DeleteGate } from "@/components/delete-gate";
 
 function TemplateDetailContent() {
   const { id } = useParams<{ id: string }>();
@@ -237,9 +238,11 @@ function TemplateDetailContent() {
       </Card>
 
       <div>
-        <Button variant="ghost" onClick={() => setConfirmDelete(true)}>
-          Delete template
-        </Button>
+        <DeleteGate type={"assignment-template"} id={id}>
+          <Button variant="ghost" onClick={() => setConfirmDelete(true)}>
+            Delete template
+          </Button>
+        </DeleteGate>
       </div>
 
       <ConfirmDialog

@@ -557,11 +557,37 @@ export interface CheckpointView {
   done: boolean;
 }
 
+export type BatchMode = "OFFLINE" | "ONLINE" | "HYBRID";
+
+/** One weekly class slot: day 0 = Sunday … 6 = Saturday, times "HH:MM" (India time). */
+export interface BatchSlot {
+  day: number;
+  start: string;
+  end: string;
+}
+
+/** A batch (stored as a cohort): course, mentors, students and class timetable. */
 export interface CohortView {
   id: string;
   name: string;
   batch: string | null;
   memberCount: number;
+  course: { id: string; title: string } | null;
+  mode: BatchMode;
+  schedule: BatchSlot[];
+  startsOn: string | null;
+  endsOn: string | null;
+  location: string | null;
+  meetingUrl: string | null;
+  isActive: boolean;
+  /** PRIMARY = the batch's mentor (one per batch); COVER = temporary, until `endsOn`. */
+  mentors: {
+    id: string;
+    name: string;
+    email: string;
+    role: "PRIMARY" | "COVER";
+    endsOn: string | null;
+  }[];
 }
 
 /** Shape used by question payloads that include topic & sketch criteria (admin). */

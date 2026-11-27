@@ -60,12 +60,14 @@ export class QuizzesService {
   }
 
   async list(params: {
+    scope?: Prisma.QuizWhereInput;
     page: number;
     pageSize: number;
     status?: ContentStatus;
     subjectId?: string;
   }) {
     const where: Prisma.QuizWhereInput = {
+      ...(params.scope ? { AND: [params.scope] } : {}),
       deletedAt: null,
       ...(params.status ? { status: params.status } : {}),
       ...(params.subjectId ? { subjectId: params.subjectId } : {}),

@@ -11,6 +11,7 @@ import configuration from "./config/configuration";
 import { validateEnv } from "./config/env.validation";
 import { AllExceptionsFilter } from "./common/filters/http-exception.filter";
 import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
+import { MentorAuditInterceptor } from "./common/interceptors/mentor-audit.interceptor";
 import { CorrelationIdMiddleware } from "./common/middleware/correlation-id.middleware";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { RolesGuard } from "./common/guards/roles.guard";
@@ -48,7 +49,11 @@ import { DailyQuizModule } from "./daily-quiz/daily-quiz.module";
 import { SketchesModule } from "./sketches/sketches.module";
 import { QuestionFeedbackModule } from "./question-feedback/question-feedback.module";
 import { StudentDashboardsModule } from "./student-dashboards/student-dashboards.module";
+import { DeletionRequestsModule } from "./deletion-requests/deletion-requests.module";
 import { PracticeModule } from "./practice/practice.module";
+import { StaffModule } from "./staff/staff.module";
+import { MentorDeskModule } from "./mentor-desk/mentor-desk.module";
+import { StaffScopeGuard } from "./staff/staff-scope.guard";
 
 @Module({
   imports: [
@@ -123,17 +128,23 @@ import { PracticeModule } from "./practice/practice.module";
     SketchesModule,
     QuestionFeedbackModule,
     StudentDashboardsModule,
+    StaffModule,
+    MentorDeskModule,
+    DeletionRequestsModule,
     PracticeModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: MentorAuditInterceptor },
     // Throttler runs first (before auth) so brute-force/scraping is capped
     // regardless of whether the target endpoint is @Public() or gated.
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },
+    // Mentors only see their own batches, courses and students (@Scoped).
+    { provide: APP_GUARD, useClass: StaffScopeGuard },
   ],
 })
 export class AppModule implements NestModule {

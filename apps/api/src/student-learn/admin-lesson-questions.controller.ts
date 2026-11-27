@@ -14,10 +14,12 @@ import type { AdminLessonQuestion } from "@examora/types";
 import { RequirePermissions } from "../common/decorators/require-permissions.decorator";
 import { AttachLessonQuestionDto } from "./dto/lesson-answer.dto";
 import { LessonQuestionsService } from "./lesson-questions.service";
+import { Scoped } from "../staff/scoped.decorator";
 
 /** Admin: pick question-bank questions to show inside a lesson. */
 @ApiTags("admin: lesson questions")
 @Controller("admin/content/lessons/:lessonId/questions")
+@Scoped(["lesson", "params:lessonId"], ["question", "body:questionId"])
 @RequirePermissions("content:manage")
 export class AdminLessonQuestionsController {
   constructor(private readonly lessonQuestions: LessonQuestionsService) {}

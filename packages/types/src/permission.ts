@@ -105,6 +105,25 @@ export const PERMISSION_CODES = [
   // PUBLISHED pages/FAQ/announcements/banners need no permission (@Public()).
   "cms:manage",
   "cms:publish",
+  // Staff guard-rails (mentor module). Creating/deleting user accounts,
+  // deleting records directly (mentors send a deletion request instead) and
+  // deciding those requests are ADMINISTRATOR-only.
+  "users:create",
+  "users:delete",
+  "deletion:direct",
+  "deletion:request",
+  "deletion:review",
+  // Structure the admin owns (mentor module, Phase 1). `courses:manage`
+  // creates/edits courses and categories (a mentor works inside courses but
+  // never creates one); `colleges:manage` runs colleges, webinars and
+  // enquiries; `practice:manage` configures a course's fixed practice library
+  // (categories, checkpoints). `batches:read` lets a mentor see batches;
+  // `batches:manage` (create, timetable, members, mentors) is the admin's.
+  "courses:manage",
+  "colleges:manage",
+  "practice:manage",
+  "batches:read",
+  "batches:manage",
 ] as const;
 
 export type PermissionCode = (typeof PERMISSION_CODES)[number];
@@ -137,13 +156,28 @@ export const REVIEWER_PERMISSION_CODES: PermissionCode[] = [
 ];
 
 /**
- * Granted to MENTOR only, in addition to REVIEWER_PERMISSION_CODES (ADR-0016,
- * Sprint 6) — the first sprint where MENTOR and REVIEWER permissions diverge.
- * A plain REVIEWER reviews creative-assignment submissions but does not get
- * a student caseload, notes, tasks, feedback, or meetings.
+ * MENTOR: an explicit allow-list (mentor module, Phase 1). A mentor is a
+ * teacher and guide for the courses and batches the admin assigns: they mark
+ * work, solve doubts, author quizzes, mock tests and assignments, analyse
+ * their students and moderate discussions. Everything financial or about
+ * accounts (users, roles, licences, orders, coupons, enrolments), platform
+ * settings, CMS, notifications, colleges, course structure, batch setup and
+ * deletion stays with the ADMINISTRATOR. `content:manage` without
+ * `content:publish` keeps a mentor's lesson edits as drafts until an admin
+ * publishes them. A plain REVIEWER still only reviews submissions.
  */
 export const MENTOR_PERMISSION_CODES: PermissionCode[] = [
   ...REVIEWER_PERMISSION_CODES,
+  "content:manage",
+  "question:manage",
+  "quiz:manage",
+  "quiz:publish",
+  "quiz:attempts:read",
+  "assignment:manage",
+  "assignment:publish",
   "mentor:workflow",
   "analytics:mentor",
+  "community:moderate",
+  "batches:read",
+  "deletion:request",
 ];

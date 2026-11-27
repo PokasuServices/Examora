@@ -4,7 +4,8 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@examora/auth-client";
 import type { AuthenticatedUser } from "@examora/types";
-import { STUDENT_HOME, isStudentView } from "@/lib/student-view";
+import { ADMIN_ORIGIN } from "@/components/admin-dashboard/admin-links";
+import { STUDENT_HOME, isStudentView, usesStaffWorkspace } from "@/lib/student-view";
 
 function landingRouteFor(user: AuthenticatedUser): string {
   if (user.permissions.includes("analytics:admin")) return "/admin";
@@ -25,7 +26,8 @@ export function HomeGate({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     if (status === "authenticated" && user) {
-      router.replace(landingRouteFor(user));
+      if (usesStaffWorkspace(user)) window.location.replace(ADMIN_ORIGIN);
+      else router.replace(landingRouteFor(user));
     }
   }, [status, user, router]);
 

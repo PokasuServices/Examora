@@ -60,10 +60,9 @@ const ROLES: RoleName[] = ["STUDENT", "MENTOR", "REVIEWER", "ADMINISTRATOR", "GU
  * Role→permission matrix (DESIGN-03 §3). Every role gets BASELINE_PERMISSION_CODES
  * (own profile + sessions, content:read, quiz:read, assignment:read);
  * REVIEWER additionally gets REVIEWER_PERMISSION_CODES (assignment:review,
- * Sprint 5 ADR-0015); MENTOR gets MENTOR_PERMISSION_CODES (REVIEWER_PERMISSION_CODES
- * plus mentor:workflow — Student 360, notes, tasks, feedback, meetings for their
- * assigned students, Sprint 6 ADR-0016 — the first sprint where MENTOR and
- * REVIEWER diverge); ADMINISTRATOR gets everything, including Sprint 2
+ * Sprint 5 ADR-0015); MENTOR gets MENTOR_PERMISSION_CODES (an explicit
+ * teacher allow-list — see its doc comment; nothing financial, no accounts,
+ * no course/batch setup, no deletes); ADMINISTRATOR gets everything, including Sprint 2
  * content:manage/publish (CMS-29 §7), the Sprint 3 admin progress dashboard
  * (progress:read), Sprint 4 question bank / quiz authoring / attempt
  * monitoring, Sprint 5 assignment authoring/publishing (assignment:manage,
@@ -2874,6 +2873,11 @@ async function main(): Promise<void> {
     const roleId = roleIdByName.get(roleName);
     if (!roleId) continue;
 
+    // The matrix is the source of truth: drop codes a role no longer holds
+    // (e.g. when the mentor allow-list is narrowed), not only add new ones.
+    await prisma.rolePermission.deleteMany({
+      where: { roleId, permission: { code: { notIn: [...ROLE_PERMISSIONS[roleName]] } } },
+    });
     for (const code of ROLE_PERMISSIONS[roleName]) {
       const permissionId = permissionIdByCode.get(code);
       if (!permissionId) continue;

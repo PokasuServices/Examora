@@ -25,6 +25,8 @@ import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { RequirePermissions } from "../common/decorators/require-permissions.decorator";
 import { PracticeService } from "./practice.service";
 import { assertShareCode, TestSharesService } from "./test-shares.service";
+import { ProtectedDelete } from "../common/decorators/protected-delete.decorator";
+import { Scoped } from "../staff/scoped.decorator";
 
 export class StudiedDto {
   @ApiProperty()
@@ -143,6 +145,7 @@ export class PracticeController {
 
 @ApiTags("admin: practice categories")
 @Controller("admin/practice")
+@Scoped(["course", "params:courseId"], ["practiceCategory", "params:id"])
 @RequirePermissions("quiz:manage")
 export class AdminPracticeController {
   constructor(private readonly practice: PracticeService) {}
@@ -162,18 +165,22 @@ export class AdminPracticeController {
   }
 
   @Post("courses/:courseId/categories")
+  @RequirePermissions("practice:manage")
   @ApiOperation({ summary: "Create a practice category" })
   create(@Param("courseId", ParseUUIDPipe) courseId: string, @Body() dto: PracticeCategoryDto) {
     return this.practice.createCategory(courseId, dto);
   }
 
   @Patch("categories/:id")
+  @RequirePermissions("practice:manage")
   @ApiOperation({ summary: "Rename / reorder a practice category" })
   update(@Param("id", ParseUUIDPipe) id: string, @Body() dto: UpdatePracticeCategoryDto) {
     return this.practice.updateCategory(id, dto);
   }
 
   @Delete("categories/:id")
+  @RequirePermissions("practice:manage")
+  @ProtectedDelete("practice-category")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Delete a category (its tests stay, unlisted)" })
   async remove(@Param("id", ParseUUIDPipe) id: string): Promise<void> {

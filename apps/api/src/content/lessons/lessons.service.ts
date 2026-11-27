@@ -36,8 +36,15 @@ export class LessonsService {
     });
   }
 
-  async list(params: { moduleId: string; page: number; pageSize: number; status?: ContentStatus }) {
+  async list(params: {
+    scope?: Prisma.LessonWhereInput;
+    moduleId: string;
+    page: number;
+    pageSize: number;
+    status?: ContentStatus;
+  }) {
     const where: Prisma.LessonWhereInput = {
+      ...(params.scope ? { AND: [params.scope] } : {}),
       deletedAt: null,
       moduleId: params.moduleId,
       ...(params.status ? { status: params.status } : {}),

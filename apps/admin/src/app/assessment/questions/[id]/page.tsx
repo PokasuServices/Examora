@@ -17,6 +17,7 @@ import { RetryInline } from "@/components/ui/retry-inline";
 import { Skeleton } from "@/components/ui/skeleton";
 import { statusLabel } from "@/lib/format";
 import { useAssessmentApi } from "@/lib/assessment-api";
+import { DeleteGate } from "@/components/delete-gate";
 
 const STATUS_TONE: Record<ContentStatus, ChipTone> = {
   DRAFT: "neutral",
@@ -129,9 +130,11 @@ function QuestionDetailContent() {
       </Card>
 
       <Card density="compact">
-        <Button variant="ghost" onClick={() => setPending({ kind: "DELETE" })}>
-          Delete question
-        </Button>
+        <DeleteGate type={"question"} id={id}>
+          <Button variant="ghost" onClick={() => setPending({ kind: "DELETE" })}>
+            Delete question
+          </Button>
+        </DeleteGate>
       </Card>
 
       <ConfirmDialog

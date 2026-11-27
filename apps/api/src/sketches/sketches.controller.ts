@@ -34,6 +34,9 @@ import type { RequestUser } from "../auth/types/request-user";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { RequirePermissions } from "../common/decorators/require-permissions.decorator";
 import { SketchesService } from "./sketches.service";
+import { Scoped } from "../staff/scoped.decorator";
+import { ActorScope } from "../staff/scope-where";
+import type { StaffScope } from "../staff/staff-scope.service";
 
 export class SketchFileDto {
   @ApiProperty()
@@ -207,14 +210,21 @@ export class SketchesController {
 
 @ApiTags("admin: sketch review")
 @Controller("admin/sketches")
+@Scoped(["answer", "params:answerId"])
 @RequirePermissions("assignment:review")
 export class AdminSketchesController {
   constructor(private readonly sketches: SketchesService) {}
 
   @Get()
   @ApiOperation({ summary: "Sketches waiting for (or already given) expert marks" })
-  list(@Query("status") status?: string): Promise<SketchReviewQueueItem[]> {
-    return this.sketches.queue(status === "reviewed" ? "reviewed" : "pending");
+  list(
+    @ActorScope() actorScope: StaffScope | null,
+    @Query("status") status?: string,
+  ): Promise<SketchReviewQueueItem[]> {
+    return this.sketches.queue(
+      status === "reviewed" ? "reviewed" : "pending",
+      actorScope?.studentIds ?? null,
+    );
   }
 
   @Put(":answerId/review")

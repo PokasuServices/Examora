@@ -154,10 +154,43 @@ export class DailyQuizService {
     private readonly xp: XpService,
   ) {}
 
-  /** A day's quiz; picks its questions on first request when `create` is set. */
-  private async quizOn(date: Date, create: boolean) {
-    const existing = await this.prisma.dailyQuiz.findUnique({ where: { date } });
+  /**
+   * Which paper a student gets on a date: their batch's course paper when its
+   * mentor scheduled one (the course's quiz calendar), else the platform paper.
+   */
+  private async scopeFor(
+    userId: string,
+    date: Date,
+  ): Promise<{ scope: string; questionIds?: string[] }> {
+    const cohorts = await this.prisma.cohortMember.findMany({
+      where: { userId, cohort: { isActive: true, courseId: { not: null } } },
+      orderBy: { joinedAt: "asc" },
+      select: { cohort: { select: { courseId: true } } },
+    });
+    for (const c of cohorts) {
+      const plan = await this.prisma.dailyQuizSchedule.findUnique({
+        where: { courseId_date: { courseId: c.cohort.courseId!, date } },
+        select: { questionIds: true },
+      });
+      if (plan) return { scope: c.cohort.courseId!, questionIds: plan.questionIds as string[] };
+    }
+    return { scope: "" };
+  }
+
+  /** A day's quiz for a student; picks its questions on first request when `create` is set. */
+  private async quizOn(date: Date, create: boolean, userId: string) {
+    const { scope, questionIds } = await this.scopeFor(userId, date);
+    const existing = await this.prisma.dailyQuiz.findUnique({
+      where: { date_scope: { date, scope } },
+    });
     if (existing || !create) return existing;
+    if (questionIds) {
+      try {
+        return await this.prisma.dailyQuiz.create({ data: { date, scope, questionIds } });
+      } catch {
+        return this.prisma.dailyQuiz.findUniqueOrThrow({ where: { date_scope: { date, scope } } });
+      }
+    }
 
     const pool = await this.prisma.question.findMany({
       where: {
@@ -171,6 +204,7 @@ export class DailyQuizService {
     if (pool.length === 0) return null;
     const recent = await this.prisma.dailyQuiz.findMany({
       where: {
+        scope: "",
         date: { gte: addDays(date, -NO_REPEAT_DAYS), lte: addDays(date, NO_REPEAT_DAYS) },
       },
       select: { questionIds: true },
@@ -187,15 +221,17 @@ export class DailyQuizService {
     );
     const picked = [...fresh, ...reused].slice(0, DAILY_QUESTION_COUNT).map((q) => q.id);
     try {
-      return await this.prisma.dailyQuiz.create({ data: { date, questionIds: picked } });
+      return await this.prisma.dailyQuiz.create({ data: { date, scope: "", questionIds: picked } });
     } catch {
       // Another request created this day's quiz first.
-      return this.prisma.dailyQuiz.findUniqueOrThrow({ where: { date } });
+      return this.prisma.dailyQuiz.findUniqueOrThrow({
+        where: { date_scope: { date, scope: "" } },
+      });
     }
   }
 
-  private today() {
-    return this.quizOn(todayInIndia(), true);
+  private today(userId: string) {
+    return this.quizOn(todayInIndia(), true, userId);
   }
 
   /** Today, or a past day inside the catch-up window. */
@@ -238,7 +274,7 @@ export class DailyQuizService {
   }
 
   async status(userId: string): Promise<DailyQuizStatus> {
-    const quiz = await this.today();
+    const quiz = await this.today(userId);
     const date = iso(todayInIndia());
     if (!quiz) {
       return {
@@ -280,7 +316,7 @@ export class DailyQuizService {
   /** Starts (or resumes) today's quiz, or a missed day's quiz when `day` is given. */
   async start(userId: string, day?: string): Promise<DailyQuizQuestion[]> {
     const { date, catchUp } = this.parseDay(day);
-    const quiz = await this.quizOn(date, true);
+    const quiz = await this.quizOn(date, true, userId);
     if (!quiz) throw new NotFoundException("That day's quiz isn't available");
     const existing = await this.prisma.dailyQuizAttempt.findUnique({
       where: { dailyQuizId_userId: { dailyQuizId: quiz.id, userId } },
@@ -320,7 +356,7 @@ export class DailyQuizService {
 
   async finish(userId: string, answers: SubmittedAnswer[], day?: string): Promise<DailyQuizResult> {
     const { date } = this.parseDay(day);
-    const quiz = await this.quizOn(date, false);
+    const quiz = await this.quizOn(date, false, userId);
     if (!quiz) throw new NotFoundException("That day's quiz isn't available");
     const attempt = await this.prisma.dailyQuizAttempt.findUnique({
       where: { dailyQuizId_userId: { dailyQuizId: quiz.id, userId } },
@@ -415,7 +451,7 @@ export class DailyQuizService {
 
   /** Top 10 on-time players of a day (today by default). */
   async leaderboard(userId: string, dailyQuizId?: string) {
-    const id = dailyQuizId ?? (await this.today())?.id;
+    const id = dailyQuizId ?? (await this.today(userId))?.id;
     if (!id) return [];
     const rows = await this.prisma.dailyQuizAttempt.findMany({
       where: { dailyQuizId: id, catchUp: false, finishedAt: { not: null } },

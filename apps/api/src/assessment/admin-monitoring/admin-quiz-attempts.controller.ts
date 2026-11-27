@@ -10,10 +10,19 @@ import { RequirePermissions } from "../../common/decorators/require-permissions.
 import { toAdminAttemptDetail, toAdminAttemptSummary } from "../assessment.mappers";
 import { AdminQuizAttemptsService } from "./admin-quiz-attempts.service";
 import { ListAdminAttemptsQueryDto } from "./dto/list-admin-attempts-query.dto";
+import { Scoped } from "../../staff/scoped.decorator";
+import { ActorScope, scopeWhere } from "../../staff/scope-where";
+import type { StaffScope } from "../../staff/staff-scope.service";
 
 /** Read-only attempt monitoring + result dashboard for administrators (quiz:attempts:read). */
 @ApiTags("admin: assessment")
 @Controller("admin/assessment")
+@Scoped(
+  ["attempt", "params:id"],
+  ["quiz", "params:quizId"],
+  ["quiz", "query:quizId"],
+  ["student", "query:userId"],
+)
 @RequirePermissions("quiz:attempts:read")
 export class AdminQuizAttemptsController {
   constructor(private readonly adminAttempts: AdminQuizAttemptsService) {}
@@ -21,9 +30,11 @@ export class AdminQuizAttemptsController {
   @Get("attempts")
   @ApiOperation({ summary: "List/monitor quiz attempts (filter by quiz/student/status)" })
   async list(
+    @ActorScope() actorScope: StaffScope | null,
     @Query() query: ListAdminAttemptsQueryDto,
   ): Promise<PaginatedData<AdminAttemptSummary>> {
     const { items, total } = await this.adminAttempts.list({
+      scope: scopeWhere.attempt(actorScope),
       page: query.page,
       pageSize: query.pageSize,
       quizId: query.quizId,

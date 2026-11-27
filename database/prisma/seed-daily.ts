@@ -90,7 +90,7 @@ export async function seedDailyHistory(prisma: PrismaClient, studentId: string):
   let attempts = 0;
   for (let back = DAYS_BACK; back >= 0; back--) {
     const date = new Date(today.getTime() - back * DAY_MS);
-    let quiz = await prisma.dailyQuiz.findUnique({ where: { date } });
+    let quiz = await prisma.dailyQuiz.findUnique({ where: { date_scope: { date, scope: "" } } });
     if (!quiz) {
       const ids = shuffle(
         pool.map((q) => q.id),

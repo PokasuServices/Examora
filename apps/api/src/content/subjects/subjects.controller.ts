@@ -27,9 +27,15 @@ import { CreateSubjectDto } from "./dto/create-subject.dto";
 import { ListSubjectsQueryDto } from "./dto/list-subjects-query.dto";
 import { SubjectsService } from "./subjects.service";
 import { UpdateSubjectDto } from "./dto/update-subject.dto";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
+import { Scoped } from "../../staff/scoped.decorator";
+import { ActorScope, scopeWhere } from "../../staff/scope-where";
+import type { StaffScope } from "../../staff/staff-scope.service";
+import { ReviewableContent } from "../../mentor-desk/content-review.interceptor";
 
 @ApiTags("content: subjects")
 @Controller("admin/content/subjects")
+@Scoped(["subject", "params:id"], ["course", "body:courseId"], ["course", "query:courseId"])
 @RequirePermissions("content:manage")
 export class SubjectsController {
   constructor(
@@ -58,8 +64,12 @@ export class SubjectsController {
 
   @Get()
   @ApiOperation({ summary: "List subjects in a course" })
-  async list(@Query() query: ListSubjectsQueryDto): Promise<PaginatedData<Subject>> {
+  async list(
+    @ActorScope() actorScope: StaffScope | null,
+    @Query() query: ListSubjectsQueryDto,
+  ): Promise<PaginatedData<Subject>> {
     const { items, total } = await this.subjectsService.list({
+      scope: scopeWhere.subject(actorScope),
       courseId: query.courseId,
       page: query.page,
       pageSize: query.pageSize,
@@ -93,6 +103,7 @@ export class SubjectsController {
   }
 
   @Patch(":id")
+  @ReviewableContent("subject", "update")
   @ApiOperation({ summary: "Update a subject" })
   async update(
     @CurrentUser() actor: RequestUser,
@@ -138,6 +149,7 @@ export class SubjectsController {
   }
 
   @Delete(":id")
+  @ProtectedDelete("subject")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Soft-delete a subject" })
   async remove(

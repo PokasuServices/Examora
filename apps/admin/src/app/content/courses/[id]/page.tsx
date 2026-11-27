@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ApiError } from "@examora/auth-client";
+import { ApiError, useAuth } from "@examora/auth-client";
 import type { ContentStatus, Course } from "@examora/types";
 import { Button, FieldError, Input, Label } from "@examora/ui";
 import { CoursePracticeSettings } from "@/components/course-practice-settings";
@@ -19,6 +19,11 @@ import { useContentApi } from "@/lib/content-api";
 function CourseDetailContent() {
   const { id } = useParams<{ id: string }>();
   const api = useContentApi();
+  const { user } = useAuth();
+  // Course details, price and exam settings, and the fixed practice library
+  // are the admin's; a mentor works on the subjects/topics/lessons below.
+  const canSetUpCourse = user?.permissions.includes("courses:manage") ?? false;
+  const canSetUpPractice = user?.permissions.includes("practice:manage") ?? false;
   const [course, setCourse] = React.useState<Course | null>(null);
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
@@ -95,49 +100,59 @@ function CourseDetailContent() {
           </h1>
           <StatusBadge status={course.status} />
         </div>
-        <StatusActions status={course.status} onChange={(s) => void changeStatus(s)} />
+        <StatusActions
+          status={course.status}
+          onChange={(s) => void changeStatus(s)}
+          permission="content:publish"
+        />
       </div>
 
-      <form
-        onSubmit={saveDetails}
-        className="mt-6 flex flex-col gap-4 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6"
-      >
-        <h2 className="text-lg font-semibold">Course details</h2>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="title">Title</Label>
-          <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="description">Description</Label>
-          <textarea
-            id="description"
-            className="min-h-24 rounded-md border border-neutral-300 dark:border-neutral-700 p-3 text-sm"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="priceAmount">Price (INR, blank = free — ADR-0018)</Label>
-          <Input
-            id="priceAmount"
-            type="number"
-            min="0"
-            step="0.01"
-            value={priceAmount}
-            onChange={(e) => setPriceAmount(e.target.value)}
-            className="w-40"
-          />
-        </div>
-        <FieldError>{error}</FieldError>
-        {saved ? <p className="text-sm text-success-600 dark:text-success-400">Saved.</p> : null}
-        <div>
-          <Button type="submit">Save details</Button>
-        </div>
-      </form>
+      {canSetUpCourse ? (
+        <form
+          onSubmit={saveDetails}
+          className="mt-6 flex flex-col gap-4 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6"
+        >
+          <h2 className="text-lg font-semibold">Course details</h2>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="title">Title</Label>
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="description">Description</Label>
+            <textarea
+              id="description"
+              className="min-h-24 rounded-md border border-neutral-300 dark:border-neutral-700 p-3 text-sm"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="priceAmount">Price (INR, blank = free — ADR-0018)</Label>
+            <Input
+              id="priceAmount"
+              type="number"
+              min="0"
+              step="0.01"
+              value={priceAmount}
+              onChange={(e) => setPriceAmount(e.target.value)}
+              className="w-40"
+            />
+          </div>
+          <FieldError>{error}</FieldError>
+          {saved ? <p className="text-sm text-success-600 dark:text-success-400">Saved.</p> : null}
+          <div>
+            <Button type="submit">Save details</Button>
+          </div>
+        </form>
+      ) : course.description ? (
+        <p className="mt-4 max-w-3xl text-sm text-neutral-600 dark:text-neutral-400">
+          {course.description}
+        </p>
+      ) : null}
 
-      <CourseStudentSettings course={course} onCourseSaved={setCourse} />
+      {canSetUpCourse ? <CourseStudentSettings course={course} onCourseSaved={setCourse} /> : null}
 
-      <CoursePracticeSettings courseId={course.id} />
+      {canSetUpPractice ? <CoursePracticeSettings courseId={course.id} /> : null}
 
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Curriculum</h2>

@@ -15,6 +15,7 @@ import {
 } from "../../../test/support/fake-notifications-service";
 import { RecommendationContextService } from "../recommendation-context.service";
 import { AssignmentRecommendationService } from "./assignment-recommendation.service";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 describe("AssignmentRecommendationService (integration)", () => {
   let service: AssignmentRecommendationService;
@@ -37,6 +38,7 @@ describe("AssignmentRecommendationService (integration)", () => {
         CatalogService,
         ProgressService,
         SubmissionsService,
+        StaffScopeService,
         PrismaService,
         { provide: STORAGE_PORT, useClass: FakeStorageService },
         { provide: MalwareScanQueueService, useValue: { enqueue: async () => undefined } },

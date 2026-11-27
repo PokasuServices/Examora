@@ -48,14 +48,15 @@ export function AppSidebar() {
   } = useSidebar();
   const showLabels = isExpanded || isHovered || isMobileOpen;
   const permissions = user?.permissions ?? [];
-  const hasAccess = (permission?: PermissionCode) =>
-    !permission || permissions.includes(permission);
+  const hasAccess = (permission?: PermissionCode, hideWith?: PermissionCode) =>
+    (!permission || permissions.includes(permission)) &&
+    (!hideWith || !permissions.includes(hideWith));
 
   const role = ROLE_PRIORITY.find((r) => user?.roles.includes(r));
   const roleLabel = role ? ROLE_LABELS[role] : null;
 
   function visibleSubItems(item: MenuItem): MenuSubItem[] {
-    return (item.subItems ?? []).filter((sub) => hasAccess(sub.permission));
+    return (item.subItems ?? []).filter((sub) => hasAccess(sub.permission, sub.hideWith));
   }
 
   /** The single active child: the longest matching path wins, so a section root doesn't light up alongside its own children. */
@@ -82,12 +83,13 @@ export function AppSidebar() {
     if (isMobileOpen) closeMobileSidebar();
   }
 
-  const groups = MENU_GROUPS.filter((group) => hasAccess(group.permission))
+  const groups = MENU_GROUPS.filter((group) => hasAccess(group.permission, group.hideWith))
     .map((group) => ({
       ...group,
       items: group.items.filter(
         (item) =>
-          hasAccess(item.permission) && (!item.subItems || visibleSubItems(item).length > 0),
+          hasAccess(item.permission, item.hideWith) &&
+          (!item.subItems || visibleSubItems(item).length > 0),
       ),
     }))
     .filter((group) => group.items.length > 0);
@@ -106,7 +108,7 @@ export function AppSidebar() {
       <div
         className={cn("hidden py-6 lg:flex", showLabels ? "justify-start px-2" : "justify-center")}
       >
-        <Link href="/dashboard" aria-label="Examora home">
+        <Link href="/" aria-label="Examora home">
           <AppLogo variant={showLabels ? "full" : "icon"} />
         </Link>
       </div>

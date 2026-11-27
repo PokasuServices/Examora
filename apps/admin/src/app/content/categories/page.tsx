@@ -7,6 +7,7 @@ import type { Category } from "@examora/types";
 import { Button, FieldError, Input, Label } from "@examora/ui";
 import { RequirePermission } from "@/components/require-permission";
 import { useContentApi } from "@/lib/content-api";
+import { DeleteGate } from "@/components/delete-gate";
 
 function CategoriesContent() {
   const api = useContentApi();
@@ -88,9 +89,11 @@ function CategoriesContent() {
               <Button variant="ghost" onClick={() => void toggleActive(category)}>
                 {category.isActive ? "Deactivate" : "Activate"}
               </Button>
-              <Button variant="ghost" onClick={() => void remove(category.id)}>
-                Delete
-              </Button>
+              <DeleteGate type={"category"} id={category.id}>
+                <Button variant="ghost" onClick={() => void remove(category.id)}>
+                  Delete
+                </Button>
+              </DeleteGate>
             </div>
           </li>
         ))}
@@ -101,7 +104,7 @@ function CategoriesContent() {
 
 export default function CategoriesPage() {
   return (
-    <RequirePermission permission="content:manage">
+    <RequirePermission permission="courses:manage">
       <CategoriesContent />
     </RequirePermission>
   );

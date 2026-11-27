@@ -15,6 +15,7 @@ import {
 } from "../../../test/support/fake-notifications-service";
 import { RecommendationContextService } from "../recommendation-context.service";
 import { CourseRecommendationService } from "./course-recommendation.service";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 describe("CourseRecommendationService (integration)", () => {
   let service: CourseRecommendationService;
@@ -35,6 +36,7 @@ describe("CourseRecommendationService (integration)", () => {
         EnrollmentService,
         StudentAnalyticsService,
         SubmissionsService,
+        StaffScopeService,
         AssignmentCatalogService,
         PrismaService,
         { provide: STORAGE_PORT, useClass: FakeStorageService },

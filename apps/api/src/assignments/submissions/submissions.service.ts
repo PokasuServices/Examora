@@ -17,6 +17,7 @@ import type { AddCommentDto } from "./dto/add-comment.dto";
 import type { ConfirmFileDto } from "./dto/confirm-file.dto";
 import type { PresignFileDto } from "./dto/presign-file.dto";
 import type { UpdateSubmissionDto } from "./dto/update-submission.dto";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 const WITH_DETAIL = {
   files: { orderBy: { uploadedAt: "asc" as const } },
@@ -37,6 +38,7 @@ export class SubmissionsService {
     private readonly scanQueue: MalwareScanQueueService,
     private readonly enrollmentService: EnrollmentService,
     private readonly notificationQueue: NotificationQueueService,
+    private readonly staffScope: StaffScopeService,
   ) {}
 
   /**
@@ -213,9 +215,13 @@ export class SubmissionsService {
     if (fileCount === 0) {
       throw new BadRequestException("Attach at least one file before submitting");
     }
+    // Only the student's batch mentor marks their work (mentor module): route
+    // the submission to them unless an admin already chose a reviewer.
+    const reviewerId =
+      submission.reviewerId ?? (await this.staffScope.mentorsOfStudent(studentId))[0] ?? null;
     return this.prisma.assignmentSubmission.update({
       where: { id: submissionId },
-      data: { status: "SUBMITTED", submittedAt: new Date() },
+      data: { status: "SUBMITTED", submittedAt: new Date(), ...(reviewerId ? { reviewerId } : {}) },
     });
   }
 

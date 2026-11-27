@@ -25,6 +25,7 @@ import { CreateForumBoardDto } from "./dto/create-forum-board.dto";
 import { ListForumsQueryDto } from "./dto/list-forums-query.dto";
 import { UpdateForumBoardDto } from "./dto/update-forum-board.dto";
 import { ForumBoardsService } from "./forum-boards.service";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
 
 /** Admin CRUD for forum boards (ADR-0017). */
 @ApiTags("community: forums (admin)")
@@ -96,6 +97,7 @@ export class ForumBoardsAdminController {
   }
 
   @Delete(":id")
+  @ProtectedDelete(null)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Soft-delete a forum board" })
   async remove(

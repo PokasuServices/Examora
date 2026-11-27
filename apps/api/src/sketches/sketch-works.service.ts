@@ -686,9 +686,11 @@ export class SketchWorksService {
   async revisionQueue(
     staff: Viewer,
     status: "pending" | "reviewed",
+    studentIds: string[] | null = null,
   ): Promise<SketchRevisionQueueItem[]> {
     const rows = await this.prisma.sketchVersion.findMany({
       where: {
+        ...(studentIds ? { work: { userId: { in: studentIds } } } : {}),
         // Part B originals and revisions; in-test uploads are marked in Sketch review.
         answerId: null,
         deletedAt: null,

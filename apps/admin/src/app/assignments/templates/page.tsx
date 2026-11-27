@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 import { useAssignmentAdminApi } from "@/lib/assignment-api";
+import { DeleteGate } from "@/components/delete-gate";
 
 function emptyItem(): RubricSkeletonItem {
   return { title: "", maxMarks: 10 };
@@ -267,9 +268,11 @@ function TemplatesContent() {
                       {t.rubric.length}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Button variant="ghost" onClick={() => setDeleteTarget(t)}>
-                        Delete
-                      </Button>
+                      <DeleteGate type={"assignment-template"} id={t.id}>
+                        <Button variant="ghost" onClick={() => setDeleteTarget(t)}>
+                          Delete
+                        </Button>
+                      </DeleteGate>
                     </td>
                   </tr>
                 ))}

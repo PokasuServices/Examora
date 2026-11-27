@@ -16,6 +16,7 @@ import { QuizCatalogService } from "../quiz-catalog/quiz-catalog.service";
 import type { OptionOrder, QuestionSnapshot } from "./attempt-snapshot.types";
 import { advanceSections, attemptDeadline, planFor, readPlan } from "./section-timing";
 import { computeScore } from "./scoring.util";
+import { quizAudience } from "../../staff/scope-where";
 
 @Injectable()
 export class QuizAttemptsService {
@@ -35,6 +36,9 @@ export class QuizAttemptsService {
    */
   async start(quizId: string, userId: string): Promise<{ attempt: QuizAttempt; created: boolean }> {
     const quiz = await this.catalog.getPublishedQuizOrThrow(quizId);
+    // A quiz published to particular batches is only for those batches.
+    const forMe = await this.prisma.quiz.count({ where: { id: quizId, ...quizAudience(userId) } });
+    if (forMe === 0) throw new NotFoundException("Quiz not found");
     await this.enrollmentService.assertLicenceForSubject(userId, quiz.subjectId);
     if (quiz.unlockAfterQuizId) {
       const finished = await this.prisma.quizAttempt.count({

@@ -34,5 +34,13 @@ import { LessonsService } from "./lessons/lessons.service";
     ModulesService,
     LessonsService,
   ],
+  exports: [
+    CategoriesService,
+    CoursesService,
+    SubjectsService,
+    TopicsService,
+    ModulesService,
+    LessonsService,
+  ],
 })
 export class ContentModule {}

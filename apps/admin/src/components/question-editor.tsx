@@ -16,6 +16,7 @@ import { useStudentAdminApi } from "@/lib/student-admin-api";
 import { TopicPicker } from "@/components/topic-picker";
 import { SelectField } from "@/components/ui/select-field";
 import { useAssessmentApi, type QuestionInput } from "@/lib/assessment-api";
+import { DuplicateHint } from "@/components/duplicate-hint";
 
 const TYPE_LABEL: Record<QuestionType, string> = {
   SINGLE_CHOICE: "Single choice",
@@ -280,6 +281,7 @@ export function QuestionEditor({
             required
           />
         </div>
+        <DuplicateHint text={text} imageUrl={imageUrl} excludeId={initial?.id ?? null} />
         <MediaField
           id="question-image"
           label="Question image (optional)"

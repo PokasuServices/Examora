@@ -16,6 +16,7 @@ import {
 } from "../../../test/support/fake-notifications-service";
 import { RecommendationContextService } from "../recommendation-context.service";
 import { QuizRecommendationService } from "./quiz-recommendation.service";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 describe("QuizRecommendationService (integration)", () => {
   let service: QuizRecommendationService;
@@ -38,6 +39,7 @@ describe("QuizRecommendationService (integration)", () => {
         CatalogService,
         ProgressService,
         SubmissionsService,
+        StaffScopeService,
         AssignmentCatalogService,
         PrismaService,
         { provide: STORAGE_PORT, useClass: FakeStorageService },

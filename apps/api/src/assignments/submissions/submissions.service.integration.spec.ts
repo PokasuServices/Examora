@@ -12,6 +12,7 @@ import {
 import { AssignmentCatalogService } from "../catalog/assignment-catalog.service";
 import { MalwareScanQueueService } from "../malware-scan-queue.service";
 import { SubmissionsService } from "./submissions.service";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 describe("SubmissionsService (integration)", () => {
   let submissions: SubmissionsService;
@@ -25,6 +26,7 @@ describe("SubmissionsService (integration)", () => {
     moduleRef = await Test.createTestingModule({
       providers: [
         SubmissionsService,
+        StaffScopeService,
         AssignmentCatalogService,
         EnrollmentService,
         PrismaService,

@@ -80,12 +80,14 @@ export class AssignmentsAdminService {
   }
 
   async list(params: {
+    scope?: Prisma.AssignmentWhereInput;
     page: number;
     pageSize: number;
     status?: ContentStatus;
     subjectId?: string;
   }) {
     const where: Prisma.AssignmentWhereInput = {
+      ...(params.scope ? { AND: [params.scope] } : {}),
       deletedAt: null,
       ...(params.status ? { status: params.status } : {}),
       ...(params.subjectId ? { subjectId: params.subjectId } : {}),

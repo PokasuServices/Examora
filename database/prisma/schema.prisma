@@ -529,6 +529,19 @@ model User {
   testShareVisits           TestShareVisit[]
   seenMarks                 UserSeen[]
   topicMarks                TopicMark[]
+  mentorOfCohorts           CohortMentor[]         @relation("CohortMentors")
+  deletionRequestsMade      DeletionRequest[]      @relation("DeletionRequestsMade")
+  deletionRequestsDecided   DeletionRequest[]      @relation("DeletionRequestsDecided")
+  staffRequestsMade         StaffRequest[]         @relation("StaffRequestsMade")
+  staffRequestsDecided      StaffRequest[]         @relation("StaffRequestsDecided")
+  attendance                AttendanceRecord[]     @relation("AttendanceOfStudent")
+  sessionsTaken             ClassSession[]         @relation("SessionsTakenBy")
+  dailySchedules            DailyQuizSchedule[]    @relation("DailySchedulesBy")
+  progressReports           ProgressReport[]       @relation("ReportsAboutStudent")
+  progressReportsWritten    ProgressReport[]       @relation("ReportsByMentor")
+  shoutoutsReceived         MentorShoutout[]       @relation("ShoutoutsToStudent")
+  shoutoutsGiven            MentorShoutout[]       @relation("ShoutoutsByMentor")
+  batchAnnouncements        BatchAnnouncement[]    @relation("AnnouncementsBy")
 
   @@index([status])
   @@map("users")
@@ -723,15 +736,17 @@ model Course {
   updatedAt     DateTime      @updatedAt @map("updated_at")
   deletedAt     DateTime?     @map("deleted_at")
 
-  category           Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  category           Category?           @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   subjects           Subject[]
   pastPaperStats     PastPaperStat[]
   practiceCategories PracticeCategory[]
   checkpoints        CourseCheckpoint[]
   lessonProgress     LessonProgress[]
-  relatedThreads     Thread[]           @relation("ThreadsByCourse")
+  relatedThreads     Thread[]            @relation("ThreadsByCourse")
   enrollments        Enrollment[]
   orders             Order[]
+  cohorts            Cohort[]
+  dailySchedules     DailyQuizSchedule[]
 
   @@index([categoryId])
   @@index([status])
@@ -1030,6 +1045,7 @@ model Quiz {
   shares           TestShare[]
   attempts         QuizAttempt[]
   relatedThreads   Thread[]          @relation("ThreadsByQuiz")
+  cohorts          QuizCohort[]
 
   @@index([subjectId])
   @@index([topicId])
@@ -2272,16 +2288,19 @@ enum DoubtKind {
 }
 
 model QuestionDoubt {
-  id         String    @id @default(uuid()) @db.Uuid
-  questionId String    @map("question_id") @db.Uuid
-  userId     String    @map("user_id") @db.Uuid
-  parentId   String?   @map("parent_id") @db.Uuid
+  id           String    @id @default(uuid()) @db.Uuid
+  questionId   String    @map("question_id") @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  parentId     String?   @map("parent_id") @db.Uuid
   /// Replies are always DOUBT (the kind only matters for top-level posts).
-  kind       DoubtKind @default(DOUBT)
+  kind         DoubtKind @default(DOUBT)
+  /// Set when a mentor marks the doubt solved (top-level doubts only).
+  resolvedAt   DateTime? @map("resolved_at")
+  resolvedById String?   @map("resolved_by_id") @db.Uuid
   /// Markdown (no raw HTML); images are "media:<id>" refs uploaded by the author.
-  body       String
-  createdAt  DateTime  @default(now()) @map("created_at")
-  deletedAt  DateTime? @map("deleted_at")
+  body         String
+  createdAt    DateTime  @default(now()) @map("created_at")
+  deletedAt    DateTime? @map("deleted_at")
 
   question Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
   user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -2341,13 +2360,36 @@ model SketchPeerRating {
 /// The day's 10 questions, picked once per date from the daily pool.
 model DailyQuiz {
   id          String   @id @default(uuid()) @db.Uuid
-  date        DateTime @unique @db.Date
+  date        DateTime @db.Date
+  /// "" = the platform-wide paper; otherwise the course id of a mentor-scheduled paper.
+  scope       String   @default("")
   questionIds Json     @map("question_ids")
   createdAt   DateTime @default(now()) @map("created_at")
 
   attempts DailyQuizAttempt[]
 
+  @@unique([date, scope])
   @@map("daily_quizzes")
+}
+
+/// A mentor's daily quiz for a course on a date (the course's quiz calendar).
+/// One per course per day; a clash moves to the next free day.
+model DailyQuizSchedule {
+  id          String   @id @default(uuid()) @db.Uuid
+  courseId    String   @map("course_id") @db.Uuid
+  date        DateTime @db.Date
+  title       String
+  /// Ordered question ids (single-choice / true-false).
+  questionIds Json     @map("question_ids")
+  createdById String   @map("created_by_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdBy User   @relation("DailySchedulesBy", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, date])
+  @@map("daily_quiz_schedules")
 }
 
 model DailyQuizAttempt {
@@ -2520,15 +2562,75 @@ model TopicStudyMark {
 }
 
 /// A batch / classroom of students (e.g. "2026 NID UCEED – Online"); licences can be assigned per cohort.
+/// A batch of students: course, mentors, members and weekly class timetable.
 model Cohort {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  batch     String?
-  createdAt DateTime @default(now()) @map("created_at")
+  id         String    @id @default(uuid()) @db.Uuid
+  name       String
+  batch      String?
+  courseId   String?   @map("course_id") @db.Uuid
+  /// OFFLINE, ONLINE or HYBRID
+  mode       String    @default("OFFLINE")
+  /// [{ day: 0-6 (Sunday = 0), start: "HH:MM", end: "HH:MM" }], India time
+  schedule   Json      @default("[]")
+  startsOn   DateTime? @map("starts_on") @db.Date
+  endsOn     DateTime? @map("ends_on") @db.Date
+  location   String?
+  meetingUrl String?   @map("meeting_url")
+  isActive   Boolean   @default(true) @map("is_active")
+  createdAt  DateTime  @default(now()) @map("created_at")
 
-  members CohortMember[]
+  course        Course?             @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  members       CohortMember[]
+  mentors       CohortMentor[]
+  sessions      ClassSession[]
+  quizzes       QuizCohort[]
+  reports       ProgressReport[]
+  announcements BatchAnnouncement[]
 
+  @@index([courseId])
   @@map("cohorts")
+}
+
+model CohortMentor {
+  cohortId String    @map("cohort_id") @db.Uuid
+  mentorId String    @map("mentor_id") @db.Uuid
+  /// PRIMARY (the batch's mentor, one per batch) or COVER (temporary)
+  role     String    @default("PRIMARY")
+  /// COVER access ends after this date (India time); null for PRIMARY
+  endsOn   DateTime? @map("ends_on") @db.Date
+  addedAt  DateTime  @default(now()) @map("added_at")
+
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  mentor User   @relation("CohortMentors", fields: [mentorId], references: [id], onDelete: Cascade)
+
+  @@id([cohortId, mentorId])
+  @@index([mentorId])
+  @@map("cohort_mentors")
+}
+
+/// A mentor asking an administrator to delete a record (mentors can't delete directly).
+model DeletionRequest {
+  id            String    @id @default(uuid()) @db.Uuid
+  targetType    String    @map("target_type")
+  targetId      String    @map("target_id") @db.Uuid
+  targetLabel   String    @map("target_label")
+  reason        String
+  /// [{ label, count }] captured when the request was made
+  impact        Json      @default("[]")
+  /// PENDING, APPROVED or REJECTED
+  status        String    @default("PENDING")
+  requestedById String    @map("requested_by_id") @db.Uuid
+  decidedById   String?   @map("decided_by_id") @db.Uuid
+  decisionNote  String?   @map("decision_note")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  decidedAt     DateTime? @map("decided_at")
+
+  requestedBy User  @relation("DeletionRequestsMade", fields: [requestedById], references: [id], onDelete: Cascade)
+  decidedBy   User? @relation("DeletionRequestsDecided", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([targetType, targetId])
+  @@map("deletion_requests")
 }
 
 model CohortMember {
@@ -2823,4 +2925,156 @@ model TopicMark {
   @@id([userId, topicId])
   @@index([topicId])
   @@map("topic_marks")
+}
+
+/// Anything a mentor sends an administrator to approve (other than deletions):
+/// CONTENT_PUBLISH (publish a draft), CONTENT_CHANGE (edit live fixed content;
+/// the patch is applied on approval), NEW_STUDENT (create an account and add
+/// it to a batch).
+model StaffRequest {
+  id            String    @id @default(uuid()) @db.Uuid
+  kind          String
+  targetType    String    @map("target_type")
+  targetId      String?   @map("target_id") @db.Uuid
+  targetLabel   String    @map("target_label")
+  payload       Json      @default("{}")
+  note          String?
+  /// PENDING, APPROVED or REJECTED
+  status        String    @default("PENDING")
+  requestedById String    @map("requested_by_id") @db.Uuid
+  decidedById   String?   @map("decided_by_id") @db.Uuid
+  decisionNote  String?   @map("decision_note")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  decidedAt     DateTime? @map("decided_at")
+
+  requestedBy User  @relation("StaffRequestsMade", fields: [requestedById], references: [id], onDelete: Cascade)
+  decidedBy   User? @relation("StaffRequestsDecided", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@index([status, kind, createdAt])
+  @@index([targetType, targetId])
+  @@map("staff_requests")
+}
+
+/// One class of a batch on a date (from the timetable or added by hand).
+model ClassSession {
+  id        String    @id @default(uuid()) @db.Uuid
+  cohortId  String    @map("cohort_id") @db.Uuid
+  date      DateTime  @db.Date
+  /// "HH:MM", India time
+  start     String
+  end       String
+  /// OFFLINE or ONLINE
+  mode      String    @default("OFFLINE")
+  topic     String?
+  /// Mentor who marked attendance
+  takenById String?   @map("taken_by_id") @db.Uuid
+  takenAt   DateTime? @map("taken_at")
+  cancelled Boolean   @default(false)
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  cohort  Cohort             @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  takenBy User?              @relation("SessionsTakenBy", fields: [takenById], references: [id], onDelete: SetNull)
+  records AttendanceRecord[]
+
+  @@unique([cohortId, date, start])
+  @@index([date])
+  @@map("class_sessions")
+}
+
+model AttendanceRecord {
+  sessionId String   @map("session_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  /// PRESENT, ABSENT, LATE or EXCUSED
+  status    String
+  note      String?
+  markedAt  DateTime @default(now()) @map("marked_at")
+
+  session ClassSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User         @relation("AttendanceOfStudent", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionId, userId])
+  @@index([userId])
+  @@map("attendance_records")
+}
+
+/// A quiz published to specific batches (class quizzes, mentor mock tests).
+/// A quiz with no rows here is visible to the whole course as before.
+model QuizCohort {
+  quizId   String   @map("quiz_id") @db.Uuid
+  cohortId String   @map("cohort_id") @db.Uuid
+  addedAt  DateTime @default(now()) @map("added_at")
+
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+
+  @@id([quizId, cohortId])
+  @@index([cohortId])
+  @@map("quiz_cohorts")
+}
+
+/// A mentor's report about a student; reaches the admin dashboard and needs
+/// admin approval. MONTHLY report card, ALERT (e.g. absences) or PTM notes.
+model ProgressReport {
+  id          String    @id @default(uuid()) @db.Uuid
+  studentId   String    @map("student_id") @db.Uuid
+  cohortId    String?   @map("cohort_id") @db.Uuid
+  mentorId    String    @map("mentor_id") @db.Uuid
+  kind        String    @default("MONTHLY")
+  /// "2026-11" for monthly reports
+  period      String
+  /// Auto-filled numbers at the time of writing (attendance, quizzes, …)
+  summary     Json      @default("{}")
+  remarks     String
+  /// DRAFT, SUBMITTED, APPROVED or RETURNED
+  status      String    @default("DRAFT")
+  adminNote   String?   @map("admin_note")
+  decidedById String?   @map("decided_by_id") @db.Uuid
+  submittedAt DateTime? @map("submitted_at")
+  decidedAt   DateTime? @map("decided_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  student User    @relation("ReportsAboutStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  mentor  User    @relation("ReportsByMentor", fields: [mentorId], references: [id], onDelete: Cascade)
+  cohort  Cohort? @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+
+  @@index([status, submittedAt])
+  @@index([studentId])
+  @@index([mentorId])
+  @@map("progress_reports")
+}
+
+/// A mentor's badge for a student ("Best sketch this week"), shown in Rewards.
+model MentorShoutout {
+  id        String   @id @default(uuid()) @db.Uuid
+  studentId String   @map("student_id") @db.Uuid
+  mentorId  String   @map("mentor_id") @db.Uuid
+  badge     String
+  note      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  student User @relation("ShoutoutsToStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  mentor  User @relation("ShoutoutsByMentor", fields: [mentorId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, createdAt])
+  @@index([mentorId, createdAt])
+  @@map("mentor_shoutouts")
+}
+
+/// A mentor's message to a batch (class change, mock reminder, resources).
+model BatchAnnouncement {
+  id        String   @id @default(uuid()) @db.Uuid
+  cohortId  String   @map("cohort_id") @db.Uuid
+  authorId  String   @map("author_id") @db.Uuid
+  title     String
+  body      String
+  /// Optional link (resources after class, meeting link)
+  linkUrl   String?  @map("link_url")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  author User   @relation("AnnouncementsBy", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([cohortId, createdAt])
+  @@map("batch_announcements")
 }

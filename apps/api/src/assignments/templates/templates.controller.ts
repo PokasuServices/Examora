@@ -25,6 +25,7 @@ import { toAssignmentTemplate } from "../assignments.mappers";
 import { CreateTemplateDto } from "./dto/create-template.dto";
 import { UpdateTemplateDto } from "./dto/update-template.dto";
 import { TemplatesService } from "./templates.service";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
 
 @ApiTags("assignments: templates")
 @Controller("admin/assignments/templates")
@@ -96,6 +97,7 @@ export class TemplatesController {
   }
 
   @Delete(":id")
+  @ProtectedDelete("assignment-template")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Soft-delete a template" })
   async remove(

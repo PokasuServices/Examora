@@ -25,6 +25,7 @@ import { CreateForumCategoryDto } from "./dto/create-forum-category.dto";
 import { ListForumsQueryDto } from "./dto/list-forums-query.dto";
 import { UpdateForumCategoryDto } from "./dto/update-forum-category.dto";
 import { ForumCategoriesService } from "./forum-categories.service";
+import { ProtectedDelete } from "../../common/decorators/protected-delete.decorator";
 
 /** Admin CRUD for forum categories (ADR-0017, mirrors Sprint 2's CategoriesController). */
 @ApiTags("community: forums (admin)")
@@ -95,6 +96,7 @@ export class ForumCategoriesAdminController {
   }
 
   @Delete(":id")
+  @ProtectedDelete(null)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Soft-delete a forum category" })
   async remove(

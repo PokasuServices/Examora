@@ -19,6 +19,7 @@ import {
 import { RecommendationContextService } from "../recommendation-context.service";
 import { CommunityRecommendationService } from "./community-recommendation.service";
 import type { RequestUser } from "../../auth/types/request-user";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 describe("CommunityRecommendationService (integration)", () => {
   let service: CommunityRecommendationService;
@@ -43,6 +44,7 @@ describe("CommunityRecommendationService (integration)", () => {
         CatalogService,
         ProgressService,
         SubmissionsService,
+        StaffScopeService,
         AssignmentCatalogService,
         PrismaService,
         { provide: STORAGE_PORT, useClass: FakeStorageService },

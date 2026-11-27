@@ -4,6 +4,8 @@ import { useAuth } from "@examora/auth-client";
 import type {
   AdminCollege,
   AdminWebinar,
+  BatchMode,
+  BatchSlot,
   CohortView,
   CollegeEnquiryView,
   QuestionReportView,
@@ -55,6 +57,20 @@ export interface WebinarInput {
 }
 
 /** Admin endpoints added by the student module redesign. */
+/** Batch fields (all optional on update). Dates are YYYY-MM-DD, times HH:MM (India time). */
+export interface BatchInput {
+  name?: string;
+  batch?: string | null;
+  courseId?: string | null;
+  mode?: BatchMode;
+  schedule?: BatchSlot[];
+  startsOn?: string | null;
+  endsOn?: string | null;
+  location?: string | null;
+  meetingUrl?: string | null;
+  isActive?: boolean;
+}
+
 export function useStudentAdminApi() {
   const { request } = useAuth();
   const get = <T>(path: string) => request<T>(path, { method: "GET" });
@@ -143,8 +159,15 @@ export function useStudentAdminApi() {
 
     // Cohorts
     cohorts: () => get<CohortView[]>("/admin/cohorts"),
-    createCohort: (body: { name: string; batch?: string }) =>
-      request("/admin/cohorts", { method: "POST", body }),
+    createCohort: (body: BatchInput & { name: string }) =>
+      request<CohortView>("/admin/cohorts", { method: "POST", body }),
+    updateCohort: (id: string, body: BatchInput) =>
+      request<CohortView>(`/admin/cohorts/${id}`, { method: "PATCH", body }),
+    /** One batch mentor plus an optional cover mentor until a date. */
+    setCohortMentors: (
+      id: string,
+      input: { mentorId: string | null; coverId: string | null; coverEndsOn: string | null },
+    ) => request<CohortView>(`/admin/cohorts/${id}/mentors`, { method: "PUT", body: input }),
     deleteCohort: (id: string) => request<void>(`/admin/cohorts/${id}`, { method: "DELETE" }),
     cohortMembers: (id: string) =>
       get<{ userId: string; email: string; name: string }[]>(`/admin/cohorts/${id}/members`),

@@ -49,6 +49,12 @@ import { QuizSectionsService } from "./quizzes/sections.service";
   // so no new quiz-history query logic is needed. QuizCatalogService is
   // reused by CommunityModule (ADR-0017) to validate a thread's optional
   // related-quiz link.
-  exports: [AdminQuizAttemptsService, QuizCatalogService, QuizAttemptsService],
+  exports: [
+    AdminQuizAttemptsService,
+    QuizCatalogService,
+    QuizAttemptsService,
+    QuestionsService,
+    QuizzesService,
+  ],
 })
 export class AssessmentModule {}

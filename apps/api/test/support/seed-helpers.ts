@@ -44,6 +44,9 @@ export async function ensureRolesAndPermissions(prisma: PrismaService): Promise<
           : role.name === "REVIEWER"
             ? REVIEWER_PERMISSION_CODES
             : BASELINE_PERMISSION_CODES;
+    await prisma.rolePermission.deleteMany({
+      where: { roleId: role.id, permission: { code: { notIn: [...codes] } } },
+    });
     for (const code of codes) {
       const permissionId = permissionIdByCode.get(code);
       if (!permissionId) continue;

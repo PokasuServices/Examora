@@ -21,3 +21,5 @@ export * from "./media";
 export * from "./student-practice";
 export * from "./mentor-course";
 export * from "./student-dashboards";
+export * from "./staff";
+export * from "./mentor-desk";

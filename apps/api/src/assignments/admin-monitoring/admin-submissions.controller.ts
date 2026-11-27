@@ -11,9 +11,13 @@ import { toAdminSubmissionDetail, toAdminSubmissionSummary } from "../assignment
 import { AdminSubmissionsService } from "./admin-submissions.service";
 import { AssignReviewerDto } from "./dto/assign-reviewer.dto";
 import { ListAdminSubmissionsQueryDto } from "./dto/list-admin-submissions-query.dto";
+import { Scoped } from "../../staff/scoped.decorator";
+import { ActorScope, scopeWhere } from "../../staff/scope-where";
+import type { StaffScope } from "../../staff/staff-scope.service";
 
 @ApiTags("assignments: admin monitoring")
 @Controller("admin/assignments/submissions")
+@Scoped(["submission", "params:id"], ["assignment", "query:assignmentId"])
 @RequirePermissions("assignment:manage")
 export class AdminSubmissionsController {
   constructor(
@@ -24,9 +28,11 @@ export class AdminSubmissionsController {
   @Get()
   @ApiOperation({ summary: "List/monitor submissions (filter by assignment/reviewer/status)" })
   async list(
+    @ActorScope() actorScope: StaffScope | null,
     @Query() query: ListAdminSubmissionsQueryDto,
   ): Promise<PaginatedData<AdminSubmissionSummary>> {
     const { items, total } = await this.adminSubmissionsService.list({
+      scope: scopeWhere.submission(actorScope),
       page: query.page,
       pageSize: query.pageSize,
       assignmentId: query.assignmentId,

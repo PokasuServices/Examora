@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Patch, Query, Req } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  Param,
+  Patch,
+  Query,
+  Req,
+} from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
 import type { PaginatedData, UserProfile } from "@examora/types";
@@ -37,6 +46,7 @@ export class AdminUsersController {
   }
 
   @Patch(":id/roles")
+  @RequirePermissions("users:manage", "roles:manage")
   @ApiOperation({ summary: "Replace a user's role assignments (admin only)" })
   async assignRoles(
     @CurrentUser() actor: RequestUser,
@@ -72,6 +82,13 @@ export class AdminUsersController {
     @Body() dto: UpdateUserStatusDto,
     @Req() req: Request,
   ): Promise<UserProfile> {
+    // Archiving is how an account is deleted: administrators only (mentors can suspend/activate).
+    if (dto.status === "ARCHIVED") {
+      const granted = await this.permissionsService.getPermissionsForRoles(actor.roles);
+      if (!granted.includes("users:delete")) {
+        throw new ForbiddenException("Only an administrator can archive (delete) an account");
+      }
+    }
     const before = await this.usersService.findByIdWithRoles(id);
     const updated = await this.usersService.updateStatus(id, dto.status);
 

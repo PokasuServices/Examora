@@ -17,5 +17,6 @@ import { SketchWorksService } from "./sketch-works.service";
     AdminSketchWorksController,
   ],
   providers: [SketchesService, SketchWorksService],
+  exports: [SketchWorksService, SketchesService],
 })
 export class SketchesModule {}

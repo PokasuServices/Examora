@@ -21,6 +21,7 @@ import {
 import { UsersService } from "../../users/users.service";
 import { MentorAssignmentService } from "../assignment/mentor-assignment.service";
 import { Student360Service } from "./student-360.service";
+import { StaffScopeService } from "../../staff/staff-scope.service";
 
 describe("Student360Service (integration)", () => {
   let service: Student360Service;
@@ -47,6 +48,7 @@ describe("Student360Service (integration)", () => {
         SubmissionsService,
         AssignmentCatalogService,
         MentorAssignmentService,
+        StaffScopeService,
         EnrollmentService,
         PrismaService,
         { provide: STORAGE_PORT, useClass: FakeStorageService },
